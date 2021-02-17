@@ -1,0 +1,9 @@
+##description: A test GTF file for the purposes of testing DPDE4PM
+##provider: Yours truly
+##format: gtf
+##date: 2021-02-03
+chr1	HZ	gene	100	1000	.	+	.	gene_id "ENSGXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB";
+chr1	HZ	transcript	218	888	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr1	HZ	exon	300	400	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr1	HZ	exon	500	600	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr1	HZ	exon	700	800	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";

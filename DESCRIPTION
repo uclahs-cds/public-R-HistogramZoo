@@ -1,0 +1,25 @@
+Package: ConsensusPeaks
+Title: A Method for Peak Merging Across Biological Replicates
+Version: 1.0.0
+Authors@R: person("Helen", "Zhu", email = "helen.zhu@mail.utoronto.ca", role = c("aut", "cre"))
+Description: A method for merging peaks called across biological replicates, in bed file format, using methods described in the literature.
+Depends: R (>= 3.4.1)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+	GenomicRanges,
+  GenomicFeatures,
+  dirichletprocess,
+  ggplot2,
+  reshape2,
+  ggalt,
+  metap,
+	S4Vectors,
+	AnnotationDbi
+Suggests:
+	knitr,
+	rmarkdown,
+	testthat
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
