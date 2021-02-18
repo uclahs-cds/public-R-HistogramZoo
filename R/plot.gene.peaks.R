@@ -1,37 +1,49 @@
 
-#' Creates a pile up of bed files using the Sushi R package
+#' A plot of the peaks found for a particular gene
 #'
 #' @param GENE A 'character' gene id corresponding to the gene_id's found in the GTF files and the 'name' column in the peak files
-#' @param PEAKS data frame containing the following columns, and potentially extras, usually found in a BED12 file, base 0 system
+#' @param PEAKS A data frame containing the following columns, and potentially extras, usually found in a BED12 file, base 0 system
 #' \describe{
-#'   \item{chr}{chromosomes, same as in GTF file}
-#'   \item{start}{starting position of the peak, base 0}
-#'   \item{end}{end position of the peak, base 0}
-#'   \item{name}{gene id}
+#'   \item{chr}{chromosomes, character, same format as those identified in GTF file}
+#'   \item{start}{starting position of the peak, integer. base 0}
+#'   \item{end}{end position of the peak, integer, base 0}
+#'   \item{name}{gene id, character}
 #'   \item{score}{p-value associated with the peak}
-#'   \item{strand}{strand of the gene}
-#'   \item{blockCount}{number of segments in the peak}
-#'   \item{blockSizes}{size of segments in the peak, BED12 notation}
-#'   \item{blockStarts}{starting positions of segments, BED12 notation}
-#'   \item{sample}{sample_id of samples}
+#'   \item{strand}{strand of the gene, only +, -, * are accepted}
+#'   \item{blockCount}{number of segments in the peak, integer}
+#'   \item{blockSizes}{size of segments in the peak, BED12 notation, comma-separated}
+#'   \item{blockStarts}{starting positions of segments, BED12 notation, comma-separated}
+#'   \item{sample}{sample_id of samples, character}
 #' }
 #' @param GTF The GTF file used to generate the peaks. This is used to determine the genomic coordinates of the gene.
-#' @param ANNOTATION
 #' @param OUTPUTDIR Output directory
 #' @param OUTPUT.TAG A character string indicating a tag to track the generated files
 #' @param PLOT Binary T or F indicating whether to save plot or just return plot
 #'
 #' @export plot.gene.peaks
 #'
+#' @return A ggplot object of the plot
+#'
 #' @examples
+#' data.path = system.file("extdata", package = "ConsensusPeaks")
+#' gtf = paste0(data.path, "/test.gtf")
+#' peaks.file = paste0(data.path, "/peaks.bed")
+#' peaks = read.delim(peaks.file, stringsAsFactors = F)
+#' p = plot.gene.peaks(
+#' GENE = "ENSGXX",
+#' PEAKS = peaks,
+#' GTF = gtf,
+#' OUTPUTDIR = ".",
+#' OUTPUT.TAG = "",
+#' PLOT = F
+#' )
 plot.gene.peaks = function(
   GENE,
   PEAKS,
   GTF = NULL,
-  ANNOTATION = NULL,
   OUTPUTDIR = ".",
   OUTPUT.TAG = "",
-  PLOT = T
+  PLOT = F
 ){
 
   # Making a list of parameters to pass back and forth
@@ -41,20 +53,10 @@ plot.gene.peaks = function(
   PARAMETERS$OUTPUTDIR = OUTPUTDIR
   PARAMETERS$OUTPUT.TAG = OUTPUT.TAG
 
-  if(!PARAMETERS$GENE %in% PEAKS$name){
-    warning("No Peaks are Found for This Gene in PEAKS!", call. = TRUE, domain = NULL)
-    return(.generate.null.result(PARAMETERS))
-  }
+  if(!PARAMETERS$GENE %in% PEAKS$name){stop("No Peaks are Found for This Gene in PEAKS!", call. = TRUE, domain = NULL)}
 
-  # Import GTF as a GRanges Object
-  annot.format = F
-  if(!is.null(ANNOTATION)){
-    PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = PARAMETERS$GENE, DF = F)
-    annot.format = .check.annotation(ANNOTATION, PEAKSGR, GENE = PARAMETERS$GENE)
-  }
-  if(!annot.format){
-    ANNOTATION = read.gtf(PARAMETERS)
-  }
+  # ANNOTATION
+  ANNOTATION = read.gtf(PARAMETERS)
 
   # Plotting Peaks
   plotting.peaks = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = PARAMETERS$GENE, DF = T)

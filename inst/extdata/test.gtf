@@ -7,3 +7,8 @@ chr1	HZ	transcript	218	888	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_
 chr1	HZ	exon	300	400	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
 chr1	HZ	exon	500	600	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
 chr1	HZ	exon	700	800	.	+	.	gene_id "ENSGXX"; transcript_id "ENSTXX"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr2	HZ	gene	100	1000	.	+	.	gene_id "ENSGYY"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB";
+chr2	HZ	transcript	218	888	.	+	.	gene_id "ENSGYY"; transcript_id "ENSTYY"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr2	HZ	exon	300	400	.	+	.	gene_id "ENSGYY"; transcript_id "ENSTYY"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr2	HZ	exon	500	600	.	+	.	gene_id "ENSGYY"; transcript_id "ENSTYY"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";
+chr2	HZ	exon	700	800	.	+	.	gene_id "ENSGYY"; transcript_id "ENSTYY"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "BOB"; transcript_type "processed_transcript";

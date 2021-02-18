@@ -1,4 +1,3 @@
-
 .dpc.peaks = function(GENEPEAKSGR, PARAMETERS){
 
   # Sampling from the set of peaks
@@ -23,7 +22,7 @@
     dpObj = dp,
     its = PARAMETERS$DP.ITERATIONS,
     updatePrior = F,
-    progressBar = TRUE)
+    progressBar = F)
 
   # Generating a data.frame from the dp object
   dp_data = data.frame(
@@ -37,4 +36,3 @@
   return(list("dp" = dp, "dp_data" = dp_data, "startvec" = startvec, "startvec.scaled" = startvec.scaled, "startvec.mean" = startvec.mean, "startvec.sd" = startvec.sd))
 
 }
-

@@ -2,33 +2,25 @@
 % Please edit documentation in R/plot.gene.peaks.R
 \name{plot.gene.peaks}
 \alias{plot.gene.peaks}
-\title{Creates a pile up of bed files using the Sushi R package}
+\title{A plot of the peaks found for a particular gene}
 \usage{
-\method{plot}{gene.peaks}(
-  GENE,
-  PEAKS,
-  GTF = NULL,
-  ANNOTATION = NULL,
-  OUTPUTDIR = ".",
-  OUTPUT.TAG = "",
-  PLOT = T
-)
+\method{plot}{gene.peaks}(GENE, PEAKS, GTF = NULL, OUTPUTDIR = ".", OUTPUT.TAG = "", PLOT = F)
 }
 \arguments{
 \item{GENE}{A 'character' gene id corresponding to the gene_id's found in the GTF files and the 'name' column in the peak files}
 
-\item{PEAKS}{data frame containing the following columns, and potentially extras, usually found in a BED12 file, base 0 system
+\item{PEAKS}{A data frame containing the following columns, and potentially extras, usually found in a BED12 file, base 0 system
 \describe{
-  \item{chr}{chromosomes, same as in GTF file}
-  \item{start}{starting position of the peak, base 0}
-  \item{end}{end position of the peak, base 0}
-  \item{name}{gene id}
+  \item{chr}{chromosomes, character, same format as those identified in GTF file}
+  \item{start}{starting position of the peak, integer. base 0}
+  \item{end}{end position of the peak, integer, base 0}
+  \item{name}{gene id, character}
   \item{score}{p-value associated with the peak}
-  \item{strand}{strand of the gene}
-  \item{blockCount}{number of segments in the peak}
-  \item{blockSizes}{size of segments in the peak, BED12 notation}
-  \item{blockStarts}{starting positions of segments, BED12 notation}
-  \item{sample}{sample_id of samples}
+  \item{strand}{strand of the gene, only +, -, * are accepted}
+  \item{blockCount}{number of segments in the peak, integer}
+  \item{blockSizes}{size of segments in the peak, BED12 notation, comma-separated}
+  \item{blockStarts}{starting positions of segments, BED12 notation, comma-separated}
+  \item{sample}{sample_id of samples, character}
 }}
 
 \item{GTF}{The GTF file used to generate the peaks. This is used to determine the genomic coordinates of the gene.}
@@ -39,6 +31,23 @@
 
 \item{PLOT}{Binary T or F indicating whether to save plot or just return plot}
 }
+\value{
+A ggplot object of the plot
+}
 \description{
-Creates a pile up of bed files using the Sushi R package
+A plot of the peaks found for a particular gene
+}
+\examples{
+data.path = system.file("extdata", package = "ConsensusPeaks")
+gtf = paste0(data.path, "/test.gtf")
+peaks.file = paste0(data.path, "/peaks.bed")
+peaks = read.delim(peaks.file, stringsAsFactors = F)
+p = plot.gene.peaks(
+GENE = "ENSGXX",
+PEAKS = peaks,
+GTF = gtf,
+OUTPUTDIR = ".",
+OUTPUT.TAG = "",
+PLOT = F
+)
 }

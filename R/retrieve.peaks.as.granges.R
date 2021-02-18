@@ -1,11 +1,3 @@
-
-#' Converts the PEAKS BED12 format to a usable GRanges BED6 format for downstream analysis
-#'
-#' @param PEAKS A data frame containing the following columns, and potentially extras, usually found in a BED12 file, base 0 system
-#' @param GENE The ID of the gene
-#' @param DF Return as a data.frame. Otherwise, return as a GRanges object
-#'
-#' @return a data.frame or GRanges object in BED6 format containing only peaks assigned to a gene with an extra column for the peak index from where it was extracted and a sample id
 .retrieve.peaks.as.granges = function(PEAKS, GENE, DF = F){
 
   PEAKS = PEAKS[PEAKS$name == GENE,]

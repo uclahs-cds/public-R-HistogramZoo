@@ -1,0 +1,110 @@
+---
+title: "ConsensusPeaks"
+author: "Helen Zhu"
+output: 
+  rmarkdown:::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{ConsensusPeaks}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500)
+options(max.print=35)
+
+library(ConsensusPeaks)
+```
+
+# Introduction
+A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In some studies, it is desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. With a few replicates, it is acceptable to identify common peaks by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. ConsensusPeaks is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments. 
+
+# Methods
+
+### The Union Method
+
+### Coerces et al., 2018 - Science
+
+### Dirichlet Process Gaussian Mixture Models
+
+```{r pressure, echo=FALSE, fig.cap="Dirichlet Process Gaussian Mixture Models", out.width = '75%'}
+knitr::include_graphics("DPDE4PM.png")
+```
+
+# Example
+
+### Simulating Peaks from Gaussians
+
+```{r peak_simulation}
+
+# Loading a Toy GTF File
+data.path = system.file("extdata", package = "ConsensusPeaks")
+gtf = paste0(data.path, "/test.gtf")
+
+# Simulating Peaks
+ensgxx = simulate.gaussian.peaks(
+  MU = c(100, 150),
+  SD = c(10, 20),
+  EXTEND.WIDTH = c(50, 25),
+  NSAMPLES = c(10, 30),
+  GENE = "ENSGXX",
+  GTF = gtf,
+  SEED = 123)
+
+head(ensgxx)
+
+```
+### Visualizing Peaks across a Gene
+
+
+```{r genomic_peak_visualization}
+
+# Loading Peaks
+peaks.file = paste0(data.path, "/peaks.bed")
+
+peaks = read.table(
+  peaks.file, 
+  header = F, 
+  sep = "\t", 
+  stringsAsFactors = F)
+
+colnames(peaks) = c("chr", "start", "end", "name", "score", "strand", "thickStart", "thickEnd", 
+                    "itemRGB", "blockCount", "blockSizes", "blockStarts", "sample")
+
+# Plotting Peaks
+plot.gene.peaks(
+  GENE = "ENSGXX",
+  PEAKS = peaks,
+  GTF = gtf,
+  OUTPUTDIR = ".",
+  OUTPUT.TAG = "",
+  PLOT = F
+)
+
+```
+
+### Identify Consensus Peaks using Dirichlet Process Gaussians
+
+```{r dp_consensus_peaks, message = F}
+
+results = ConsensusPeaks(
+ GENES = c("ENSGXX", "ENSGYY"),
+ PEAKS = peaks,
+ RNA.OR.DNA = "rna",
+ METHOD = "dpc",
+ GTF = gtf,
+ DP.RESOLUTION = 10,
+ DP.ITERATIONS = 1000,
+ DP.WEIGHT.THRESHOLD = 0.1,
+ DP.N.SD = 1.5,
+ DP.ALPHA.PRIORS = c(0.5,5),
+ DP.SEED = 123,
+ PLOT.MERGED.PEAKS = F,
+ OUTPUT.TAG = "TEST",
+ OUTPUTDIR = ".",
+ WRITE.OUTPUT = F
+)
+
+head(results[,1:13])
+```

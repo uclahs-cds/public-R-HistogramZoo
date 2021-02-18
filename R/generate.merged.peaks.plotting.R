@@ -1,9 +1,7 @@
-
-
 .generate.merged.peaks.plotting = function(dp, PARAMETERS, GENEINFO, GENEPEAKSGR){
 
   # Peak Coverage
-  REDUCED.GENE.PEAKS.GR = reduce(GENEPEAKSGR)
+  REDUCED.GENE.PEAKS.GR = GenomicRanges::reduce(GENEPEAKSGR)
   PEAK.COVERAGE = GenomicRanges::coverage(GENEPEAKSGR)
   BINS = unlist(GenomicRanges::tile(REDUCED.GENE.PEAKS.GR, width = 1))
   BIN.COUNTS = data.frame(GenomicRanges::binnedAverage(BINS, PEAK.COVERAGE, "Coverage"), stringsAsFactors = F)
