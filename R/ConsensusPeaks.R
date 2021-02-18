@@ -16,7 +16,7 @@
 #'   \item{sample}{sample_id of samples, character}
 #' }
 #' @param RNA.OR.DNA One of 'rna' or 'dna' indicating whether peaks are identified on the transcriptome or genome
-#' @param METHOD One 'dpc', 'union', 'coerces
+#' @param METHOD One 'dpc', 'union', 'corces'
 #' \describe{
 #'  \item{dpc}{A GMM is fitted on the peaks using a Dirichlet process prior}
 #'  \item{union}{The union of overlapping peaks is reported}

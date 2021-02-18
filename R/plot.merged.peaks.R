@@ -11,7 +11,7 @@
   pdf(filename)
 
   p1 = ggplot2::ggplot() +
-    ggplot2::geom_histogram(data=data.frame("start" = plotting.data$startvec), ggplot2::aes(x=start), binwidth = 50, colour = "grey", fill="white") +
+    ggplot2::geom_histogram(data=data.frame("start" = plotting.data$startvec), ggplot2::aes(x=start), binwidth = PARAMETERS$DP.RESOLUTION, colour = "grey", fill="white") +
     ggplot2::geom_line(data=plotting.data$fit.frame, ggplot2::aes(x=x, y=y), colour='black') +
     ggplot2::theme_bw() +
     ggplot2::ggtitle(GENE) +

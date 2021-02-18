@@ -54,7 +54,7 @@ simulate.gaussian.peaks = function(
   # Creating annotation and geneinfo
   ANNOTATION = read.gtf(PARAMETERS)
   if(!GENE %in% ANNOTATION$gene){stop("GENE must be in the GTF file")}
-  GENEINFO = ConsensusPeaks:::.get.gene.anno(PARAMETERS, ANNOTATION)
+  GENEINFO = .get.gene.anno(PARAMETERS, ANNOTATION)
 
   # Initializing
   peaks = GenomicRanges::GRanges()

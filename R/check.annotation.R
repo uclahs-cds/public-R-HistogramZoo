@@ -2,9 +2,7 @@
 
   # Checking that all columns exist
   annot.cols = c("chr", "feature", "start", "stop", "strand", "gene", "transcript")
-  if(!all(annot.cols %in% names(ANNOTATION))){
-    return(FALSE)
-  }
+  if(!all(annot.cols %in% names(ANNOTATION))){return(FALSE)}
 
   # Subsetting the annotation into the ranges of the gene
   ANNOTATION = ANNOTATION[ANNOTATION$gene == GENE,]

@@ -35,7 +35,7 @@ dpc = function(
   merged.peaks.genome = ConsensusPeaks:::.rna.peaks.to.genome(merged.peaks.rna, GENEINFO)
 
   # Plotting
-  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS){
+  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS & length(merged.peaks.rna) > 0){
     plotting.data = ConsensusPeaks:::.generate.merged.peaks.plotting(dp, PARAMETERS, GENEINFO, GENEPEAKSGR)
     ConsensusPeaks:::.plot.merged.peaks(GENE, plotting.data, merged.peaks.rna, PARAMETERS)
   }
