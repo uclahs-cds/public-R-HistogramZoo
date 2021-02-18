@@ -139,6 +139,7 @@ ConsensusPeaks = function(
   # Loop through all genes using the correct method
   OUTPUT.TABLE = data.frame()
   for(i in GENES){
+    print( paste(as.character(signif(which(GENES == i)/length(GENES)*100, digits = 3)),"%") )
     if(METHOD == 'dpc'){
       RESULTS = dpc(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     } else if (METHOD == 'coerces'){
