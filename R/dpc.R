@@ -13,10 +13,10 @@ dpc = function(
   }
 
   # PEAKSGR
-  PEAKSGR = ConsensusPeaks:::.retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
+  PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
 
   # Get Gene Information
-  GENEINFO = ConsensusPeaks:::.get.gene.anno(GENE, ANNOTATION)
+  GENEINFO = .get.gene.anno(GENE, ANNOTATION)
 
   # Converting to RNA
   GENEPEAKSGR = GenomicRanges::shift(PEAKSGR, -1*GENEINFO$left+1)
@@ -28,16 +28,16 @@ dpc = function(
   GENEPEAKSGR = unlist(GenomicRanges::reduce(GENEPEAKSGR))
 
   # Examining Weights & Distributions of the GMM
-  dp = ConsensusPeaks:::.dpc.peaks(GENEPEAKSGR, PARAMETERS)
+  dp = .dpc.peaks(GENEPEAKSGR, PARAMETERS)
 
   # Generating Peaks
-  merged.peaks.rna = ConsensusPeaks:::.generate.peaks.from.gmm(dp = dp, PARAMETERS, GENEINFO)
-  merged.peaks.genome = ConsensusPeaks:::.rna.peaks.to.genome(merged.peaks.rna, GENEINFO)
+  merged.peaks.rna = .generate.peaks.from.gmm(dp = dp, PARAMETERS, GENEINFO)
+  merged.peaks.genome = .rna.peaks.to.genome(merged.peaks.rna, GENEINFO)
 
   # Plotting
-  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS & length(merged.peaks.rna) > 0){
-    plotting.data = ConsensusPeaks:::.generate.merged.peaks.plotting(dp, PARAMETERS, GENEINFO, GENEPEAKSGR)
-    ConsensusPeaks:::.plot.merged.peaks(GENE, plotting.data, merged.peaks.rna, PARAMETERS)
+  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS){
+    plotting.data = .generate.merged.peaks.plotting(dp, PARAMETERS, GENEINFO, GENEPEAKSGR)
+    .plot.merged.peaks(GENE, plotting.data, merged.peaks.rna, PARAMETERS)
   }
 
   # Return a Data Frame of Merged Peaks
