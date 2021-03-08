@@ -6,6 +6,13 @@ hmm = function(
   PEAKS
 ){
 
+  # If the gene doesn't have peaks
+  if(!GENE %in% PEAKS$name){
+    warn.message = paste0("No Peaks are Found for ", GENE, " in PEAKS!")
+    warning(warn.message, call. = TRUE, domain = NULL)
+    return(.generate.null.result(PARAMETERS))
+  }
+
   # PEAKSGR
   PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
 
