@@ -36,15 +36,24 @@ hmm = function(
 
 
   # HMM
-  mod <- depmixS4::depmix(Coverage ~ 1, data = BIN.COUNTS, nstates = 2, family = gaussian())
-  fit.mod <- depmixS4::fit(mod)
-  est.states <- depmixS4::posterior(fit.mod)
-  peak.state = ifelse(mean(BIN.COUNTS$Coverage[est.states$state == 1]) > mean(BIN.COUNTS$Coverage[est.states$state == 2]), 1, 2)
+  result = tryCatch({
+    # HMM
+    mod <- depmixS4::depmix(Coverage ~ 1, data = BIN.COUNTS, nstates = 2, family = gaussian())
+    fit.mod <- depmixS4::fit(mod)
+    est.states <- depmixS4::posterior(fit.mod)
+    peak.state = ifelse(mean(BIN.COUNTS$Coverage[est.states$state == 1]) > mean(BIN.COUNTS$Coverage[est.states$state == 2]), 1, 2)
 
-  # Generating Peaks
-  rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr,
-                                        IRanges::IRanges(which(est.states$state == peak.state)),
-                                        strand = GENEINFO$strand)
+    # Generating Peaks
+    rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr,
+                                          IRanges::IRanges(which(est.states$state == peak.state)),
+                                          strand = GENEINFO$strand)
+
+  }, finally = {
+    # Taking the Union of Peaks Regions if HMM fails to fit
+    rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr,
+                                          IRanges::IRanges(which(BIN.COUNTS$Coverage > 0)),
+                                          strand = GENEINFO$strand)
+  }
   mcols(rna.peaks.gr)$name = GENEINFO$gene
   mcols(rna.peaks.gr)$i = 1:length(rna.peaks.gr)
 
