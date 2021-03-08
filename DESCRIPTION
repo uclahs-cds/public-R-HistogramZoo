@@ -16,7 +16,8 @@ Imports:
   ggalt,
   metap,
 	S4Vectors,
-	AnnotationDbi
+	AnnotationDbi,
+	depmixS4
 Suggests:
 	knitr,
 	rmarkdown,
