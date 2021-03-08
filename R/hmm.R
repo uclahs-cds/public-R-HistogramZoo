@@ -53,7 +53,7 @@ hmm = function(
     rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr,
                                           IRanges::IRanges(which(BIN.COUNTS$Coverage > 0)),
                                           strand = GENEINFO$strand)
-  }
+  })
   mcols(rna.peaks.gr)$name = GENEINFO$gene
   mcols(rna.peaks.gr)$i = 1:length(rna.peaks.gr)
 
