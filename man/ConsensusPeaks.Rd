@@ -8,7 +8,7 @@ ConsensusPeaks(
   GENES = "all",
   PEAKS,
   RNA.OR.DNA = c("rna", "dna"),
-  METHOD = c("dpc", "union", "corces"),
+  METHOD = c("dpc", "hmm"),
   GTF = NULL,
   DP.RESOLUTION = 50,
   DP.ITERATIONS = 1000,
@@ -41,7 +41,7 @@ ConsensusPeaks(
 
 \item{RNA.OR.DNA}{One of 'rna' or 'dna' indicating whether peaks are identified on the transcriptome or genome}
 
-\item{METHOD}{One 'dpc', 'union', 'coerces
+\item{METHOD}{One 'dpc', 'union', 'corces'
 \describe{
  \item{dpc}{A GMM is fitted on the peaks using a Dirichlet process prior}
  \item{union}{The union of overlapping peaks is reported}

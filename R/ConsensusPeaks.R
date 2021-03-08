@@ -66,7 +66,7 @@ ConsensusPeaks = function(
   GENES = "all",
   PEAKS,
   RNA.OR.DNA = c("rna", "dna"),
-  METHOD = c("dpc", "union", "corces"),
+  METHOD = c("dpc", "hmm"),
   GTF = NULL,
   DP.RESOLUTION = 50,
   DP.ITERATIONS = 1000,
@@ -142,8 +142,8 @@ ConsensusPeaks = function(
     print( paste(as.character(signif(which(GENES == i)/length(GENES)*100, digits = 3)),"%") )
     if(METHOD == 'dpc'){
       RESULTS = dpc(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
-    } else if (METHOD == 'coerces'){
-      ## todo
+    } else if (METHOD == 'hmm'){
+      RESULTS = hmm(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     } else if (METHOD == 'union'){
       ## todo
     }
