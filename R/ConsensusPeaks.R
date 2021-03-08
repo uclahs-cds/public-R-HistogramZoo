@@ -95,7 +95,7 @@ ConsensusPeaks = function(
   }
 
   # Error checking, generic
-  if(!METHOD %in% c("dpc", "union", "corces")){stop("Please select a method out of 'dpc', 'union' or 'corces'")}
+  if(!METHOD %in% c("dpc", "hmm")){stop("Please select a method out of 'dpc' or 'hmm'")}
   if(!RNA.OR.DNA %in% c("rna", "dna")){stop("Please select if peaks are part of the transcriptome or genome")}
   if(RNA.OR.DNA == "rna" & is.null(GTF)){stop("Please provide the GTF file used to call RNA peaks")}
   # Error checking, dpc
