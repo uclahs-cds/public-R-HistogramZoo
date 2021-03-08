@@ -43,7 +43,7 @@ hmm = function(
   } else {
     est.states <- depmixS4::posterior(fit.mod)
     peak.state = ifelse(mean(BIN.COUNTS$Coverage[est.states$state == 1]) > mean(BIN.COUNTS$Coverage[est.states$state == 2]), 1, 2)
-    rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr, Ranges::IRanges(which(est.states$state == peak.state)), strand = GENEINFO$strand)
+    rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr, IRanges::IRanges(which(est.states$state == peak.state)), strand = GENEINFO$strand)
   }
   mcols(rna.peaks.gr)$name = GENEINFO$gene
   mcols(rna.peaks.gr)$i = 1:length(rna.peaks.gr)
