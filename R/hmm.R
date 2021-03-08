@@ -70,7 +70,7 @@ hmm = function(
   }
 
   # Return a Data Frame of Merged Peaks
-  if(length(merged.peaks.genome) == 0){
+  if(length(dna.peaks.gr) == 0){
     warning("No Peaks are Found for This Gene After Fitting!", call. = TRUE, domain = NULL)
     OUTPUT.TABLE = .generate.null.result(PARAMETERS)
   } else {
