@@ -77,8 +77,8 @@ ConsensusPeaks = function(
   PLOT.MERGED.PEAKS=F,
   OUTPUT.TAG="",
   OUTPUTDIR =".",
-  WRITE.OUTPUT=T
-
+  WRITE.OUTPUT=T,
+  ANNOTATION=NULL
 ) {
 
   # Check format of PEAKS, create list of genes to be tested, create list of plots to be generated
@@ -131,14 +131,14 @@ ConsensusPeaks = function(
   PARAMETERS$ALL.SAMPLES = ALL.SAMPLES
 
   # If RNA, generate annotation & change peak coordinates
-  ANNOTATION = NULL
-  if(PARAMETERS$RNA.OR.DNA == "rna"){
+  if(is.null(ANNOTATION) && PARAMETERS$RNA.OR.DNA == "rna"){
     ANNOTATION = read.gtf(PARAMETERS)
   }
 
   # Loop through all genes using the correct method
   OUTPUT.TABLE = data.frame()
   for(i in GENES){
+    print(sprintf("Processing gene: %s", i))
     print( paste(as.character(signif(which(GENES == i)/length(GENES)*100, digits = 3)),"%") )
     if(METHOD == 'dpc'){
       RESULTS = dpc(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)

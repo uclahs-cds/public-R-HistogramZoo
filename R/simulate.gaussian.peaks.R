@@ -33,6 +33,7 @@ simulate.gaussian.peaks = function(
   NSAMPLES = 10,
   GENE,
   GTF = NULL,
+  ANNOTATION = NULL,
   SEED = 123
   ){
 
@@ -51,8 +52,10 @@ simulate.gaussian.peaks = function(
   PARAMETERS$GENE = GENE
   PARAMETERS$GTF = GTF
 
-  # Creating annotation and geneinfo
-  ANNOTATION = read.gtf(PARAMETERS)
+  if(is.null(ANNOTATION)) {
+    # Creating annotation and geneinfo
+    ANNOTATION = read.gtf(PARAMETERS)
+  }
   if(!GENE %in% ANNOTATION$gene){stop("GENE must be in the GTF file")}
   GENEINFO = .get.gene.anno(PARAMETERS, ANNOTATION)
 
