@@ -145,7 +145,7 @@ ConsensusPeaks = function(
     } else if (METHOD == 'hmm'){
       RESULTS = hmm(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     } else if (METHOD == 'union'){
-      ## todo
+      RESULTS = union.peaks(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     }
   OUTPUT.TABLE = rbind(OUTPUT.TABLE, RESULTS)
   }

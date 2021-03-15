@@ -52,8 +52,8 @@ hmm = function(
     peak.state = ifelse(mean(BIN.COUNTS$Coverage[est.states$state == 1]) > mean(BIN.COUNTS$Coverage[est.states$state == 2]), 1, 2)
     rna.peaks.gr = GenomicRanges::GRanges(seqnames = GENEINFO$chr, IRanges::IRanges(which(est.states$state == peak.state)), strand = GENEINFO$strand)
   }
-  mcols(rna.peaks.gr)$name = GENEINFO$gene
-  mcols(rna.peaks.gr)$i = 1:length(rna.peaks.gr)
+  S4Vectors::mcols(rna.peaks.gr)$name = GENEINFO$gene
+  S4Vectors::mcols(rna.peaks.gr)$i = 1:length(rna.peaks.gr)
 
   # DNA peak
   dna.peaks.gr = .rna.peaks.to.genome(rna.peaks.gr, GENEINFO)
