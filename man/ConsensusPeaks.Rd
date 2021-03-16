@@ -19,7 +19,8 @@ ConsensusPeaks(
   PLOT.MERGED.PEAKS = F,
   OUTPUT.TAG = "",
   OUTPUTDIR = ".",
-  WRITE.OUTPUT = T
+  WRITE.OUTPUT = T,
+  ANNOTATION = NULL
 )
 }
 \arguments{
