@@ -28,9 +28,6 @@ hmm = function(
   GENEPEAKSGR = S4Vectors::split(GENEPEAKSGR, GENEPEAKSGR$sample)
   GENEPEAKSGR = unlist(GenomicRanges::reduce(GENEPEAKSGR))
 
-  # Tiling Peaks
-  TILED.PEAKS.GR = unlist(GenomicRanges::tile(GENEPEAKSGR, width = PARAMETERS$DP.RESOLUTION))
-
   # Peak Coverage
   REDUCED.GENE.PEAKS.GR = GenomicRanges::reduce(GENEPEAKSGR)
   PEAK.COVERAGE = GenomicRanges::coverage(GENEPEAKSGR)
