@@ -114,7 +114,7 @@ segment.and.fit = function(
     results = rbind(results, fits)
 
     if(!is.null(output.folder)) {
-      filename = file.path(output.folder, paste0("fit.segments.", i, ".pdf"))
+      filename = file.path(output.folder, paste0(GENE, ".fit.segments.", i, ".pdf"))
       pdf(filename, width = 10, height = 10)
     }
 
@@ -136,7 +136,7 @@ segment.and.fit = function(
   if(!is.null(output.folder)) {
     write.table(
       results,
-      file = file.path(output.folder, "fit.segments.tsv"),
+      file = file.path(output.folder, paste0(GENE, ".fit.segments.tsv")),
       sep = "\t",
       col.names = T,
       row.names = F,
