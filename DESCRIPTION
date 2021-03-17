@@ -7,8 +7,10 @@ Depends: R (>= 3.4.1)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+  extraDistr
 Imports:
-	GenomicRanges,
+  GenomicRanges,
   GenomicFeatures,
   dirichletprocess,
   ggplot2,
@@ -17,7 +19,8 @@ Imports:
   metap,
 	S4Vectors,
 	AnnotationDbi,
-	depmixS4
+	depmixS4,
+	fitdistrplus
 Suggests:
 	knitr,
 	rmarkdown,
