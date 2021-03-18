@@ -3,7 +3,7 @@ Title: A Method for Peak Merging Across Biological Replicates
 Version: 1.0.0
 Authors@R: person("Helen", "Zhu", email = "helen.zhu@mail.utoronto.ca", role = c("aut", "cre"))
 Description: A method for merging peaks called across biological replicates, in bed file format, using methods described in the literature.
-Depends: 
+Depends:
     R (>= 3.4.1),
     extraDistr
 License: GPL-3
@@ -20,7 +20,8 @@ Imports:
     S4Vectors,
     AnnotationDbi,
     depmixS4,
-    fitdistrplus
+    fitdistrplus,
+    extraDistr
 Suggests:
     knitr,
     rmarkdown,

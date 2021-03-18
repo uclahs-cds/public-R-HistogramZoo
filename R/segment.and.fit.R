@@ -64,30 +64,29 @@ segment.and.fit = function(
   peak.counts = GenomicRanges::start(peak.counts)
 
   # Segments
-  if(!is.null(output.folder)) {
-    filename = file.path(output.folder, "segments.pdf")
+  if(PARAMETERS$PLOT.MERGED.PEAK) {
+    filename = file.path(PARAMETERS$OUTPUTDIR, "segments.pdf")
     pdf(filename, width = 5, height = 5)
+    plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
+    points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
+    dev.off()
   }
-  plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
-  p <- find.peaks(-BIN.COUNTS$Coverage, m = 150)
-  points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
-
-  if(!is.null(output.folder)) dev.off()
 
   # Fitting different models
   results = data.frame()
+  models = list()
   for(i in 1:nrow(seg.df)){
     x = peak.counts[peak.counts >= seg.df$start[i] & peak.counts <= seg.df$end[i]]
     simple.model.names <- c("norm", "gamma", "unif")
 
-    models = lapply(simple.model.names, function(distr) fitdistrplus::fitdist(x, distr))
-    names(models) <- simple.model.names
+    mod = lapply(simple.model.names, function(distr) fitdistrplus::fitdist(x, distr))
+    names(mod) <- simple.model.names
 
     # Attempt to fit a truncated normal distribution
     # Wrap in a tryCatch incase MLE fails to converge
     tryCatch(
       expr = {
-        models$tnorm <- fitdistrplus::fitdist(
+        mod$tnorm <- fitdistrplus::fitdist(
           data = x,
           distr = "tnorm",
           fix.arg = list(a = seg.df$start[i] - 1, b = seg.df$end[i] + 1),
@@ -100,8 +99,7 @@ segment.and.fit = function(
       }
     )
 
-    fits = lapply(models, function(mod){
-      # c("dist" = summary(mod)$distname, "aic" = summary(mod)$aic, "bic" = summary(mod)$bic, summary(mod)$estimate)
+    fits = lapply(mod, function(mod){
       data.frame(
         "dist" = summary(mod)$distname,
         "loglikelihood" = summary(mod)$loglik,
@@ -111,32 +109,75 @@ segment.and.fit = function(
     })
     fits = do.call(rbind, fits)
     fits$i = i
-    results = rbind(results, fits)
-
-    if(!is.null(output.folder)) {
-      filename = file.path(output.folder, paste0(GENE, ".fit.segments.", i, ".pdf"))
+    # results = rbind(results, fits)
+    
+    if(PARAMETERS$DIAGNOSTIC) {
+      filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.", i, ".pdf"))
       pdf(filename, width = 10, height = 10)
+      
+      par(mfrow = c(2,2))
+      plot.legend = names(mod)
+      
+      fitdistrplus::denscomp(mod, legendtext = plot.legend)
+      fitdistrplus::qqcomp(mod, legendtext = plot.legend)
+      fitdistrplus::cdfcomp(mod, legendtext = plot.legend)
+      fitdistrplus::ppcomp(mod, legendtext = plot.legend)
+      dev.off()
     }
-
-    par(mfrow = c(2,2))
-    plot.legend = c("norm", "gamma", "uniform")
-    if("tnorm" %in% names(models)) {
-      plot.legend <- c(plot.legend, "tnorm")
-    }
-
-    fitdistrplus::denscomp(models, legendtext = plot.legend)
-    fitdistrplus::qqcomp(models, legendtext = plot.legend)
-    fitdistrplus::cdfcomp(models, legendtext = plot.legend)
-    fitdistrplus::ppcomp(models, legendtext = plot.legend)
-
-    if(!is.null(output.folder)) dev.off()
-
+    
+    # Adding the results to the table
+    res.final = fits[fits$aic == min(fits$aic),]
+    results = rbind(results, res.final)
+    mod.final = mod[[res.final$dist]]
+    models[[i]] = mod.final
+  }
+  
+  # Acquiring a Density Distribution
+  comput.fti <- function(i) { # models, seg.df
+    # Initializing
+    x = seg.df$start[i]:seg.df$end[i]
+    fti = models[[i]]
+    # Scale factor
+    scalefactor = length(fti$data)
+    # Generating data
+    para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
+    distname <- fti$distname
+    ddistname <- paste("d", distname, sep = "")
+    dens = do.call(ddistname, c(list(x), as.list(para))) * scalefactor
+    data.frame("x" = x, "dens" = dens, "col" = distname, row.names = NULL)
   }
 
-  if(!is.null(output.folder)) {
+  # Making a Nice Figure
+  if(PARAMETERS$PLOT.MERGED.PEAK) {
+    
+    distr.plotting.data = lapply(1:nrow(seg.df), comput.fti)
+    
+    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".SegmentAndFit.pdf"))
+    pdf(filename, width = 10, height = 10)
+    
+    p1 = ggplot2::ggplot(BIN.COUNTS, ggplot2::aes(x = start, y = Coverage)) +
+      ggplot2::geom_line() +
+      ggplot2::geom_point(data = BIN.COUNTS[p,], ggplot2::aes(x = start, y = Coverage), col = 'red') +
+      ggplot2::theme_bw() +
+      ggplot2::ggtitle(GENEINFO$gene) +
+      ggplot2::ylab("Coverage (at BP resolution)") +
+      ggplot2::xlab("Transcript Coordinate") +
+      ggplot2::annotate("rect", xmin=seg.df$start, xmax=seg.df$end, ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:nrow(seg.df))
+    
+    for(i in 1:length(distr.plotting.data)){
+      p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = col))
+    }
+    p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
+    print(p1)
+    
+    dev.off()
+    
+  }
+
+  if(PARAMETERS$WRITE.OUTPUT) {
     write.table(
       results,
-      file = file.path(output.folder, paste0(GENE, ".fit.segments.tsv")),
+      file = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.tsv")),
       sep = "\t",
       col.names = T,
       row.names = F,
@@ -146,3 +187,4 @@ segment.and.fit = function(
   results
 
 }
+  
