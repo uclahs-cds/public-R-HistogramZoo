@@ -55,6 +55,8 @@ segment.and.fit = function(
   # Segmenting & Determining which segments are peaks
   p <- find.peaks(-BIN.COUNTS$Coverage, m = 150)
   p = sort(p)
+  # Remove segments that are less than 100 apart
+  p = p[diff(p) > 100]
   seg.df = data.frame("start" = p[1:(length(p)-1)]+1, "end" = p[2:length(p)], "mean" = 0)
   for(i in 1:nrow(seg.df)){
     tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
