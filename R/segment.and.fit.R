@@ -26,6 +26,8 @@ segment.and.fit = function(
   plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAK %||% FALSE
   plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
   write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
+  # Optional normal mixture model via mixtools
+  fit.norm_mixture <- PARAMETERS$FIT.MIXTURE %||% FALSE
 
   # PEAKSGR
   PEAKSGR = ConsensusPeaks:::.retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
@@ -116,9 +118,31 @@ segment.and.fit = function(
         "bic" = summary(mod)$bic
       )
     })
+
+    if(fit.norm_mixture) {
+      # Fit a Normal Mixture model
+      maxiter <- 500
+      # Fit mixture model, silencing output
+      invisible(capture.output({
+        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04)
+      }))
+      if((length(mixfit$all.loglik) - 1) >= maxiter) {
+        # EM did not converge. Don't use results.
+        mixfit <- NULL
+      } else {
+        mixfit.params <- length(mixfit$mu) * 3 # for lambda, mu, and sigma params
+        mixfit.results <- data.frame(
+          "dist" = "norm_mixture",
+          "loglikelihood" = mixfit$loglik,
+          "aic" = -2 * mixfit$loglik + 2 * mixfit.params,
+          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x))
+        )
+        fits$norm_mixture <- mixfit.results
+      }
+    }
+
     fits = do.call(rbind, fits)
     fits$i = i
-    # results = rbind(results, fits)
 
     if(plot.diagnostic) {
       filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.", i, ".pdf"))
@@ -134,6 +158,8 @@ segment.and.fit = function(
       dev.off()
     }
 
+    # Add the normal mixture after fitdistrplus
+    if(fit.norm_mixture && !is.null(mixfit)) mod$norm_mixture <- mixfit
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
     results = rbind(results, res.final)
@@ -146,14 +172,20 @@ segment.and.fit = function(
     # Initializing
     x = seg.df$start[i]:seg.df$end[i]
     fti = models[[i]]
-    # Scale factor
-    scalefactor = length(fti$data)
-    # Generating data
-    para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
-    distname <- fti$distname
-    ddistname <- paste("d", distname, sep = "")
-    dens = do.call(ddistname, c(list(x), as.list(para))) * scalefactor
-    data.frame("x" = x, "dens" = dens, "col" = distname, row.names = NULL)
+    if(class(fti) == "mixEM") {
+      scalefactor = length(fti$x)
+      distname <- "norm_mixture"
+      dens <- dnorm_mixture(x, fti)
+    } else {
+      scalefactor = length(fti$data)
+      # Scale factor
+      # Generating data
+      para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
+      distname <- fti$distname
+      ddistname <- paste("d", distname, sep = "")
+      dens <- do.call(ddistname, c(list(x), as.list(para)))
+    }
+    data.frame("x" = x, "dens" = dens * scalefactor, "col" = distname, row.names = NULL)
   }
 
   # Making a Nice Figure
