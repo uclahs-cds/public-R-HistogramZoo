@@ -21,7 +21,8 @@ Imports:
     AnnotationDbi,
     depmixS4,
     fitdistrplus,
-    extraDistr
+    extraDistr,
+    mixtools
 Suggests:
     knitr,
     rmarkdown,
