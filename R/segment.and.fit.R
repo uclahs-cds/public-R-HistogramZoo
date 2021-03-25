@@ -5,7 +5,6 @@
 #' @param PARAMETERS
 #' @param ANNOTATION
 #' @param PEAKS
-#' @param output.folder
 #'
 #' @import extraDistr
 #' @export
@@ -13,8 +12,7 @@ segment.and.fit = function(
   GENE,
   PARAMETERS,
   ANNOTATION,
-  PEAKS,
-  output.folder = NULL
+  PEAKS
 ){
 
   # If the gene doesn't have peaks
@@ -23,6 +21,11 @@ segment.and.fit = function(
     warning(warn.message, call. = TRUE, domain = NULL)
     return(.generate.null.result(PARAMETERS))
   }
+
+  # Use the parameters if they are defined and default to FALSE if not defined
+  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAK %||% FALSE
+  plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
+  write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
 
   # PEAKSGR
   PEAKSGR = ConsensusPeaks:::.retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
@@ -64,7 +67,7 @@ segment.and.fit = function(
   peak.counts = GenomicRanges::start(peak.counts)
 
   # Segments
-  if(PARAMETERS$PLOT.MERGED.PEAK) {
+  if(plot.merged.peak) {
     filename = file.path(PARAMETERS$OUTPUTDIR, "segments.pdf")
     pdf(filename, width = 5, height = 5)
     plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
@@ -111,7 +114,7 @@ segment.and.fit = function(
     fits$i = i
     # results = rbind(results, fits)
 
-    if(PARAMETERS$DIAGNOSTIC) {
+    if(plot.diagnostic) {
       filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.", i, ".pdf"))
       pdf(filename, width = 10, height = 10)
 
@@ -148,7 +151,7 @@ segment.and.fit = function(
   }
 
   # Making a Nice Figure
-  if(PARAMETERS$PLOT.MERGED.PEAK) {
+  if(plot.merged.peak) {
 
     distr.plotting.data = lapply(1:nrow(seg.df), comput.fti)
 
@@ -174,7 +177,7 @@ segment.and.fit = function(
 
   }
 
-  if(PARAMETERS$WRITE.OUTPUT) {
+  if(write.output) {
     write.table(
       results,
       file = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.tsv")),
