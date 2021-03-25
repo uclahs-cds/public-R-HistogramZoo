@@ -53,7 +53,9 @@ segment.and.fit = function(
   BIN.COUNTS = BIN.COUNTS[order(BIN.COUNTS$start),]
 
   # Segmenting & Determining which segments are peaks
-  p <- find.peaks(-BIN.COUNTS$Coverage, m = 150)
+  # Fit smoothing spline before finding the peaks
+  smooth.coverage <- smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.5)
+  p <- c(min(BIN.COUNTS$start), find.peaks(-smooth.coverage$y, m = 150))
   p = sort(p)
   # Remove segments that are less than 100 apart
   p = p[diff(p) > 100]
@@ -62,7 +64,9 @@ segment.and.fit = function(
     tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
     seg.df$mean[i] = mean(tmp)
   }
-  seg.df = seg.df[seg.df$mean > 0,]
+  filter.cond <- seg.df$mean > 0
+  seg.df = seg.df[filter.cond, ]
+  p = c(seg.df$start, seg.df$end)
 
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(GENEPEAKSGR, width = 1))
