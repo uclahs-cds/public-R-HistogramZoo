@@ -110,28 +110,28 @@ segment.and.fit = function(
     fits = do.call(rbind, fits)
     fits$i = i
     # results = rbind(results, fits)
-    
+
     if(PARAMETERS$DIAGNOSTIC) {
       filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.", i, ".pdf"))
       pdf(filename, width = 10, height = 10)
-      
+
       par(mfrow = c(2,2))
       plot.legend = names(mod)
-      
+
       fitdistrplus::denscomp(mod, legendtext = plot.legend)
       fitdistrplus::qqcomp(mod, legendtext = plot.legend)
       fitdistrplus::cdfcomp(mod, legendtext = plot.legend)
       fitdistrplus::ppcomp(mod, legendtext = plot.legend)
       dev.off()
     }
-    
+
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
     results = rbind(results, res.final)
     mod.final = mod[[res.final$dist]]
     models[[i]] = mod.final
   }
-  
+
   # Acquiring a Density Distribution
   comput.fti <- function(i) { # models, seg.df
     # Initializing
@@ -149,12 +149,12 @@ segment.and.fit = function(
 
   # Making a Nice Figure
   if(PARAMETERS$PLOT.MERGED.PEAK) {
-    
+
     distr.plotting.data = lapply(1:nrow(seg.df), comput.fti)
-    
+
     filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".SegmentAndFit.pdf"))
     pdf(filename, width = 10, height = 10)
-    
+
     p1 = ggplot2::ggplot(BIN.COUNTS, ggplot2::aes(x = start, y = Coverage)) +
       ggplot2::geom_line() +
       ggplot2::geom_point(data = BIN.COUNTS[p,], ggplot2::aes(x = start, y = Coverage), col = 'red') +
@@ -163,15 +163,15 @@ segment.and.fit = function(
       ggplot2::ylab("Coverage (at BP resolution)") +
       ggplot2::xlab("Transcript Coordinate") +
       ggplot2::annotate("rect", xmin=seg.df$start, xmax=seg.df$end, ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:nrow(seg.df))
-    
+
     for(i in 1:length(distr.plotting.data)){
       p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = col))
     }
     p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
     print(p1)
-    
+
     dev.off()
-    
+
   }
 
   if(PARAMETERS$WRITE.OUTPUT) {
@@ -187,4 +187,3 @@ segment.and.fit = function(
   results
 
 }
-  
