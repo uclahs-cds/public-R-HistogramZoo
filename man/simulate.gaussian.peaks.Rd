@@ -11,6 +11,7 @@
   NSAMPLES = 10,
   GENE,
   GTF = NULL,
+  ANNOTATION = NULL,
   SEED = 123
 )
 }
