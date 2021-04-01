@@ -229,6 +229,6 @@ segment.and.fit = function(
   # Output Table
   OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
 
-  return(OUTPUT.TBALE)
+  return(OUTPUT.TABLE)
 
 }
