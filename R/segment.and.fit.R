@@ -23,11 +23,11 @@ segment.and.fit = function(
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS %||% FALSE
-  plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
-  write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
+  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS #  %||% FALSE
+  plot.diagnostic <- PARAMETERS$DIAGNOSTIC # %||% FALSE
+  write.output <- PARAMETERS$WRITE.OUTPUT # %||% FALSE
   # Optional normal mixture model via mixtools
-  fit.norm_mixture <- PARAMETERS$FIT.MIXTURE %||% FALSE
+  fit.norm_mixture <- PARAMETERS$FIT.MIXTURE # %||% FALSE
 
   # PEAKSGR
   PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
