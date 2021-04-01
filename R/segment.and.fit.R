@@ -23,7 +23,7 @@ segment.and.fit = function(
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS  %||% FALSE
+  # plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS  %||% FALSE
   plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
   write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
   # Optional normal mixture model via mixtools
@@ -76,7 +76,7 @@ segment.and.fit = function(
   peak.counts = GenomicRanges::start(peak.counts)
 
   # Segments
-  if(isTRUE(plot.merged.peak)) {
+  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
     filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
     pdf(filename, width = 5, height = 5)
     plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
@@ -191,7 +191,7 @@ segment.and.fit = function(
   }
 
   # Making a Nice Figure
-  if(isTRUE(plot.merged.peak)) {
+  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
 
     distr.plotting.data = lapply(1:nrow(seg.df), comput.fti)
 
