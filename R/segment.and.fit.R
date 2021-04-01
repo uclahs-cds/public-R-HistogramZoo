@@ -23,17 +23,17 @@ segment.and.fit = function(
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAK %||% FALSE
+  plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS %||% FALSE
   plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
   write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
   # Optional normal mixture model via mixtools
   fit.norm_mixture <- PARAMETERS$FIT.MIXTURE %||% FALSE
 
   # PEAKSGR
-  PEAKSGR = ConsensusPeaks:::.retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
+  PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
 
   # Get Gene Information
-  GENEINFO = ConsensusPeaks:::.get.gene.anno(GENE, ANNOTATION)
+  GENEINFO = .get.gene.anno(GENE, ANNOTATION)
 
   # Converting to RNA
   GENEPEAKSGR = GenomicRanges::shift(PEAKSGR, -1*GENEINFO$left+1)
@@ -56,8 +56,9 @@ segment.and.fit = function(
 
   # Segmenting & Determining which segments are peaks
   # Fit smoothing spline before finding the peaks
-  smooth.coverage <- smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.5)
-  p <- c(min(BIN.COUNTS$start), find.peaks(-smooth.coverage$y, m = 150))
+  # smooth.coverage <- smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.5)
+  # p <- c(min(BIN.COUNTS$start), find.peaks(-smooth.coverage$y, m = 150))
+  p = find.peaks(-BIN.COUNTS$Coverage, m = 150)
   p = sort(p)
   # Remove segments that are less than 100 apart
   p = p[diff(p) > 100]
@@ -76,9 +77,10 @@ segment.and.fit = function(
 
   # Segments
   if(plot.merged.peak) {
-    filename = file.path(PARAMETERS$OUTPUTDIR, "segments.pdf")
+    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
     pdf(filename, width = 5, height = 5)
     plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
+    # lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
     points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
     dev.off()
   }
@@ -215,16 +217,18 @@ segment.and.fit = function(
 
   }
 
-  if(write.output) {
-    write.table(
-      results,
-      file = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.tsv")),
-      sep = "\t",
-      col.names = T,
-      row.names = F,
-      quote = F
-    )
-  }
-  results
+  # Generating Peaks
+  merged.peaks = GenomicRanges::GRanges(seqnames = GENEINFO$chr, IRanges::IRanges(start = seg.df$start, end = seg.df$end), strand = GENEINFO$strand, i = results$i, dist = results$dist, name = GENEINFO$gene)
+  merged.peaks = .rna.peaks.to.genome(merged.peaks, GENEINFO)
+  GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
+
+  # Generating BED12 File
+  PEAKS.FINAL = .bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
+  # P-Value Table
+  SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
+  # Output Table
+  OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
+
+  return(OUTPUT.TBALE)
 
 }

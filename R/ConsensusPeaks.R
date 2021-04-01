@@ -33,6 +33,9 @@
 #' @param OUTPUT.TAG A character string added to the names of any output files.
 #' @param OUTPUTDIR Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
 #' @param WRITE.OUTPUT A logical value indicating whether the output table should be written.
+#' @param DIAGNOSTIC
+#' @param FIT.MIXTURE
+#' @param ANNOTATION
 #'
 #' @return A data frame with the same columns as 'PEAKS' indicating the coordinates of the merged peaks in genomic coordinates. If the method is 'dpc', additional columns with the sample names of the samples will indicate the merged p-value using Fisher's Method.
 #'
@@ -78,6 +81,8 @@ ConsensusPeaks = function(
   OUTPUT.TAG="",
   OUTPUTDIR =".",
   WRITE.OUTPUT=T,
+  DIAGNOSTIC = F,
+  FIT.MIXTURE = T,
   ANNOTATION=NULL
 ) {
 
@@ -95,7 +100,7 @@ ConsensusPeaks = function(
   }
 
   # Error checking, generic
-  if(!METHOD %in% c("dpc", "hmm", "union")){stop("Please select a method out of 'dpc' or 'hmm' or 'union'")}
+  if(!METHOD %in% c("dpc", "hmm", "union", "sf")){stop("Please select a method out of 'dpc' or 'hmm' or 'union' or 'sf'")}
   if(!RNA.OR.DNA %in% c("rna", "dna")){stop("Please select if peaks are part of the transcriptome or genome")}
   if(RNA.OR.DNA == "rna" & is.null(GTF)){stop("Please provide the GTF file used to call RNA peaks")}
   # Error checking, dpc
@@ -126,6 +131,8 @@ ConsensusPeaks = function(
   PARAMETERS$OUTPUT.TAG = OUTPUT.TAG
   PARAMETERS$OUTPUTDIR = OUTPUTDIR
   PARAMETERS$PLOT.MERGED.PEAKS = PLOT.MERGED.PEAKS
+  PARAMETERS$DIAGNOSTIC = DIAGNOSTIC
+  PARAMETERS$FIT.MIXTURE = FIT.MIXTURE
   # All Samples
   ALL.SAMPLES = sort(unique(PEAKS$sample))
   PARAMETERS$ALL.SAMPLES = ALL.SAMPLES
@@ -146,13 +153,15 @@ ConsensusPeaks = function(
       RESULTS = hmm(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     } else if (METHOD == 'union'){
       RESULTS = union.peaks(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
+    } else if (METHOD == "sf"){
+      RESULTS = segment.and.fit(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     }
   OUTPUT.TABLE = rbind(OUTPUT.TABLE, RESULTS)
   }
 
   # Writing output
   if(WRITE.OUTPUT){
-    filename = paste0(PARAMETERS$OUTPUTDIR, "/", PARAMETERS$OUTPUT.TAG, ".MergedPeaks.tsv")
+    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.tsv"))
     write.table(
       OUTPUT.TABLE,
       file = filename,
