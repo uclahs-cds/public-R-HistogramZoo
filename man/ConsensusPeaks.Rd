@@ -20,6 +20,8 @@ ConsensusPeaks(
   OUTPUT.TAG = "",
   OUTPUTDIR = ".",
   WRITE.OUTPUT = T,
+  DIAGNOSTIC = F,
+  FIT.MIXTURE = T,
   ANNOTATION = NULL
 )
 }
@@ -70,6 +72,8 @@ ConsensusPeaks(
 \item{OUTPUTDIR}{Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.}
 
 \item{WRITE.OUTPUT}{A logical value indicating whether the output table should be written.}
+
+\item{ANNOTATION}{}
 }
 \value{
 A data frame with the same columns as 'PEAKS' indicating the coordinates of the merged peaks in genomic coordinates. If the method is 'dpc', additional columns with the sample names of the samples will indicate the merged p-value using Fisher's Method.
