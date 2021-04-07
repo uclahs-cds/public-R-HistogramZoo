@@ -1,0 +1,23 @@
+# Segmenting by Sections with Coverage
+REDUCED.GENE.PEAKS.GR = GenomicRanges::reduce(GENEPEAKSGR)
+p.add = c(GenomicRanges::start(REDUCED.GENE.PEAKS.GR), GenomicRanges::end(REDUCED.GENE.PEAKS.GR))
+p = p.add
+for(i in 1:length(REDUCED.GENE.PEAKS.GR)){
+  start.temp = GenomicRanges::start(REDUCED.GENE.PEAKS.GR)[i]
+  end.temp = GenomicRanges::end(REDUCED.GENE.PEAKS.GR)[i]
+  x.temp = BIN.COUNTS[BIN.COUNTS$start >= start.temp & BIN.COUNTS$start <= end.temp,]
+  # smooth.temp = smooth.spline(x.temp$start, x.temp$Coverage, spar = 0.5)
+  # p.temp = find.peaks(x = -smooth.temp$y, m = 150, diff.threshold = 10^-3)
+  p.temp = find.peaks(-x.temp$Coverage, m = 150)
+  p.temp.shifted = p.temp + start.temp -1
+  p = append(p, p.temp.shifted)
+
+  filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".", i, "segments.pdf"))
+  pdf(filename, width = 5, height = 5)
+  plot(x.temp$start, x.temp$Coverage, type = "s")
+  # lines(x.temp$start, smooth.temp$y, type = "s", col = "pink")
+  # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
+  # lines(BIN.COUNTS$start, p.na.abnorm, type = "s", col = "chartreuse4")
+  points(x.temp$start[p.temp], x.temp$Coverage[p.temp], col = 'red')
+  dev.off()
+}
