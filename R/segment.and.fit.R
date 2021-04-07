@@ -87,8 +87,8 @@ segment.and.fit = function(
     filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
     pdf(filename, width = 5, height = 5)
     plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
-    lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
-    lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
+    # lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
+    # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
     points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
     dev.off()
   }

@@ -161,7 +161,7 @@ ConsensusPeaks = function(
 
   # Writing output
   if(WRITE.OUTPUT){
-    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.tsv"))
+    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(OUTPUT.TAG, ".MergedPeak.tsv"))
     write.table(
       OUTPUT.TABLE,
       file = filename,
