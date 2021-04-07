@@ -50,26 +50,32 @@ segment.and.fit = function(
   BINS = unlist(GenomicRanges::tile(REDUCED.GENE.PEAKS.GR, width = 1))
   BIN.COUNTS = data.frame(GenomicRanges::binnedAverage(BINS, PEAK.COVERAGE, "Coverage"), stringsAsFactors = F)
   add.zero.counts = setdiff(1:GENEINFO$exome_length, BIN.COUNTS$start)
-  add.zero.counts = data.frame("start" = add.zero.counts, "Coverage" = 0, stringsAsFactors = F)
-  BIN.COUNTS = rbind(BIN.COUNTS[,c("start", "Coverage")], add.zero.counts)
+  if(length(add.zero.counts) > 0){
+    add.zero.counts = data.frame("start" = add.zero.counts, "Coverage" = 0, stringsAsFactors = F)
+    BIN.COUNTS = rbind(BIN.COUNTS[,c("start", "Coverage")], add.zero.counts)
+  }
   BIN.COUNTS = BIN.COUNTS[order(BIN.COUNTS$start),]
 
   # Segmenting & Determining which segments are peaks
   # Test 1: Fit smoothing spline before finding the peaks
-  # smooth.coverage = smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.5)
-  # p = find.peaks(-smooth.coverage$y, m = 150)
+  smooth.coverage = smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.4)
+  p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-5)
   # Test 2: As-is
-  p = find.peaks(-BIN.COUNTS$Coverage, m = 150)
+  # p = find.peaks(-BIN.COUNTS$Coverage, m = 150)
   # Test 3: Moving Average
   # p.moving = moving.average(BIN.COUNTS$Coverage, n = 10)
+  # p.moving[is.na(p.moving)] = BIN.COUNTS$Coverage[is.na(p.moving)]
   # p = find.peaks(-p.moving, m = 150)
+  # Test 4: Remove Local Abnormalities
+  # p.na.abnorm = remove.local.abnormalities(BIN.COUNTS, max_background_fold_increase = 2, background_window = 100)
+  # p = find.peaks(-p.na.abnorm, m = 150)
 
   # Formatting
   p = c(1, GENEINFO$exome_length, p)
   p = unique(p)
   p = sort(p)
   # Remove segments that are less than 100 apart
-  p = p[diff(p) > 100]
+  # p = p[diff(p) > 100]
   seg.df = data.frame("start" = p[1:(length(p)-1)]+1, "end" = p[2:length(p)], "mean" = 0)
   for(i in 1:nrow(seg.df)){
     tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
@@ -87,8 +93,9 @@ segment.and.fit = function(
     filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
     pdf(filename, width = 5, height = 5)
     plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
-    # lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
+    lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
     # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
+    # lines(BIN.COUNTS$start, p.na.abnorm, type = "s", col = "chartreuse4")
     points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
     dev.off()
   }
