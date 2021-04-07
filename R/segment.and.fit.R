@@ -70,7 +70,7 @@ segment.and.fit = function(
   p = sort(p)
   # Remove segments that are less than 100 apart
   # p = p[diff(p) > 100]
-  seg.df = data.frame("start" = p[1:(length(p)-1)]+1, "end" = p[2:length(p)], "mean" = 0)
+  seg.df = data.frame("start" = p[1:(length(p)-1)], "end" = p[2:length(p)]-1, "mean" = 0)
   for(i in 1:nrow(seg.df)){
     tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
     seg.df$mean[i] = mean(tmp)
