@@ -75,7 +75,7 @@ segment.and.fit = function(
     tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
     seg.df$mean[i] = mean(tmp)
   }
-  filter.cond <- seg.df$mean > 0
+  filter.cond <- seg.df$mean > 0.5 # This is currently a patch that removes some weird edge cases, need to revisit
   seg.df = seg.df[filter.cond, ]
 
   # Tiling Peaks
