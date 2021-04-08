@@ -9,6 +9,11 @@ generate.peaks.from.split.points = function(
   # Generate Regions With Peak Coverage
   REDUCED.GENE.PEAKS.GR = GenomicRanges::reduce(GENEPEAKSGR)
   
+  # If there are no fitted points
+  if(is.null(p)){
+    return(REDUCED.GENE.PEAKS.GR)
+  }
+  
   # Find Points Within Peaks
   POINT.GR = GenomicRanges::GRanges(seqnames = GENEINFO$chr, IRanges::IRanges(p), strand = GENEINFO$strand)
   POINT.GR = POINT.GR[S4Vectors::queryHits(GenomicRanges::findOverlaps(POINT.GR, REDUCED.GENE.PEAKS.GR))]
