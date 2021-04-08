@@ -65,18 +65,7 @@ segment.and.fit = function(
   # p = find.peaks(-p.na.abnorm, m = 150)
 
   # Formatting
-  p = c(1, GENEINFO$exome_length, p)
-  p = unique(p)
-  p = sort(p)
-  # Remove segments that are less than 100 apart
-  # p = p[diff(p) > 100]
-  seg.df = data.frame("start" = p[1:(length(p)-1)], "end" = p[2:length(p)]-1, "mean" = 0)
-  for(i in 1:nrow(seg.df)){
-    tmp = BIN.COUNTS$Coverage[BIN.COUNTS$start >= seg.df$start[i] & BIN.COUNTS$start <= seg.df$end[i]]
-    seg.df$mean[i] = mean(tmp)
-  }
-  filter.cond <- seg.df$mean > 0.5 # This is currently a patch that removes some weird edge cases, need to revisit
-  seg.df = seg.df[filter.cond, ]
+  SEG.GR = generate.peaks.from.split.points(p, GENEPEAKSGR, GENEINFO, m = 100)
 
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(GENEPEAKSGR, width = 1))
@@ -97,9 +86,11 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
-  for(i in 1:nrow(seg.df)){
+  for(i in 1:length(SEG.GR)){
     # cat(i, "\n")
-    x = peak.counts[peak.counts >= seg.df$start[i] & peak.counts <= seg.df$end[i]]
+    seg.start = GenomicRanges::start(SEG.GR)[i]
+    seg.end = GenomicRanges::end(SEG.GR)[i]
+    x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     mod = list()
 
     # Uniform Distribution (This is unlikely to fail, I know)
@@ -110,7 +101,7 @@ segment.and.fit = function(
           distr = "unif")
       },
       error = function(e) {
-        warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.df$start[i], seg.df$end[i]))
+        warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -123,7 +114,7 @@ segment.and.fit = function(
           distr = "gamma")
       },
       error = function(e) {
-        warning(sprintf("Error in fitdist gamma for segment [%d, %d]", seg.df$start[i], seg.df$end[i]))
+        warning(sprintf("Error in fitdist gamma for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -135,12 +126,12 @@ segment.and.fit = function(
         mod$tnorm <- fitdistrplus::fitdist(
           data = x,
           distr = "tnorm",
-          fix.arg = list(a = seg.df$start[i] - 1, b = seg.df$end[i] + 1),
+          fix.arg = list(a = seg.start - 1, b = seg.end + 1),
           start = list(mean = mean(x), sd = sd(x)),
           optim.method="L-BFGS-B")
       },
       error = function(e) {
-        warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.df$start[i], seg.df$end[i]))
+        warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -203,9 +194,9 @@ segment.and.fit = function(
   }
 
   # Acquiring a Density Distribution
-  comput.fti <- function(i) { # models, seg.df
+  comput.fti <- function(i) { # models, SEG.GR
     # Initializing
-    x = seg.df$start[i]:seg.df$end[i]
+    x = GenomicRanges::start(SEG.GR)[i]:GenomicRanges::end(SEG.GR)[i]
     fti = models[[i]]
     if(class(fti) == "mixEM") {
       scalefactor = length(fti$x)
@@ -226,7 +217,7 @@ segment.and.fit = function(
   # Making a Nice Figure
   if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
 
-    distr.plotting.data = lapply(1:nrow(seg.df), comput.fti)
+    distr.plotting.data = lapply(1:length(SEG.GR), comput.fti)
 
     filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".SegmentAndFit.pdf"))
     pdf(filename, width = 10, height = 10)
@@ -238,7 +229,7 @@ segment.and.fit = function(
       ggplot2::ggtitle(GENEINFO$gene) +
       ggplot2::ylab("Coverage (at BP resolution)") +
       ggplot2::xlab("Transcript Coordinate") +
-      ggplot2::annotate("rect", xmin=seg.df$start, xmax=seg.df$end, ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:nrow(seg.df))
+      ggplot2::annotate("rect", xmin=GenomicRanges::start(SEG.GR), xmax=GenomicRanges::end(SEG.GR), ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:length(SEG.GR))
 
     for(i in 1:length(distr.plotting.data)){
       p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = col))
@@ -251,7 +242,10 @@ segment.and.fit = function(
   }
 
   # Generating Peaks
-  merged.peaks = GenomicRanges::GRanges(seqnames = GENEINFO$chr, IRanges::IRanges(start = seg.df$start, end = seg.df$end), strand = GENEINFO$strand, i = results$i, dist = results$dist, name = GENEINFO$gene)
+  merged.peaks = SEG.GR
+  S4Vectors::mcols(merged.peaks)$i = results$i
+  S4Vectors::mcols(merged.peaks)$dist = results$dist
+  S4Vectors::mcols(merged.peaks)$name = GENEINFO$gene
   merged.peaks = ConsensusPeaks:::.rna.peaks.to.genome(merged.peaks, GENEINFO)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
 
