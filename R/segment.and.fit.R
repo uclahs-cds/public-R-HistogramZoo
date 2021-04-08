@@ -52,7 +52,7 @@ segment.and.fit = function(
 
   # Segmenting & Determining which segments are peaks
   # Test 1: Fit smoothing spline before finding the peaks
-  smooth.coverage = smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.4)
+  smooth.coverage = smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.3)
   p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-7)
   # Test 2: As-is
   # p = find.peaks(-BIN.COUNTS$Coverage, m = 150)

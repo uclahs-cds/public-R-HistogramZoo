@@ -26,10 +26,18 @@ generate.peaks.from.split.points = function(
     return(REDUCED.GENE.PEAKS.GR)
   }
   
-  # Split Segments
+  ##################
+  # Split Segments #
+  ##################
+  
+  # Setting point boundaries
+  p.start = GenomicRanges::start(REDUCED.GENE.PEAKS.GR)
+  p.end = GenomicRanges::end(REDUCED.GENE.PEAKS.GR)
   p.midpoints = GenomicRanges::start(POINT.GR)
-  p.all = c(p.midpoints, GenomicRanges::start(REDUCED.GENE.PEAKS.GR), GenomicRanges::end(REDUCED.GENE.PEAKS.GR))
+  p.all = c(p.midpoints, p.start, p.end)
   p.all = sort(p.all)
+  
+  # Initializing segments
   SEG.GR = GenomicRanges::GRanges(
     seqnames = GENEINFO$chr,
     IRanges::IRanges(
@@ -37,8 +45,12 @@ generate.peaks.from.split.points = function(
       end = p.all[2:length(p.all)]), 
     strand = GENEINFO$strand)
   
-  # Shifting Segments by 1 bp if it's a midpoint
-  GenomicRanges::start(SEG.GR) = ifelse(GenomicRanges::start(SEG.GR) %in% p.midpoints, GenomicRanges::start(SEG.GR) + 1, GenomicRanges::start(SEG.GR))
+  # Shifting Segments by 1 bp if it's a segment point or an endpoint of a peak
+  GenomicRanges::start(SEG.GR) = ifelse(GenomicRanges::start(SEG.GR) %in% c(p.midpoints, p.end), GenomicRanges::start(SEG.GR) + 1, GenomicRanges::start(SEG.GR))
+  GenomicRanges::end(SEG.GR) = ifelse(GenomicRanges::end(SEG.GR) %in% c(p.start), GenomicRanges::end(SEG.GR) - 1, GenomicRanges::end(SEG.GR))
+  
+  # Remove the Non-peak segments
+  SEG.GR = SEG.GR[unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(SEG.GR, REDUCED.GENE.PEAKS.GR)))]
 
   return(SEG.GR)
   
