@@ -146,6 +146,24 @@ segment.and.fit = function(
       }
     )
 
+    # Flipped Truncated gamma distribution
+    tryCatch(
+      expr = {
+        mod$tgamma_flip <- fitdistrplus::fitdist(
+          data = x.scale,
+          distr = "tgamma_flip",
+          fix.arg = list(b = max(x.scale) + 1e-10),
+          start = list(shape = 2, rate = 1),
+          # Set the lower bound for shape and rate params
+          lower = c(0, 0))
+        mod$tgamma_flip$sd_scale <- sd.scale
+      },
+      error = function(e) {
+        warning(sprintf("Error in fitdist tgamma_flip for segment [%d, %d]", seg.start, seg.end))
+        print(e)
+      }
+    )
+
     fits = lapply(mod, function(mod){
       params <- c(mod$estimate, mod$fix.arg)
 
