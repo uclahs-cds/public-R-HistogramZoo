@@ -87,34 +87,25 @@ segment.and.fit = function(
   results = data.frame()
   models = list()
   for(i in 1:length(SEG.GR)){
-    # cat(i, "\n")
     seg.start = GenomicRanges::start(SEG.GR)[i]
     seg.end = GenomicRanges::end(SEG.GR)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
+    # Start the counts at 0 to fit the distributions better
+    x.adj <- (x - seg.start) + 1e-10
+    sd.scale <- sd(x.adj)
+    x.scale <- x.adj / sd.scale
     mod = list()
 
     # Uniform Distribution (This is unlikely to fail, I know)
     tryCatch(
       expr = {
         mod$unif <- fitdistrplus::fitdist(
-          data = x,
+          data = x.scale,
           distr = "unif")
+        mod$unif$sd_scale <- sd.scale
       },
       error = function(e) {
         warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
-    # Gamma Distribution (Change to truncated gamma)
-    tryCatch(
-      expr = {
-        mod$gamma <- fitdistrplus::fitdist(
-          data = x,
-          distr = "gamma")
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist gamma for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -124,11 +115,12 @@ segment.and.fit = function(
     tryCatch(
       expr = {
         mod$tnorm <- fitdistrplus::fitdist(
-          data = x,
+          data = x.scale,
           distr = "tnorm",
-          fix.arg = list(a = seg.start - 1, b = seg.end + 1),
-          start = list(mean = mean(x), sd = sd(x)),
+          fix.arg = list(a = 0, b = max(x.scale) + 1e-10),
+          start = list(mean = mean(x.scale), sd = sd(x.scale)),
           optim.method="L-BFGS-B")
+        mod$tnorm$sd_scale <- sd.scale
       },
       error = function(e) {
         warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
@@ -136,12 +128,52 @@ segment.and.fit = function(
       }
     )
 
+    # Truncated gamma distribution
+    tryCatch(
+      expr = {
+        mod$tgamma <- fitdistrplus::fitdist(
+          data = x.scale,
+          distr = "tgamma",
+          fix.arg = list(a = 0, b = max(x.scale)),
+          start = list(shape = 2, rate = 1),
+          # Set the lower bound for shape and rate params
+          lower = c(0, 0))
+        mod$tgamma$sd_scale <- sd.scale
+      },
+      error = function(e) {
+        warning(sprintf("Error in fitdist tgamma for segment [%d, %d]", seg.start, seg.end))
+        print(e)
+      }
+    )
+
+    # Flipped Truncated gamma distribution
+    tryCatch(
+      expr = {
+        mod$tgamma_flip <- fitdistrplus::fitdist(
+          data = x.scale,
+          distr = "tgamma_flip",
+          fix.arg = list(b = max(x.scale) + 1e-10),
+          start = list(shape = 2, rate = 1),
+          # Set the lower bound for shape and rate params
+          lower = c(0, 0))
+        mod$tgamma_flip$sd_scale <- sd.scale
+      },
+      error = function(e) {
+        warning(sprintf("Error in fitdist tgamma_flip for segment [%d, %d]", seg.start, seg.end))
+        print(e)
+      }
+    )
+
     fits = lapply(mod, function(mod){
+      params <- c(mod$estimate, mod$fix.arg)
+
       data.frame(
         "dist" = summary(mod)$distname,
         "loglikelihood" = summary(mod)$loglik,
         "aic" = summary(mod)$aic,
-        "bic" = summary(mod)$bic
+        "bic" = summary(mod)$bic,
+        # Text representation of the parameters
+        params = dput.str(params)
       )
     })
 
@@ -150,7 +182,7 @@ segment.and.fit = function(
       maxiter <- 500
       # Fit mixture model, silencing output
       invisible(capture.output({
-        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04)
+        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
       }))
       if((length(mixfit$all.loglik) - 1) >= maxiter) {
         # EM did not converge. Don't use results.
@@ -161,7 +193,8 @@ segment.and.fit = function(
           "dist" = "norm_mixture",
           "loglikelihood" = mixfit$loglik,
           "aic" = -2 * mixfit$loglik + 2 * mixfit.params,
-          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x))
+          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x)),
+          "params" = dput.str(mixfit[c("mu", "sigma", "lambda")])
         )
         fits$norm_mixture <- mixfit.results
       }
@@ -196,22 +229,38 @@ segment.and.fit = function(
   # Acquiring a Density Distribution
   comput.fti <- function(i) { # models, SEG.GR
     # Initializing
-    x = GenomicRanges::start(SEG.GR)[i]:GenomicRanges::end(SEG.GR)[i]
+    seg.start <- GenomicRanges::start(SEG.GR)[i]
+    seg.end <- GenomicRanges::end(SEG.GR)[i]
+    x = seg.start:seg.end
     fti = models[[i]]
     if(class(fti) == "mixEM") {
       scalefactor = length(fti$x)
       distname <- "norm_mixture"
       dens <- dnorm_mixture(x, fti)
     } else {
-      scalefactor = length(fti$data)
-      # Scale factor
+      # Center the region to match fitting process
+      x.adj <- (x - seg.start) + 1e-10
+      scalefactor <- length(fti$data)
+      # Adjust the scale of the segment
+      if(!is.null(fti$sd_scale)) {
+        x.adj <- x.adj / fti$sd_scale
+        # The bin size is now 1/sd_scale
+        # Multiple scale factor by this new bin size
+        scalefactor <- scalefactor / fti$sd_scale
+      }
+
       # Generating data
-      para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
+      params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
       distname <- fti$distname
-      ddistname <- paste("d", distname, sep = "")
-      dens <- do.call(ddistname, c(list(x), as.list(para)))
+      ddistname <- paste0("d", distname)
+      call.params <- c(list(x = x.adj), as.list(params))
+      dens <- do.call(ddistname, call.params)
     }
-    data.frame("x" = x, "dens" = dens * scalefactor, "col" = distname, row.names = NULL)
+    data.frame(
+      "x" = x,
+      "dens" = dens * scalefactor,
+      "col" = distname,
+      row.names = NULL)
   }
 
   # Making a Nice Figure
@@ -245,14 +294,15 @@ segment.and.fit = function(
   merged.peaks = SEG.GR
   S4Vectors::mcols(merged.peaks)$i = results$i
   S4Vectors::mcols(merged.peaks)$dist = results$dist
+  S4Vectors::mcols(merged.peaks)$params = results$params
   S4Vectors::mcols(merged.peaks)$name = GENEINFO$gene
-  merged.peaks = ConsensusPeaks:::.rna.peaks.to.genome(merged.peaks, GENEINFO)
+  merged.peaks = .rna.peaks.to.genome(merged.peaks, GENEINFO)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
 
   # Generating BED12 File
-  PEAKS.FINAL = ConsensusPeaks:::.bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
+  PEAKS.FINAL = .bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
   # P-Value Table
-  SAMPLE.PVAL = ConsensusPeaks:::.merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
+  SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
   # Output Table
   OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
 
