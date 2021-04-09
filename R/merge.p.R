@@ -35,7 +35,7 @@
     add.table = data.frame(matrix(1, nrow = nrow(pmat), ncol = length(missing.samples), dimnames = list(NULL, missing.samples)))
     pmat = cbind(pmat, add.table)
   }
-  pmat = pmat[,c("peak", PARAMETERS$ALL.SAMPLES)]
+  pmat = pmat[,c("peak", PARAMETERS$ALL.SAMPLES), drop = FALSE]
 
   return(pmat)
 

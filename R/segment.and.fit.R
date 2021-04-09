@@ -87,34 +87,22 @@ segment.and.fit = function(
   results = data.frame()
   models = list()
   for(i in 1:length(SEG.GR)){
-    # cat(i, "\n")
     seg.start = GenomicRanges::start(SEG.GR)[i]
     seg.end = GenomicRanges::end(SEG.GR)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
+    # Start the counts at 0 to fit the distributions better
+    x.adj <- (x - seg.start) + 1e-10
     mod = list()
 
     # Uniform Distribution (This is unlikely to fail, I know)
     tryCatch(
       expr = {
         mod$unif <- fitdistrplus::fitdist(
-          data = x,
+          data = x.adj,
           distr = "unif")
       },
       error = function(e) {
         warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
-    # Gamma Distribution (Change to truncated gamma)
-    tryCatch(
-      expr = {
-        mod$gamma <- fitdistrplus::fitdist(
-          data = x,
-          distr = "gamma")
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist gamma for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -124,14 +112,29 @@ segment.and.fit = function(
     tryCatch(
       expr = {
         mod$tnorm <- fitdistrplus::fitdist(
-          data = x,
+          data = x.adj,
           distr = "tnorm",
-          fix.arg = list(a = seg.start - 1, b = seg.end + 1),
-          start = list(mean = mean(x), sd = sd(x)),
+          fix.arg = list(a = 0, b = max(x.adj) + 1e-10),
+          start = list(mean = mean(x.adj), sd = sd(x.adj)),
           optim.method="L-BFGS-B")
       },
       error = function(e) {
         warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
+        print(e)
+      }
+    )
+
+    tryCatch(
+      expr = {
+        mod$tgamma <- fitdistrplus::fitdist(
+          data = x.adj,
+          distr = "tgamma",
+          fix.arg = list(a = 0, b = max(x.adj)),
+          start = list(shape = 1, rate = 1),
+          lower = c(0, 0))
+      },
+      error = function(e) {
+        warning(sprintf("Error in fitdist tgamma for segment [%d, %d]", seg.start, seg.end))
         print(e)
       }
     )
@@ -150,7 +153,7 @@ segment.and.fit = function(
       maxiter <- 500
       # Fit mixture model, silencing output
       invisible(capture.output({
-        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04)
+        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
       }))
       if((length(mixfit$all.loglik) - 1) >= maxiter) {
         # EM did not converge. Don't use results.
@@ -196,20 +199,25 @@ segment.and.fit = function(
   # Acquiring a Density Distribution
   comput.fti <- function(i) { # models, SEG.GR
     # Initializing
-    x = GenomicRanges::start(SEG.GR)[i]:GenomicRanges::end(SEG.GR)[i]
+    seg.start <- GenomicRanges::start(SEG.GR)[i]
+    seg.end <- GenomicRanges::end(SEG.GR)[i]
+    x = seg.start:seg.end
     fti = models[[i]]
     if(class(fti) == "mixEM") {
       scalefactor = length(fti$x)
       distname <- "norm_mixture"
       dens <- dnorm_mixture(x, fti)
     } else {
+      # Center the region to match fitting process
+      x.adj <- (x - seg.start) + 1e-10
       scalefactor = length(fti$data)
       # Scale factor
       # Generating data
       para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
       distname <- fti$distname
-      ddistname <- paste("d", distname, sep = "")
-      dens <- do.call(ddistname, c(list(x), as.list(para)))
+      ddistname <- paste0("d", distname)
+      call.params <- c(list(x = x.adj), as.list(para))
+      dens <- do.call(ddistname, call.params)
     }
     data.frame("x" = x, "dens" = dens * scalefactor, "col" = distname, row.names = NULL)
   }
@@ -246,13 +254,13 @@ segment.and.fit = function(
   S4Vectors::mcols(merged.peaks)$i = results$i
   S4Vectors::mcols(merged.peaks)$dist = results$dist
   S4Vectors::mcols(merged.peaks)$name = GENEINFO$gene
-  merged.peaks = ConsensusPeaks:::.rna.peaks.to.genome(merged.peaks, GENEINFO)
+  merged.peaks = .rna.peaks.to.genome(merged.peaks, GENEINFO)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
 
   # Generating BED12 File
-  PEAKS.FINAL = ConsensusPeaks:::.bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
+  PEAKS.FINAL = .bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
   # P-Value Table
-  SAMPLE.PVAL = ConsensusPeaks:::.merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
+  SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
   # Output Table
   OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
 
