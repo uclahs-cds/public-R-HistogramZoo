@@ -175,7 +175,8 @@ segment.and.fit = function(
           "dist" = "norm_mixture",
           "loglikelihood" = mixfit$loglik,
           "aic" = -2 * mixfit$loglik + 2 * mixfit.params,
-          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x))
+          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x)),
+          "params" = dput.str(mixfit[c("mu", "sigma", "lambda")])
         )
         fits$norm_mixture <- mixfit.results
       }
@@ -275,6 +276,7 @@ segment.and.fit = function(
   merged.peaks = SEG.GR
   S4Vectors::mcols(merged.peaks)$i = results$i
   S4Vectors::mcols(merged.peaks)$dist = results$dist
+  S4Vectors::mcols(merged.peaks)$params = results$params
   S4Vectors::mcols(merged.peaks)$name = GENEINFO$gene
   merged.peaks = .rna.peaks.to.genome(merged.peaks, GENEINFO)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
