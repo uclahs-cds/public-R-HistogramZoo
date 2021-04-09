@@ -92,14 +92,17 @@ segment.and.fit = function(
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     # Start the counts at 0 to fit the distributions better
     x.adj <- (x - seg.start) + 1e-10
+    sd.scale <- sd(x.adj)
+    x.scale <- x.adj / sd.scale
     mod = list()
 
     # Uniform Distribution (This is unlikely to fail, I know)
     tryCatch(
       expr = {
         mod$unif <- fitdistrplus::fitdist(
-          data = x.adj,
+          data = x.scale,
           distr = "unif")
+        mod$unif$sd_scale <- sd.scale
       },
       error = function(e) {
         warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
@@ -112,11 +115,12 @@ segment.and.fit = function(
     tryCatch(
       expr = {
         mod$tnorm <- fitdistrplus::fitdist(
-          data = x.adj,
+          data = x.scale,
           distr = "tnorm",
-          fix.arg = list(a = 0, b = max(x.adj) + 1e-10),
-          start = list(mean = mean(x.adj), sd = sd(x.adj)),
+          fix.arg = list(a = 0, b = max(x.scale) + 1e-10),
+          start = list(mean = mean(x.scale), sd = sd(x.scale)),
           optim.method="L-BFGS-B")
+        mod$tnorm$sd_scale <- sd.scale
       },
       error = function(e) {
         warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
@@ -124,14 +128,17 @@ segment.and.fit = function(
       }
     )
 
+    # Truncated gamma distribution
     tryCatch(
       expr = {
         mod$tgamma <- fitdistrplus::fitdist(
-          data = x.adj,
+          data = x.scale,
           distr = "tgamma",
-          fix.arg = list(a = 0, b = max(x.adj)),
-          start = list(shape = 1, rate = 1),
+          fix.arg = list(a = 0, b = max(x.scale)),
+          start = list(shape = 2, rate = 1),
+          # Set the lower bound for shape and rate params
           lower = c(0, 0))
+        mod$tgamma$sd_scale <- sd.scale
       },
       error = function(e) {
         warning(sprintf("Error in fitdist tgamma for segment [%d, %d]", seg.start, seg.end))
@@ -140,11 +147,15 @@ segment.and.fit = function(
     )
 
     fits = lapply(mod, function(mod){
+      params <- c(mod$estimate, mod$fix.arg)
+
       data.frame(
         "dist" = summary(mod)$distname,
         "loglikelihood" = summary(mod)$loglik,
         "aic" = summary(mod)$aic,
-        "bic" = summary(mod)$bic
+        "bic" = summary(mod)$bic,
+        # Text representation of the parameters
+        params = dput.str(params)
       )
     })
 
@@ -210,16 +221,27 @@ segment.and.fit = function(
     } else {
       # Center the region to match fitting process
       x.adj <- (x - seg.start) + 1e-10
-      scalefactor = length(fti$data)
-      # Scale factor
+      scalefactor <- length(fti$data)
+      # Adjust the scale of the segment
+      if(!is.null(fti$sd_scale)) {
+        x.adj <- x.adj / fti$sd_scale
+        # The bin size is now 1/sd_scale
+        # Multiple scale factor by this new bin size
+        scalefactor <- scalefactor / fti$sd_scale
+      }
+
       # Generating data
-      para <- c(as.list(fti$estimate), as.list(fti$fix.arg))
+      params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
       distname <- fti$distname
       ddistname <- paste0("d", distname)
-      call.params <- c(list(x = x.adj), as.list(para))
+      call.params <- c(list(x = x.adj), as.list(params))
       dens <- do.call(ddistname, call.params)
     }
-    data.frame("x" = x, "dens" = dens * scalefactor, "col" = distname, row.names = NULL)
+    data.frame(
+      "x" = x,
+      "dens" = dens * scalefactor,
+      "col" = distname,
+      row.names = NULL)
   }
 
   # Making a Nice Figure
