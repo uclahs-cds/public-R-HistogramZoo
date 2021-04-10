@@ -22,7 +22,8 @@ Imports:
     depmixS4,
     fitdistrplus,
     extraDistr,
-    mixtools
+    mixtools,
+    truncdist,
 Suggests:
     knitr,
     rmarkdown,
