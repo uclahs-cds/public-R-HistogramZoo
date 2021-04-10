@@ -7,6 +7,7 @@
 #' @param PEAKS
 #'
 #' @import extraDistr
+#' @import fitdistrplus
 #' @export
 segment.and.fit = function(
   GENE,
@@ -96,10 +97,10 @@ segment.and.fit = function(
     x.scale <- x.adj / sd.scale
     mod = list()
 
-    # Uniform Distribution (This is unlikely to fail, I know)
+    # Uniform Distribution
     tryCatch(
       expr = {
-        mod$unif <- fitdistrplus::fitdist(
+        mod$unif <- fitdist(
           data = x.scale,
           distr = "unif")
         mod$unif$sd_scale <- sd.scale
@@ -114,7 +115,7 @@ segment.and.fit = function(
     # Wrap in a tryCatch incase MLE fails to converge
     tryCatch(
       expr = {
-        mod$tnorm <- fitdistrplus::fitdist(
+        mod$tnorm <- fitdist(
           data = x.scale,
           distr = "tnorm",
           fix.arg = list(a = 0, b = max(x.scale) + 1e-10),
@@ -131,7 +132,7 @@ segment.and.fit = function(
     # Truncated gamma distribution
     tryCatch(
       expr = {
-        mod$tgamma <- fitdistrplus::fitdist(
+        mod$tgamma <- fitdist(
           data = x.scale,
           distr = "tgamma",
           fix.arg = list(a = 0, b = max(x.scale)),
@@ -149,7 +150,7 @@ segment.and.fit = function(
     # Flipped Truncated gamma distribution
     tryCatch(
       expr = {
-        mod$tgamma_flip <- fitdistrplus::fitdist(
+        mod$tgamma_flip <- fitdist(
           data = x.scale,
           distr = "tgamma_flip",
           fix.arg = list(b = max(x.scale) + 1e-10),
@@ -210,10 +211,10 @@ segment.and.fit = function(
       par(mfrow = c(2,2))
       plot.legend = names(mod)
 
-      fitdistrplus::denscomp(mod, legendtext = plot.legend)
-      fitdistrplus::qqcomp(mod, legendtext = plot.legend)
-      fitdistrplus::cdfcomp(mod, legendtext = plot.legend)
-      fitdistrplus::ppcomp(mod, legendtext = plot.legend)
+      denscomp(mod, legendtext = plot.legend)
+      qqcomp(mod, legendtext = plot.legend)
+      cdfcomp(mod, legendtext = plot.legend)
+      ppcomp(mod, legendtext = plot.legend)
       dev.off()
     }
 
