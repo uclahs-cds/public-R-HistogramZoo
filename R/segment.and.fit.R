@@ -182,7 +182,7 @@ segment.and.fit = function(
       maxiter <- 500
       # Fit mixture model, silencing output
       invisible(capture.output({
-        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
+        mixfit <- mixtools::normalmixEM(x.scale, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
       }))
       if((length(mixfit$all.loglik) - 1) >= maxiter) {
         # EM did not converge. Don't use results.
