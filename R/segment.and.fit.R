@@ -218,7 +218,10 @@ segment.and.fit = function(
     }
 
     # Add the normal mixture after fitdistrplus
-    if(fit.norm_mixture && !is.null(mixfit)) mod$norm_mixture <- mixfit
+    if(fit.norm_mixture && !is.null(mixfit)) {
+      mod$norm_mixture <- mixfit
+      mod$norm_mixture$sd_scale <- sd.scale
+    }
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
     results = rbind(results, res.final)
@@ -232,22 +235,22 @@ segment.and.fit = function(
     seg.start <- GenomicRanges::start(SEG.GR)[i]
     seg.end <- GenomicRanges::end(SEG.GR)[i]
     x = seg.start:seg.end
+    x.adj <- (x - seg.start) + 1e-10
+    # Extracting Model
     fti = models[[i]]
+    # The bin size is now 1/sd_scale
+    x.adj <- x.adj / fti$sd_scale
+
     if(class(fti) == "mixEM") {
       scalefactor = length(fti$x)
+      scalefactor <- scalefactor / fti$sd_scale
       distname <- "norm_mixture"
-      dens <- dnorm_mixture(x, fti)
+      dens <- dnorm_mixture(x.adj, fti)
     } else {
-      # Center the region to match fitting process
-      x.adj <- (x - seg.start) + 1e-10
-      scalefactor <- length(fti$data)
       # Adjust the scale of the segment
-      if(!is.null(fti$sd_scale)) {
-        x.adj <- x.adj / fti$sd_scale
-        # The bin size is now 1/sd_scale
-        # Multiple scale factor by this new bin size
-        scalefactor <- scalefactor / fti$sd_scale
-      }
+      scalefactor <- length(fti$data)
+      # Multiple scale factor by this new bin size
+      scalefactor <- scalefactor / fti$sd_scale
 
       # Generating data
       params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
