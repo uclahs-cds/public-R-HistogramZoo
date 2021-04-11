@@ -137,7 +137,7 @@ segment.and.fit = function(
           fix.arg = list(a = 0, b = max(x.scale)),
           start = list(shape = 2, rate = 1),
           # Set the lower bound for shape and rate params
-          lower = c(0, 0))
+          lower = c(1, 0.5))
         mod$tgamma$sd_scale <- sd.scale
       },
       error = function(e) {
@@ -155,7 +155,7 @@ segment.and.fit = function(
           fix.arg = list(b = max(x.scale) + 1e-10),
           start = list(shape = 2, rate = 1),
           # Set the lower bound for shape and rate params
-          lower = c(0, 0))
+          lower = c(1, 0.5))
         mod$tgamma_flip$sd_scale <- sd.scale
       },
       error = function(e) {
