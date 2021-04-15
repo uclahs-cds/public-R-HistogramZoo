@@ -72,16 +72,16 @@ segment.and.fit = function(
   peak.counts = GenomicRanges::start(peak.counts)
 
   # Segments
-  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
-    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
-    pdf(filename, width = 5, height = 5)
-    plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
-    lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
-    # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
-    # lines(BIN.COUNTS$start, p.na.abnorm, type = "s", col = "chartreuse4")
-    points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
-    dev.off()
-  }
+  # if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
+  #   filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
+  #   pdf(filename, width = 5, height = 5)
+  #   plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
+  #   lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
+  #   # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
+  #   # lines(BIN.COUNTS$start, p.na.abnorm, type = "s", col = "chartreuse4")
+  #   points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
+  #   dev.off()
+  # }
 
   # Fitting different models
   results = data.frame()
@@ -270,26 +270,8 @@ segment.and.fit = function(
   if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
 
     distr.plotting.data = lapply(1:length(SEG.GR), comput.fti)
-
-    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".SegmentAndFit.pdf"))
-    pdf(filename, width = 10, height = 10)
-
-    p1 = ggplot2::ggplot(BIN.COUNTS, ggplot2::aes(x = start, y = Coverage)) +
-      ggplot2::geom_line() +
-      ggplot2::geom_point(data = BIN.COUNTS[p,], ggplot2::aes(x = start, y = Coverage), col = 'red') +
-      ggplot2::theme_bw() +
-      ggplot2::ggtitle(GENEINFO$gene) +
-      ggplot2::ylab("Coverage (at BP resolution)") +
-      ggplot2::xlab("Transcript Coordinate") +
-      ggplot2::annotate("rect", xmin=GenomicRanges::start(SEG.GR), xmax=GenomicRanges::end(SEG.GR), ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:length(SEG.GR))
-
-    for(i in 1:length(distr.plotting.data)){
-      p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = col))
-    }
-    p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
-    print(p1)
-
-    dev.off()
+    # ggplot.plot(PARAMETERS=PARAMETERS, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
+    bpg.plot(PARAMETERS=PARAMETERS, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
 
   }
 

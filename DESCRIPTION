@@ -24,6 +24,7 @@ Imports:
     extraDistr,
     mixtools,
     truncdist,
+    BoutrosLab.plotting.general,
 Suggests:
     knitr,
     rmarkdown,
