@@ -30,10 +30,10 @@ segment.and.fit = function(
   fit.norm_mixture <- PARAMETERS$FIT.MIXTURE %||% FALSE
 
   # PEAKSGR
-  PEAKSGR = ConsensusPeaks:::.retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
+  PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
 
   # Get Gene Information
-  GENEINFO = ConsensusPeaks:::.get.gene.anno(GENE, ANNOTATION)
+  GENEINFO = .get.gene.anno(GENE, ANNOTATION)
 
   # Converting to RNA
   GENEPEAKSGR = GenomicRanges::shift(PEAKSGR, -1*GENEINFO$left+1)
@@ -51,18 +51,8 @@ segment.and.fit = function(
   BIN.COUNTS = data.frame(GenomicRanges::binnedAverage(BINS, PEAK.COVERAGE, "Coverage"), stringsAsFactors = F)
 
   # Segmenting & Determining which segments are peaks
-  # Test 1: Fit smoothing spline before finding the peaks
   smooth.coverage = smooth.spline( BIN.COUNTS$start, BIN.COUNTS$Coverage, spar = 0.3)
   p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-7)
-  # Test 2: As-is
-  # p = find.peaks(-BIN.COUNTS$Coverage, m = 150)
-  # Test 3: Moving Average
-  # p.moving = moving.average(BIN.COUNTS$Coverage, n = 10)
-  # p.moving[is.na(p.moving)] = BIN.COUNTS$Coverage[is.na(p.moving)]
-  # p = find.peaks(-p.moving, m = 150)
-  # Test 4: Remove Local Abnormalities
-  # p.na.abnorm = remove.local.abnormalities(BIN.COUNTS, max_background_fold_increase = 2, background_window = 100)
-  # p = find.peaks(-p.na.abnorm, m = 150)
 
   # Formatting
   SEG.GR = generate.peaks.from.split.points(p, GENEPEAKSGR, GENEINFO, m = 100)
@@ -70,18 +60,6 @@ segment.and.fit = function(
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(GENEPEAKSGR, width = 1))
   peak.counts = GenomicRanges::start(peak.counts)
-
-  # Segments
-  # if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
-  #   filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, "segments.pdf"))
-  #   pdf(filename, width = 5, height = 5)
-  #   plot(BIN.COUNTS$start, BIN.COUNTS$Coverage, type = "s")
-  #   lines(BIN.COUNTS$start, smooth.coverage$y, type = "s", col = "pink")
-  #   # lines(BIN.COUNTS$start, p.moving, type = "s", col = "green")
-  #   # lines(BIN.COUNTS$start, p.na.abnorm, type = "s", col = "chartreuse4")
-  #   points(BIN.COUNTS$start[p], BIN.COUNTS$Coverage[p], col = 'red')
-  #   dev.off()
-  # }
 
   # Fitting different models
   results = data.frame()

@@ -69,14 +69,8 @@ ConsensusPeaks = function(
   GENES = "all",
   PEAKS,
   RNA.OR.DNA = c("rna", "dna"),
-  METHOD = c("dpc", "hmm"),
+  METHOD = c("union", "sf"),
   GTF = NULL,
-  DP.RESOLUTION = 50,
-  DP.ITERATIONS = 1000,
-  DP.WEIGHT.THRESHOLD = 0.2,
-  DP.N.SD = 1,
-  DP.ALPHA.PRIORS = c(1,2),
-  DP.SEED = 123,
   PLOT.MERGED.PEAKS=F,
   OUTPUT.TAG="",
   OUTPUTDIR =".",
@@ -100,15 +94,9 @@ ConsensusPeaks = function(
   }
 
   # Error checking, generic
-  if(!METHOD %in% c("dpc", "hmm", "union", "sf")){stop("Please select a method out of 'dpc' or 'hmm' or 'union' or 'sf'")}
+  if(!METHOD %in% c("union", "sf")){stop("Please select a method out of 'union' or 'sf'")}
   if(!RNA.OR.DNA %in% c("rna", "dna")){stop("Please select if peaks are part of the transcriptome or genome")}
   if(RNA.OR.DNA == "rna" & is.null(GTF)){stop("Please provide the GTF file used to call RNA peaks")}
-  # Error checking, dpc
-  if(METHOD == "dpc" & (!is.numeric(DP.RESOLUTION) | !(DP.RESOLUTION %% 1 == 0) | DP.RESOLUTION <= 0)){stop("Please provide a positive integer for DP.RESOLUTION")}
-  if(METHOD == "dpc" & (!is.numeric(DP.ITERATIONS) | !(DP.ITERATIONS %% 1 == 0) | DP.ITERATIONS <= 0)){stop("Please provide an integer for DP.ITERATIONS")}
-  if(METHOD == "dpc" & !is.numeric(DP.WEIGHT.THRESHOLD) | DP.WEIGHT.THRESHOLD > 1 | DP.WEIGHT.THRESHOLD < 0){stop("Please provide an number between 0 and 1 for DP.WEIGHT.THRESHOLD")}
-  if(METHOD == "dpc" & !is.numeric(DP.N.SD) | DP.N.SD < 0){stop("Please provide a numeric value greater than 0 for DP.N.SD")}
-  if(METHOD == "dpc" & !is.numeric(DP.SEED)){stop("Please provide a numeric value for DP.SEED")}
   # Error checking, output
   if(!dir.exists(OUTPUTDIR)){dir.create(OUTPUTDIR, recursive = T)}
   if(!is.character(OUTPUT.TAG)){stop("Please provide a character OUTPUT.TAG")}
@@ -120,13 +108,6 @@ ConsensusPeaks = function(
   PARAMETERS$RNA.OR.DNA = RNA.OR.DNA
   PARAMETERS$METHOD = METHOD
   PARAMETERS$GTF = GTF
-  # DP
-  PARAMETERS$DP.RESOLUTION = DP.RESOLUTION
-  PARAMETERS$DP.ITERATIONS = DP.ITERATIONS
-  PARAMETERS$DP.WEIGHT.THRESHOLD = DP.WEIGHT.THRESHOLD
-  PARAMETERS$DP.N.SD = DP.N.SD
-  PARAMETERS$DP.ALPHA.PRIORS = DP.ALPHA.PRIORS
-  PARAMETERS$DP.SEED = DP.SEED
   # Output
   PARAMETERS$OUTPUT.TAG = OUTPUT.TAG
   PARAMETERS$OUTPUTDIR = OUTPUTDIR
@@ -147,11 +128,7 @@ ConsensusPeaks = function(
   for(i in GENES){
     print(sprintf("Processing gene: %s", i))
     print( paste(as.character(signif(which(GENES == i)/length(GENES)*100, digits = 3)),"%") )
-    if(METHOD == 'dpc'){
-      RESULTS = dpc(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
-    } else if (METHOD == 'hmm'){
-      RESULTS = hmm(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
-    } else if (METHOD == 'union'){
+    if(METHOD == 'union'){
       RESULTS = union.peaks(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
     } else if (METHOD == "sf"){
       RESULTS = segment.and.fit(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
