@@ -17,21 +17,17 @@
 read.gtf <- function(PARAMETERS){
 
   # Creating a TXDB
-  op <- options(warn = (-1))
-  txdb=GenomicFeatures::makeTxDbFromGFF(PARAMETERS$GTF,format="gtf")
-  options(op)
+  txdb=suppressWarnings(GenomicFeatures::makeTxDbFromGFF(PARAMETERS$GTF,format="gtf"))
 
   # Filtering the TXDB
   colkey <- AnnotationDbi::columns(txdb)
   select_col <- match(c("EXONCHROM","TXID","EXONSTART","EXONEND","EXONSTRAND","GENEID","TXNAME"),colkey)
-  op <- options(warn = (-1))
   ID = AnnotationDbi::keys(txdb, "TXID")
   temp = AnnotationDbi::select(txdb, ID , c(AnnotationDbi::columns(txdb))[select_col], "TXID")
   select_col2 <- match(c("EXONCHROM","TXID","EXONSTART","EXONEND","EXONSTRAND","GENEID","TXNAME"),names(temp))
   temp <- temp[,select_col2]
   colnames(temp)=c("chr","feature","start","stop","strand","gene","transcript")
-  options(op)
-  temp$"feature" <- "exon";
+  temp$"feature" <- "exon"
   gtf <- temp
 
   # return data

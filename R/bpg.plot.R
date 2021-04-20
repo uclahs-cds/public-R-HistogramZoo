@@ -1,34 +1,34 @@
 
 bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.gr, p){
-  
+
   # Remove once fixed
   seg.gr$p.value = runif(length(seg.gr))
   seg.gr$i = 1:length(seg.gr)
-  
+
   # Plotting data
   n.distributions = length(distr.plotting.data)
   for(i in 1:n.distributions){distr.plotting.data[[i]]$'i' <- i}
   lineplot.data = do.call(rbind, distr.plotting.data)
-  
+
   # Bin counts
   bin.counts = bin.counts[,c("start", "Coverage")]
   bin.counts$col = "coverage"
   bin.counts$i = n.distributions + 1
   colnames(bin.counts) = c('x', 'dens', 'col', 'i')
-  
+
   # Points
   points = bin.counts[bin.counts$x %in% p,]
-  
+
   # Plotting Data
   lineplot.data = rbind(lineplot.data, bin.counts)
-  
+
   # Colours
   col.reference = structure(c("black", "orange", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
                             names = c("coverage", "tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
   col.used = unique(lineplot.data[,c("col", "i")])
   col.used = col.used[order(col.used$i),]
   col.vec = col.reference[col.used$col]
-  
+
   # Plotting
   sc = BoutrosLab.plotting.general::create.scatterplot(
     dens ~ x,
@@ -60,21 +60,24 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
   anno = geneinfo$anno
   anno$start = geneinfo$DNA2RNA[anno$start - geneinfo$left+1]
   anno$stop = geneinfo$DNA2RNA[anno$stop - geneinfo$left+1]
-  anno.gr = GenomicRanges::makeGRangesFromDataFrame(anno)
-  anno.coverage = GenomicRanges::coverage(anno.gr)
+  anno.gr = GenomicRanges::makeGRangesFromDataFrame(anno, keep.extra.columns = T)
+  anno.gr = S4Vectors::split(anno.gr, anno.gr$transcript)
+  anno.coverage = lapply(anno.gr, GenomicRanges::coverage)
   bins = unlist(GenomicRanges::tile(genegr, width = 1))
-  anno.counts = GenomicRanges::binnedAverage(bins, anno.coverage, "Coverage")
-  
+  anno.counts = lapply(anno.coverage, function(i) GenomicRanges::binnedAverage(bins, i, "Coverage"))
+  transcript.coverage = do.call(cbind, lapply(anno.counts, function(x) x$Coverage))
+  transcript.coverage = as.data.frame(transcript.coverage, stringsAsFactors = F)
+
   # Adding p-values & segments
-  ovl = GenomicRanges::findOverlaps(anno.counts, seg.gr)
-  anno.counts$p.value = NA
-  anno.counts$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
-  anno.counts$i = 0
-  anno.counts$i[S4Vectors::queryHits(ovl)] = seg.gr$i[S4Vectors::subjectHits(ovl)]
-  
+  ovl = GenomicRanges::findOverlaps(bins, seg.gr)
+  bins$p.value = NA
+  bins$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
+  bins$i = 0
+  bins$i[S4Vectors::queryHits(ovl)] = seg.gr$i[S4Vectors::subjectHits(ovl)]
+
   # Plotting Heatmap
-  heatmap.data = data.frame(anno.counts, stringsAsFactors = F)
-  heatmap.data = heatmap.data[,c("start", "Coverage", "p.value", "i")]
+  heatmap.data = data.frame(bins, stringsAsFactors = F)
+  heatmap.data = heatmap.data[,c("start", "p.value", "i")]
   heatmap.data = heatmap.data[order(heatmap.data$start),]
 
   hm.peaks = BoutrosLab.plotting.general::create.heatmap(
@@ -96,7 +99,7 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
     # colourkey.labels = seq(0, length(seg.gr)+1, 1),
     print.colour.key = F
   )
-  
+
   hm.pvalue = BoutrosLab.plotting.general::create.heatmap(
     heatmap.data[,c("p.value", "p.value")],
     clustering.method = 'none',
@@ -115,12 +118,11 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
     # Colourkey
     print.colour.key = F
   )
-  
+
   x.digits = floor(log10(geneinfo$exome_length))-1
   x.at = seq(0, round(geneinfo$exome_length, digits = -x.digits), length.out = 5)
-  
   hm.coverage = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("Coverage", "Coverage")],
+    transcript.coverage,
     clustering.method = 'none',
     # Axes labels
     xaxis.lab = x.at,
@@ -132,20 +134,29 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
     xlab.cex = 1,
     xlab.label = "Transcript Coordinate",
     # Discrete Colours
-    at = seq(-0.5, max(heatmap.data$Coverage)+1, 1),
-    total.colours = max(heatmap.data$Coverage)+1,
-    colour.scheme = c( 'white', BoutrosLab.plotting.general::colour.gradient("violetred3", max(heatmap.data$Coverage))),
+    at = c(-0.5, 0.5, 1.5),
+    total.colours = 3,
+    colour.scheme = c('white', 'pink'),
     # Border
     axes.lwd = 1,
+    # Adding lines for segments
+    force.grid.col = TRUE,
+    grid.col = TRUE,
+    col.lines = c(GenomicRanges::start(seg.gr), GenomicRanges::end(seg.gr)),
+    col.lwd = 1,
+    force.grid.row = TRUE,
+    grid.row = TRUE,
+    row.lines = 1:ncol(transcript.coverage)+0.5,
+    row.lwd = 1,
     # Colourkey
     print.colour.key = F
   )
-  
+
   # Legend
   covariate.legend <- list(
     legend = list(
       colours = 'red',
-      labels = c("Segment Endpoint"),
+      labels = c("Segment Start/End"),
       title = expression(bold(underline('Points'))),
       lwd = 0.5
     ),
@@ -175,13 +186,13 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
       lwd = 0.5
     ),
     legend = list(
-      colours = BoutrosLab.plotting.general::colour.gradient("violetred3", max(heatmap.data$Coverage)),
-      labels = as.character(1:max(heatmap.data$Coverage)),
-      title = expression(bold(underline('Exon Coverage'))),
+      colours = c("pink"),
+      labels = c("Exon"),
+      title = expression(bold(underline('Transcript Coverage'))),
       lwd = 0.5
     )
   )
-  
+
   side.legend <- BoutrosLab.plotting.general::legend.grob(
     legends = covariate.legend,
     label.cex = 0.7,
@@ -190,15 +201,16 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
     title.fontface = 'bold',
     size = 2
   )
-  
+
   # Plotting
   filename = file.path(PARAMETERS$OUTPUTDIR, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
   pdf(filename, width = 10, height = 10)
-  
-  
+
+  transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
+
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
     plot.objects = list(sc, hm.peaks, hm.pvalue, hm.coverage),
-    plot.objects.heights = c(10, 1, 1, 1.55),
+    plot.objects.heights = c(10, 1, 1, transcript.height),
     y.spacing = -4,
     # Labels
     main = geneinfo$gene,
@@ -212,8 +224,8 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
       )
     )
   )
-  
+
   print(mpp)
   dev.off()
-  
+
 }
