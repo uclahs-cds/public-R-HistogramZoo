@@ -1,7 +1,18 @@
 Package: ConsensusPeaks
 Title: A Method for Peak Merging And Distribution Fitting Across Biological Replicates
 Version: 1.0.0
-Authors@R: person("Helen", "Zhu", email = "helen.zhu@mail.utoronto.ca", role = c("aut", "cre"), person("Stefan", "Eng", email = "stefaneng13@gmail.com", role = c("aut", "cre")))
+Authors@R:
+    c(
+    person(given = "Helen",
+           family = "Zhu",
+           email = "helen.zhu@mail.utoronto.ca",
+           role = c("aut", "cre")),
+    person(given = "Stefan",
+           family = "Eng",
+           role = c("aut"),
+           email = "stefaneng@mednet.ucla.edu",
+           comment = c(ORCID = "0000-0002-5245-6507"))
+    )
 Description: A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.
 Depends:
     R (>= 3.4.1),
