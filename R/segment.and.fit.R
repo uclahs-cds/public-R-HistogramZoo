@@ -142,14 +142,33 @@ segment.and.fit = function(
       }
     )
 
-    fits = lapply(mod, function(mod){
-      params <- c(mod$estimate, mod$fix.arg)
+    x.range = seg.start:seg.end
+    x.range.adj <- (x - seg.start) + 1e-10
+    # The bin size is now 1/sd_scale
+    x.range.scale <- x.range.adj / sd.scale
+    # Multiple scale factor by this new bin size
+    scalefactor <- length(x.scale) / sd.scale
+
+    fits = lapply(mod, function(m){
+      params <- c(m$estimate, m$fix.arg)
+
+      bin.data <- table(x.scale)
+
+      params <- c(as.list(m$estimate), as.list(m$fix.arg))
+      distname <- m$distname
+      ddistname <- paste0("d", distname)
+      call.params <- c(list(x = as.numeric(names(bin.data))), as.list(params))
+      dens <- do.call(ddistname, call.params)
+      dens.scale <- dens * scalefactor
+
+      fit.residuals <- (dens.scale - as.integer(bin.data))^2
 
       data.frame(
-        "dist" = summary(mod)$distname,
-        "loglikelihood" = summary(mod)$loglik,
-        "aic" = summary(mod)$aic,
-        "bic" = summary(mod)$bic,
+        "dist" = summary(m)$distname,
+        "loglikelihood" = summary(m)$loglik,
+        "aic" = summary(m)$aic,
+        "bic" = summary(m)$bic,
+        "mse" = mean(fit.residuals),
         # Text representation of the parameters
         params = dput.str(params)
       )
@@ -167,11 +186,19 @@ segment.and.fit = function(
         mixfit <- NULL
       } else {
         mixfit.params <- length(mixfit$mu) * 3 # for lambda, mu, and sigma params
+
+        bin.data <- table(x.scale)
+        dens <- dnorm_mixture(as.numeric(names(bin.data)), mixfit)
+        dens.scale <- dens * scalefactor
+
+        fit.residuals <- (dens.scale - as.integer(bin.data))^2
+
         mixfit.results <- data.frame(
           "dist" = "norm_mixture",
           "loglikelihood" = mixfit$loglik,
           "aic" = -2 * mixfit$loglik + 2 * mixfit.params,
           "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x)),
+          "mse" = mean(fit.residuals),
           "params" = dput.str(mixfit[c("mu", "sigma", "lambda")])
         )
         fits$norm_mixture <- mixfit.results
@@ -217,29 +244,30 @@ segment.and.fit = function(
     # Extracting Model
     fti = models[[i]]
     # The bin size is now 1/sd_scale
-    x.adj <- x.adj / fti$sd_scale
+    x.scale <- x.adj / fti$sd_scale
 
     if(class(fti) == "mixEM") {
-      scalefactor = length(fti$x)
-      scalefactor <- scalefactor / fti$sd_scale
+      fit.data <- fti$x
+      scalefactor <- length(fit.data) / fti$sd_scale
       distname <- "norm_mixture"
-      dens <- dnorm_mixture(x.adj, fti)
+      dens <- dnorm_mixture(x.scale, fti)
     } else {
+      fit.data <- fti$data
       # Adjust the scale of the segment
-      scalefactor <- length(fti$data)
       # Multiple scale factor by this new bin size
-      scalefactor <- scalefactor / fti$sd_scale
+      scalefactor <- length(fit.data) / fti$sd_scale
 
       # Generating data
       params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
       distname <- fti$distname
       ddistname <- paste0("d", distname)
-      call.params <- c(list(x = x.adj), as.list(params))
+      call.params <- c(list(x = x.scale), as.list(params))
       dens <- do.call(ddistname, call.params)
     }
+    dens.scale <- dens * scalefactor
     data.frame(
       "x" = x,
-      "dens" = dens * scalefactor,
+      "dens" = dens.scale,
       "col" = distname,
       row.names = NULL)
   }
