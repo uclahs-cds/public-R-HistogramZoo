@@ -77,7 +77,7 @@ fit.continuous.distributions = function(
   )
 
   # Mixture of Normals
-  if(fit.norm_mixture) {
+  if(fit.normal.mixture) {
     # Fit a Normal Mixture model
     maxiter <- max.iterations
     # Fit mixture model, silencing output
