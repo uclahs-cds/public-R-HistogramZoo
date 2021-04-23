@@ -73,6 +73,7 @@ segment.and.fit = function(
     sd.scale <- sd(x.adj)
     x.scale <- x.adj / sd.scale
 
+    # While loop
     # My thoughts are here, we can do a while loop (e.g, while end residuals > abs. residual threshold & we haven't surpassed the edge threshold),
     # continue to shrink the edges. Here's where we also place a call to the fit.residuals function
     x.range = seg.start:seg.end
@@ -84,6 +85,7 @@ segment.and.fit = function(
 
     mod = fit.continuous.distributions(x = x.scale, sd.scale = sd.scale, seg.start = seg.start, seg.end = seg.end, fit.normal.mixture = T, max.iterations = 500)
     fits = extract.distribution.parameters(mod = mod, x = x.scale, scalefactor = scalefactor)
+    # The loop ends here.
 
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
