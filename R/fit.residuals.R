@@ -15,7 +15,11 @@ fit.residuals = function(
   # Residual Table
   # "Observed" = as.vector(bin.data)
   # "x" = as.numeric(names(bin.data)),
-  abs.residual.table = data.frame("x" = as.numeric(names(bin.data)))
+  # Observed
+  bin.count = as.integer(bin.data)
+  # x value
+  bin.x = as.numeric(names(bin.data))
+  abs.residual.table = data.frame("x" = bin.x)
   sq.residual.table = abs.residual.table
   residual.table = abs.residual.table
   density.list = list()
@@ -29,24 +33,24 @@ fit.residuals = function(
 
     if(class(m) == "mixEM") {
       distname <- "norm_mixture"
-      dens <- dnorm_mixture(as.numeric(names(bin.data)), m)
+      dens <- dnorm_mixture(bin.x, m)
     } else {
       params <- c(as.list(m$estimate), as.list(m$fix.arg))
       distname <- m$distname
       ddistname <- paste0("d", distname)
-      call.params <- c(list(x = as.numeric(names(bin.data))), as.list(params))
+      call.params <- c(list(x = bin.x), as.list(params))
       dens <- do.call(ddistname, call.params)
     }
     dens.scale <- dens * scalefactor
-    fit.residuals = dens.scale - as.integer(bin.data)
+    fit.residuals = dens.scale - bin.count
     fit.residuals = fit.residuals/sample.size
-    # fit.residuals <- (dens.scale - as.integer(bin.data))^2
+    # fit.residuals <- (dens.scale - bin.count)^2
 
     # Adding to table
     residual.table[,distname] = fit.residuals
     sq.residual.table[,distname] = fit.residuals^2
     abs.residual.table[,distname] = abs(fit.residuals)
-    density.list[[distname]] = data.frame("x" = as.numeric(names(bin.data)), "y" = dens.scale, "col" = as.vector(col.reference[distname]), stringsAsFactors = F)
+    density.list[[distname]] = data.frame("x" = bin.x, "y" = dens.scale, "col" = as.vector(col.reference[distname]), stringsAsFactors = F)
   }
 
   if(plot.diagnostic.residuals){
@@ -98,7 +102,7 @@ fit.residuals = function(
     print(p3)
     print(p4)
     print(p5)
-    
+
     dev.off()
   }
 
