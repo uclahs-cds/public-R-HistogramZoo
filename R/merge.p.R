@@ -1,4 +1,4 @@
-.merge.p = function(PEAKSGR, MERGED.PEAKS, ANNOTATION, PARAMETERS, ID.COLS){
+.merge.p = function(PEAKSGR, MERGED.PEAKS, ANNOTATION, ALL.SAMPLES, ID.COLS){
 
   # Numeric Stability
   PEAKSGR$score = ifelse(PEAKSGR$score == 0, 2e-16, PEAKSGR$score)
@@ -30,12 +30,12 @@
   pmat[is.na(pmat)] <- 1
 
   # Adding Extra Samples
-  missing.samples = setdiff(PARAMETERS$ALL.SAMPLES, colnames(pmat))
+  missing.samples = setdiff(ALL.SAMPLES, colnames(pmat))
   if(length(missing.samples) > 0){
     add.table = data.frame(matrix(1, nrow = nrow(pmat), ncol = length(missing.samples), dimnames = list(NULL, missing.samples)))
     pmat = cbind(pmat, add.table)
   }
-  pmat = pmat[,c("peak", PARAMETERS$ALL.SAMPLES), drop = FALSE]
+  pmat = pmat[,c("peak", ALL.SAMPLES), drop = FALSE]
 
   return(pmat)
 

@@ -1,6 +1,6 @@
 #' read.gtf is a function that imports a gtf file and creates an annotation data frame, adapted from exomePeak
 #'
-#' @param PARAMETERS A PARAMETERS list with the parameters indicated in the DPDE4PM function
+#' @param gtf A gtf file
 #'
 #' @return
 #' \describe{
@@ -14,10 +14,10 @@
 #' }
 #'
 #' @export read.gtf
-read.gtf <- function(PARAMETERS){
+read.gtf <- function(gtf){
 
   # Creating a TXDB
-  txdb=suppressWarnings(GenomicFeatures::makeTxDbFromGFF(PARAMETERS$GTF,format="gtf"))
+  txdb=suppressWarnings(GenomicFeatures::makeTxDbFromGFF(gtf,format="gtf"))
 
   # Filtering the TXDB
   colkey <- AnnotationDbi::columns(txdb)

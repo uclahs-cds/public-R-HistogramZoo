@@ -1,4 +1,4 @@
-.generate.null.result = function(PARAMETERS){
+.generate.null.result = function(all.samples){
 
   # Required Column Names
   bed.cols = c("chr", "start", "end", "name", "score", "strand",
@@ -6,11 +6,11 @@
                "blockCount", "blockSizes","blockStarts")
 
   # Number of Columns
-  output.ncol = length(PARAMETERS$ALL.SAMPLES) + 12
+  output.ncol = length(all.samples) + 12
 
   # A table with no values
   output.table = data.frame(matrix(ncol = output.ncol, nrow = 0))
-  names(output.table) = c(bed.cols, PARAMETERS$ALL.SAMPLES)
+  names(output.table) = c(bed.cols, all.samples)
 
   return(output.table)
 }

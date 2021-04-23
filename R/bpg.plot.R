@@ -1,5 +1,5 @@
 
-bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.gr, p){
+bpg.plot = function(outputdir, distr.plotting.data, geneinfo, bin.counts, seg.gr, p){
 
   # Remove once fixed
   seg.gr$p.value = runif(length(seg.gr))
@@ -203,7 +203,7 @@ bpg.plot = function(PARAMETERS, distr.plotting.data, geneinfo, bin.counts, seg.g
   )
 
   # Plotting
-  filename = file.path(PARAMETERS$OUTPUTDIR, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
+  filename = file.path(outputdir, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
   pdf(filename, width = 10, height = 10)
 
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55

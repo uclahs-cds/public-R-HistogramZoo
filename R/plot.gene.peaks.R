@@ -46,23 +46,16 @@ plot.gene.peaks = function(
   PLOT = F
 ){
 
-  # Making a list of parameters to pass back and forth
-  PARAMETERS = list()
-  PARAMETERS$GENE = GENE
-  PARAMETERS$GTF = GTF
-  PARAMETERS$OUTPUTDIR = OUTPUTDIR
-  PARAMETERS$OUTPUT.TAG = OUTPUT.TAG
-
-  if(!PARAMETERS$GENE %in% PEAKS$name){stop("No Peaks are Found for This Gene in PEAKS!", call. = TRUE, domain = NULL)}
+  if(!GENE %in% PEAKS$name){stop("No Peaks are Found for This Gene in PEAKS!", call. = TRUE, domain = NULL)}
 
   # ANNOTATION
-  ANNOTATION = read.gtf(PARAMETERS)
+  ANNOTATION = read.gtf(GTF)
 
   # Plotting Peaks
-  plotting.peaks = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = PARAMETERS$GENE, DF = T)
+  plotting.peaks = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = T)
 
   # Gene Bed
-  gene.bed = ANNOTATION[ANNOTATION$gene == PARAMETERS$GENE, c("chr", "start", "stop", "gene", "strand")]
+  gene.bed = ANNOTATION[ANNOTATION$gene == GENE, c("chr", "start", "stop", "gene", "strand")]
   gene.chr = unique(gene.bed$chr)
 
   # Code for ggplot
@@ -72,7 +65,7 @@ plot.gene.peaks = function(
     ggplot2::theme_classic() +
     ggplot2::theme(axis.text.y = ggplot2::element_text(size = 0),
                    axis.ticks.y = ggplot2::element_blank()) +
-    ggplot2::ggtitle(PARAMETERS$GENE) +
+    ggplot2::ggtitle(GENE) +
     ggplot2::xlab(gene.chr) + ggplot2::ylab("Sample")
 
   p1 = p1 + ggplot2::annotate(
@@ -88,7 +81,7 @@ plot.gene.peaks = function(
   options(warn = 0)
 
   if(PLOT){
-    filename = paste0(PARAMETERS$OUTPUTDIR, "/", PARAMETERS$GENE, ".", PARAMETERS$OUTPUT.TAG, ".Peaks.pdf")
+    filename = paste0(OUTPUTDIR, "/", GENE, ".", OUTPUT.TAG, ".Peaks.pdf")
     pdf(filename)
     print(p1)
     dev.off()

@@ -2,7 +2,6 @@
 #'
 #' @param GENE
 #'
-#' @param PARAMETERS
 #' @param ANNOTATION
 #' @param PEAKS
 #'
@@ -10,24 +9,27 @@
 #' @export
 segment.and.fit = function(
   GENE,
-  PARAMETERS,
   ANNOTATION,
-  PEAKS
+  PEAKS,
+  ALL.SAMPLES,
+  OUTPUT.TAG,
+  OUTPUTDIR,
+  PLOT.MERGED.PEAKS,
+  DIAGNOSTIC,
+  FIT.MIXTURE
 ){
 
   # If the gene doesn't have peaks
   if(!GENE %in% PEAKS$name){
     warn.message = paste0("No Peaks are Found for ", GENE, " in PEAKS!")
     warning(warn.message, call. = TRUE, domain = NULL)
-    return(.generate.null.result(PARAMETERS))
+    return(.generate.null.result(ALL.SAMPLES))
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  # plot.merged.peak <- PARAMETERS$PLOT.MERGED.PEAKS  %||% FALSE
-  plot.diagnostic <- PARAMETERS$DIAGNOSTIC %||% FALSE
-  write.output <- PARAMETERS$WRITE.OUTPUT %||% FALSE
+  plot.diagnostic <- DIAGNOSTIC %||% FALSE
   # Optional normal mixture model via mixtools
-  fit.norm_mixture <- PARAMETERS$FIT.MIXTURE %||% FALSE
+  fit.norm_mixture <- FIT.MIXTURE %||% FALSE
 
   # PEAKSGR
   PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
@@ -134,11 +136,11 @@ segment.and.fit = function(
   }
 
   # Making a Nice Figure
-  if(GENE %in% PARAMETERS$PLOT.MERGED.PEAKS) {
+  if(GENE %in% PLOT.MERGED.PEAKS) {
 
     distr.plotting.data = lapply(1:length(SEG.GR), comput.fti)
-    # ggplot.plot(PARAMETERS=PARAMETERS, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
-    bpg.plot(PARAMETERS=PARAMETERS, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
+    # ggplot.plot(outputdir = OUTPUTDIR, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
+    bpg.plot(outputdir = OUTPUTDIR, distr.plotting.data = distr.plotting.data, geneinfo=GENEINFO, bin.counts=BIN.COUNTS, seg.gr=SEG.GR, p=p)
 
   }
 
@@ -154,7 +156,7 @@ segment.and.fit = function(
   # Generating BED12 File
   PEAKS.FINAL = .bed6tobed12(MERGED.PEAKS = merged.peaks, ID.COLS = c("name", "i", "dist"))
   # P-Value Table
-  SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, PARAMETERS, ID.COLS = c("name", "i", "dist"))
+  SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks, ANNOTATION, ALL.SAMPLES, ID.COLS = c("name", "i", "dist"))
   # Output Table
   OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
 

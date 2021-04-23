@@ -47,17 +47,12 @@ simulate.gaussian.peaks = function(
   if(!is.character(GENE) | GENE == "" | is.na(GENE)){stop("GENE must be character")}
   if(!(SEED %% 1 == 0)){stop("SEED must be integer")}
 
-  # PARAMETERS
-  PARAMETERS = list()
-  PARAMETERS$GENE = GENE
-  PARAMETERS$GTF = GTF
-
   if(is.null(ANNOTATION)) {
     # Creating annotation and geneinfo
-    ANNOTATION = read.gtf(PARAMETERS)
+    ANNOTATION = read.gtf(GTF)
   }
   if(!GENE %in% ANNOTATION$gene){stop("GENE must be in the GTF file")}
-  GENEINFO = .get.gene.anno(PARAMETERS, ANNOTATION)
+  GENEINFO = .get.gene.anno(GENE, ANNOTATION)
 
   # Initializing
   peaks = GenomicRanges::GRanges()

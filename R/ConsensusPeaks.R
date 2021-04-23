@@ -102,25 +102,12 @@ ConsensusPeaks = function(
   if(!is.character(OUTPUT.TAG)){stop("Please provide a character OUTPUT.TAG")}
   if(!is.logical(WRITE.OUTPUT)){stop("Please provide a logical WRITE.OUTPUT")}
 
-  # Making a list of parameters to pass back and forth
-  PARAMETERS = list()
-  # General
-  PARAMETERS$RNA.OR.DNA = RNA.OR.DNA
-  PARAMETERS$METHOD = METHOD
-  PARAMETERS$GTF = GTF
-  # Output
-  PARAMETERS$OUTPUT.TAG = OUTPUT.TAG
-  PARAMETERS$OUTPUTDIR = OUTPUTDIR
-  PARAMETERS$PLOT.MERGED.PEAKS = PLOT.MERGED.PEAKS
-  PARAMETERS$DIAGNOSTIC = DIAGNOSTIC
-  PARAMETERS$FIT.MIXTURE = FIT.MIXTURE
   # All Samples
   ALL.SAMPLES = sort(unique(PEAKS$sample))
-  PARAMETERS$ALL.SAMPLES = ALL.SAMPLES
 
   # If RNA, generate annotation & change peak coordinates
-  if(is.null(ANNOTATION) && PARAMETERS$RNA.OR.DNA == "rna"){
-    ANNOTATION = read.gtf(PARAMETERS)
+  if(is.null(ANNOTATION) && RNA.OR.DNA == "rna"){
+    ANNOTATION = read.gtf(GTF)
   }
 
   # Loop through all genes using the correct method
@@ -129,16 +116,25 @@ ConsensusPeaks = function(
     print(sprintf("Processing gene: %s", i))
     print( paste(as.character(signif(which(GENES == i)/length(GENES)*100, digits = 3)),"%") )
     if(METHOD == 'union'){
-      RESULTS = union.peaks(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
+      RESULTS = union.peaks(GENE = i, ANNOTATION = ANNOTATION, PEAKS = PEAKS, ALL.SAMPLES = ALL.SAMPLES)
     } else if (METHOD == "sf"){
-      RESULTS = segment.and.fit(GENE = i, PARAMETERS = PARAMETERS, ANNOTATION = ANNOTATION, PEAKS = PEAKS)
+      RESULTS = segment.and.fit(
+        GENE = i,
+        ANNOTATION = ANNOTATION,
+        PEAKS = PEAKS,
+        ALL.SAMPLES = ALL.SAMPLES,
+        OUTPUT.TAG = OUTPUT.TAG,
+        OUTPUTDIR = OUTPUTDIR,
+        PLOT.MERGED.PEAKS = PLOT.MERGED.PEAKS,
+        DIAGNOSTIC = DIAGNOSTIC,
+        FIT.MIXTURE = FIT.MIXTURE)
     }
   OUTPUT.TABLE = rbind(OUTPUT.TABLE, RESULTS)
   }
 
   # Writing output
   if(WRITE.OUTPUT){
-    filename = file.path(PARAMETERS$OUTPUTDIR, paste0(OUTPUT.TAG, ".MergedPeak.tsv"))
+    filename = file.path(OUTPUTDIR, paste0(OUTPUT.TAG, ".MergedPeak.tsv"))
     write.table(
       OUTPUT.TABLE,
       file = filename,
