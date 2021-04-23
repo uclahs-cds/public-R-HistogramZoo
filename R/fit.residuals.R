@@ -2,7 +2,6 @@ fit.residuals = function(
   x,
   scalefactor,
   mod,
-  sample.size,
   plot.diagnostic.residuals = F,
   outputdir,
   i,
@@ -10,7 +9,8 @@ fit.residuals = function(
 ){
 
   # Observed
-  bin.data <- table(x)
+  bin.data = table(x)
+  sample.size = length(x)
 
   # Residual Table
   # "Observed" = as.vector(bin.data)
@@ -19,6 +19,9 @@ fit.residuals = function(
   bin.count = as.integer(bin.data)
   # x value
   bin.x = as.numeric(names(bin.data))
+
+  density.table = data.frame(x = bin.x, Observed = bin.count)
+
   abs.residual.table = data.frame("x" = bin.x)
   sq.residual.table = abs.residual.table
   residual.table = abs.residual.table
@@ -50,51 +53,57 @@ fit.residuals = function(
     residual.table[,distname] = fit.residuals
     sq.residual.table[,distname] = fit.residuals^2
     abs.residual.table[,distname] = abs(fit.residuals)
-    density.list[[distname]] = data.frame("x" = bin.x, "y" = dens.scale, "col" = as.vector(col.reference[distname]), stringsAsFactors = F)
+    density.list[[distname]] = data.frame("x" = bin.x, "y" = dens.scale, "col" = distname, stringsAsFactors = F)
   }
 
   if(plot.diagnostic.residuals){
 
-    filename = file.path(outputdir, paste0(GENE, ".residuals.", i, ".pdf"))
+    filename = file.path(outputdir, paste0(gene, ".residuals.", i, ".pdf"))
     pdf(filename)
 
+    plotting.data = do.call(rbind.data.frame, density.list)
+    plotting.data.res = reshape2::melt(residual.table, id.vars = "x")
+    plotting.data.sq.res = reshape2::melt(sq.residual.table, id.vars = "x")
+    plotting.data.abs.res = reshape2::melt(abs.residual.table, id.vars = "x")
+    plotting.data.mean.res = rowMeans(sq.residual.table[,2:ncol(sq.residual.table)])
+    plotting.data.mean.res = data.frame("x" = sq.residual.table$x, "MeanModelResidual" = plotting.data.mean.res)
+
+    # Keep same factor level
+    plotting.data$col <- factor(plotting.data$col, levels(as.factor(plotting.data.res$variable)))
+
     p1 = ggplot2::ggplot(density.table, ggplot2::aes(x = x, y = Observed)) +
-      ggplot2::geom_line() +
+      ggplot2::geom_step() +
       ggplot2::theme_bw() +
       ggplot2::ggtitle(gene) +
       ggplot2::ylab("Coverage (at BP resolution)") +
       ggplot2::xlab("Scaled X")
 
-    for(j in 1:length(density.list)){
-      p1 = p1 + ggplot2::geom_line(data = density.list[[j]], ggplot2::aes(x=x, y=y, color = col))
-    }
+    p1 = p1 + ggplot2::geom_line(data = plotting.data, ggplot2::aes(x=x, y=y, color = col))
+    # for(j in 1:length(density.list)){
+    #   p1 = p1 + ggplot2::geom_line(data = density.list[[j]], ggplot2::aes(x=x, y=y, color = col))
+    # }
     p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
 
-    plotting.data = reshape2::melt(residual.table, id.vars = "x")
-    p2 = ggplot2::ggplot(plotting.data, aes(x = x, y = value, color = variable)) +
+    p2 = ggplot2::ggplot(plotting.data.res, ggplot2::aes(x = x, y = value, color = variable)) +
       ggplot2::geom_point() +
       ggplot2::theme_bw() +
       ggplot2::ggtitle("Residuals")
 
-    plotting.data = reshape2::melt(sq.residual.table, id.vars = "x")
-    p3 = ggplot2::ggplot(plotting.data, aes(x = x, y = value, color = variable)) +
+    p3 = ggplot2::ggplot(plotting.data.sq.res, ggplot2::aes(x = x, y = value, color = variable)) +
       ggplot2::geom_point() +
       ggplot2::theme_bw() +
       ggplot2::ggtitle("Squared Residuals")
 
-    plotting.data = reshape2::melt(abs.residual.table, id.vars = "x")
-    p4 = ggplot2::ggplot(plotting.data, aes(x = x, y = value, color = variable)) +
+    p4 = ggplot2::ggplot(plotting.data.abs.res, ggplot2::aes(x = x, y = value, color = variable)) +
       ggplot2::geom_point() +
       ggplot2::theme_bw() +
       ggplot2::ggtitle("Absolute Residuals")
 
-   # Mean Squared Residuals
-   plotting.data = rowMeans(sq.residual.table[,2:ncol(sq.residual.table)])
-   plotting.data = data.frame("x" = sq.residual.table$x, "MeanModelResidual" = plotting.data)
-   p5 = ggplot2::ggplot(plotting.data, aes(x = x, y = MeanModelResidual)) +
-     ggplot2::geom_line() +
-     ggplot2::theme_bw() +
-     ggplot2::ggtitle("Mean Model Residual")
+    # Mean Squared Residuals
+    p5 = ggplot2::ggplot(plotting.data.mean.res, ggplot2::aes(x = x, y = MeanModelResidual)) +
+      ggplot2::geom_line() +
+      ggplot2::theme_bw() +
+      ggplot2::ggtitle("Mean Model Residual")
 
     # Printing the plot
     print(p1)
