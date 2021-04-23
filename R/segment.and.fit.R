@@ -72,76 +72,9 @@ segment.and.fit = function(
     x.adj <- (x - seg.start) + 1e-10
     sd.scale <- sd(x.adj)
     x.scale <- x.adj / sd.scale
-    mod = list()
 
-    # Uniform Distribution
-    tryCatch(
-      expr = {
-        mod$unif <- fitdistrplus::fitdist(
-          data = x.scale,
-          distr = "unif")
-        mod$unif$sd_scale <- sd.scale
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
-    # Attempt to fit a truncated normal distribution
-    # Wrap in a tryCatch incase MLE fails to converge
-    tryCatch(
-      expr = {
-        mod$tnorm <- fitdistrplus::fitdist(
-          data = x.scale,
-          distr = "tnorm",
-          fix.arg = list(a = 0, b = max(x.scale) + 1e-10),
-          start = list(mean = mean(x.scale), sd = sd(x.scale)),
-          optim.method="L-BFGS-B")
-        mod$tnorm$sd_scale <- sd.scale
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
-    # Truncated gamma distribution
-    tryCatch(
-      expr = {
-        mod$tgamma <- fitdistrplus::fitdist(
-          data = x.scale,
-          distr = "tgamma",
-          fix.arg = list(a = 0, b = max(x.scale)),
-          start = list(shape = 2, rate = 1),
-          # Set the lower bound for shape and rate params
-          lower = c(1, 0.5))
-        mod$tgamma$sd_scale <- sd.scale
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist tgamma for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
-    # Flipped Truncated gamma distribution
-    tryCatch(
-      expr = {
-        mod$tgamma_flip <- fitdistrplus::fitdist(
-          data = x.scale,
-          distr = "tgamma_flip",
-          fix.arg = list(b = max(x.scale) + 1e-10),
-          start = list(shape = 2, rate = 1),
-          # Set the lower bound for shape and rate params
-          lower = c(1, 0.5))
-        mod$tgamma_flip$sd_scale <- sd.scale
-      },
-      error = function(e) {
-        warning(sprintf("Error in fitdist tgamma_flip for segment [%d, %d]", seg.start, seg.end))
-        print(e)
-      }
-    )
-
+    # My thoughts are here, we can do a while loop (e.g, while end residuals > abs. residual threshold & we haven't surpassed the edge threshold),
+    # continue to shrink the edges. Here's where we also place a call to the fit.residuals function
     x.range = seg.start:seg.end
     x.range.adj <- (x - seg.start) + 1e-10
     # The bin size is now 1/sd_scale
@@ -149,84 +82,9 @@ segment.and.fit = function(
     # Multiple scale factor by this new bin size
     scalefactor <- length(x.scale) / sd.scale
 
-    fits = lapply(mod, function(m){
-      # params <- c(m$estimate, m$fix.arg)
+    mod = fit.continuous.distributions(x = x.scale, sd.scale = sd.scale, seg.start = seg.start, seg.end = seg.end, fit.normal.mixture = T, max.iterations = 500)
+    fits = extract.distribution.parameters(mod = mod, x = x.scale, scalefactor = scalefactor)
 
-      bin.data <- table(x.scale)
-
-      params <- c(as.list(m$estimate), as.list(m$fix.arg))
-      distname <- m$distname
-      ddistname <- paste0("d", distname)
-      call.params <- c(list(x = as.numeric(names(bin.data))), as.list(params))
-      dens <- do.call(ddistname, call.params)
-      dens.scale <- dens * scalefactor
-
-      fit.residuals <- (dens.scale - as.integer(bin.data))^2
-
-      data.frame(
-        "dist" = summary(m)$distname,
-        "loglikelihood" = summary(m)$loglik,
-        "aic" = summary(m)$aic,
-        "bic" = summary(m)$bic,
-        "mse" = mean(fit.residuals),
-        # Text representation of the parameters
-        params = dput.str(params)
-      )
-    })
-
-    if(fit.norm_mixture) {
-      # Fit a Normal Mixture model
-      maxiter <- 500
-      # Fit mixture model, silencing output
-      invisible(capture.output({
-        mixfit <- mixtools::normalmixEM(x.scale, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
-      }))
-      if((length(mixfit$all.loglik) - 1) >= maxiter) {
-        # EM did not converge. Don't use results.
-        mixfit <- NULL
-      } else {
-        mixfit.params <- length(mixfit$mu) * 3 # for lambda, mu, and sigma params
-
-        bin.data <- table(x.scale)
-        dens <- dnorm_mixture(as.numeric(names(bin.data)), mixfit)
-        dens.scale <- dens * scalefactor
-
-        fit.residuals <- (dens.scale - as.integer(bin.data))^2
-
-        mixfit.results <- data.frame(
-          "dist" = "norm_mixture",
-          "loglikelihood" = mixfit$loglik,
-          "aic" = -2 * mixfit$loglik + 2 * mixfit.params,
-          "bic" = -2 * mixfit$loglik + mixfit.params * log(length(x)),
-          "mse" = mean(fit.residuals),
-          "params" = dput.str(mixfit[c("mu", "sigma", "lambda")])
-        )
-        fits$norm_mixture <- mixfit.results
-      }
-    }
-
-    fits = do.call(rbind, fits)
-    fits$i = i
-
-    if(plot.diagnostic) {
-      filename = file.path(PARAMETERS$OUTPUTDIR, paste0(GENE, ".fit.segments.", i, ".pdf"))
-      pdf(filename, width = 10, height = 10)
-
-      par(mfrow = c(2,2))
-      plot.legend = names(mod)
-
-      fitdistrplus::denscomp(mod, legendtext = plot.legend)
-      fitdistrplus::qqcomp(mod, legendtext = plot.legend)
-      fitdistrplus::cdfcomp(mod, legendtext = plot.legend)
-      fitdistrplus::ppcomp(mod, legendtext = plot.legend)
-      dev.off()
-    }
-
-    # Add the normal mixture after fitdistrplus
-    if(fit.norm_mixture && !is.null(mixfit)) {
-      mod$norm_mixture <- mixfit
-      mod$norm_mixture$sd_scale <- sd.scale
-    }
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
     results = rbind(results, res.final)
