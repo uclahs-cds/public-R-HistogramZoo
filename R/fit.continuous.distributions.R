@@ -12,7 +12,7 @@ fit.continuous.distributions = function(
   tryCatch(
     expr = {
       mod$unif <- fitdistrplus::fitdist(
-        data = x.scale,
+        data = x,
         distr = "unif")
       mod$unif$sd_scale <- sd.scale
     },
@@ -26,10 +26,10 @@ fit.continuous.distributions = function(
   tryCatch(
     expr = {
       mod$tnorm <- fitdistrplus::fitdist(
-        data = x.scale,
+        data = x,
         distr = "tnorm",
-        fix.arg = list(a = 0, b = max(x.scale) + 1e-10),
-        start = list(mean = mean(x.scale), sd = sd(x.scale)),
+        fix.arg = list(a = 0, b = max(x) + 1e-10),
+        start = list(mean = mean(x), sd = sd(x)),
         optim.method="L-BFGS-B")
       mod$tnorm$sd_scale <- sd.scale
     },
@@ -44,9 +44,9 @@ fit.continuous.distributions = function(
   tryCatch(
     expr = {
       mod$tgamma <- fitdistrplus::fitdist(
-        data = x.scale,
+        data = x,
         distr = "tgamma",
-        fix.arg = list(a = 0, b = max(x.scale)),
+        fix.arg = list(a = 0, b = max(x)),
         start = list(shape = 2, rate = 1),
         # Set the lower bound for shape and rate params
         lower = c(1, 0.5))
@@ -62,9 +62,9 @@ fit.continuous.distributions = function(
   tryCatch(
     expr = {
       mod$tgamma_flip <- fitdistrplus::fitdist(
-        data = x.scale,
+        data = x,
         distr = "tgamma_flip",
-        fix.arg = list(b = max(x.scale) + 1e-10),
+        fix.arg = list(b = max(x) + 1e-10),
         start = list(shape = 2, rate = 1),
         # Set the lower bound for shape and rate params
         lower = c(1, 0.5))
@@ -77,7 +77,7 @@ fit.continuous.distributions = function(
   )
 
   # Mixture of Normals
-  if(fit.norm_mixture) {
+  if(fit.normal.mixture) {
     # Fit a Normal Mixture model
     maxiter <- max.iterations
     # Fit mixture model, silencing output

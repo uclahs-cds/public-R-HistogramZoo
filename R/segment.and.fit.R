@@ -85,6 +85,7 @@ segment.and.fit = function(
 
     mod = fit.continuous.distributions(x = x.scale, sd.scale = sd.scale, seg.start = seg.start, seg.end = seg.end, fit.normal.mixture = T, max.iterations = 500)
     fits = extract.distribution.parameters(mod = mod, x = x.scale, scalefactor = scalefactor)
+    fits$i = i
     # The loop ends here.
 
     # Adding the results to the table
