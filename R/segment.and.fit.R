@@ -150,7 +150,7 @@ segment.and.fit = function(
     scalefactor <- length(x.scale) / sd.scale
 
     fits = lapply(mod, function(m){
-      params <- c(m$estimate, m$fix.arg)
+      # params <- c(m$estimate, m$fix.arg)
 
       bin.data <- table(x.scale)
 

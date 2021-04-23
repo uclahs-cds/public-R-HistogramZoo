@@ -1,7 +1,7 @@
 ---
-title: "ConsensusPeaks"
-author: "Helen Zhu"
-output: 
+title: "The Software That Must Not Be Named"
+author: "Helen Zhu & Stefan Eng"
+output:
   rmarkdown:::html_vignette:
     toc: true
 vignette: >
@@ -18,22 +18,16 @@ library(ConsensusPeaks)
 ```
 
 # Introduction
-A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In such studies, it is often desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. It is easy to identify common peaks with few replicates by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. ConsensusPeaks is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments. 
+A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In such studies, it is often desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. It is easy to identify common peaks with few replicates by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. ConsensusPeaks is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments.
 
 # Methods
 
+
+### Segment & Fit
+Segment and Fit is a method that takes the union of the peaks and looks for local optima to segment the peaks into finer regions. Each of these regions is fit with a continuous distribution to characterize its shape.
+
 ### The Union Method
-The most commonly used method is taking the union of the regions identified across multiple samples.
-
-### Corces et al., 2018
-In [Corces et al., 2018](https://science.sciencemag.org/content/362/6413/eaav1898.abstract), a 'daisy chain' approach was implemented to merge peaks called on ATAC-seq data. In a set of overlapping peaks, the peak with the lowest p-value is used as the representative peak.
-
-### Dirichlet Process Gaussian Mixture Models
-In [unpublished work], a Gaussian mixture model (GMM) with a Dirichlet Process prior is fit on the pile-up of bed files. We are using the implementation of the GMM from the R package [DirichletProcess](https://cran.r-project.org/web/packages/dirichletprocess/index.html). 
-
-```{r pipeline, echo=FALSE, fig.cap="Dirichlet Process Gaussian Mixture Models", out.width = '60%'}
-knitr::include_graphics("DPDE4PM.png")
-```
+We included a method that returns the union of peaks.
 
 # Example
 
@@ -95,7 +89,7 @@ If you are anything like us, you would want to know what this looks like. Thus, 
 
 5) `OUTPUT.TAG` is the character string attached to the output file.
 
-6) `PLOT` is a logical indicator which if `TRUE` will create a plot in PDF format in the output directory. Otherwise, if `FALSE`, it will only return the ggplot object. 
+6) `PLOT` is a logical indicator which if `TRUE` will create a plot in PDF format in the output directory. Otherwise, if `FALSE`, it will only return the ggplot object.
 
 ```{r genomic_peak_visualization}
 
@@ -103,12 +97,12 @@ If you are anything like us, you would want to know what this looks like. Thus, 
 peaks.file = paste0(data.path, "/peaks.bed")
 
 peaks = read.table(
-  peaks.file, 
-  header = F, 
-  sep = "\t", 
+  peaks.file,
+  header = F,
+  sep = "\t",
   stringsAsFactors = F)
 
-colnames(peaks) = c("chr", "start", "end", "name", "score", "strand", "thickStart", "thickEnd", 
+colnames(peaks) = c("chr", "start", "end", "name", "score", "strand", "thickStart", "thickEnd",
                     "itemRGB", "blockCount", "blockSizes", "blockStarts", "sample")
 
 # Plotting Peaks
@@ -163,26 +157,14 @@ We wrote a function to fit a GMM with a Dirichlet Process prior on the pileup of
 4) `METHOD` One 'dpc', 'union', 'corces' indicating the method used to merge peaks.
 
 5) `GTF` The path to a GTF file, character string.
-  
-6) `DP.RESOLUTION` If the METHOD is 'dpc', specify the resolution of the provided PEAKS data.frame. This usually corresponds to the bin width chosen when the peaks are called, a positive integer.
 
-7) `DP.ITERATIONS` If the METHOD is 'dpc', specify the number of iterations used to fit the GMM, a positive integer.
+6) `PLOT.MERGED.PEAKS` Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 
-8) `DP.WEIGHT.THRESHOLD` If the METHOD is 'dpc', specify the minimum weight used to threshold the Gaussians. This value is required to be numeric and between 0 and 1.
+7) `OUTPUT.TAG` A character string added to the names of any output files.
 
-9) `DP.N.SD` If the METHOD is 'dpc', specify the standard deviation of the Gaussians required to identify peak boundaries, numeric value, above 0.
+8) `OUTPUTDIR` Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
 
-10) `DP.ALPHA.PRIORS` If the METHOD is 'dpc', specify the priors (alpha, beta) for the Gamma distribution from which the weight concentration prior is drawn, numeric vector of length 2
-
-11) `DP.SEED` A seed for reproducibility, integer above 0.
-
-12) `PLOT.MERGED.PEAKS` Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
-
-13) `OUTPUT.TAG` A character string added to the names of any output files.
-
-14) `OUTPUTDIR` Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
-
-15) `WRITE.OUTPUT` A logical value indicating whether the output table should be written. Otherwise, it is returned.
+9) `WRITE.OUTPUT` A logical value indicating whether the output table should be written. Otherwise, it is returned.
 
 ```{r dp_consensus_peaks, message = F}
 
@@ -190,7 +172,7 @@ results = ConsensusPeaks(
  GENES = c("ENSGXX", "ENSGYY"),
  PEAKS = peaks,
  RNA.OR.DNA = "rna",
- METHOD = "dpc",
+ METHOD = "sf",
  GTF = gtf,
  DP.RESOLUTION = 10,
  DP.ITERATIONS = 1000,
@@ -209,24 +191,12 @@ head(results[,1:13])
 
 Below are the results from the ENSGXX gene using the peaks we simulated earlier. On the left, the plot shows a histogram of counts sampled at `DP.RESOLUTION` base pairs in grey. This is the distribution of data observed by GMM. The black line indicates the fitted GMM. The colored lines show the individual Gaussians fitted, scaled by weight. The colored rectangles at the bottom show the retrieved peaks. On the right, the plot shows a bp resolution coverage of pileup of peaks in grey. This plot is used to diagnose issues with sampling at an unsuitable resolution.
 
-From these plots, we can see that using a GMM model with a Dirichlet Process prior does a reasonable job of recovering the distributions from which these peaks were drawn. The means of the two Gaussians are approximately at 80 bps and 130 bps with the peak on the right weighted approximately 3x the peak on the left (we drew 10 samples from the Gaussian(100, 10) and 30 samples from the Gaussian(150, 20)). 
+From these plots, we can see that using a GMM model with a Dirichlet Process prior does a reasonable job of recovering the distributions from which these peaks were drawn. The means of the two Gaussians are approximately at 80 bps and 130 bps with the peak on the right weighted approximately 3x the peak on the left (we drew 10 samples from the Gaussian(100, 10) and 30 samples from the Gaussian(150, 20)).
 
 ```{r transcriptomepeaks, echo=FALSE, out.width = '45%'}
 knitr::include_graphics("ENSGXX.MergedPeaks.png")
 knitr::include_graphics("ENSGXX.MergedPeaks.bp.png")
 ```
 
-## Parameter Tuning for the GMM Model
-
-### Alpha Priors
-
-The alpha parameter, or weight concentration parameter, is sampled from a Gamma prior with parameters alpha and beta rather than specified by the user in the DirichletProcess R package. We recommend tuning these parameters to fit the properties of your data. The default parameter settings are alpha = 5 and beta = 0.5 fits a sparse model. The three diagrams below use alpha and beta parameters of ($\alpha = 1$, $\beta = 1$), ($\alpha = 1$, $\beta = 2$) and ($\alpha = 0.5$, $\beta = 5$) respectively. As one can observe, there are significantly more Gaussians fitted to a lower weight concentration parameter. 
-
-```{r alpha prior tuning peaks, echo=FALSE, out.width = '30%'}
-knitr::include_graphics("ENSGXX.A1B1.MergedPeaks.png")
-knitr::include_graphics("ENSGXX.A1B2.MergedPeaks.png")
-knitr::include_graphics("ENSGXX.MergedPeaks.png")
-```
-
 ## P values
-Currently, p values per sample in the output file results from merging p values of peaks that overlap with the resulting peak using [Fisher's Method](). 
+Currently, p values per sample in the output file results from merging p values of peaks that overlap with the resulting peak using [Fisher's Method]().
