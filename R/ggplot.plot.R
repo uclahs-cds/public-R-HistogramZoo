@@ -1,6 +1,6 @@
 
 ggplot.plot = function(
-  outputdir,
+  output.dir,
   distr.plotting.data,
   geneinfo,
   bin.counts,
@@ -8,7 +8,7 @@ ggplot.plot = function(
   p
 ) {
 
-  filename = file.path(outputdir, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
+  filename = file.path(output.dir, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
   pdf(filename, width = 10, height = 10)
 
   p1 = ggplot2::ggplot(bin.counts, ggplot2::aes(x = start, y = Coverage)) +

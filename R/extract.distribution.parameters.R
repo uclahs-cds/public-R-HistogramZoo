@@ -1,21 +1,22 @@
 
+#   scalefactor
 extract.distribution.parameters = function(
   mod,
-  x,
-  scalefactor
+  x
 ){
-  
+
   extract.distribution.parameters.helper = function(m){
-    
+
     if(class(m) == "mixEM"){
       mixfit.params <- length(m$mu)*3 # for lambda, mu, and sigma params
-      
+
       # For Residuals
       bin.data <- table(x)
       dens <- dnorm_mixture(as.numeric(names(bin.data)), m)
-      dens.scale <- dens * scalefactor
-      fit.residuals <- (dens.scale - as.integer(bin.data))^2
-      
+      fit.residuals = (dens - as.integer(bin.data))^2
+      # dens.scale <- dens * scalefactor
+      # fit.residuals <- (dens.scale - as.integer(bin.data))^2
+
       results <- data.frame(
         "dist" = "norm_mixture",
         "loglikelihood" = m$loglik,
@@ -26,7 +27,7 @@ extract.distribution.parameters = function(
         stringsAsFactors = F
       )
     } else {
-      
+
       # Residuals
       bin.data <- table(x)
       params <- c(as.list(m$estimate), as.list(m$fix.arg))
@@ -34,10 +35,12 @@ extract.distribution.parameters = function(
       ddistname <- paste0("d", distname)
       call.params <- c(list(x = as.numeric(names(bin.data))), as.list(params))
       dens <- do.call(ddistname, call.params)
-      dens.scale <- dens * scalefactor
-      
-      fit.residuals <- (dens.scale - as.integer(bin.data))^2
-      
+      fit.residuals = (dens - as.integer(bin.data))^2
+
+      # dens.scale <- dens * scalefactor
+      # fit.residuals <- (dens.scale - as.integer(bin.data))^2
+
+
       data.frame(
         "dist" = summary(m)$distname,
         "loglikelihood" = summary(m)$loglik,
@@ -49,6 +52,6 @@ extract.distribution.parameters = function(
         stringsAsFactors = F)
     }
   }
-  
+
   do.call(rbind, lapply(mod, extract.distribution.parameters.helper))
 }

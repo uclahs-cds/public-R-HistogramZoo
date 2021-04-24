@@ -75,35 +75,26 @@ segment.and.fit = function(
   results = data.frame()
   models = list()
   for(i in 1:length(seg.gr)){
+
+    # while loop
+    # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     # Start the counts at 0 to fit the distributions better
-    x.adj <- (x - seg.start) + 1e-10
-    sd.scale <- sd(x.adj)
-    x.scale <- x.adj / sd.scale
-
-    # While loop
-    # My thoughts are here, we can do a while loop (e.g, while end residuals > abs. residual threshold & we haven't surpassed the edge threshold),
-    # continue to shrink the edges. Here's where we also place a call to the fit.residuals function
+    x.adjusted <- (x - seg.start) + 1e-10
     x.range = seg.start:seg.end
-    x.range.adj <- (x - seg.start) + 1e-10
-    # The bin size is now 1/sd_scale
-    x.range.scale <- x.range.adj / sd.scale
-    # Multiple scale factor by this new bin size
-    scalefactor <- length(x.scale) / sd.scale
+    x.range.adjusted <- (x - seg.start) + 1e-10
 
     mod = fit.continuous.distributions(
-      x = x.scale,
-      sd.scale = sd.scale,
+      x = x.adjusted,
       seg.start = seg.start,
       seg.end = seg.end,
       fit.normal.mixture = fit.mixture,
       max.iterations = 500)
     fits = extract.distribution.parameters(
       mod = mod,
-      x = x.scale,
-      scalefactor = scalefactor)
+      x = x.adjusted)
     fits$i = i
     # The loop ends here.
 
@@ -119,29 +110,25 @@ segment.and.fit = function(
     # Initializing
     seg.start <- GenomicRanges::start(seg.gr)[i]
     seg.end <- GenomicRanges::end(seg.gr)[i]
-    x = seg.start:seg.end
-    x.adj <- (x - seg.start) + 1e-10
+    x.range = seg.start:seg.end
+    x.range.adjusted <- (x - seg.start) + 1e-10
     # Extracting Model
     fti = models[[i]]
-    # The bin size is now 1/sd_scale
-    x.scale <- x.adj / fti$sd_scale
 
     if(class(fti) == "mixEM") {
       fit.data <- fti$x
-      scalefactor <- length(fit.data) / fti$sd_scale
+      scalefactor <- length(fit.data)
       distname <- "norm_mixture"
-      dens <- dnorm_mixture(x.scale, fti)
+      dens <- dnorm_mixture(x.range.adjusted, fti)
     } else {
       fit.data <- fti$data
-      # Adjust the scale of the segment
-      # Multiple scale factor by this new bin size
-      scalefactor <- length(fit.data) / fti$sd_scale
+      scalefactor <- length(fit.data)
 
       # Generating data
       params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
       distname <- fti$distname
       ddistname <- paste0("d", distname)
-      call.params <- c(list(x = x.scale), as.list(params))
+      call.params <- c(list(x = x.range.adjusted), as.list(params))
       dens <- do.call(ddistname, call.params)
     }
     dens.scale <- dens * scalefactor
@@ -155,9 +142,9 @@ segment.and.fit = function(
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
     distr.plotting.data = lapply(1:length(seg.gr), comput.fti)
-    # ggplot.plot(outputdir = output.dir, distr.plotting.data = distr.plotting.data, geneinfo=geneinfo, bin.counts=bin.counts, seg.gr=seg.gr, p=p)
+    # ggplot.plot(output.dir = output.dir, distr.plotting.data = distr.plotting.data, geneinfo=geneinfo, bin.counts=bin.counts, seg.gr=seg.gr, p=p)
     bpg.plot(
-      outputdir = output.dir,
+      output.dir = output.dir,
       distr.plotting.data = distr.plotting.data,
       geneinfo=geneinfo,
       bin.counts=bin.counts,

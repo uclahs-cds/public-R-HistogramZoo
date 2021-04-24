@@ -1,13 +1,19 @@
 fit.continuous.distributions = function(
   x,
-  sd.scale,
   seg.start,
   seg.end,
   fit.normal.mixture = T,
   max.iterations = 500
 ){
 
-  # Initializing
+  # Calculating initializing values for parameter estimation
+  x.mean = mean(x)
+  x.var = var(x)
+  x.sd = sd(x)
+  x.shape.initial = x.mean^2/x.var
+  x.rate.initial = x.mean/x.var
+
+  # Initializing list of models
   mod = list()
 
   # Uniform Distribution
@@ -16,7 +22,6 @@ fit.continuous.distributions = function(
       mod$unif <- fitdistrplus::fitdist(
         data = x,
         distr = "unif")
-      mod$unif$sd_scale <- sd.scale
     },
     error = function(e) {
       warning(sprintf("Error in fitdist unif for segment [%d, %d]", seg.start, seg.end))
@@ -31,9 +36,8 @@ fit.continuous.distributions = function(
         data = x,
         distr = "tnorm",
         fix.arg = list(a = 0, b = max(x) + 1e-10),
-        start = list(mean = mean(x), sd = sd(x)),
+        start = list(mean = x.mean, sd = x.sd),
         optim.method="L-BFGS-B")
-      mod$tnorm$sd_scale <- sd.scale
     },
     error = function(e) {
       warning(sprintf("Error in fitdist tnorm for segment [%d, %d]", seg.start, seg.end))
@@ -48,10 +52,9 @@ fit.continuous.distributions = function(
         data = x,
         distr = "tgamma",
         fix.arg = list(a = 0, b = max(x)),
-        start = list(shape = 2, rate = 1),
+        start = list(shape = x.shape.initial, rate = x.rate.initial),
         # Set the lower bound for shape and rate params
-        lower = c(1, 0.5))
-      mod$tgamma$sd_scale <- sd.scale
+        lower = c(1, 0.00001))
     },
     error = function(e) {
       warning(sprintf("Error in fitdist tgamma for segment [%d, %d]", seg.start, seg.end))
@@ -66,10 +69,9 @@ fit.continuous.distributions = function(
         data = x,
         distr = "tgamma_flip",
         fix.arg = list(b = max(x) + 1e-10),
-        start = list(shape = 2, rate = 1),
+        start = list(shape = x.shape.initial, rate = x.rate.initial),
         # Set the lower bound for shape and rate params
-        lower = c(1, 0.5))
-      mod$tgamma_flip$sd_scale <- sd.scale
+        lower = c(1, 0.00001))
     },
     error = function(e) {
       warning(sprintf("Error in fitdist tgamma_flip for segment [%d, %d]", seg.start, seg.end))
@@ -90,7 +92,6 @@ fit.continuous.distributions = function(
       mixfit <- NULL
     } else {
       mod$norm_mixture <- mixfit
-      mod$norm_mixture$sd_scale <- sd.scale
     }
   }
 
