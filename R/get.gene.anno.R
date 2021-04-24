@@ -1,7 +1,7 @@
-.get.gene.anno <- function(GENE, ANNOTATION) {
+.get.gene.anno <- function(gene, annotation) {
 
   # extract batch annotation
-  anno=ANNOTATION[ANNOTATION$gene == GENE,]
+  anno=annotation[annotation$gene == gene,]
   anno_unique=unique(anno)
 
   # extract information
@@ -24,7 +24,7 @@
   RNA2DNA = RNA2DNA[DNA2RNA > 0]
 
   # summarize result
-  batch_anno=list(anno=anno_unique, gene=GENE,chr=chr,strand=strand,left=left,right=right,
+  batch_anno=list(anno=anno_unique, gene=gene,chr=chr,strand=strand,left=left,right=right,
                   DNA2RNA=DNA2RNA, RNA2DNA=RNA2DNA, dna_length=dna_length,
                   exome_length=exome_length)
 }

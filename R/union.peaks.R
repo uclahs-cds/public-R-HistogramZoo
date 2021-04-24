@@ -1,54 +1,54 @@
 union.peaks = function(
-  GENE,
-  ANNOTATION,
-  PEAKS,
-  ALL.SAMPLES
+  gene,
+  annotation,
+  peaks,
+  all.samples
 ){
 
   # If the gene doesn't have peaks
-  if(!GENE %in% PEAKS$name){
-    warn.message = paste0("No Peaks are Found for ", GENE, " in PEAKS!")
+  if(!gene %in% peaks$name){
+    warn.message = paste0("No Peaks are Found for ", gene, " in peaks!")
     warning(warn.message, call. = TRUE, domain = NULL)
-    return(.generate.null.result(ALL.SAMPLES))
+    return(.generate.null.result(all.samples))
   }
 
-  # PEAKSGR
-  PEAKSGR = .retrieve.peaks.as.granges(PEAKS = PEAKS, GENE = GENE, DF = F)
+  # peaksgr
+  peaksgr = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = F)
 
   # Get Gene Information
-  GENEINFO = .get.gene.anno(GENE, ANNOTATION)
+  geneinfo = .get.gene.anno(gene, annotation)
 
   # Converting to RNA
-  GENEPEAKSGR = GenomicRanges::shift(PEAKSGR, -1*GENEINFO$left+1)
-  GenomicRanges::start(GENEPEAKSGR) = GENEINFO$DNA2RNA[GenomicRanges::start(GENEPEAKSGR)+1]
-  GenomicRanges::end(GENEPEAKSGR) = GENEINFO$DNA2RNA[GenomicRanges::end(GENEPEAKSGR)]
+  genepeaksgr = GenomicRanges::shift(peaksgr, -1*geneinfo$left+1)
+  GenomicRanges::start(genepeaksgr) = geneinfo$DNA2RNA[GenomicRanges::start(genepeaksgr)+1]
+  GenomicRanges::end(genepeaksgr) = geneinfo$DNA2RNA[GenomicRanges::end(genepeaksgr)]
 
   # Reduce Overlapping Peaks in the Same Sample
-  GENEPEAKSGR = GenomicRanges::reduce(GENEPEAKSGR)
-  S4Vectors::mcols(GENEPEAKSGR)$name = GENEINFO$gene
-  S4Vectors::mcols(GENEPEAKSGR)$i = 1:length(GENEPEAKSGR)
+  genepeaksgr = GenomicRanges::reduce(genepeaksgr)
+  S4Vectors::mcols(genepeaksgr)$name = geneinfo$gene
+  S4Vectors::mcols(genepeaksgr)$i = 1:length(genepeaksgr)
 
   # Generating Peaks
-  merged.peaks.genome = .rna.peaks.to.genome(GENEPEAKSGR, GENEINFO)
+  merged.peaks.genome = .rna.peaks.to.genome(genepeaksgr, geneinfo)
 
   # Return a Data Frame of Merged Peaks
   if(length(merged.peaks.genome) == 0){
     warning("No Peaks are Found for This Gene After Fitting!", call. = TRUE, domain = NULL)
-    OUTPUT.TABLE = .generate.null.result(ALL.SAMPLES)
+    output.table = .generate.null.result(all.samples)
   } else {
 
     # Creating a BED12 File
     GenomicRanges::start(merged.peaks.genome) = GenomicRanges::start(merged.peaks.genome)-1
-    PEAKS.FINAL = .bed6tobed12(MERGED.PEAKS = merged.peaks.genome, ID.COLS = c("name", "i"))
+    peaks.final = .bed6tobed12(merged.peaks = merged.peaks.genome, id.cols = c("name", "i"))
 
     # Merging P-Values
-    SAMPLE.PVAL = .merge.p(PEAKSGR, MERGED.PEAKS = merged.peaks.genome, ANNOTATION, ALL.SAMPLES, ID.COLS = c("name", "i"))
+    sample.pval = .merge.p(peaksgr, merged.peaks = merged.peaks.genome, annotation, all.samples, id.cols = c("name", "i"))
 
     # Write Output Tables & Return Files
-    OUTPUT.TABLE = merge(PEAKS.FINAL, SAMPLE.PVAL, by = "peak", all = T)
-    OUTPUT.TABLE = OUTPUT.TABLE[,colnames(OUTPUT.TABLE) != "peak"]
+    output.table = merge(peaks.final, sample.pval, by = "peak", all = T)
+    output.table = output.table[,colnames(output.table) != "peak"]
   }
 
-  return(OUTPUT.TABLE)
+  return(output.table)
 
 }

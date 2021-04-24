@@ -1,26 +1,26 @@
-.retrieve.peaks.as.granges = function(PEAKS, GENE, DF = F){
+.retrieve.peaks.as.granges = function(peaks, gene, return.df = F){
 
-  PEAKS = PEAKS[PEAKS$name == GENE,]
+  peaks = peaks[peaks$name == gene,]
 
-  # Creating a BED6 File
-  BED6 = data.frame(stringsAsFactors = F)
-  for(i in 1:nrow(PEAKS)){
+  # Creating a bed6 File
+  bed6 = data.frame(stringsAsFactors = F)
+  for(i in 1:nrow(peaks)){
     tmp = data.frame(
-      "chr" = PEAKS$chr[i],
-      "start" = PEAKS$start[i] + strtoi(strsplit(PEAKS$blockStarts[i], split = ",")[[1]]),
-      "end" = PEAKS$start[i] + strtoi(strsplit(PEAKS$blockStarts[i], split = ",")[[1]]) + strtoi(strsplit(PEAKS$blockSizes[i], split = ",")[[1]]),
-      "name" = PEAKS$name[i],
-      "score" = PEAKS$score[i],
-      "strand" = PEAKS$strand[i],
+      "chr" = peaks$chr[i],
+      "start" = peaks$start[i] + strtoi(strsplit(peaks$blockStarts[i], split = ",")[[1]]),
+      "end" = peaks$start[i] + strtoi(strsplit(peaks$blockStarts[i], split = ",")[[1]]) + strtoi(strsplit(peaks$blockSizes[i], split = ",")[[1]]),
+      "name" = peaks$name[i],
+      "score" = peaks$score[i],
+      "strand" = peaks$strand[i],
       "peak" = i,
-      "sample" = PEAKS$sample[i],
+      "sample" = peaks$sample[i],
       stringsAsFactors = F
     )
-    BED6 = rbind(BED6, tmp)
+    bed6 = rbind(bed6, tmp)
   }
-  if(DF){
-    return(BED6)
+  if(return.df){
+    return(bed6)
   } else {
-    return(GenomicRanges::makeGRangesFromDataFrame(BED6, keep.extra.columns = T))
+    return(GenomicRanges::makeGRangesFromDataFrame(bed6, keep.extra.columns = T))
   }
 }

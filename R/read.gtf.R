@@ -28,8 +28,8 @@ read.gtf <- function(gtf){
   temp <- temp[,select_col2]
   colnames(temp)=c("chr","feature","start","stop","strand","gene","transcript")
   temp$"feature" <- "exon"
-  gtf <- temp
+  annotation <- temp
 
   # return data
-  return(gtf)
+  return(annotation)
 }

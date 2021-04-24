@@ -1,4 +1,4 @@
-.rna.peaks.to.genome = function(merged.peaks.rna, GENEINFO){
+.rna.peaks.to.genome = function(merged.peaks.rna, geneinfo){
 
   # Return an empty GRanges if no peaks survive
   if(length(merged.peaks.rna) == 0){
@@ -7,11 +7,11 @@
 
   # Transferring to Genomic Coordinates
   merged.peaks.genome = merged.peaks.rna
-  GenomicRanges::end(merged.peaks.genome) = GENEINFO$RNA2DNA[GenomicRanges::end(merged.peaks.genome)]
-  GenomicRanges::start(merged.peaks.genome) = GENEINFO$RNA2DNA[GenomicRanges::start(merged.peaks.genome)]
+  GenomicRanges::end(merged.peaks.genome) = geneinfo$RNA2DNA[GenomicRanges::end(merged.peaks.genome)]
+  GenomicRanges::start(merged.peaks.genome) = geneinfo$RNA2DNA[GenomicRanges::start(merged.peaks.genome)]
 
   # Creating a GRanges object from the Annotation
-  anno_gr = GenomicRanges::makeGRangesFromDataFrame(GENEINFO$anno)
+  anno_gr = GenomicRanges::makeGRangesFromDataFrame(geneinfo$anno)
 
   # Filtering Out Introns
   merged.peaks.filtered.genome = GenomicRanges::GRanges()

@@ -1,15 +1,15 @@
-.merge.p = function(PEAKSGR, MERGED.PEAKS, ANNOTATION, ALL.SAMPLES, ID.COLS){
+.merge.p = function(peaksgr, merged.peaks, annotation, all.samples, id.cols){
 
   # Numeric Stability
-  PEAKSGR$score = ifelse(PEAKSGR$score == 0, 2e-16, PEAKSGR$score)
+  peaksgr$score = ifelse(peaksgr$score == 0, 2e-16, peaksgr$score)
 
   # Tag
-  MERGED.PEAKS$tag = apply(GenomicRanges::mcols(MERGED.PEAKS)[,ID.COLS], 1, function(x) paste(x, collapse = ":"))
+  merged.peaks$tag = apply(GenomicRanges::mcols(merged.peaks)[,id.cols], 1, function(x) paste(x, collapse = ":"))
 
   # Finding Overlaps
-  overlaps = GenomicRanges::findOverlaps(MERGED.PEAKS, PEAKSGR)
-  overlapping_peaks = PEAKSGR[S4Vectors::subjectHits(overlaps)]
-  overlapping_peaks$merged_peak = MERGED.PEAKS$tag[S4Vectors::queryHits(overlaps)]
+  overlaps = GenomicRanges::findOverlaps(merged.peaks, peaksgr)
+  overlapping_peaks = peaksgr[S4Vectors::subjectHits(overlaps)]
+  overlapping_peaks$merged_peak = merged.peaks$tag[S4Vectors::queryHits(overlaps)]
   overlapping_peaks$tag = paste0(overlapping_peaks$sample, ":", overlapping_peaks$merged_peak)
 
   overlapping_peaks = split(overlapping_peaks, overlapping_peaks$tag)
@@ -30,12 +30,12 @@
   pmat[is.na(pmat)] <- 1
 
   # Adding Extra Samples
-  missing.samples = setdiff(ALL.SAMPLES, colnames(pmat))
+  missing.samples = setdiff(all.samples, colnames(pmat))
   if(length(missing.samples) > 0){
     add.table = data.frame(matrix(1, nrow = nrow(pmat), ncol = length(missing.samples), dimnames = list(NULL, missing.samples)))
     pmat = cbind(pmat, add.table)
   }
-  pmat = pmat[,c("peak", ALL.SAMPLES), drop = FALSE]
+  pmat = pmat[,c("peak", all.samples), drop = FALSE]
 
   return(pmat)
 

@@ -6,6 +6,8 @@ fit.continuous.distributions = function(
   fit.normal.mixture = T,
   max.iterations = 500
 ){
+
+  # Initializing
   mod = list()
 
   # Uniform Distribution
@@ -38,7 +40,6 @@ fit.continuous.distributions = function(
       print(e)
     }
   )
-
 
   # Truncated gamma distribution
   tryCatch(
