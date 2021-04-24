@@ -99,7 +99,7 @@ ConsensusPeaks = function(
   if(method == "sf"){
     if(!is.logical(fit.mixture)){stop("Please provide a logical for fit.mixture")}
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
-    if(!is.integer(trim.step.size) | trim.step.size < 0){stop("Please provide a positive integer trim.step.size")}
+    if(!is.numeric(trim.step.size) | trim.step.size %% 1 > 0 | trim.step.size < 0){stop("Please provide a positive integer trim.step.size")}
     if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
   }
 
