@@ -33,52 +33,52 @@ simulate.gaussian.peaks = function(
   nsamples = 10,
   gene,
   gtf = NULL,
-  ANNOTATION = NULL,
+  annotation = NULL,
   seed = 123
   ){
 
   # Error checking
-  NGAUSSIANS = length(mu)
+  ngaussians = length(mu)
   params.lengths = c(length(mu), length(sd), length(extend.width), length(nsamples))
-  if(sum(params.lengths) != 4*NGAUSSIANS){stop("mu, sd, extend.width and nsamples need to be the same length")}
+  if(sum(params.lengths) != 4*ngaussians){stop("mu, sd, extend.width and nsamples need to be the same length")}
   if(!all(mu %% 1 == 0)| !all(mu >= 0)){stop("mu must be an integer vector where all elements are greater than 0")}
   if(!all(sd %% 1 == 0) | !all(sd > 0)){stop("sd must be an integer vector where all elements are greater than 0")}
   if(!all(extend.width %% 1 == 0) | !all(extend.width > 0)){stop("extend.width must be an integer vector where all elements are greater than 0")}
   if(!is.character(gene) | gene == "" | is.na(gene)){stop("gene must be character")}
   if(!(seed %% 1 == 0)){stop("seed must be integer")}
 
-  if(is.null(ANNOTATION)) {
+  if(is.null(annotation)) {
     # Creating annotation and geneinfo
-    ANNOTATION = read.gtf(gtf)
+    annotation = read.gtf(gtf)
   }
-  if(!gene %in% ANNOTATION$gene){stop("gene must be in the gtf file")}
-  geneINFO = .get.gene.anno(gene, ANNOTATION)
+  if(!gene %in% annotation$gene){stop("gene must be in the gtf file")}
+  geneinfo = .get.gene.anno(gene, annotation)
 
   # Initializing
   peaks = GenomicRanges::GRanges()
   set.seed(seed)
 
   # Generating Peaks
-  for(i in 1:NGAUSSIANS){
+  for(i in 1:ngaussians){
 
     # Creating RNA peaks
     pts = round(rnorm(nsamples[i], mean = mu[i], sd = sd[i]))
     sample_ids = paste0("Sample.", i, ".", 1:nsamples[i])
-    rna.peaks = GenomicRanges::GRanges(seqnames = geneINFO$chr, IRanges::IRanges(start = pts, end = pts), strand = geneINFO$strand)
+    rna.peaks = GenomicRanges::GRanges(seqnames = geneinfo$chr, IRanges::IRanges(start = pts, end = pts), strand = geneinfo$strand)
     GenomicRanges::mcols(rna.peaks)$sample = sample_ids
-    GenomicRanges::mcols(rna.peaks)$name = rep(geneINFO$gene, nsamples[i])
+    GenomicRanges::mcols(rna.peaks)$name = rep(geneinfo$gene, nsamples[i])
     rna.peaks = GenomicRanges::resize(rna.peaks, width = extend.width[i], fix = "center")
     GenomicRanges::start(rna.peaks) = ifelse(GenomicRanges::start(rna.peaks) < 1, 1, GenomicRanges::start(rna.peaks))
-    GenomicRanges::end(rna.peaks) = ifelse(GenomicRanges::end(rna.peaks) > geneINFO$exome_length, geneINFO$exome_length, GenomicRanges::end(rna.peaks))
+    GenomicRanges::end(rna.peaks) = ifelse(GenomicRanges::end(rna.peaks) > geneinfo$exome_length, geneinfo$exome_length, GenomicRanges::end(rna.peaks))
     peaks = c(peaks, rna.peaks)
 
   }
 
   # Creating DNA peaks
-  dna.peaks = .rna.peaks.to.genome(peaks, geneINFO)
+  dna.peaks = .rna.peaks.to.genome(peaks, geneinfo)
 
   # Creating BED12 peaks
-  dna.peaks.bed12  = .bed6tobed12(MERGED.PEAKS = dna.peaks, ID.COLS = "sample")
+  dna.peaks.bed12  = .bed6tobed12(merged.peaks = dna.peaks, id.cols = "sample")
   colnames(dna.peaks.bed12)[which(colnames(dna.peaks.bed12) == "peak")] = "sample"
 
   return(dna.peaks.bed12)

@@ -1,4 +1,7 @@
-.get.gene.anno <- function(gene, annotation) {
+.get.gene.anno <- function(
+  gene,
+  annotation
+) {
 
   # extract batch annotation
   anno=annotation[annotation$gene == gene,]

@@ -52,7 +52,7 @@ plot.gene.peaks = function(
   annotation = read.gtf(gtf)
 
   # Plotting Peaks
-  plotting.peaks = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, DF = T)
+  plotting.peaks = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = T)
 
   # Gene Bed
   gene.bed = annotation[annotation$gene == gene, c("chr", "start", "stop", "gene", "strand")]

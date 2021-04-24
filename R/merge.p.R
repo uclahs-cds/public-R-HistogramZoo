@@ -1,4 +1,10 @@
-.merge.p = function(peaksgr, merged.peaks, annotation, all.samples, id.cols){
+.merge.p = function(
+  peaksgr,
+  merged.peaks,
+  annotation,
+  all.samples,
+  id.cols
+){
 
   # Numeric Stability
   peaksgr$score = ifelse(peaksgr$score == 0, 2e-16, peaksgr$score)

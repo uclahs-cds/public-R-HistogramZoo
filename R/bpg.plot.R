@@ -1,5 +1,12 @@
 
-bpg.plot = function(outputdir, distr.plotting.data, geneinfo, bin.counts, seg.gr, p){
+bpg.plot = function(
+  outputdir,
+  distr.plotting.data,
+  geneinfo,
+  bin.counts,
+  seg.gr,
+  p
+) {
 
   # Remove once fixed
   seg.gr$p.value = runif(length(seg.gr))

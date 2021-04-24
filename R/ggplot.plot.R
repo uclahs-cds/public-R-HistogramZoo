@@ -1,5 +1,12 @@
 
-ggplot.plot = function(outputdir, distr.plotting.data, geneinfo, bin.counts, seg.gr, p){
+ggplot.plot = function(
+  outputdir,
+  distr.plotting.data,
+  geneinfo,
+  bin.counts,
+  seg.gr,
+  p
+) {
 
   filename = file.path(outputdir, paste0(geneinfo$gene, ".SegmentAndFit.pdf"))
   pdf(filename, width = 10, height = 10)
