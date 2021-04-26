@@ -24,7 +24,7 @@
 #' @param gtf Only if the rna.or.dna parameter is set to 'rna'. The path to a GTF file, character string.
 #' @param annotation Only if the rna.or.dna parameter is set to 'rna'. A user can choose to provide a custom annotation file created using the read.gtf function for software efficiency.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
-#' @param fit.mixture Only if the method parameter is set to 'sf'. A logical value indicating whether a mixture of normal distributions should be fitted.
+#' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM" (misxture of normals). "all" for all available distributions.
 #' @param trim.step.size Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim per iteration from either end of peak to maximize distribution fit quality.
 #' @param trim.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
@@ -68,7 +68,7 @@ ConsensusPeaks = function(
   gtf = NULL,
   annotation=NULL,
   diagnostic = F,
-  fit.mixture = T,
+  fit.mixtures = "all",
   trim.step.size = 10,
   trim.peak.threshold = 0.1,
   plot.merged.peaks = F,
@@ -97,7 +97,13 @@ ConsensusPeaks = function(
 
   # Check the parameters required for sf
   if(method == "sf"){
-    if(!is.logical(fit.mixture)){stop("Please provide a logical for fit.mixture")}
+    if(!is.character(fit.mixtures)){stop("Please provide a character vector for fit.mixture")}
+    if(fit.mixtures == "all"){
+      fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM")
+    } else {
+      fit.mixtures = intersect(fit.mixtures, c("unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM"))
+      if(length(fit.mixtures) == 0){stop("Please provide valid distributions")}
+    }
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
     if(!is.numeric(trim.step.size) | trim.step.size %% 1 > 0 | trim.step.size < 0){stop("Please provide a positive integer trim.step.size")}
     if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
@@ -143,7 +149,7 @@ ConsensusPeaks = function(
         output.dir = output.dir,
         plot.merged.peaks = plot.merged.peaks,
         diagnostic = diagnostic,
-        fit.mixture = fit.mixture)
+        fit.mixtures = fit.mixtures)
     }
     output.table = rbind(output.table, results)
   }
