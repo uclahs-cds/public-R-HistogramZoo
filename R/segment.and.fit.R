@@ -8,7 +8,7 @@
 #' @param output.dir Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
-#' @param fit.mixture Only if the method parameter is set to 'sf'. A logical value indicating whether a mixture of normal distributions should be fitted.
+#' @param fit.mixtures Only if the method parameter is set to 'sf'. A character vector indicating distributions to fit.
 #'
 #' @import extraDistr
 #' @export
@@ -21,7 +21,9 @@ segment.and.fit = function(
   output.dir,
   plot.merged.peaks,
   diagnostic,
-  fit.mixture
+  fit.mixtures,
+  trim.step.size,
+  trim.peak.threshold
 ){
 
   # If the gene doesn't have peaks
@@ -33,7 +35,7 @@ segment.and.fit = function(
 
   # Use the parameters if they are defined and default to FALSE if not defined
   plot.diagnostic <- diagnostic %||% FALSE
-  fit.norm_mixture <- fit.mixture %||% FALSE
+  fit.norm_mixture <- fit.mixtures %||% FALSE
 
   # peaksgr
   peaksgr = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = F)
@@ -74,29 +76,65 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
+  seg.update = data.frame("i" = 1:length(seg.gr), "start" = NA, "end" = NA)
   for(i in 1:length(seg.gr)){
 
-    # while loop
     # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
-    # Start the counts at 0 to fit the distributions better
     x.adjusted <- (x - seg.start) + 1e-10
     x.range = seg.start:seg.end
     x.range.adjusted <- (x - seg.start) + 1e-10
 
+    # Setting threshold for shrinking
+    peak.length = seg.end-seg.start+1
+    peak.length.threshold = floor((1-trim.peak.threshold)*peak.length)
+
+    # Fitting Uniform Distribution
     mod = fit.continuous.distributions(
       x = x.adjusted,
       seg.start = seg.start,
       seg.end = seg.end,
-      fit.normal.mixture = fit.mixture,
+      fit.mixtures = "unif",
       max.iterations = 500)
+
+    # Residuals
+    residuals = fit.residuals.threshold.unif(
+      x = x.adjusted,
+      mod = mod[['unif']],
+      plot.diagnostic.residuals = diagnostic,
+      output.dir = output.dir,
+      i = i,
+      gene = gene)
+
+    # Figuring this out
+    residual.sign = sign(residuals$Residuals)
+    residual.diff = diff(residual.sign)
+    lower.bound = which(residual.diff == -2)+1
+    upper.bound = which(residual.diff == 2)
+
+    peak.length.update = upper.bound - lower.bound + 1
+    if(peak.length.update < peak.length.threshold){
+      missing.length = peak.length.threshold - peak.length.update
+      upper.missing = peak.length - upper.bound
+      upper.bound = upper.bound + ceiling(upper.missing*missing.length/(upper.missing+lower.bound))
+      lower.bound = lower.bound - floor(lower.bound*missing.length/(upper.missing+lower.bound))
+    }
+
+    # Refit models
+    mod = fit.continuous.distributions(
+      x = x.adjusted,
+      seg.start = seg.start,
+      seg.end = seg.end,
+      fit.mixtures = fit.mixtures,
+      max.iterations = 500)
+
+    # Extracting Fit Data
     fits = extract.distribution.parameters(
       mod = mod,
       x = x.adjusted)
     fits$i = i
-    # The loop ends here.
 
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
@@ -105,44 +143,25 @@ segment.and.fit = function(
     models[[i]] = mod.final
   }
 
-  # Acquiring a Density Distribution
-  comput.fti <- function(i) { # models, seg.gr
-    # Initializing
-    seg.start <- GenomicRanges::start(seg.gr)[i]
-    seg.end <- GenomicRanges::end(seg.gr)[i]
-    x.range = seg.start:seg.end
-    x.range.adjusted <- (x - seg.start) + 1e-10
-    # Extracting Model
-    fti = models[[i]]
-
-    if(class(fti) == "mixEM") {
-      fit.data <- fti$x
-      scalefactor <- length(fit.data)
-      distname <- "norm_mixture"
-      dens <- dnorm_mixture(x.range.adjusted, fti)
-    } else {
-      fit.data <- fti$data
-      scalefactor <- length(fit.data)
-
-      # Generating data
-      params <- c(as.list(fti$estimate), as.list(fti$fix.arg))
-      distname <- fti$distname
-      ddistname <- paste0("d", distname)
-      call.params <- c(list(x = x.range.adjusted), as.list(params))
-      dens <- do.call(ddistname, call.params)
-    }
-    dens.scale <- dens * scalefactor
-    data.frame(
-      "x" = x,
-      "dens" = dens.scale,
-      "col" = distname,
-      row.names = NULL)
-  }
-
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
-    distr.plotting.data = lapply(1:length(seg.gr), comput.fti)
-    # ggplot.plot(output.dir = output.dir, distr.plotting.data = distr.plotting.data, geneinfo=geneinfo, bin.counts=bin.counts, seg.gr=seg.gr, p=p)
+    distr.plotting.data = lapply(1:length(seg.gr), function(i){
+      calculate.density(
+        m = models[[i]],
+        x = NULL,
+        seg.start = GenomicRanges::start(seg.gr)[i],
+        seg.end = GenomicRanges::end(seg.gr)[i],
+        stepsize = 1,
+        scale.density = T,
+        return.df = T)
+    })
+    # ggplot.plot(
+    #  output.dir = output.dir,
+    #  distr.plotting.data = distr.plotting.data,
+    #  geneinfo = geneinfo,
+    #  bin.counts = bin.counts,
+    #  seg.gr = seg.gr,
+    #  p = p)
     bpg.plot(
       output.dir = output.dir,
       distr.plotting.data = distr.plotting.data,
