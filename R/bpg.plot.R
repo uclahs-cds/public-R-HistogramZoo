@@ -21,7 +21,7 @@ bpg.plot = function(
   bin.counts = bin.counts[,c("start", "Coverage")]
   bin.counts$col = "coverage"
   bin.counts$i = n.distributions + 1
-  colnames(bin.counts) = c('x', 'dens', 'col', 'i')
+  colnames(bin.counts) = c('x', 'dens', 'dist', 'i')
 
   # Points
   points = bin.counts[bin.counts$x %in% p,]
@@ -32,9 +32,9 @@ bpg.plot = function(
   # Colours
   col.reference = structure(c("black", "orange", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
                             names = c("coverage", "tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
-  col.used = unique(lineplot.data[,c("col", "i")])
+  col.used = unique(lineplot.data[,c("dist", "i")])
   col.used = col.used[order(col.used$i),]
-  col.vec = col.reference[col.used$col]
+  col.vec = col.reference[col.used$dist]
 
   # Plotting
   sc = BoutrosLab.plotting.general::create.scatterplot(

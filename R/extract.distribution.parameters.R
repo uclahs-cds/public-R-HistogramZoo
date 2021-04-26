@@ -1,5 +1,3 @@
-
-#   scalefactor
 extract.distribution.parameters = function(
   mod,
   x

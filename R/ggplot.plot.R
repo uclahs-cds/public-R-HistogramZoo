@@ -21,7 +21,7 @@ ggplot.plot = function(
     ggplot2::annotate("rect", xmin=GenomicRanges::start(seg.gr), xmax=GenomicRanges::end(seg.gr), ymin=-1 , ymax=-0.1, alpha=0.5, color="black", fill=1:length(seg.gr))
 
   for(i in 1:length(distr.plotting.data)){
-    p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = col))
+    p1 = p1 + ggplot2::geom_line(data = distr.plotting.data[[i]], ggplot2::aes(x=x, y=dens, color = dist))
   }
   p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
   print(p1)

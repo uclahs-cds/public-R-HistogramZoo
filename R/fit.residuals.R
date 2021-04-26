@@ -1,21 +1,17 @@
 fit.residuals = function(
   x,
-  scalefactor,
   mod,
   plot.diagnostic.residuals = F,
-  outputdir,
+  output.dir,
   i,
   gene
 ){
 
   # Observed
   bin.data = table(x)
-  sample.size = length(x)
+  scalefactor = length(x)
 
   # Residual Table
-  # "Observed" = as.vector(bin.data)
-  # "x" = as.numeric(names(bin.data)),
-  # Observed
   bin.count = as.integer(bin.data)
   # x value
   bin.x = as.numeric(names(bin.data))
@@ -34,22 +30,21 @@ fit.residuals = function(
   # Expected
   for(m in mod){
 
-    if(class(m) == "mixEM") {
-      distname <- "norm_mixture"
-      dens <- dnorm_mixture(bin.x, m)
-    } else {
-      params <- c(as.list(m$estimate), as.list(m$fix.arg))
-      distname <- m$distname
-      ddistname <- paste0("d", distname)
-      call.params <- c(list(x = bin.x), as.list(params))
-      dens <- do.call(ddistname, call.params)
-    }
-    dens.scale <- dens * scalefactor
+    dens.scale = calculate.density(
+      m = m,
+      x = bin.x,
+      seg.start = NULL,
+      seg.end = NULL,
+      stepsize = 1,
+      scale.density = T,
+      return.df = F)
+
     fit.residuals = dens.scale - bin.count
-    fit.residuals = fit.residuals/sample.size
+    fit.residuals = fit.residuals/scalefactor
     # fit.residuals <- (dens.scale - bin.count)^2
 
     # Adding to table
+    distname = ifelse(class(m) == "mixEM", "mixEM", m$distname)
     residual.table[,distname] = fit.residuals
     sq.residual.table[,distname] = fit.residuals^2
     abs.residual.table[,distname] = abs(fit.residuals)
@@ -58,7 +53,7 @@ fit.residuals = function(
 
   if(plot.diagnostic.residuals){
 
-    filename = file.path(outputdir, paste0(gene, ".residuals.", i, ".pdf"))
+    filename = file.path(output.dir, paste0(gene, ".residuals.", i, ".pdf"))
     pdf(filename)
 
     plotting.data = do.call(rbind.data.frame, density.list)
@@ -74,15 +69,9 @@ fit.residuals = function(
     p1 = ggplot2::ggplot(density.table, ggplot2::aes(x = x, y = Observed)) +
       ggplot2::geom_step() +
       ggplot2::theme_bw() +
-      ggplot2::ggtitle(gene) +
+      ggplot2::ggtitle(paste0(gene, "\tSegment:", i)) +
       ggplot2::ylab("Coverage (at BP resolution)") +
       ggplot2::xlab("Scaled X")
-
-    p1 = p1 + ggplot2::geom_line(data = plotting.data, ggplot2::aes(x=x, y=y, color = col))
-    # for(j in 1:length(density.list)){
-    #   p1 = p1 + ggplot2::geom_line(data = density.list[[j]], ggplot2::aes(x=x, y=y, color = col))
-    # }
-    p1 = p1 + ggplot2::guides(col=ggplot2::guide_legend(title="Distribution"))
 
     p2 = ggplot2::ggplot(plotting.data.res, ggplot2::aes(x = x, y = value, color = variable)) +
       ggplot2::geom_point() +
