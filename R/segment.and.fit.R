@@ -69,6 +69,14 @@ segment.and.fit = function(
     geneinfo = geneinfo,
     m = 100)
 
+  # Extracting Uniform Segments on Segments
+  seg.gr.unif.correction = identify.uniform.segments(
+    seg.gr = seg.gr,
+    bin.counts = bin.counts,
+    trim.peak.threshold = trim.peak.threshold,
+    short.peak.threshold = 50
+  )
+
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
   peak.counts = GenomicRanges::start(peak.counts)
@@ -76,51 +84,15 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
-  seg.update = data.frame("i" = 1:length(seg.gr), "start" = NA, "end" = NA)
-  for(i in 1:length(seg.gr)){
+  for(i in 1:length(seg.gr.unif.correction)){
 
     # Extracting data
-    seg.start = GenomicRanges::start(seg.gr)[i]
-    seg.end = GenomicRanges::end(seg.gr)[i]
+    seg.start = GenomicRanges::start(seg.gr.unif.correction)[i]
+    seg.end = GenomicRanges::end(seg.gr.unif.correction)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     x.adjusted <- (x - seg.start) + 1e-10
     x.range = seg.start:seg.end
     x.range.adjusted <- (x - seg.start) + 1e-10
-
-    # Setting threshold for shrinking
-    peak.length = seg.end-seg.start+1
-    peak.length.threshold = floor((1-trim.peak.threshold)*peak.length)
-
-    # Fitting Uniform Distribution
-    mod = fit.continuous.distributions(
-      x = x.adjusted,
-      seg.start = seg.start,
-      seg.end = seg.end,
-      fit.mixtures = "unif",
-      max.iterations = 500)
-
-    # Residuals
-    residuals = fit.residuals.threshold.unif(
-      x = x.adjusted,
-      mod = mod[['unif']],
-      plot.diagnostic.residuals = diagnostic,
-      output.dir = output.dir,
-      i = i,
-      gene = gene)
-
-    # Figuring this out
-    residual.sign = sign(residuals$Residuals)
-    residual.diff = diff(residual.sign)
-    lower.bound = which(residual.diff == -2)+1
-    upper.bound = which(residual.diff == 2)
-
-    peak.length.update = upper.bound - lower.bound + 1
-    if(peak.length.update < peak.length.threshold){
-      missing.length = peak.length.threshold - peak.length.update
-      upper.missing = peak.length - upper.bound
-      upper.bound = upper.bound + ceiling(upper.missing*missing.length/(upper.missing+lower.bound))
-      lower.bound = lower.bound - floor(lower.bound*missing.length/(upper.missing+lower.bound))
-    }
 
     # Refit models
     mod = fit.continuous.distributions(
