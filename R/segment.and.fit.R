@@ -125,7 +125,9 @@ segment.and.fit = function(
         seg.end = GenomicRanges::end(seg.gr.unif.correction)[i],
         stepsize = 1,
         scale.density = T,
-        return.df = T)
+        return.df = T,
+        seg.gr.unif.correction = seg.gr.unif.correction,
+        results = results)
     })
     # ggplot.plot(
     #  output.dir = output.dir,
