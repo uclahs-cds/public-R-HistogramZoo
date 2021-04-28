@@ -22,8 +22,8 @@ segment.and.fit = function(
   plot.merged.peaks,
   diagnostic,
   fit.mixtures,
-  trim.step.size,
-  trim.peak.threshold
+  trim.peak.threshold,
+  peak.length.threshold
 ){
 
   # If the gene doesn't have peaks
@@ -74,7 +74,7 @@ segment.and.fit = function(
     seg.gr = seg.gr,
     bin.counts = bin.counts,
     trim.peak.threshold = trim.peak.threshold,
-    short.peak.threshold = 50
+    short.peak.threshold = peak.length.threshold
   )
 
   # Tiling Peaks
@@ -106,7 +106,7 @@ segment.and.fit = function(
     fits = extract.distribution.parameters(
       mod = mod,
       x = x.adjusted)
-    fits$i = i
+    fits$i = seg.gr.unif.correction$i[i]
 
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
@@ -117,12 +117,12 @@ segment.and.fit = function(
 
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
-    distr.plotting.data = lapply(1:length(seg.gr), function(i){
+    distr.plotting.data = lapply(1:length(seg.gr.unif.correction), function(i){
       calculate.density(
         m = models[[i]],
         x = NULL,
-        seg.start = GenomicRanges::start(seg.gr)[i],
-        seg.end = GenomicRanges::end(seg.gr)[i],
+        seg.start = GenomicRanges::start(seg.gr.unif.correction)[i],
+        seg.end = GenomicRanges::end(seg.gr.unif.correction)[i],
         stepsize = 1,
         scale.density = T,
         return.df = T)
@@ -143,11 +143,18 @@ segment.and.fit = function(
       p=p)
   }
 
+  # Formatting results table to include extra params
+  results$width = GenomicRanges::width(seg.gr.unif.correction)
+  results.dist = sapply(1:length(seg.gr), function(i) paste0(results$dist[results$i == i], collapse = ","))
+  results.params = sapply(1:length(seg.gr), function(i) paste0(results$params[results$i == i], collapse = ","))
+  results.mse = sapply(1:length(seg.gr), function(i){stats::weighted.mean(results$mse[results$i == i], results$width[results$i == i])})
+
   # Generating Peaks
   merged.peaks = seg.gr
-  S4Vectors::mcols(merged.peaks)$i = results$i
-  S4Vectors::mcols(merged.peaks)$dist = results$dist
-  S4Vectors::mcols(merged.peaks)$params = results$params
+  S4Vectors::mcols(merged.peaks)$i = 1:length(seg.gr)
+  S4Vectors::mcols(merged.peaks)$dist = results.dist
+  S4Vectors::mcols(merged.peaks)$params = results.params
+  S4Vectors::mcols(merged.peaks)$mse = results.mse
   S4Vectors::mcols(merged.peaks)$name = geneinfo$gene
   merged.peaks = .rna.peaks.to.genome(merged.peaks, geneinfo)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1

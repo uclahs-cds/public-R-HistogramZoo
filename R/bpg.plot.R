@@ -5,7 +5,9 @@ bpg.plot = function(
   geneinfo,
   bin.counts,
   seg.gr,
-  p
+  p,
+  seg.gr.unif.correction,
+  results
 ) {
 
   # Remove once fixed
@@ -32,6 +34,7 @@ bpg.plot = function(
   # Colours
   col.reference = structure(c("black", "orange", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
                             names = c("coverage", "tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
+  col.numeric = structure(1:5, names = c("tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
   col.used = unique(lineplot.data[,c("dist", "i")])
   col.used = col.used[order(col.used$i),]
   col.vec = col.reference[col.used$dist]
@@ -77,15 +80,42 @@ bpg.plot = function(
 
   # Adding p-values & segments
   ovl = GenomicRanges::findOverlaps(bins, seg.gr)
-  bins$p.value = NA
-  bins$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
+  # bins$p.value = NA
+  # bins$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
   bins$i = 0
   bins$i[S4Vectors::queryHits(ovl)] = seg.gr$i[S4Vectors::subjectHits(ovl)]
 
+  # Adding segment fits
+  ovl = GenomicRanges::findOverlaps(bins, seg.gr.unif.correction)
+  bins$dist = 0
+  bins$dist[S4Vectors::queryHits(ovl)] = col.numeric[results$dist[S4Vectors::subjectHits(ovl)]]
+  bins$mse = NA
+  bins$mse[S4Vectors::queryHits(ovl)] = results$mse[S4Vectors::subjectHits(ovl)]
+
   # Plotting Heatmap
   heatmap.data = data.frame(bins, stringsAsFactors = F)
-  heatmap.data = heatmap.data[,c("start", "p.value", "i")]
+  heatmap.data = heatmap.data[,c("start", "i", "dist", "mse")]
   heatmap.data = heatmap.data[order(heatmap.data$start),]
+
+  hm.dist = BoutrosLab.plotting.general::create.heatmap(
+    heatmap.data[,c("dist", "dist")],
+    clustering.method = 'none',
+    # Plotting Characteristics
+    axes.lwd = 1,
+    yaxis.tck = 0,
+    # Discrete Colours
+    at = seq(-0.5, 6, 1),
+    total.colours = 6,
+    colour.scheme = c( 'white', col.reference[2:6]),
+    # Adding lines for segments
+    force.grid.col = TRUE,
+    grid.col = TRUE,
+    col.lines = c(GenomicRanges::start(seg.gr.unif.correction), GenomicRanges::end(seg.gr.unif.correction)),
+    # Colourkey
+    # colourkey.labels.at = seq(0, length(seg.gr)+1, 1),
+    # colourkey.labels = seq(0, length(seg.gr)+1, 1),
+    print.colour.key = F
+  )
 
   hm.peaks = BoutrosLab.plotting.general::create.heatmap(
     heatmap.data[,c("i", "i")],
@@ -108,14 +138,14 @@ bpg.plot = function(
   )
 
   hm.pvalue = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("p.value", "p.value")],
+    heatmap.data[,c("mse", "mse")],
     clustering.method = 'none',
     # Plotting Characteristics
     axes.lwd = 1,
     yaxis.tck = 0,
     # Colours
     colour.scheme = c('dodgerblue4', 'cadetblue1'),
-    at = seq(0, 1, 0.001),
+    # at = seq(0, 1, 0.001), # fix this when scaled
     fill.colour = "white",
     # Adding lines for segments
     force.grid.col = TRUE,
@@ -181,8 +211,8 @@ bpg.plot = function(
     ),
     legend = list(
       colours = c('dodgerblue4', 'cadetblue1'),
-      labels = c(0,1),
-      title = expression(bold(underline('P Value'))),
+      labels = c(0,max(results$mse)),
+      title = expression(bold(underline('MSE'))),
       continuous = TRUE,
       height = 2,
       angle = -90,
@@ -216,8 +246,8 @@ bpg.plot = function(
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
-    plot.objects = list(sc, hm.peaks, hm.pvalue, hm.coverage),
-    plot.objects.heights = c(10, 1, 1, transcript.height),
+    plot.objects = list(sc, hm.dist, hm.peaks, hm.pvalue, hm.coverage),
+    plot.objects.heights = c(10, 1, 1, 1, transcript.height),
     y.spacing = -4,
     # Labels
     main = geneinfo$gene,

@@ -25,7 +25,7 @@
 #' @param annotation Only if the rna.or.dna parameter is set to 'rna'. A user can choose to provide a custom annotation file created using the read.gtf function for software efficiency.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
 #' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM" (misxture of normals). "all" for all available distributions.
-#' @param trim.step.size Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim per iteration from either end of peak to maximize distribution fit quality.
+#' @param peak.length.threshold Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs for the smallest peak with a fitted distribution. Can also be given as a proportion of the peak.
 #' @param trim.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 #' @param output.tag A character string added to the names of any output files.
@@ -52,7 +52,7 @@
 #' annotation = NULL,
 #' diagnostic = F,
 #' fit.mixture = T,
-#' trim.step.size = 10,
+#' peak.length.threshold,
 #' trim.peak.threshold = 0.1,
 #' plot.merged.peaks = F,
 #' output.tag = "TEST",
@@ -69,8 +69,8 @@ ConsensusPeaks = function(
   annotation=NULL,
   diagnostic = F,
   fit.mixtures = "all",
-  trim.step.size = 10,
-  trim.peak.threshold = 0.1,
+  peak.length.threshold = 50,
+  trim.peak.threshold = 0.5,
   plot.merged.peaks = F,
   output.tag = "",
   output.dir = ".",
@@ -105,7 +105,7 @@ ConsensusPeaks = function(
       if(length(fit.mixtures) == 0){stop("Please provide valid distributions")}
     }
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
-    if(!is.numeric(trim.step.size) | trim.step.size %% 1 > 0 | trim.step.size < 0){stop("Please provide a positive integer trim.step.size")}
+    if(!is.numeric(peak.length.threshold) |  peak.length.threshold < 0){stop("Please provide a positive integer or proportion for peak.length.threshold")}
     if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
   }
 
@@ -149,7 +149,9 @@ ConsensusPeaks = function(
         output.dir = output.dir,
         plot.merged.peaks = plot.merged.peaks,
         diagnostic = diagnostic,
-        fit.mixtures = fit.mixtures)
+        fit.mixtures = fit.mixtures,
+        trim.peak.threshold = trim.peak.threshold,
+        peak.length.threshold = peak.length.threshold)
     }
     output.table = rbind(output.table, results)
   }
