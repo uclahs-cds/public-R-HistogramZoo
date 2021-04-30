@@ -6,14 +6,19 @@ extract.distribution.parameters = function(
   extract.distribution.parameters.helper = function(m){
 
     if(class(m) == "mixEM"){
+
+      # Extracting Model Parameters
       mixfit.params <- length(m$mu)*3 # for lambda, mu, and sigma params
 
-      # For Residuals
+      # Density of Observed Data
       bin.data <- table(x)
+      scaled.observations = as.integer(bin.data)/sum(as.integer(bin.data))
+
+      # Calculating Density
       dens <- dnorm_mixture(as.numeric(names(bin.data)), m)
-      fit.residuals = (dens - as.integer(bin.data))^2
-      # dens.scale <- dens * scalefactor
-      # fit.residuals <- (dens.scale - as.integer(bin.data))^2
+
+      # Calculating Residuals
+      fit.residuals = (dens - scaled.observations)^2
 
       results <- data.frame(
         "dist" = "norm_mixture",
@@ -26,18 +31,19 @@ extract.distribution.parameters = function(
       )
     } else {
 
-      # Residuals
+      # Density of Observed Data
       bin.data <- table(x)
+      scaled.observations = as.integer(bin.data)/sum(as.integer(bin.data))
+
+      # Extracting Model Parameters & Calculating Density
       params <- c(as.list(m$estimate), as.list(m$fix.arg))
       distname <- m$distname
       ddistname <- paste0("d", distname)
       call.params <- c(list(x = as.numeric(names(bin.data))), as.list(params))
       dens <- do.call(ddistname, call.params)
-      fit.residuals = (dens - as.integer(bin.data))^2
 
-      # dens.scale <- dens * scalefactor
-      # fit.residuals <- (dens.scale - as.integer(bin.data))^2
-
+      # Calculating Residuals
+      fit.residuals = (dens - scaled.observations)^2
 
       data.frame(
         "dist" = summary(m)$distname,

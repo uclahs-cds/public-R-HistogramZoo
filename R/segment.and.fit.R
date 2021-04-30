@@ -9,6 +9,9 @@
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
 #' @param fit.mixtures Only if the method parameter is set to 'sf'. A character vector indicating distributions to fit.
+#' @param trim.peak.threshold See ConsensusPeaks
+#' @param trim.peak.stepsize See ConsensusPeaks
+#' @param residual.threshold See ConsensusPeaks
 #'
 #' @import extraDistr
 #' @export
@@ -23,7 +26,8 @@ segment.and.fit = function(
   diagnostic,
   fit.mixtures,
   trim.peak.threshold,
-  peak.length.threshold
+  trim.peak.stepsize,
+  residual.threshold
 ){
 
   # If the gene doesn't have peaks
@@ -34,8 +38,8 @@ segment.and.fit = function(
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  plot.diagnostic <- diagnostic %||% FALSE
-  fit.norm_mixture <- fit.mixtures %||% FALSE
+  # plot.diagnostic <- diagnostic %||% FALSE
+  # fit.norm_mixture <- fit.mixtures %||% FALSE
 
   # peaksgr
   peaksgr = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = F)
@@ -70,12 +74,12 @@ segment.and.fit = function(
     m = 100)
 
   # Extracting Uniform Segments on Segments
-  seg.gr.unif.correction = identify.uniform.segments(
-    seg.gr = seg.gr,
-    bin.counts = bin.counts,
-    trim.peak.threshold = trim.peak.threshold,
-    short.peak.threshold = peak.length.threshold
-  )
+  # seg.gr.unif.correction = identify.uniform.segments(
+  #   seg.gr = seg.gr,
+  #   bin.counts = bin.counts,
+  #   trim.peak.threshold = trim.peak.threshold,
+  #   short.peak.threshold = short.peak.threshold
+  # )
 
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
@@ -87,9 +91,10 @@ segment.and.fit = function(
   for(i in 1:length(seg.gr.unif.correction)){
 
     # Extracting data
-    seg.start = GenomicRanges::start(seg.gr.unif.correction)[i]
-    seg.end = GenomicRanges::end(seg.gr.unif.correction)[i]
+    seg.start = GenomicRanges::start(seg.gr)[i]
+    seg.end = GenomicRanges::end(seg.gr)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
+    # Adjusting X
     x.adjusted <- (x - seg.start) + 1e-10
     x.range = seg.start:seg.end
     x.range.adjusted <- (x - seg.start) + 1e-10
@@ -106,7 +111,21 @@ segment.and.fit = function(
     fits = extract.distribution.parameters(
       mod = mod,
       x = x.adjusted)
-    fits$i = seg.gr.unif.correction$i[i]
+    fits$i = i
+
+    # Extract Residuals
+    mod.optim = which(fits$aic == min(fits$aic))
+
+    if(fits$mse[mod.optim] > residual.threshold){
+      resids = fit.residuals(
+        x = x.scale,
+        mod = mod[[mod.optim]],
+        plot.diagnostic.residuals = F,
+        output.dir = output.dir,
+        i = i,
+        gene = gene
+        )
+    }
 
     # Adding the results to the table
     res.final = fits[fits$aic == min(fits$aic),]
