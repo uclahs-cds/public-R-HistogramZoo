@@ -32,7 +32,7 @@ bpg.plot = function(
   lineplot.data = rbind(lineplot.data, bin.counts)
 
   # Colours
-  col.reference = structure(c("black", "orange", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
+  col.reference = structure(c("black", "gold", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
                             names = c("coverage", "tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
   col.numeric = structure(1:5, names = c("tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
   col.used = unique(lineplot.data[,c("dist", "i")])
