@@ -82,7 +82,7 @@ segment.and.fit = function(
   models = list()
   fitted.seg.gr = GenomicRanges::GRanges()
   for(i in 1:length(seg.gr)){
-    cat(i , "\n")
+    # cat(i , "\n")
     # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
@@ -144,8 +144,8 @@ segment.and.fit = function(
       max.jc = max(refit.values)
       if(max.jc > jc.optim.multi.distr){
         optim.model = which(refit.values == max.jc)
-        seg.unif.start.final = todo[optim.model, "seg.start.values"]
-        seg.unif.end.final = todo[optim.model, "seg.end.values"]
+        seg.unif.start.final = todo[optim.model, "seg.start.values"][1]
+        seg.unif.end.final = todo[optim.model, "seg.end.values"][1]
         x.unif.final = peak.counts[peak.counts >= seg.unif.start.final & peak.counts <= seg.unif.end.final]
         x.unif.final.adjusted = x.unif.final - seg.unif.start.final + 1e-10
 
