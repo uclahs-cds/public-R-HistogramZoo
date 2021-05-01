@@ -20,12 +20,18 @@ extract.distribution.parameters = function(
       # Calculating Residuals
       fit.residuals = (dens - scaled.observations)^2
 
+      # Jaccard
+      overlap = pmin(a = scaled.observations, b = dens, na.rm = T)
+      union = pmax(a = scaled.observations, b = dens, na.rm = T)
+      jc = sum(overlap)/sum(union)
+
       results <- data.frame(
         "dist" = "norm_mixture",
         "loglikelihood" = m$loglik,
         "aic" = -2 * m$loglik + 2 * mixfit.params,
         "bic" = -2 * m$loglik + mixfit.params * log(length(x)),
         "mse" = mean(fit.residuals),
+        "jc" = jc,
         "params" = dput.str(m[c("mu", "sigma", "lambda")]),
         stringsAsFactors = F
       )
@@ -45,13 +51,18 @@ extract.distribution.parameters = function(
       # Calculating Residuals
       fit.residuals = (dens - scaled.observations)^2
 
+      # Jaccard
+      overlap = pmin(a = scaled.observations, b = dens, na.rm = T)
+      union = pmax(a = scaled.observations, b = dens, na.rm = T)
+      jc = sum(overlap)/sum(union)
+
       data.frame(
         "dist" = summary(m)$distname,
         "loglikelihood" = summary(m)$loglik,
         "aic" = summary(m)$aic,
         "bic" = summary(m)$bic,
         "mse" = mean(fit.residuals),
-        # Text representation of the parameters
+        "jc" = jc,
         params = dput.str(params),
         stringsAsFactors = F)
     }

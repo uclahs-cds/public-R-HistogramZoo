@@ -73,14 +73,6 @@ segment.and.fit = function(
     geneinfo = geneinfo,
     m = 100)
 
-  # Extracting Uniform Segments on Segments
-  # seg.gr.unif.correction = identify.uniform.segments(
-  #   seg.gr = seg.gr,
-  #   bin.counts = bin.counts,
-  #   trim.peak.threshold = trim.peak.threshold,
-  #   short.peak.threshold = short.peak.threshold
-  # )
-
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
   peak.counts = GenomicRanges::start(peak.counts)
@@ -88,8 +80,9 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
-  for(i in 1:length(seg.gr.unif.correction)){
-
+  fitted.seg.gr = GenomicRanges::GRanges()
+  for(i in 1:length(seg.gr)){
+    cat(i , "\n")
     # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
@@ -111,48 +104,93 @@ segment.and.fit = function(
     fits = extract.distribution.parameters(
       mod = mod,
       x = x.adjusted)
-    fits$i = i
 
     # Extract Residuals
     mod.optim = which(fits$aic == min(fits$aic))
+    jc.optim.multi.distr = fits$jc[mod.optim]
 
-    if(fits$mse[mod.optim] > residual.threshold){
-      resids = fit.residuals(
-        x = x.scale,
-        mod = mod[[mod.optim]],
-        plot.diagnostic.residuals = F,
-        output.dir = output.dir,
-        i = i,
-        gene = gene
-        )
+    if(jc.optim.multi.distr < residual.tolerance){
+
+      # Calculating Threshold
+      peak.length = seg.end - seg.start +1
+      shortest.peak =  trim.peak.threshold*peak.length
+      peak.shift.max = floor((peak.length - shortest.peak)/trim.peak.stepsize)*trim.peak.stepsize
+
+      # Initializing Refit
+      refit.values = c()
+      seg.start.values = seq(seg.start, seg.start + peak.shift.max, trim.peak.stepsize)
+      seg.end.values = seq(seg.end - peak.shift.max, seg.end, trim.peak.stepsize)
+      todo = expand.grid("seg.start.values" = seg.start.values, "seg.end.values" = seg.end.values)
+      todo = todo[todo$seg.end.values - todo$seg.start.values > shortest.peak,]
+
+      for (j in 1:nrow(todo)) {
+        seg.unif.start = todo[j, "seg.start.values"]
+        seg.unif.end = todo[j, "seg.end.values"]
+        x.unif = peak.counts[peak.counts >=  seg.unif.start & peak.counts <= seg.unif.end]
+        x.unif.adjusted = x.unif - seg.unif.start + 1e-10
+        mod.unif <- fit.continuous.distributions(
+          x = x.unif.adjusted,
+          seg.start = seg.unif.start,
+          seg.end = seg.unif.end,
+          fit.mixtures = "unif",
+          max.iterations = 500)
+        fits.tmp = extract.distribution.parameters(
+          mod = mod.unif,
+          x = x.unif.adjusted)
+        refit.values <- c(refit.values, fits.tmp$jc[1])
+      }
+
+      # Picking optimal fit & updating model
+      max.jc = max(refit.values)
+      if(max.jc > jc.optim.multi.distr){
+        optim.model = which(refit.values == max.jc)
+        seg.unif.start.final = todo[optim.model, "seg.start.values"]
+        seg.unif.end.final = todo[optim.model, "seg.end.values"]
+        x.unif.final = peak.counts[peak.counts >= seg.unif.start.final & peak.counts <= seg.unif.end.final]
+        x.unif.final.adjusted = x.unif.final - seg.unif.start.final + 1e-10
+
+        mod.final = fit.continuous.distributions(
+          x = x.unif.final.adjusted,
+          seg.start = seg.unif.start.final,
+          seg.end = seg.unif.end.final,
+          fit.mixtures = "unif",
+          max.iterations = 500)
+        res.final = extract.distribution.parameters(
+          mod = mod.final,
+          x = x.unif.final.adjusted)
+        seg.gr.i = GenomicRanges::GRanges(seqnames = geneinfo$chr,
+                                          IRanges::IRanges(start = seg.unif.start.final, end = seg.unif.end.final),
+                                          strand = geneinfo$strand)
+        mod.final = mod.final[[1]]
+      } else {
+        # Adding the results to the table
+        res.final = fits[fits$aic == min(fits$aic),]
+        mod.final = mod[[res.final$dist]]
+        seg.gr.i = seg.gr[i]
+      }
+    } else {
+      # Adding the results to the table
+      res.final = fits[fits$aic == min(fits$aic),]
+      mod.final = mod[[res.final$dist]]
+      seg.gr.i = seg.gr[i]
     }
-
-    # Adding the results to the table
-    res.final = fits[fits$aic == min(fits$aic),]
     results = rbind(results, res.final)
-    mod.final = mod[[res.final$dist]]
     models[[i]] = mod.final
+    fitted.seg.gr = c(fitted.seg.gr, seg.gr.i)
   }
 
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
-    distr.plotting.data = lapply(1:length(seg.gr.unif.correction), function(i){
+    distr.plotting.data = lapply(1:length(fitted.seg.gr), function(i){
       calculate.density(
         m = models[[i]],
         x = NULL,
-        seg.start = GenomicRanges::start(seg.gr.unif.correction)[i],
-        seg.end = GenomicRanges::end(seg.gr.unif.correction)[i],
+        seg.start = GenomicRanges::start(fitted.seg.gr)[i],
+        seg.end = GenomicRanges::end(fitted.seg.gr)[i],
         stepsize = 1,
         scale.density = T,
         return.df = T)
     })
-    # ggplot.plot(
-    #  output.dir = output.dir,
-    #  distr.plotting.data = distr.plotting.data,
-    #  geneinfo = geneinfo,
-    #  bin.counts = bin.counts,
-    #  seg.gr = seg.gr,
-    #  p = p)
     bpg.plot(
       output.dir = output.dir,
       distr.plotting.data = distr.plotting.data,
@@ -160,22 +198,16 @@ segment.and.fit = function(
       bin.counts=bin.counts,
       seg.gr=seg.gr,
       p=p,
-      seg.gr.unif.correction = seg.gr.unif.correction,
+      fitted.seg.gr = fitted.seg.gr,
       results = results)
   }
-
-  # Formatting results table to include extra params
-  results$width = GenomicRanges::width(seg.gr.unif.correction)
-  results.dist = sapply(1:length(seg.gr), function(i) paste0(results$dist[results$i == i], collapse = ","))
-  results.params = sapply(1:length(seg.gr), function(i) paste0(results$params[results$i == i], collapse = ","))
-  results.mse = sapply(1:length(seg.gr), function(i){stats::weighted.mean(results$mse[results$i == i], results$width[results$i == i])})
 
   # Generating Peaks
   merged.peaks = seg.gr
   S4Vectors::mcols(merged.peaks)$i = 1:length(seg.gr)
-  S4Vectors::mcols(merged.peaks)$dist = results.dist
-  S4Vectors::mcols(merged.peaks)$params = results.params
-  S4Vectors::mcols(merged.peaks)$mse = results.mse
+  S4Vectors::mcols(merged.peaks)$dist = results$dist
+  S4Vectors::mcols(merged.peaks)$params = results$params
+  S4Vectors::mcols(merged.peaks)$mse = results$mse
   S4Vectors::mcols(merged.peaks)$name = geneinfo$gene
   merged.peaks = .rna.peaks.to.genome(merged.peaks, geneinfo)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1

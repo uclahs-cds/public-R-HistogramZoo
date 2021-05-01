@@ -6,7 +6,7 @@ bpg.plot = function(
   bin.counts,
   seg.gr,
   p,
-  seg.gr.unif.correction,
+  fitted.seg.gr,
   results
 ) {
 
@@ -84,33 +84,35 @@ bpg.plot = function(
   # bins$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
   bins$i = 0
   bins$i[S4Vectors::queryHits(ovl)] = seg.gr$i[S4Vectors::subjectHits(ovl)]
-
-  # Adding segment fits
-  ovl = GenomicRanges::findOverlaps(bins, seg.gr.unif.correction)
-  bins$dist = 0
-  bins$dist[S4Vectors::queryHits(ovl)] = col.numeric[results$dist[S4Vectors::subjectHits(ovl)]]
   bins$mse = NA
   bins$mse[S4Vectors::queryHits(ovl)] = results$mse[S4Vectors::subjectHits(ovl)]
+  bins$jc = NA
+  bins$jc[S4Vectors::queryHits(ovl)] = results$jc[S4Vectors::subjectHits(ovl)]
+
+  # Adding segment fits
+  ovl = GenomicRanges::findOverlaps(bins, fitted.seg.gr)
+  bins$fitted.uniform = 0
+  bins$fitted.uniform[S4Vectors::queryHits(ovl)] = 1
 
   # Plotting Heatmap
   heatmap.data = data.frame(bins, stringsAsFactors = F)
-  heatmap.data = heatmap.data[,c("start", "i", "dist", "mse")]
+  heatmap.data = heatmap.data[,c("start", "i", "fitted.uniform", "jc", "mse")]
   heatmap.data = heatmap.data[order(heatmap.data$start),]
 
-  hm.dist = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("dist", "dist")],
+  hm.fu = BoutrosLab.plotting.general::create.heatmap(
+    heatmap.data[,c("fitted.uniform", "fitted.uniform")],
     clustering.method = 'none',
     # Plotting Characteristics
     axes.lwd = 1,
     yaxis.tck = 0,
     # Discrete Colours
-    at = seq(-0.5, 6, 1),
-    total.colours = 6,
-    colour.scheme = c( 'white', col.reference[2:6]),
+    at = seq(-0.5, 1.5, 1),
+    total.colours = 2,
+    colour.scheme = c( 'white', 'lightgrey'),
     # Adding lines for segments
     force.grid.col = TRUE,
     grid.col = TRUE,
-    col.lines = c(GenomicRanges::start(seg.gr.unif.correction), GenomicRanges::end(seg.gr.unif.correction)),
+    col.lines = c(GenomicRanges::start(fitted.seg.gr), GenomicRanges::end(fitted.seg.gr)),
     # Colourkey
     # colourkey.labels.at = seq(0, length(seg.gr)+1, 1),
     # colourkey.labels = seq(0, length(seg.gr)+1, 1),
@@ -137,15 +139,15 @@ bpg.plot = function(
     print.colour.key = F
   )
 
-  hm.pvalue = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("mse", "mse")],
+  hm.gof = BoutrosLab.plotting.general::create.heatmap(
+    heatmap.data[,c("jc", "jc")],
     clustering.method = 'none',
     # Plotting Characteristics
     axes.lwd = 1,
     yaxis.tck = 0,
     # Colours
     colour.scheme = c('dodgerblue4', 'cadetblue1'),
-    # at = seq(0, 1, 0.001), # fix this when scaled
+    at = seq(0, 1, 0.05), # fix this when scaled
     fill.colour = "white",
     # Adding lines for segments
     force.grid.col = TRUE,
@@ -204,6 +206,12 @@ bpg.plot = function(
       lwd = 0.5
     ),
     legend = list(
+      colours = 'lightgrey',
+      labels = 'Fitted',
+      title = expression(bold(underline('Distribution Coverage'))),
+      lwd = 0.5
+    ),
+    legend = list(
       colours = BoutrosLab.plotting.general::colour.gradient("firebrick3", length(seg.gr)),
       labels = as.character(1:length(seg.gr)),
       title = expression(bold(underline('Peaks'))),
@@ -211,8 +219,8 @@ bpg.plot = function(
     ),
     legend = list(
       colours = c('dodgerblue4', 'cadetblue1'),
-      labels = c(0,max(results$mse)),
-      title = expression(bold(underline('MSE'))),
+      labels = c(0, 1),
+      title = expression(bold(underline('Jaccard'))),
       continuous = TRUE,
       height = 2,
       angle = -90,
@@ -246,7 +254,7 @@ bpg.plot = function(
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
-    plot.objects = list(sc, hm.dist, hm.peaks, hm.pvalue, hm.coverage),
+    plot.objects = list(sc, hm.fu, hm.peaks, hm.gof, hm.coverage),
     plot.objects.heights = c(10, 1, 1, 1, transcript.height),
     y.spacing = -4,
     # Labels
