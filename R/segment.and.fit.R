@@ -11,7 +11,7 @@
 #' @param fit.mixtures Only if the method parameter is set to 'sf'. A character vector indicating distributions to fit.
 #' @param trim.peak.threshold See ConsensusPeaks
 #' @param trim.peak.stepsize See ConsensusPeaks
-#' @param residual.threshold See ConsensusPeaks
+#' @param residual.tolerance See ConsensusPeaks
 #'
 #' @import extraDistr
 #' @export
@@ -27,7 +27,7 @@ segment.and.fit = function(
   fit.mixtures,
   trim.peak.threshold,
   trim.peak.stepsize,
-  residual.threshold
+  residual.tolerance
 ){
 
   # If the gene doesn't have peaks

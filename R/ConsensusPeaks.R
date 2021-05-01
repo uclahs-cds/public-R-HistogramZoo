@@ -108,7 +108,7 @@ ConsensusPeaks = function(
       if(length(fit.mixtures) == 0){stop("Please provide valid distributions")}
     }
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
-    if(!is.numeric(residual.threshold) | residual.threshold < 0){stop("Please provide a positive numeric for thresholding residuals")}
+    if(!is.numeric(residual.tolerance) | residual.tolerance < 0){stop("Please provide a positive numeric for thresholding residuals")}
     if(!is.numeric(trim.peak.stepsize) |  trim.peak.stepsize < 0){stop("Please provide a positive integer or proportion for trim.peak.stepsize")}
     if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
   }
@@ -156,7 +156,7 @@ ConsensusPeaks = function(
         fit.mixtures = fit.mixtures,
         trim.peak.threshold = trim.peak.threshold,
         trim.peak.stepsize = trim.peak.stepsize,
-        residual.threshold = residual.threshold)
+        residual.tolerance = residual.tolerance)
     }
     output.table = rbind(output.table, results)
   }
