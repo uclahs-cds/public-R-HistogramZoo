@@ -69,7 +69,7 @@ fit.continuous.distributions = function(
   }
 
   # Flipped Truncated gamma distribution
-  if("tgamma_flipped" %in% fit.mixtures){
+  if("tgamma_flip" %in% fit.mixtures){
     tryCatch(
       expr = {
         mod$tgamma_flip <- fitdistrplus::fitdist(
