@@ -2,7 +2,7 @@ fit.continuous.distributions = function(
   x,
   seg.start,
   seg.end,
-  fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM"),
+  fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flip", "mixEM"),
   max.iterations = 500
 ){
 

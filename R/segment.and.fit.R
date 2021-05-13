@@ -158,9 +158,12 @@ segment.and.fit = function(
         res.final = extract.distribution.parameters(
           mod = mod.final,
           x = x.unif.final.adjusted)
-        seg.gr.i = GenomicRanges::GRanges(seqnames = geneinfo$chr,
-                                          IRanges::IRanges(start = seg.unif.start.final, end = seg.unif.end.final),
-                                          strand = geneinfo$strand)
+        seg.gr.i = GenomicRanges::GRanges(
+          seqnames = geneinfo$chr,
+          IRanges::IRanges(
+            start = seg.unif.start.final,
+            end = seg.unif.end.final),
+          strand = geneinfo$strand)
         mod.final = mod.final[[1]]
       } else {
         # Adding the results to the table

@@ -24,7 +24,7 @@
 #' @param gtf Only if the rna.or.dna parameter is set to 'rna'. The path to a GTF file, character string.
 #' @param annotation Only if the rna.or.dna parameter is set to 'rna'. A user can choose to provide a custom annotation file created using the read.gtf function for software efficiency.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
-#' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM" (misxture of normals). "all" for all available distributions.
+#' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flip", "mixEM" (misxture of normals). "all" for all available distributions.
 #' @param residual.tolerance Only if the method parameter is set to 'sf'. The maximum threshold for a sum of residuals requiring the peak to be refit with a uniform.
 #' @param trim.peak.stepsize Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim iteratively. Can also be given as a proportion of the peak.
 #' @param trim.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
@@ -102,9 +102,9 @@ ConsensusPeaks = function(
   if(method == "sf"){
     if(!is.character(fit.mixtures)){stop("Please provide a character vector for fit.mixture")}
     if(fit.mixtures == "all"){
-      fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM")
+      fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flip", "mixEM")
     } else {
-      fit.mixtures = intersect(fit.mixtures, c("unif", "tnorm", "tgamma", "tgamma_flipped", "mixEM"))
+      fit.mixtures = intersect(fit.mixtures, c("unif", "tnorm", "tgamma", "tgamma_flip", "mixEM"))
       if(length(fit.mixtures) == 0){stop("Please provide valid distributions")}
     }
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
