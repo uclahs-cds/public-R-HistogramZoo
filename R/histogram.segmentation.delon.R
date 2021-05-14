@@ -102,8 +102,9 @@ ftc.segments = function(obs, seg.size){
     # Updating bins
     if(test.i){
       bins = bins[!bins %in% bins[i]]
+      ct = 0
     } else {
-      i = i+1
+      ct = ct+1
     }
   }
   
@@ -116,4 +117,6 @@ set.seed(314)
 simulated.data = c(rnorm(100, 5, 1), rnorm(100, 12, 3))
 hist(simulated.data, breaks = 1:20)
 summary(simulated.data)
+
+# Make a plot
 
