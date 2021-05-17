@@ -204,8 +204,11 @@ ftc = function(x) {
   m
 }
 
-plot.segments = function(x) {
+plot.segments = function(x, s = NULL) {
   index = seq_along(x)
+  if(!is.null(s)) {
+    opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
+  }
   plot(x)
 
   minmax = local.minmax(x)
@@ -214,24 +217,29 @@ plot.segments = function(x) {
 
   points(seq_along(x)[min.ind], x[min.ind], col = "green")
   points(seq_along(x)[max.ind], x[max.ind], col = "red")
+
+  if(!is.null(s)) {
+    plot(x)
+    points(s, x[s], col = "orange")
+    par(opar)
+  }
 }
 
 set.seed(13)
 # Example 1, uniform
 x = obs.to.int.hist(runif(1000, min = 0, max = 50))
-plot.segments(x)
 s = ftc(x)
+plot.segments(x, s)
 
 #set.seed(13)
 # set.seed(26)
 # Example 2, normal dist
 x.norm = obs.to.int.hist(rnorm(1000) * 5)
-plot.segments(x.norm)
 s.norm = ftc(x.norm)
-s.norm
+plot.segments(x.norm, s.norm)
 
 # Example 2, messy mixture of gaussians and uniform
 x.norm.mix = obs.to.int.hist(c(rnorm(25, mean = 1), rnorm(10, mean = 5), c(runif(20, min = 3, max = 5))))
-plot.segments(x.norm.mix)
 s.norm.mix = ftc(x.norm.mix)
-s.norm.mix
+plot.segments(x.norm.mix, s.norm.mix)
+
