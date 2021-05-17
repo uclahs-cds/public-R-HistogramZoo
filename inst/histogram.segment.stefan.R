@@ -23,12 +23,98 @@ grenader = function(x, increasing = T){
   return(est / sum(est))
 }
 
-local.min = function(x) {
-  which(diff(sign(diff(x)))==2)
-}
+local.minmax = function(x) {
+  n <- length(x)
+  min.bool = find_peaks(-x, strict = FALSE)
+  max.bool = find_peaks(x, strict = FALSE)
+  rle_valleys <- rle(as.logical(min.bool))
+  rle_peaks <- rle(as.logical(max.bool))
 
-local.max = function(x) {
-  which(diff(sign(diff(x)))==-2)
+  minima_lengths <- rle_valleys$lengths[rle_valleys$values]
+  minima_end_indices <- cumsum(rle_valleys$lengths)[rle_valleys$values]
+  minima_start_indices <- minima_end_indices - minima_lengths + 1
+
+  maxima_lengths <- rle_peaks$lengths[rle_peaks$values]
+  maxima_end_indices <- cumsum(rle_peaks$lengths)[rle_peaks$values]
+  maxima_start_indices <- maxima_end_indices - maxima_lengths + 1
+
+  i.min <- minima_start_indices[minima_lengths == 2]
+  i.max <- maxima_start_indices[maxima_lengths == 2]
+
+  # Remove the local minima after the duplicated
+  min.bool[i.min + 1] <- FALSE
+  max.bool[i.max + 1] <- FALSE
+
+  valley_runs = minima_lengths > 2
+  valley_lengths = minima_lengths[valley_runs]
+  valley_start = minima_start_indices[valley_runs]
+  for(j in seq_len(sum(valley_runs))) {
+    start.i <- valley_start[j]
+    run_length <- valley_lengths[j]
+
+    # Remove all the internal local maxima
+    # Keep the end points since we need these to be local maxima, since
+    #   the next points will be local maxima
+    min.bool[(start.i + 1):(start.i + run_length - 2)] <- FALSE
+    max.bool[(start.i + 1):(start.i + run_length - 2)] <- FALSE
+    # Add a single local maxima point in between
+    max.i <- floor((2 * start.i + run_length - 1) / 2)
+    max.bool[max.i] <- TRUE
+    stopifnot(start.i < max.i && max.i < start.i + run_length - 1)
+  }
+
+  peak_runs = maxima_lengths > 2
+  peak_lengths = maxima_lengths[peak_runs]
+  peak_start = maxima_start_indices[peak_runs]
+  for(j in seq_len(sum(peak_runs))) {
+    start.i <- peak_start[j]
+    run_length <- peak_lengths[j]
+
+    # Remove all the internal local minima
+    # Keep the end points since we need these to be local minima, since
+    #   the next points will be local maxima
+    min.bool[(start.i + 1):(start.i + run_length - 2)] <- FALSE
+    max.bool[(start.i + 1):(start.i + run_length - 2)] <- FALSE
+    # Add a single local maxima point in between
+    min.i <- floor((2 * start.i + run_length - 1) / 2)
+    min.bool[min.i] <- TRUE
+    stopifnot(start.i < min.i && min.i < start.i + run_length - 1)
+  }
+
+  # Check that we don't have a min/max as the same point
+  if(max(as.integer(min.bool) + as.integer(max.bool)) > 1) {
+    browser()
+    stop("Overlapping min/max at the same point")
+  }
+  # stopifnot()
+  # Check that we alternate min and max
+  check.vec <- rep("none", length(min.bool))
+  check.vec[min.bool] <- "min"
+  check.vec[max.bool] <- "max"
+  check.rle <- rle(check.vec)
+  check.minmax.lengths <- check.rle$lengths[check.rle$values %in% c("min", "max")]
+  stopifnot(max(check.minmax.lengths) <= 1)
+
+  min.ind = seq_along(x)[min.bool]
+  max.ind = seq_along(x)[max.bool]
+
+  # Start with local maximum, add first point to minima
+  if(max.ind[1] < min.ind[1]) {
+    min.ind <- c(1, min.ind)
+  } else {
+    max.ind <- c(1, max.ind)
+  }
+
+  n.max <- length(max.ind)
+  n.min <- length(min.ind)
+  # End with local maximum, add last point as local minimum
+  if(max.ind[n.max] > min.ind[n.min]) {
+    min.ind <- c(min.ind, n)
+  } else {
+    max.ind <- c(max.ind, n)
+  }
+
+  list(min.ind = min.ind, max.ind = max.ind)
 }
 
 # Get the max relative entropy in the interval
@@ -55,9 +141,19 @@ monotone.cost = function(x, eps = 1, increasing = TRUE) {
 }
 
 ftc = function(x) {
+  minmax = local.minmax(x)
   # Add end points
-  m = c(1, local.min(x), length(x))
-  M = local.max(x)
+  #m = c(1, local.min(x), length(x))
+  #M = local.max(x)
+  m = minmax$min.ind
+  M = minmax$max.ind
+
+  if(m[1] > M[1]) {
+    minmax = local.minmax(-x)
+    m = minmax$min.ind
+    M = minmax$max.ind
+  }
+
   names(m) = NULL
   names(M) = NULL
   K = length(m)
@@ -112,27 +208,30 @@ plot.segments = function(x) {
   index = seq_along(x)
   plot(x)
 
-  tp = turnpoints(x)
-  min.ind = tp$pos[tp$pits]
-  max.ind = tp$pos[tp$peaks]
-  points(min.ind, x[min.ind], col = "red")
-  points(max.ind, x[max.ind], col = "green")
+  minmax = local.minmax(x)
+  min.ind = minmax$min.ind
+  max.ind = minmax$max.ind
+
+  points(seq_along(x)[min.ind], x[min.ind], col = "green")
+  points(seq_along(x)[max.ind], x[max.ind], col = "red")
 }
 
 set.seed(13)
 # Example 1, uniform
-x = obs.to.int.hist(runif(10, min = 0, max = 50))
+x = obs.to.int.hist(runif(1000, min = 0, max = 50))
 plot.segments(x)
 s = ftc(x)
 
+#set.seed(13)
+# set.seed(26)
 # Example 2, normal dist
 x.norm = obs.to.int.hist(rnorm(1000) * 5)
-s.norm = ftc(x.norm)
 plot.segments(x.norm)
+s.norm = ftc(x.norm)
 s.norm
 
 # Example 2, messy mixture of gaussians and uniform
-x.norm.mix = obs.to.int.hist(c(rnorm(100, mean = 1), rnorm(100, mean = 5), c(runif(20, min = 3, max = 5))))
-s.norm.mix = ftc(x.norm.mix)
+x.norm.mix = obs.to.int.hist(c(rnorm(25, mean = 1), rnorm(10, mean = 5), c(runif(20, min = 3, max = 5))))
 plot.segments(x.norm.mix)
-
+s.norm.mix = ftc(x.norm.mix)
+s.norm.mix
