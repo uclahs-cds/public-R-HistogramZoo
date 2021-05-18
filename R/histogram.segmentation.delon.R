@@ -1,122 +1,100 @@
-
-# For the Grenador estimator, Pool Adjacent Violators algorithm
-library(isotone)
-
-# Functions ---------------------------------------------------------------
-
-# Observed distribution
-rab = function(N, obs, a, b, seg.size){
-  
-  obs = obs[obs >= a & obs < b]
-  bk.pts = seq(a, b, seg.size)
-  dens = table(cut(obs, breaks = bk.pts))/N
-  dens = as.numeric(dens)
-  return(dens)
+# Take a vector of values and get the histogram for integer breaks
+obs.to.int.hist = function(x) {
+  table(cut(x, breaks = floor(min(x)):ceiling(max(x))))
 }
 
-# Grenander estimator, Pool Adjacent Violators
-pab = function(dens, increasing = T){
-  
+rel.entropy = function(h, p, a, b) {
+  interval = a:b
+  hab = sum(h[interval])
+  pab = sum(p[interval])
+  if(hab == pab){
+    return(0)
+  } else {
+    hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
+  }
+}
+
+# Estimate x with grenader estimator
+grenader = function(x, increasing = T){
   if(increasing){
-    est = isotone::gpava(z = 1:length(dens), y = dens)
+    est = isotone::gpava(z = 1:length(x), y = x)
     est = est$x
   } else {
-    est = isotone::gpava(z = 1:length(dens), y = rev(dens))
+    est = isotone::gpava(z = 1:length(x), y = rev(x))
     est = rev(est$x)
   }
-  
-  return(est)
+  N = ifelse(sum(x) == 0, 1, sum(x))
+  return(est / N)
 }
 
-# NFA
-nfa = function(rab., pab.){
-  
-  L = length(rab.)
-  coeff = L*(L+1)/2
-  
-  bnkp = c()
-  for(i in 1:length(rab.)){
-    rab.i = rab.[i]
-    pab.i = pab.[i]
-    
-    if(rab.i >= pab.i){
-      bnkp[i] = pbinom(N*rab.i, N, pab.i, lower.tail = F)
-    } else {
-      bnkp[i] = pbinom(N*(1-rab.i), N, (1-pab.i), lower.tail = F)
+local.min = function(x) {
+  which(diff(sign(diff(x)))==2)+1
+}
+
+local.max = function(x) {
+  which(diff(sign(diff(x)))==-2)+1
+}
+
+# Get the max relative entropy in the interval
+max.entropy = function(x, increasing = TRUE) {
+  N = ifelse(sum(x) == 0, 1, sum(x))
+  L = length(x)
+
+  # Prob distributions
+  h = x/N
+  p = grenader(x, increasing)
+
+  max.rel.entropy = -Inf
+  for(a in 1:L) {
+    for(b in a:L) {
+      max.rel.entropy = max(max.rel.entropy, rel.entropy(h, p, a, b), na.rm = TRUE)
     }
   }
-  bnkp = prod(bnkp)*coeff
-  
-  return(bnkp)
+  max.rel.entropy
 }
 
-# Testing for satisfaction of the unimodal hypothesis
-unimodal.hypothesis = function(rab. , epsilon = 1){
-  
+monotone.cost = function(x, eps = 1, increasing = TRUE) {
+  max.rel.entropy = max.entropy(x, increasing)
+  N = sum(x)
+  L = length(x)
+
+  max.rel.entropy * N - log(L * (L + 1) / 2 * eps)
+}
+
+ftc = function(x) {
+
+  # segments
+  lmin = which(find_peaks(-x, strict = F))
+  lmax = which(find_peaks(x, strict = F))
+  s = c(1, lmin, lmax, length(x) )
+  s = sort(unique(s))
+
   # Initializing
-  unimodal.binary = F
-  max.point = order(-rab.)
-  i = 1
-  thres = epsilon/2
+  K = length(s)
+  cost = c(-Inf)
 
-    while(!isTRUE(unimodal.binary) | i < length(max.point)){
-    
-    # Choosing midpoint to test
-    midpoint.to.test = max.point[i]
-    pab.increasing = pab(rab.[1:midpoint.to.test], increasing = T)
-    pab.decreasing = pab(rab.[midpoint.to.test:length(rab)], increasing = F)
-    
-    # NFA
-    nfa.increasing = nfa(rab. = rab.[1:midpoint.to.test], pab. = pab.increasing)
-    nfa.decreasing = nfa(rab. = rab.[midpoint.to.test:length(rab)], pab. = pab.decreasing)
-    
-    # Updating
-    unimodal.binary = (nfa.increasing < thres & nfa.decreasing < thres)
-    i = i+1
-    } 
-  
-  return(unimodal.binary)
-  
-}
-
-# Fine to Coarse Segmentation Algorithm
-ftc.segments = function(obs, seg.size){
-  
-  # Initializing segmentation
-  a = floor(min(obs))
-  b = ceiling(max(obs))
-  bins = seq(a, b, seg.size)
-  
-  # Generating density vector
-  rab. = rab(N = length(obs), obs = obs, a = a, b = b, seg.size = seg.size)
-  
-  # counter, this checks whether every test has been done
-  ct = 0
-  
-  while(ct < (length(bins)-2)){
-    
-    # Sampling a point
-    i = sample(2:(length(bins)-1), 1)
-    test.i = unimodal.hypothesis(rab.[bins[i-1]:bins[i+1]])
-    
-    # Updating bins
-    if(test.i){
-      bins = bins[!bins %in% bins[i]]
-      ct = 0
-    } else {
-      ct = ct+1
+  while(!all(cost > 0) & K > 2){
+    # Initialize
+    cost = c(-Inf)
+    # Loop through segments
+    for(i in 1:(K-2)){
+      # cat(i, " ", K , "\n")
+      inc.int = s[i]:s[i+1]
+      dec.int = s[i+1]:s[i+2]
+      cost_i = monotone.cost(x[inc.int], increasing = TRUE)
+      cost_d = monotone.cost(x[dec.int], increasing = FALSE)
+      cost[i] = min(cost_i, cost_d)
     }
+    # Removing minimum cost
+    min.cost.index = which.min(cost)
+    min.cost = cost[min.cost.index]
+    if(min.cost < 0){
+      s = s[-(min.cost.index+1)]
+    }
+    # Update
+    K = length(s)
   }
-  
+
+  # Return the final list of minima
+  s
 }
-
-
-# Testing -----------------------------------------------------------------
-
-set.seed(314)
-simulated.data = c(rnorm(100, 5, 1), rnorm(100, 12, 3))
-hist(simulated.data, breaks = 1:20)
-summary(simulated.data)
-
-# Make a plot
-
