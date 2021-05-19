@@ -9,7 +9,7 @@ plot.segments = function(x, s = NULL) {
   if(!is.null(s)) {
     opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
   }
-  plot(x)
+  plot(x, type = "h")
 
   minmax = local.minmax(x)
   min.ind = minmax$min.ind
@@ -19,7 +19,7 @@ plot.segments = function(x, s = NULL) {
   points(seq_along(x)[max.ind], x[max.ind], col = "red")
 
   if(!is.null(s)) {
-    plot(x)
+    plot(x, type = "h")
     points(s, x[s], col = "orange")
     par(opar)
   }
