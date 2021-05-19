@@ -1,14 +1,37 @@
 # Take a vector of values and get the histogram for integer breaks
 obs.to.int.hist = function(x) {
-  table(cut(x, breaks = floor(min(x)):ceiling(max(x))))
+  table(cut(x, breaks = (floor(min(x)) - 1):(ceiling(max(x)) + 1)))
+}
+
+# Plots the vector x of counts (or table) and the optional segment points s
+plot.segments = function(x, s = NULL) {
+  index = seq_along(x)
+  if(!is.null(s)) {
+    opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
+  }
+  plot(x)
+
+  minmax = local.minmax(x)
+  min.ind = minmax$min.ind
+  max.ind = minmax$max.ind
+
+  points(seq_along(x)[min.ind], x[min.ind], col = "green")
+  points(seq_along(x)[max.ind], x[max.ind], col = "red")
+
+  if(!is.null(s)) {
+    plot(x)
+    points(s, x[s], col = "orange")
+    par(opar)
+  }
 }
 
 #' Kullback-Leibler divergence (Relative Entropy)
 rel.entropy = function(h, p, a, b) {
   interval = a:b
-  hab = sum(h[interval])
-  pab = sum(p[interval])
-  if(pab == 0) {
+  # Round to prevent floating point issues
+  hab = round(sum(h[interval]), digits = 14)
+  pab = round(sum(p[interval]), digits = 14)
+  if(pab == 0 || pab == 1) {
     return(0)
   } else {
     hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
