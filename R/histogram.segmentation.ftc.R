@@ -1,9 +1,18 @@
-# Compute the relative entropy
+# Take a vector of values and get the histogram for integer breaks
+obs.to.int.hist = function(x) {
+  table(cut(x, breaks = floor(min(x)):ceiling(max(x))))
+}
+
+#' Kullback-Leibler divergence (Relative Entropy)
 rel.entropy = function(h, p, a, b) {
   interval = a:b
-  hab = sum(h[interval]) / sum(h)
+  hab = sum(h[interval])
   pab = sum(p[interval])
-  hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
+  if(pab == 0) {
+    return(0)
+  } else {
+    hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
+  }
 }
 
 # Estimate x with grenader estimator
@@ -15,8 +24,43 @@ grenader = function(x, increasing = T){
     est = isotone::gpava(z = 1:length(x), y = rev(x))
     est = rev(est$x)
   }
+  N = ifelse(sum(x) == 0, 1, sum(x))
+  return(est / N)
+}
 
-  return(est / sum(est))
+local.min = function(x) {
+  which(diff(sign(diff(x)))==2)+1
+}
+
+local.max = function(x) {
+  which(diff(sign(diff(x)))==-2)+1
+}
+
+#' Get the max relative entropy in the interval
+#' Computes H, the maximum H_{h,p}([a,b])
+max.entropy = function(x, increasing = TRUE) {
+  N = ifelse(sum(x) == 0, 1, sum(x))
+  L = length(x)
+
+  # Prob distributions
+  h = x/N
+  p = grenader(x, increasing)
+
+  max.rel.entropy = -Inf
+  for(a in 1:L) {
+    for(b in a:L) {
+      max.rel.entropy = max(max.rel.entropy, rel.entropy(h, p, a, b), na.rm = TRUE)
+    }
+  }
+  max.rel.entropy
+}
+
+monotone.cost = function(x, eps = 1, increasing = TRUE) {
+  max.rel.entropy = max.entropy(x, increasing)
+  N = sum(x)
+  L = length(x)
+
+  max.rel.entropy * N - log(L * (L + 1) / 2 * eps)
 }
 
 #' Finds the local minima m and maxima M such that
@@ -27,22 +71,15 @@ local.minmax = function(x) {
   min.bool = find_peaks(-x, strict = FALSE)
   max.bool = find_peaks(x, strict = FALSE)
   rle_valleys = rle(as.logical(min.bool))
-  rle_peaks = rle(as.logical(max.bool))
 
   minima_lengths = rle_valleys$lengths[rle_valleys$values]
   minima_end_indices = cumsum(rle_valleys$lengths)[rle_valleys$values]
   minima_start_indices = minima_end_indices - minima_lengths + 1
 
-  maxima_lengths = rle_peaks$lengths[rle_peaks$values]
-  maxima_end_indices = cumsum(rle_peaks$lengths)[rle_peaks$values]
-  maxima_start_indices = maxima_end_indices - maxima_lengths + 1
-
   i.min = minima_start_indices[minima_lengths == 2]
-  i.max = maxima_start_indices[maxima_lengths == 2]
 
   # Remove the local minima after the duplicated
   min.bool[i.min + 1] = FALSE
-  max.bool[i.max + 1] = FALSE
 
   # Modify the duplicated minima
   valley_runs = minima_lengths > 2
@@ -62,6 +99,13 @@ local.minmax = function(x) {
     max.bool[max.i] = TRUE
     stopifnot(start.i < max.i && max.i < start.i + run_length - 1)
   }
+
+  rle_peaks = rle(as.logical(max.bool))
+  maxima_lengths = rle_peaks$lengths[rle_peaks$values]
+  maxima_end_indices = cumsum(rle_peaks$lengths)[rle_peaks$values]
+  maxima_start_indices = maxima_end_indices - maxima_lengths + 1
+  i.max = maxima_start_indices[maxima_lengths == 2]
+  max.bool[i.max + 1] = FALSE
 
   # Modify the duplicated maxima
   peak_runs = maxima_lengths > 2
@@ -94,40 +138,24 @@ local.minmax = function(x) {
 
   min.ind = seq_along(x)[min.bool]
   max.ind = seq_along(x)[max.bool]
+  n.max = length(max.ind)
+  n.min = length(min.ind)
 
   # Start with local maximum, add first point to minima
-  if(max.ind[1] < min.ind[1]) {
+  if(n.max > 0 && max.ind[1] < min.ind[1]) {
     min.ind = c(1, min.ind)
   } else {
     max.ind = c(1, max.ind)
   }
 
-  n.max = length(max.ind)
-  n.min = length(min.ind)
   # End with local maximum, add last point as local minimum
-  if(max.ind[n.max] > min.ind[n.min]) {
+  if(n.max > 0 && max.ind[n.max] > min.ind[n.min]) {
     min.ind = c(min.ind, n)
   } else {
     max.ind = c(max.ind, n)
   }
 
   list(min.ind = min.ind, max.ind = max.ind)
-}
-
-# Get the max relative entropy in the interval
-# Computes H, the maximum H_{h,p}([a,b])
-max.entropy = function(x, increasing = TRUE) {
-  N = sum(x)
-  L = length(x)
-  p = grenader(x, increasing)
-
-  max.rel.entropy = -Inf
-  for(a in 1:L) {
-    for(b in a:L) {
-      max.rel.entropy = max(max.rel.entropy, rel.entropy(x, p, a, b), na.rm = TRUE)
-    }
-  }
-  max.rel.entropy
 }
 
 # Compute the monotone cost,
@@ -174,7 +202,6 @@ ftc = function(x) {
       }
 
       min.cost.index = which.min(costs)
-
       if(length(min.cost.index) > 0) {
         min.cost = costs[min.cost.index]
         if(min.cost < 0) {
@@ -204,4 +231,45 @@ ftc = function(x) {
   if(m[L] == n && x[m[L]] == 0) m[L] = n - 1
 
   m
+}
+
+ftc.helen = function(x) {
+
+  # segments
+  lmin = which(find_peaks(-x, strict = F))
+  lmax = which(find_peaks(x, strict = F))
+  s = c(1, lmin, lmax, length(x) )
+  s = sort(unique(s))
+
+  # Initializing
+  K = length(s)
+  cost = c(-Inf)
+  J = 1
+
+  #while(J < K) {
+    while(!all(cost > 0) & K > 2){
+      # Initialize
+      cost = -Inf
+      # Loop through segments
+      for(i in 1:(K - J - 1)){
+        inc.int = s[i]:s[i+1]
+        dec.int = s[i+1]:s[i+2]
+        cost_i = monotone.cost(x[inc.int], increasing = TRUE)
+        cost_d = monotone.cost(x[dec.int], increasing = FALSE)
+        cost[i] = min(cost_i, cost_d)
+      }
+      # Removing minimum cost
+      min.cost.index = which.min(cost)
+      min.cost = cost[min.cost.index]
+      if(length(min.cost) > 0 && min.cost < 0){
+        s = s[-(min.cost.index+1)]
+      }
+      # Update
+      K = length(s)
+    }
+  #  J <- J + 1
+  #}
+
+  # Return the final list of minima
+  s
 }
