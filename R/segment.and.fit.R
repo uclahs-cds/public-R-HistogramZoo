@@ -74,9 +74,11 @@ segment.and.fit = function(
   p = c()
   reduced.gr = GenomicRanges::reduce(genepeaksgr)
   for(i in 1:length(reduced.gr)){
+    # cat(i, "\n")
     p.start = GenomicRanges::start(reduced.gr)[i]
     p.end = GenomicRanges::end(reduced.gr)[i]
-    p.init = c(GenomicRanges::start(genepeaksgr), GenomicRanges::end(genepeaksgr))
+    tmp.gr = genepeaksgr[S4Vectors::subjectHits(GenomicRanges::findOverlaps(reduced.gr[i], genepeaksgr))]
+    p.init = c(GenomicRanges::start(tmp.gr), GenomicRanges::end(tmp.gr))
     p.init = c(p.start, p.init, p.end)
     p.init = sort(unique(p.init))-p.start+1
     x = peak.counts[peak.counts >= p.start & peak.counts <= p.end]
