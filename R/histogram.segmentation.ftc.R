@@ -256,13 +256,15 @@ ftc = function(x) {
   m
 }
 
-ftc.helen = function(x) {
+ftc.helen = function(x, s, eps) {
 
-  # segments
-  lmin = which(find_peaks(-x, strict = F))
-  lmax = which(find_peaks(x, strict = F))
-  s = c(1, lmin, lmax, length(x) )
-  s = sort(unique(s))
+  if(is.null(s)){
+    # segments
+    lmin = which(find_peaks(-x, strict = F))
+    lmax = which(find_peaks(x, strict = F))
+    s = c(1, lmin, lmax, length(x) )
+    s = sort(unique(s))
+  }
 
   # Initializing
   K = length(s)
@@ -274,11 +276,13 @@ ftc.helen = function(x) {
       # Initialize
       cost = -Inf
       # Loop through segments
-      for(i in 1:(K - J - 1)){
+      # for(i in 1:(K - J - 1)){
+      for(i in 1:(K-2)){
+        # cat(K, " ", i, "\n")
         inc.int = s[i]:s[i+1]
         dec.int = s[i+1]:s[i+2]
-        cost_i = monotone.cost(x[inc.int], increasing = TRUE)
-        cost_d = monotone.cost(x[dec.int], increasing = FALSE)
+        cost_i = monotone.cost(x[inc.int], eps = eps, increasing = TRUE)
+        cost_d = monotone.cost(x[dec.int], eps = eps, increasing = FALSE)
         cost[i] = min(cost_i, cost_d)
       }
       # Removing minimum cost

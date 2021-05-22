@@ -27,7 +27,8 @@ segment.and.fit = function(
   fit.mixtures,
   trim.peak.threshold,
   trim.peak.stepsize,
-  residual.tolerance
+  residual.tolerance,
+  eps
 ){
 
   # If the gene doesn't have peaks
@@ -63,8 +64,27 @@ segment.and.fit = function(
   bin.counts = data.frame(GenomicRanges::binnedAverage(bins, peak.coverage, "Coverage"), stringsAsFactors = F)
 
   # Segmenting & Determining which segments are peaks
-  smooth.coverage = smooth.spline( bin.counts$start, bin.counts$Coverage, spar = 0.3)
-  p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-7)
+  # smooth.coverage = smooth.spline( bin.counts$start, bin.counts$Coverage, spar = 0.3)
+  # p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-7)
+
+  # Tiling Peaks
+  peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
+  peak.counts = GenomicRanges::start(peak.counts)
+
+  p = c()
+  reduced.gr = GenomicRanges::reduce(genepeaksgr)
+  for(i in 1:length(reduced.gr)){
+    p.start = GenomicRanges::start(reduced.gr)[i]
+    p.end = GenomicRanges::end(reduced.gr)[i]
+    p.init = c(GenomicRanges::start(genepeaksgr), GenomicRanges::end(genepeaksgr))
+    p.init = c(p.start, p.init, p.end)
+    p.init = sort(unique(p.init))-p.start+1
+    x = peak.counts[peak.counts >= p.start & peak.counts <= p.end]
+    hist = obs.to.int.hist(x)
+    p.tmp = ftc.helen(hist, p.init, eps)
+    p.tmp = p.tmp+p.start-1
+    p = c(p, p.tmp)
+  }
 
   # Formatting
   seg.gr = generate.peaks.from.split.points(
@@ -72,10 +92,6 @@ segment.and.fit = function(
     genepeaksgr = genepeaksgr,
     geneinfo = geneinfo,
     m = 100)
-
-  # Tiling Peaks
-  peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
-  peak.counts = GenomicRanges::start(peak.counts)
 
   # Fitting different models
   results = data.frame()

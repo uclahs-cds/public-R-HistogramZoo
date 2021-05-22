@@ -74,6 +74,7 @@ ConsensusPeaks = function(
   residual.tolerance = 0.1,
   trim.peak.stepsize = 10,
   trim.peak.threshold = 0.8,
+  eps = 1,
   plot.merged.peaks = F,
   output.tag = "",
   output.dir = ".",
@@ -111,6 +112,7 @@ ConsensusPeaks = function(
     if(!is.numeric(residual.tolerance) | residual.tolerance < 0){stop("Please provide a positive numeric for thresholding residuals")}
     if(!is.numeric(trim.peak.stepsize) |  trim.peak.stepsize < 0){stop("Please provide a positive integer or proportion for trim.peak.stepsize")}
     if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
+    if(!is.numeric(eps)){stop("Please provide a numeric for eps")}
   }
 
   # Error checking, output parameters
@@ -156,7 +158,8 @@ ConsensusPeaks = function(
         fit.mixtures = fit.mixtures,
         trim.peak.threshold = trim.peak.threshold,
         trim.peak.stepsize = trim.peak.stepsize,
-        residual.tolerance = residual.tolerance)
+        residual.tolerance = residual.tolerance,
+        eps = eps)
     }
     output.table = rbind(output.table, results)
   }
