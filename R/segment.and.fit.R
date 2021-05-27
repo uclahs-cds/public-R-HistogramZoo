@@ -213,6 +213,7 @@ segment.and.fit = function(
         return.df = T)
     })
     bpg.plot(
+      output.tag = output.tag,
       output.dir = output.dir,
       distr.plotting.data = distr.plotting.data,
       geneinfo=geneinfo,
