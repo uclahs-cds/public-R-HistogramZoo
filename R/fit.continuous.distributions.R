@@ -92,15 +92,19 @@ fit.continuous.distributions = function(
     # Fit a Normal Mixture model
     maxiter <- max.iterations
     # Fit mixture model, silencing output
-    invisible(capture.output({
-      mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
-    }))
-    if((length(mixfit$all.loglik) - 1) >= maxiter) {
-      # EM did not converge. Don't use results.
-      mixfit <- NULL
-    } else {
-      mod$norm_mixture <- mixfit
-    }
+    out = tryCatch(
+      {
+      invisible(capture.output({
+        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
+      }))
+      mixfit
+      },
+      error = function(e) {
+        print(e)
+        return(NULL)
+      }
+    )
+    mod$norm_mixture <- out
   }
 
   return(mod)
