@@ -14,9 +14,19 @@ plot.segments = function(x, s = NULL) {
   minmax = local.minmax(x)
   min.ind = minmax$min.ind
   max.ind = minmax$max.ind
+  # min.ind = find_peaks(-x, strict = FALSE)
+  # max.ind = find_peaks(x, strict = TRUE)
+  # min.ind = local.min(x)
+  # max.ind = local.max(x)
+  both.ind = intersect(min.ind, max.ind)
+
+  # points(seq_along(x)[min.ind & !max.ind], x[min.ind & !max.ind], col = "green")
+  # points(seq_along(x)[max.ind & !min.ind], x[max.ind & !min.ind], col = "red")
+  # points(seq_along(x)[max.ind & min.ind], x[max.ind & min.ind], col = "orange")
 
   points(seq_along(x)[min.ind], x[min.ind], col = "green")
   points(seq_along(x)[max.ind], x[max.ind], col = "red")
+  points(seq_along(x)[both.ind], x[both.ind], col = "orange")
 
   if(!is.null(s)) {
     plot(x, type = "h")
@@ -90,95 +100,68 @@ monotone.cost = function(x, eps = 1, increasing = TRUE) {
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
 #' @export
 local.minmax = function(x) {
-  n = length(x)
-  min.bool = find_peaks(-x, strict = FALSE)
-  max.bool = find_peaks(x, strict = FALSE)
-  rle_valleys = rle(as.logical(min.bool))
+  x <- as.numeric(x)
+  stopifnot(length(x) > 1)
+  # Get the first non-equal index
+  n <- length(x)
+  min.ind <- NULL
+  max.ind <- NULL
+  #init <- x[1]
+  # If x = c(1,1,1,1,2,3) then j = 4, the first index before the run ends
 
-  minima_lengths = rle_valleys$lengths[rle_valleys$values]
-  minima_end_indices = cumsum(rle_valleys$lengths)[rle_valleys$values]
-  minima_start_indices = minima_end_indices - minima_lengths + 1
-
-  i.min = minima_start_indices[minima_lengths == 2]
-
-  # Remove the local minima after the duplicated
-  min.bool[i.min + 1] = FALSE
-
-  # Modify the duplicated minima
-  valley_runs = minima_lengths > 2
-  valley_lengths = minima_lengths[valley_runs]
-  valley_start = minima_start_indices[valley_runs]
-  for(j in seq_len(sum(valley_runs))) {
-    start.i = valley_start[j]
-    run_length = valley_lengths[j]
-
-    # Remove all the internal local maxima
-    # Keep the end points since we need these to be local maxima, since
-    #   the next points will be local maxima
-    min.bool[(start.i + 1):(start.i + run_length - 2)] = FALSE
-    max.bool[(start.i + 1):(start.i + run_length - 2)] = FALSE
-    # Add a single local maxima point in between
-    max.i = floor((2 * start.i + run_length - 1) / 2)
-    max.bool[max.i] = TRUE
-    stopifnot(start.i < max.i && max.i < start.i + run_length - 1)
+  # Trim the left and right side
+  rle_diff <- rle(diff(x))
+  # Return no min/max if all equal
+  if(length(rle_diff$lengths) <= 1) {
+    return(list(min.ind = 1, max.ind = NULL))
+  }
+  startIndex <- 1
+  endIndex <- n
+  if(rle_diff$values[1] == 0) {
+    startIndex <- rle_diff$lengths[1] + 1
+  }
+  if(length(rle_diff$lengths) > 2 && tail(rle_diff$values, n = 1) == 0) {
+    # Remove the last equal values
+    endIndex <- n - tail(rle_diff$lengths, n = 1)
+  }
+  x.trim <- x[startIndex:endIndex]
+  n.trim <- length(x.trim)
+  # Keep track if we last appended a min/max
+  min.appended <- NULL
+  # Check the first point for min/max
+  if(x.trim[1] < x.trim[2]) {
+    min.ind <- 1
+    min.appended <- TRUE
+  } else if (x.trim[1] > x.trim[2]) {
+    max.ind <- 1
+    min.appended <- FALSE
   }
 
-  rle_peaks = rle(as.logical(max.bool))
-  maxima_lengths = rle_peaks$lengths[rle_peaks$values]
-  maxima_end_indices = cumsum(rle_peaks$lengths)[rle_peaks$values]
-  maxima_start_indices = maxima_end_indices - maxima_lengths + 1
-  i.max = maxima_start_indices[maxima_lengths == 2]
-  max.bool[i.max + 1] = FALSE
-
-  # Modify the duplicated maxima
-  peak_runs = maxima_lengths > 2
-  peak_lengths = maxima_lengths[peak_runs]
-  peak_start = maxima_start_indices[peak_runs]
-  for(j in seq_len(sum(peak_runs))) {
-    start.i = peak_start[j]
-    run_length = peak_lengths[j]
-
-    # Remove all the internal local minima
-    # Keep the end points since we need these to be local minima, since
-    #   the next points will be local maxima
-    min.bool[(start.i + 1):(start.i + run_length - 2)] = FALSE
-    max.bool[(start.i + 1):(start.i + run_length - 2)] = FALSE
-    # Add a single local maxima point in between
-    min.i = floor((2 * start.i + run_length - 1) / 2)
-    min.bool[min.i] = TRUE
-    stopifnot(start.i < min.i && min.i < start.i + run_length - 1)
+  # Do the middle segment
+  for(i in seq(2, n.trim - 1)) {
+    # min.appended ensures that we alternate minima and maxima
+    if (!min.appended &&
+        ((x.trim[i - 1] > x.trim[i]) && (x.trim[i] <= x.trim[i + 1]) ||
+        (x.trim[i - 1] >= x.trim[i]) && (x.trim[i] < x.trim[i + 1]))) {
+      min.ind <- c(min.ind, i)
+      min.appended <- TRUE
+    } else if(min.appended &&
+              ((x.trim[i - 1] < x.trim[i]) && (x.trim[i] >= x.trim[i + 1]) ||
+              (x.trim[i - 1] <= x.trim[i]) && (x.trim[i] > x.trim[i + 1]))) {
+      max.ind <- c(max.ind, i)
+      min.appended <- FALSE
+    }
   }
 
-  # Check that we don't have a min/max as the same point
-  stopifnot(max(as.integer(min.bool) + as.integer(max.bool)) <= 1)
-  # Check that we alternate min and max
-  check.vec = rep("none", length(min.bool))
-  check.vec[min.bool] = "min"
-  check.vec[max.bool] = "max"
-  check.rle = rle(check.vec)
-  check.minmax.lengths = check.rle$lengths[check.rle$values %in% c("min", "max")]
-  stopifnot(max(check.minmax.lengths) <= 1)
-
-  min.ind = seq_along(x)[min.bool]
-  max.ind = seq_along(x)[max.bool]
-  n.max = length(max.ind)
-  n.min = length(min.ind)
-
-  # Start with local maximum, add first point to minima
-  if(n.max > 0 && max.ind[1] < min.ind[1]) {
-    min.ind = c(1, min.ind)
-  } else {
-    max.ind = c(1, max.ind)
+  if(x.trim[n.trim - 1] > x.trim[n.trim]) {
+    min.ind <- c(min.ind, n.trim)
+    min.appended <- TRUE
+  } else if (x.trim[n.trim - 1] < x.trim[n.trim]) {
+    max.ind <- c(max.ind, n.trim)
+    min.appended <- FALSE
   }
 
-  # End with local maximum, add last point as local minimum
-  if(n.max > 0 && max.ind[n.max] > min.ind[n.min]) {
-    min.ind = c(min.ind, n)
-  } else {
-    max.ind = c(max.ind, n)
-  }
-
-  list(min.ind = min.ind, max.ind = max.ind)
+  list(min.ind = min.ind + (startIndex - 1), max.ind = max.ind + (startIndex - 1))
 }
 
 # Compute the monotone cost,
