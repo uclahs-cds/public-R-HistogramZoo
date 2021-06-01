@@ -4,12 +4,12 @@ obs.to.int.hist = function(x) {
 }
 
 # Plots the vector x of counts (or table) and the optional segment points s
-plot.segments = function(x, s = NULL) {
+plot.segments = function(x, s = NULL, ...) {
   index = seq_along(x)
   if(!is.null(s)) {
     opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
   }
-  plot(x, type = "h")
+  plot(x, type = "h", ...)
 
   minmax = local.minmax(x)
   min.ind = minmax$min.ind
@@ -100,41 +100,41 @@ monotone.cost = function(x, eps = 1, increasing = TRUE) {
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
 #' @export
 local.minmax = function(x) {
-  x <- as.numeric(x)
+  x = as.numeric(x)
   stopifnot(length(x) > 1)
   # Get the first non-equal index
-  n <- length(x)
-  min.ind <- NULL
-  max.ind <- NULL
-  #init <- x[1]
+  n = length(x)
+  min.ind = NULL
+  max.ind = NULL
+  #init = x[1]
   # If x = c(1,1,1,1,2,3) then j = 4, the first index before the run ends
 
   # Trim the left and right side
-  rle_diff <- rle(diff(x))
+  rle_diff = rle(diff(x))
   # Return no min/max if all equal
   if(length(rle_diff$lengths) <= 1) {
     return(list(min.ind = 1, max.ind = NULL))
   }
-  startIndex <- 1
-  endIndex <- n
+  startIndex = 1
+  endIndex = n
   if(rle_diff$values[1] == 0) {
-    startIndex <- rle_diff$lengths[1] + 1
+    startIndex = rle_diff$lengths[1] + 1
   }
   if(length(rle_diff$lengths) > 2 && tail(rle_diff$values, n = 1) == 0) {
     # Remove the last equal values
-    endIndex <- n - tail(rle_diff$lengths, n = 1)
+    endIndex = n - tail(rle_diff$lengths, n = 1)
   }
-  x.trim <- x[startIndex:endIndex]
-  n.trim <- length(x.trim)
+  x.trim = x[startIndex:endIndex]
+  n.trim = length(x.trim)
   # Keep track if we last appended a min/max
-  min.appended <- NULL
+  min.appended = NULL
   # Check the first point for min/max
   if(x.trim[1] < x.trim[2]) {
-    min.ind <- 1
-    min.appended <- TRUE
+    min.ind = 1
+    min.appended = TRUE
   } else if (x.trim[1] > x.trim[2]) {
-    max.ind <- 1
-    min.appended <- FALSE
+    max.ind = 1
+    min.appended = FALSE
   }
 
   # Do the middle segment
@@ -143,22 +143,22 @@ local.minmax = function(x) {
     if (!min.appended &&
         ((x.trim[i - 1] > x.trim[i]) && (x.trim[i] <= x.trim[i + 1]) ||
         (x.trim[i - 1] >= x.trim[i]) && (x.trim[i] < x.trim[i + 1]))) {
-      min.ind <- c(min.ind, i)
-      min.appended <- TRUE
+      min.ind = c(min.ind, i)
+      min.appended = TRUE
     } else if(min.appended &&
               ((x.trim[i - 1] < x.trim[i]) && (x.trim[i] >= x.trim[i + 1]) ||
               (x.trim[i - 1] <= x.trim[i]) && (x.trim[i] > x.trim[i + 1]))) {
-      max.ind <- c(max.ind, i)
-      min.appended <- FALSE
+      max.ind = c(max.ind, i)
+      min.appended = FALSE
     }
   }
 
   if(x.trim[n.trim - 1] > x.trim[n.trim]) {
-    min.ind <- c(min.ind, n.trim)
-    min.appended <- TRUE
+    min.ind = c(min.ind, n.trim)
+    min.appended = TRUE
   } else if (x.trim[n.trim - 1] < x.trim[n.trim]) {
-    max.ind <- c(max.ind, n.trim)
-    min.appended <- FALSE
+    max.ind = c(max.ind, n.trim)
+    min.appended = FALSE
   }
 
   list(min.ind = min.ind + (startIndex - 1), max.ind = max.ind + (startIndex - 1))
@@ -239,12 +239,12 @@ ftc = function(x) {
   m
 }
 
-ftc.helen = function(x, s, eps) {
-
+ftc.helen = function(x, s = NULL, eps = 1) {
   if(is.null(s)){
     # segments
-    lmin = which(find_peaks(-x, strict = F))
-    lmax = which(find_peaks(x, strict = F))
+    minmax = local.minmax(x)
+    lmin = minmax$max.ind
+    lmax = minmax$min.ind
     s = c(1, lmin, lmax, length(x) )
     s = sort(unique(s))
   }
@@ -277,7 +277,7 @@ ftc.helen = function(x, s, eps) {
       # Update
       K = length(s)
     }
-  #  J <- J + 1
+  #  J = J + 1
   #}
 
   # Return the final list of minima
