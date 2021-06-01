@@ -138,18 +138,20 @@ local.minmax = function(x) {
   }
 
   # Do the middle segment
-  for(i in seq(2, n.trim - 1)) {
-    # min.appended ensures that we alternate minima and maxima
-    if (!min.appended &&
-        ((x.trim[i - 1] > x.trim[i]) && (x.trim[i] <= x.trim[i + 1]) ||
-        (x.trim[i - 1] >= x.trim[i]) && (x.trim[i] < x.trim[i + 1]))) {
-      min.ind = c(min.ind, i)
-      min.appended = TRUE
-    } else if(min.appended &&
-              ((x.trim[i - 1] < x.trim[i]) && (x.trim[i] >= x.trim[i + 1]) ||
-              (x.trim[i - 1] <= x.trim[i]) && (x.trim[i] > x.trim[i + 1]))) {
-      max.ind = c(max.ind, i)
-      min.appended = FALSE
+  if(n.trim > 3) {
+    for(i in seq(2, n.trim - 1)) {
+      # min.appended ensures that we alternate minima and maxima
+      if (!min.appended &&
+          ((x.trim[i - 1] > x.trim[i]) && (x.trim[i] <= x.trim[i + 1]) ||
+           (x.trim[i - 1] >= x.trim[i]) && (x.trim[i] < x.trim[i + 1]))) {
+        min.ind = c(min.ind, i)
+        min.appended = TRUE
+      } else if(min.appended &&
+                ((x.trim[i - 1] < x.trim[i]) && (x.trim[i] >= x.trim[i + 1]) ||
+                 (x.trim[i - 1] <= x.trim[i]) && (x.trim[i] > x.trim[i + 1]))) {
+        max.ind = c(max.ind, i)
+        min.appended = FALSE
+      }
     }
   }
 
@@ -177,7 +179,7 @@ monotone.cost = function(x, eps = 1, increasing = TRUE) {
 #'
 #' @param x a vector (or table) of counts representing the histogram
 #' @export
-ftc = function(x) {
+ftc = function(x, maxJ = Inf) {
   minmax = local.minmax(x)
   # Add end points
   m = minmax$min.ind
@@ -187,7 +189,7 @@ ftc = function(x) {
   names(M) = NULL
   K = length(m)
   J = 1
-  while(J < K) {
+  while(J < K && J <= maxJ) {
     costs = -Inf
     while(length(costs) > 0 && min(costs) < 0) {
       costs = NULL
