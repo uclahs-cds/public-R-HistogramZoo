@@ -4,14 +4,14 @@ obs.to.int.hist = function(x) {
 }
 
 # Plots the vector x of counts (or table) and the optional segment points s
-plot.segments = function(x, s = NULL, ...) {
+plot.segments = function(x, s = NULL, threshold = 0, ...) {
   index = seq_along(x)
   if(!is.null(s)) {
     opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
   }
   plot(x, type = "h", ...)
 
-  minmax = local.minmax(x)
+  minmax = local.minmax(x, threshold)
   min.ind = minmax$min.ind
   max.ind = minmax$max.ind
   # min.ind = find_peaks(-x, strict = FALSE)
@@ -92,7 +92,7 @@ max.entropy = function(x, s = NULL, increasing = TRUE) {
 #' Finds the local minima m and maxima M such that
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
 #' @export
-local.minmax = function(x) {
+local.minmax = function(x, threshold = 0) {
   x = as.numeric(x)
   stopifnot(length(x) > 1)
   # Get the first non-equal index
@@ -134,14 +134,17 @@ local.minmax = function(x) {
   if(n.trim > 3) {
     for(i in seq(2, n.trim - 1)) {
       # min.appended ensures that we alternate minima and maxima
+      left.diff <- x.trim[i] - x.trim[i - 1]
+      right.diff <- x.trim[i] - x.trim[i + 1]
+
       if (!min.appended &&
-          ((x.trim[i - 1] > x.trim[i]) && (x.trim[i] <= x.trim[i + 1]) ||
-           (x.trim[i - 1] >= x.trim[i]) && (x.trim[i] < x.trim[i + 1]))) {
+          ((left.diff < -threshold && right.diff <= 0) ||
+           (left.diff <= 0 && right.diff < -threshold))) {
         min.ind = c(min.ind, i)
         min.appended = TRUE
       } else if(min.appended &&
-                ((x.trim[i - 1] < x.trim[i]) && (x.trim[i] >= x.trim[i + 1]) ||
-                 (x.trim[i - 1] <= x.trim[i]) && (x.trim[i] > x.trim[i + 1]))) {
+                ((left.diff > threshold && right.diff >= 0) ||
+                (left.diff >= 0 && right.diff > threshold))) {
         max.ind = c(max.ind, i)
         min.appended = FALSE
       }
@@ -172,8 +175,8 @@ monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 #'
 #' @param x a vector (or table) of counts representing the histogram
 #' @export
-ftc = function(x, maxJ = Inf) {
-  minmax = local.minmax(x)
+ftc = function(x, maxJ = Inf, threshold = 0) {
+  minmax = local.minmax(x, threshold = threshold)
   # Add end points
   m = minmax$min.ind
   M = minmax$max.ind
