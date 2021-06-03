@@ -71,9 +71,10 @@ local.max = function(x) {
 
 #' Get the max relative entropy in the interval
 #' Computes H, the maximum H_{h,p}([a,b])
-max.entropy = function(x, increasing = TRUE) {
+max.entropy = function(x, s = NULL, increasing = TRUE) {
   N = ifelse(sum(x) == 0, 1, sum(x))
-  L = length(x)
+  if(is.null(s)){s = 1:length(x)}
+  L = length(s)
 
   # Prob distributions
   h = x/N
@@ -82,18 +83,10 @@ max.entropy = function(x, increasing = TRUE) {
   max.rel.entropy = -Inf
   for(a in 1:L) {
     for(b in a:L) {
-      max.rel.entropy = max(max.rel.entropy, rel.entropy(h, p, a, b), na.rm = TRUE)
+      max.rel.entropy = max(max.rel.entropy, rel.entropy(h, p, s[a], s[b]), na.rm = TRUE)
     }
   }
   max.rel.entropy
-}
-
-monotone.cost = function(x, eps = 1, increasing = TRUE) {
-  max.rel.entropy = max.entropy(x, increasing)
-  N = sum(x)
-  L = length(x)
-
-  max.rel.entropy * N - log(L * (L + 1) / 2 * eps)
 }
 
 #' Finds the local minima m and maxima M such that
@@ -167,8 +160,8 @@ local.minmax = function(x) {
 }
 
 # Compute the monotone cost,
-monotone.cost = function(x, eps = 1, increasing = TRUE) {
-  max.rel.entropy = max.entropy(x, increasing)
+monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
+  max.rel.entropy = max.entropy(x, s, increasing)
   N = sum(x)
   L = length(x)
 
@@ -252,35 +245,34 @@ ftc.helen = function(x, s = NULL, eps = 1) {
   }
 
   # Initializing
+  s.fixed = s
   K = length(s)
   cost = c(-Inf)
   J = 1
 
-  #while(J < K) {
-    while(!all(cost > 0) & K > 2){
-      # Initialize
-      cost = -Inf
-      # Loop through segments
-      # for(i in 1:(K - J - 1)){
-      for(i in 1:(K-2)){
-        # cat(K, " ", i, "\n")
-        inc.int = s[i]:s[i+1]
-        dec.int = s[i+1]:s[i+2]
-        cost_i = monotone.cost(x[inc.int], eps = eps, increasing = TRUE)
-        cost_d = monotone.cost(x[dec.int], eps = eps, increasing = FALSE)
-        cost[i] = min(cost_i, cost_d)
-      }
-      # Removing minimum cost
-      min.cost.index = which.min(cost)
-      min.cost = cost[min.cost.index]
-      if(length(min.cost) > 0 && min.cost < 0){
-        s = s[-(min.cost.index+1)]
-      }
-      # Update
-      K = length(s)
+  while(!all(cost > 0) & K > 2){
+    # Initialize
+    cost = -Inf
+    # Loop through segments
+    for(i in 1:(K-2)){
+      # cat(K, " ", i, "\n")
+      inc.int = s[i]:s[i+1]
+      inc.s = s.fixed[s.fixed >= s[i] & s.fixed <= s[i+1]] - s[i] + 1
+      dec.int = s[i+1]:s[i+2]
+      dec.s = s.fixed[s.fixed >= s[i+1] & s.fixed <= s[i+2]] - s[i+1] + 1
+      cost_i = monotone.cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
+      cost_d = monotone.cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
+      cost[i] = min(cost_i, cost_d)
     }
-  #  J = J + 1
-  #}
+    # Removing minimum cost
+    min.cost.index = which.min(cost)
+    min.cost = cost[min.cost.index]
+    if(length(min.cost) > 0 && min.cost < 0){
+      s = s[-(min.cost.index+1)]
+    }
+    # Update
+    K = length(s)
+  }
 
   # Return the final list of minima
   s
