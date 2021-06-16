@@ -55,3 +55,68 @@ identify.uniform.segments = function(
 
   return(unif.seg.gr)
 }
+
+# meaningful.interval(
+#   h = x/sum(x),
+#   p = generate.unif(x),
+#   a = todo$Var1[i],
+#   b = todo$Var2[i],
+#   N = sum(x),
+#   L = length(x)
+# )
+
+#' Finds the largest uniform segment that is longer than threshold
+find.uniform.segment <- function(x, threshold = 0.5, step.size = 1) {
+  num.bins <- length(x)
+  min.seg.size <- ceiling(num.bins * threshold)
+
+  p.unif = generate.unif(x)
+  res <- lapply(seq(from = 1, to = num.bins - min.seg.size, by = step.size), function(a) {
+    lapply(seq(from = min.seg.size + a, to = num.bins, by = step.size), function(b) {
+      unif.entropy = rel.entropy(
+        h = x / sum(x),
+        p = p.unif,
+        a = a,
+        b = b
+      )
+
+      # MSE
+      x.sub = x[a:b]
+      p.unif.sub = generate.unif(x.sub)
+      h.sub = x.sub / sum(x.sub)
+      mse = mean((p.unif.sub - h.sub)^2)
+
+      # Chi-Squared
+      chi.stat = sum((h.sub - p.unif.sub)^2 / p.unif.sub)
+      chi.df = b - a + 1
+
+      # Jaccard
+      overlap = pmin(a = h.sub, b = p.unif.sub, na.rm = T)
+      union = pmax(a = h.sub, b = p.unif.sub, na.rm = T)
+      jc = sum(overlap)/sum(union)
+
+      c(a = a, b = b,
+        unif.entropy = unif.entropy,
+        mse = mse,
+        chi.stat = chi.stat,
+        chi.pvalue = pchisq(chi.stat, df = b - a + 1, lower.tail = FALSE),
+        jaccard = jc
+        )
+    })
+  })
+
+  res.df <- do.call(rbind.data.frame, unlist(res, recursive = F))
+  colnames(res.df) <- c("a", "b", "entropy", "mse", "chi.stat", "chi.pvalue", "jaccard.index")
+  res.df
+  #plot(NULL, xlim = c(1, num.bins), ylim = c(1, ))
+
+#  h = x / sum(x)
+#  p = generate.unif(x) ,
+#  a =
+#  rel.entropy()
+}
+
+# Uniform Generation
+generate.unif = function(x){
+  rep(1/length(x), length(x))
+}
