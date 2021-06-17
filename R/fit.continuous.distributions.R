@@ -110,3 +110,41 @@ fit.continuous.distributions = function(
   return(mod)
 
 }
+
+# Histogram comparison
+# https://stats.stackexchange.com/a/151362/97417
+fit.distributions.optim <- function(x, metric = c("jaccard", "intersect")) {
+  metric = match.arg(metric)
+  freq = x[, 2]
+
+  hist.optim <- function(params, dist = c("tnorm", "tgamma")) {
+  # Compute the expected counts for the given parameters
+    dist = match.arg(dist)
+    args = c(list(x = x[, 1], a = 0, b = max(x) + 1e-10), params)
+    dens = do.call(paste0("d", dist), args)
+    overlap = pmin(a = freq, b = dens, na.rm = T)
+    if(metric == "jaccard") {
+      union = pmax(a = freq, b = dens, na.rm = T)
+      rtn = sum(overlap)/sum(union)
+    } else if (metric == "intersect") {
+      rtn = sum(overlap) / sum(freq)
+    }
+
+    rtn
+  }
+
+  norm.res <- optim(par = c(0, 1),
+                    fn = hist.optim,
+                    method = "L-BFGS-B",
+                    dist = "tnorm",
+                    control = list(fnscale = -1),
+                    lower = c(-Inf, 0.001))
+  gamma.res <- optim(par = c(0, 1),
+                    fn = hist.optim,
+                    method = "L-BFGS-B",
+                    dist = "tgamma",
+                    control = list(fnscale = -1),
+                    lower = c(0.001, 0.001))
+  list(tnorm = norm.res,
+       tgamma = gamma.res)
+}
