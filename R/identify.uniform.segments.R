@@ -66,7 +66,7 @@ identify.uniform.segments = function(
 # )
 
 #' Finds the largest uniform segment that is longer than threshold
-find.uniform.segment <- function(x, threshold = 0.5, step.size = 1) {
+find.uniform.segment <- function(x, threshold = 0.5, step.size = 1, max.metric = "jaccard") {
   num.bins <- length(x)
   min.seg.size <- ceiling(num.bins * threshold)
 
@@ -107,13 +107,10 @@ find.uniform.segment <- function(x, threshold = 0.5, step.size = 1) {
 
   res.df <- do.call(rbind.data.frame, unlist(res, recursive = F))
   colnames(res.df) <- c("a", "b", "entropy", "mse", "chi.stat", "chi.pvalue", "jaccard.index")
-  res.df
-  #plot(NULL, xlim = c(1, num.bins), ylim = c(1, ))
-
-#  h = x / sum(x)
-#  p = generate.unif(x) ,
-#  a =
-#  rel.entropy()
+  res.df %>%
+    arrange(desc(jaccard.index), desc(b - a)) %>%
+    slice(1) %>%
+    as.list(.)
 }
 
 # Uniform Generation
