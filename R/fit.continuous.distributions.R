@@ -112,35 +112,50 @@ fit.continuous.distributions = function(
 }
 
 # Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks")) {
+fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE) {
   metric = match.arg(metric)
   # Get one of the metrics from histogram.distances
   metric.func = get(paste('histogram', metric, sep = "."))
+  bin = x[, 1]
   freq = x[, 2]
   N = sum(freq)
 
-  hist.optim <- function(params, dist = c("tnorm", "tgamma")) {
+  hist.optim <- function(params, dist = c("norm", "gamma")) {
   # Compute the expected counts for the given parameters
     dist = match.arg(dist)
-    args = c(list(x = x[, 1], a =  min(x) - 1e-10, b = max(x) + 1e-10), params)
-    dens = do.call(paste0("d", dist), args) * N
-
-    metric.func(freq, dens)
+    args = c(list(x = bin), params)
+    if(truncated) {
+      args$a =  min(bin) - 1e-10
+      args$b = max(bin) + 1e-10
+    }
+    trunc.letter = if(truncated) "t" else ""
+    dens = do.call(paste0("d", trunc.letter, dist), args) * N
+    dens[is.na(dens)] = 0
+    res = metric.func(freq, dens)
+    if(is.na(res) || res == -Inf) browser()
+    res
   }
 
-  norm.res <- optim(par = c(0, 1),
+  L = sum(bin)
+  hist.mean = sum(freq * bin) / L
+  hist.var = sum(freq * (bin - hist.mean)^2) / L
+  norm.res <- optim(par = c(hist.mean, sqrt(hist.var)),
                     fn = hist.optim,
                     method = "L-BFGS-B",
-                    dist = "tnorm",
+                    dist = "norm",
                     # fnscale = -1 does maximization and 1 for minimization
                     control = list(fnscale = 1),
-                    lower = c(-Inf, 0.001))
-  gamma.res <- optim(par = c(0, 1),
+                    lower = c(-Inf, 0.001),
+                    upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
+
+  shape.init = hist.mean^2 / hist.var
+  rate.init = hist.mean / hist.var
+  gamma.res <- optim(par = c(shape.init, rate.init),
                     fn = hist.optim,
                     method = "L-BFGS-B",
-                    dist = "tgamma",
+                    dist = "gamma",
                     control = list(fnscale = 1),
-                    lower = c(0.001, 0.001))
+                    lower = c(0.001, 0.01))
   list(tnorm = norm.res,
        tgamma = gamma.res)
 }

@@ -1,70 +1,84 @@
 library(ConsensusPeaks)
-# Instead of using MLE, use the metrics we are interested in
+# Instead of using MLE, use the metrics we are interested in:
 # Jaccard or histogram intersection
-# Let's see how it works for fitting a normal distribution
+
+metric = "jaccard"
 
 set.seed(13)
 mu = 0
 sigma = 50
 x <- rnorm(1e4, mean = mu, sd = sigma)
-bin.data = obs.to.int.hist(x, as.data.frame = TRUE, add.zero.endpoints = FALSE)
+bin.data = obs.to.int.hist(x - min(x), as.data.frame = TRUE, add.zero.endpoints = FALSE)
 
-dens <- dnorm(bin.data$x, mean = mu, sd = sigma) * sum(bin.data$Freq)
-plot(bin.data$x, dens, col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens, bin.data$Freq)))
+dist.optim = fit.distributions.optim(bin.data, metric = metric, truncated = TRUE)
+# intersect.optim = fit.distributions.optim(bin.data, metric = "intersection")
+
+dens.norm <- dnorm(bin.data$x, mean = dist.optim$tnorm$par[1], sd = dist.optim$tnorm$par[2]) * sum(bin.data$Freq)
+
+plot(bin.data$x, dens.norm,
+     col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens.norm, bin.data$Freq)),
+     main = sprintf("%s optimization for normal distribution", metric))
 lines(bin.data$x, bin.data$Freq, col = scales::alpha("lightblue", 0.9), type = "h", lwd = 5, lend = 1)
-lines(bin.data$x, pmin(a = bin.data$Freq, b = dens, na.rm = T),
+lines(bin.data$x, pmin(a = bin.data$Freq, b = dens.norm, na.rm = T),
       col = scales::alpha("lightgreen", 0.9), type = "h", lwd = 5, lend = 1)
 legend("topleft",
        legend = c("Observed", "Model", "Intersect"),
        fill = c(scales::alpha("lightblue", 0.9), scales::alpha("pink", 0.7), scales::alpha("lightgreen", 0.9)),
        cex = 0.5,
        inset = .05)
+mtext(sprintf("%s index: %.3f", metric, round(1 - dist.optim$tnorm$value, 3)))
 
+dens.gamma <- dgamma(bin.data$x, shape = dist.optim$tgamma$par[1], rate = dist.optim$tgamma$par[2]) * sum(bin.data$Freq)
 
-# Histogram comparison
-# https://stats.stackexchange.com/a/151362/97417
-normal.hist.optim <- function(data, params, metric = c("jaccard", "intersect")) {
-  metric = match.arg(metric)
-  dens <- dnorm(data$x, mean = params[1], sd = params[2]) * sum(data$Freq)
-  overlap = pmin(a = data$Freq, b = dens, na.rm = T)
-  if(metric == "jaccard") {
-    union = pmax(a = data$Freq, b = dens, na.rm = T)
-    rtn = sum(overlap)/sum(union)
-  } else if (metric == "intersect") {
-    rtn = sum(overlap) / sum(data$Freq)
-  }
+plot(bin.data$x, dens.gamma,
+     col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens.gamma, bin.data$Freq)),
+     main = sprintf("%s optimization for gamma distribution", metric))
+lines(bin.data$x, bin.data$Freq, col = scales::alpha("lightblue", 0.9), type = "h", lwd = 5, lend = 1)
+lines(bin.data$x, pmin(a = bin.data$Freq, b = dens.gamma, na.rm = T),
+      col = scales::alpha("lightgreen", 0.9), type = "h", lwd = 5, lend = 1)
+legend("topleft",
+       legend = c("Observed", "Model", "Intersect"),
+       fill = c(scales::alpha("lightblue", 0.9), scales::alpha("pink", 0.7), scales::alpha("lightgreen", 0.9)),
+       cex = 0.5,
+       inset = .05)
+mtext(sprintf("%s index: %.3f", metric, round(1 - dist.optim$tgamma$value, 3)))
 
-  rtn
-}
-
-res <- optim(par = c(0, 1),
-      fn = normal.hist.optim,
-      method = "L-BFGS-B",
-      data = bin.data,
-      control = list(fnscale = -1),
-      lower = c(-Inf, 0),
-      metric = "intersect"
-      )
 
 # Use a unif distribution
 set.seed(13)
 x <- runif(1e4, min = 0, max = 100)
-bin.data = obs.to.int.hist(x, as.data.frame = TRUE, add.zero.endpoints = FALSE)
-res <- optim(par = c(0, 1),
-             fn = normal.hist.optim,
-             method = "L-BFGS-B",
-             data = bin.data,
-             control = list(fnscale = -1),
-             lower = c(-Inf, 0),
-             metric = "intersect")
-dens <- dnorm(bin.data$x, mean = res$par[1], sd = res$par[2]) * sum(bin.data$Freq)
-plot(bin.data$x, dens, col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens, bin.data$Freq)))
+bin.data = obs.to.int.hist(100 * (x - min(x)) / (max(x) - min(x)), as.data.frame = TRUE, add.zero.endpoints = FALSE)
+
+dist.optim = fit.distributions.optim(bin.data, metric = metric, truncated = TRUE)
+
+dens.norm <- dtnorm(bin.data$x, mean = dist.optim$tnorm$par[1], sd = dist.optim$tnorm$par[2],
+                   a = min(bin.data$x) - 1e-10, b = max(bin.data$x) + 1e-10) * sum(bin.data$Freq)
+
+plot(bin.data$x, dens.norm,
+     col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens.norm, bin.data$Freq)),
+     main = sprintf("%s optimization for normal distribution", metric))
 lines(bin.data$x, bin.data$Freq, col = scales::alpha("lightblue", 0.9), type = "h", lwd = 5, lend = 1)
-lines(bin.data$x, pmin(a = bin.data$Freq, b = dens, na.rm = T),
+lines(bin.data$x, pmin(a = bin.data$Freq, b = dens.norm, na.rm = T),
       col = scales::alpha("lightgreen", 0.9), type = "h", lwd = 5, lend = 1)
-legend("bottomleft",
+legend("topleft",
        legend = c("Observed", "Model", "Intersect"),
        fill = c(scales::alpha("lightblue", 0.9), scales::alpha("pink", 0.7), scales::alpha("lightgreen", 0.9)),
        cex = 0.5,
-       inset = 0.05
-       )
+       inset = .05)
+mtext(sprintf("%s index: %.3f", metric, round(1 - dist.optim$tnorm$value, 3)))
+
+dens.gamma <- dtgamma(bin.data$x, shape = dist.optim$tgamma$par[1], rate = dist.optim$tgamma$par[2],
+                      a = min(bin.data$x) - 1e-10, b = max(bin.data$x) + 1e-10) * sum(bin.data$Freq)
+
+plot(bin.data$x, dens.gamma,
+     col = scales::alpha("pink", 0.7), type = "h", lwd = 5, lend = 1, ylim = c(0, max(dens.gamma, bin.data$Freq)),
+     main = sprintf("%s optimization for gamma distribution", metric))
+lines(bin.data$x, bin.data$Freq, col = scales::alpha("lightblue", 0.9), type = "h", lwd = 5, lend = 1)
+lines(bin.data$x, pmin(a = bin.data$Freq, b = dens.gamma, na.rm = T),
+      col = scales::alpha("lightgreen", 0.9), type = "h", lwd = 5, lend = 1)
+legend("topleft",
+       legend = c("Observed", "Model", "Intersect"),
+       fill = c(scales::alpha("lightblue", 0.9), scales::alpha("pink", 0.7), scales::alpha("lightgreen", 0.9)),
+       cex = 0.5,
+       inset = .05)
+mtext(sprintf("%s index: %.3f", metric, round(1 - dist.optim$tgamma$value, 3)))
