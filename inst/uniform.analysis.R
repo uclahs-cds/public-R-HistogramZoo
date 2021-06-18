@@ -1,33 +1,26 @@
 library(dplyr)
 library(tidyr)
 library(BoutrosLab.plotting.general)
+devtools::load_all(".")
 
 data <- readRDS("rds/foxa1.rds")
-devtools::load_all(".")
 attach(data)
 
-hist(peak.counts, breaks = seq(1, max(peak.counts)))
-
+# Only look at second peak
 seg.start = GenomicRanges::start(seg.gr)[2]
 seg.end = GenomicRanges::end(seg.gr)[2]
 
 x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
 
-
-#x.adjusted <- (x - seg.start) + 1e-10
-#x.range = seg.start:seg.end
-#x.range.adjusted <- (x - seg.start) + 1e-10
-
+# Table the data
 x.df <- as.data.frame(table(x))
 x.df$x <- as.numeric(as.character(x.df$x))
 unif.data = x.df
-# unif.data = data.frame(peak.counts = seq(1, max(x)))
-# unif.data = merge(unif.data, x.df, all.x = TRUE)
 
-# hist(x.adjusted, breaks = seq(0, floor(max(x.adjusted))))
 res <- find.uniform.segment(x.df$Freq, threshold = .75, step.size = 5)
-unif.segment = unlist(res[c('a', 'b')])  + min(x.df$x)
-points.y = x.df$Freq[unlist(res[c('a', 'b')])]
+unif.segment = unlist(res[c('a', 'b')])
+unif.segment.adj =  unif.segment + min(x.df$x)
+points.y = x.df$Freq[unif.segment]
 main = create.scatterplot(
   Freq ~ x,
   x.df,
@@ -41,13 +34,13 @@ main = create.scatterplot(
   main.cex = 0,
   type = "a",
   add.points = T,
-  points.x = unif.segment,
+  points.x = unif.segment.adj,
   points.y = points.y,
   points.pch = 19,
   points.col = 'red'
 )
 
-unif.data$unif <- unif.data$x >= unif.segment[1] & unif.data$x <= unif.segment[2]
+unif.data$unif <- unif.data$x >= unif.segment.adj[1] & unif.data$x <= unif.segment.adj[2]
 jc.heatmap = create.heatmap(
   t(as.matrix(unif.data$unif)),
   clustering.method = 'none',
@@ -69,3 +62,30 @@ create.multipanelplot(
   width = 12,
   filename = "plots/test_jc.png"
 )
+
+# Fit the model on the original data
+x.adjusted <- (x - unif.segment[1]) + 1e-10
+mod = fit.continuous.distributions(
+  x = x.adjusted,
+  seg.start = seg.start,
+  seg.end = seg.end,
+  fit.mixtures = c('unif', 'tnorm', 'tgamma', 'tgamma_flip'),
+  max.iterations = 500)
+
+fits = extract.distribution.parameters(
+  mod = mod,
+  x = x.adjusted)
+
+# Fit the models on the unif segment
+x.segment <- x[x >= unif.segment.adj[1] & x <= unif.segment.adj[2]]
+x.segment.adjusted <- (x.segment - unif.segment[1]) + 1e-10
+mod.unif = fit.continuous.distributions(
+  x = x.segment.adjusted,
+  seg.start =  unif.segment[1],
+  seg.end = unif.segment[2],
+  fit.mixtures = c('unif', 'tnorm', 'tgamma', 'tgamma_flip'),
+  max.iterations = 500)
+
+fits.unif = extract.distribution.parameters(
+  mod = mod.unif,
+  x = x.segment.adjusted)
