@@ -112,24 +112,24 @@ fit.continuous.distributions = function(
 }
 
 # Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE) {
+fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE, distr = c("norm", "gamma")) {
   metric = match.arg(metric)
+  distr = match.arg(distr, several.ok = TRUE)
   # Get one of the metrics from histogram.distances
   metric.func = get(paste('histogram', metric, sep = "."))
   bin = x[, 1]
   freq = x[, 2]
   N = sum(freq)
 
-  hist.optim <- function(params, dist = c("norm", "gamma")) {
-  # Compute the expected counts for the given parameters
-    dist = match.arg(dist)
+  .hist.optim <- function(params, .dist = c("norm", "gamma")) {
+    # Compute the expected counts for the given parameters
     args = c(list(x = bin), params)
     if(truncated) {
       args$a =  min(bin) - 1e-10
       args$b = max(bin) + 1e-10
     }
     trunc.letter = if(truncated) "t" else ""
-    dens = do.call(paste0("d", trunc.letter, dist), args) * N
+    dens = do.call(paste0("d", trunc.letter, .dist), args) * N
     dens[is.na(dens)] = 0
     res = metric.func(freq, dens)
     if(is.na(res) || res == -Inf) browser()
@@ -137,25 +137,36 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
   }
 
   L = sum(bin)
-  hist.mean = sum(freq * bin) / L
-  hist.var = sum(freq * (bin - hist.mean)^2) / L
-  norm.res <- optim(par = c(hist.mean, sqrt(hist.var)),
-                    fn = hist.optim,
-                    method = "L-BFGS-B",
-                    dist = "norm",
-                    # fnscale = -1 does maximization and 1 for minimization
-                    control = list(fnscale = 1),
-                    lower = c(-Inf, 0.001),
-                    upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
 
-  shape.init = hist.mean^2 / hist.var
-  rate.init = hist.mean / hist.var
-  gamma.res <- optim(par = c(shape.init, rate.init),
-                    fn = hist.optim,
-                    method = "L-BFGS-B",
-                    dist = "gamma",
-                    control = list(fnscale = 1),
-                    lower = c(0.001, 0.01))
-  list(tnorm = norm.res,
-       tgamma = gamma.res)
+  rtn <- list()
+  if("norm" %in% distr) {
+    hist.mean = sum(freq * bin) / L
+    hist.var = sum(freq * (bin - hist.mean)^2) / L
+
+    norm.res <- optim(par = c(hist.mean, sqrt(hist.var)),
+                      fn = .hist.optim,
+                      method = "L-BFGS-B",
+                      .dist = "norm",
+                      # fnscale = -1 does maximization and 1 for minimization
+                      control = list(fnscale = 1),
+                      lower = c(-Inf, 0.001),
+                      upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
+    rtn$norm = norm.res
+  }
+
+
+  if("gamma" %in% distr) {
+    shape.init = hist.mean^2 / hist.var
+    rate.init = hist.mean / hist.var
+    gamma.res <- optim(par = c(shape.init, rate.init),
+                       fn = .hist.optim,
+                       method = "L-BFGS-B",
+                       .dist = "gamma",
+                       control = list(fnscale = 1),
+                       lower = c(0.001, 0.01))
+
+    rtn$gamma = gamma.res
+  }
+
+  rtn
 }

@@ -1,6 +1,19 @@
-# Take a vector of values and get the histogram for integer breaks
-obs.to.int.hist = function(x) {
-  table(cut(x, breaks = (floor(min(x)) - 1):(ceiling(max(x)) + 1)))
+#' Take a vector of values and get the histogram for integer breaks
+#' @param x the observation
+#' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
+obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.data.frame = FALSE) {
+  a = floor(min(x))
+  b = ceiling(max(x))
+  breaks = a:b
+  if(add.zero.endpoints) breaks = c(a - 1, breaks, b + 1)
+  rtn = table(cut(x, breaks = breaks))
+  names(rtn) <- breaks[2:length(breaks)]
+  if(as.data.frame) {
+    rtn <- as.data.frame(rtn)
+    colnames(rtn) <- c("x", "Freq")
+    rtn$x <- as.integer(as.character(rtn$x))
+  }
+  rtn
 }
 
 # Plots the vector x of counts (or table) and the optional segment points s
