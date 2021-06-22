@@ -124,7 +124,8 @@ segment.and.fit = function(
       x = x.adjusted)
 
     # Extract Residuals
-    mod.optim = which(fits$aic == min(fits$aic))
+    # mod.optim = which(fits$aic == min(fits$aic))
+    mod.optim = which(fits$jc == min(fits$jc))
     jc.optim.multi.distr = fits$jc[mod.optim]
 
     if(jc.optim.multi.distr < residual.tolerance){

@@ -3,9 +3,9 @@
 #' @param y histogram 2
 histogram.intersection <- function(x, y) {
   overlap = pmin(a = x, b = y, na.rm = T)
-  sums = c(sum(x), sum(y))
+  # sums = c(sum(x), sum(y))
   # If one of the histograms is all zero, then return the other count
-  1 - sum(overlap) / min(sums[sums > 0])
+  1 - sum(overlap) / sum(x)
 }
 
 #' Jaccard index

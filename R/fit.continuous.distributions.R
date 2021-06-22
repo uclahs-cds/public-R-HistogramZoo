@@ -139,6 +139,20 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
   L = sum(bin)
 
   rtn <- list()
+  # Add uniform distribution
+  unif.dens = 1 / (max(x) - min(x))
+  rtn$unif = list(
+    value = metric.func(freq, rep(unif.dens * N, length(L))),
+    dens = function(x = NULL, scale = TRUE) {
+      if(missing(x)) {
+        x = bin
+      }
+      res = ifelse(x >= min(bin) & x <= max(bin), unif.dens, 0)
+      if(scale) res * N
+      else res
+    }
+  )
+
   if("norm" %in% distr) {
     hist.mean = sum(freq * bin) / L
     hist.var = sum(freq * (bin - hist.mean)^2) / L
@@ -151,6 +165,16 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
                       control = list(fnscale = 1),
                       lower = c(-Inf, 0.001),
                       upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
+    names(norm.res$par) <- c("mean", "sd")
+    norm.res$dens = function(x = NULL, scale = TRUE) {
+      if(missing(x)) {
+        x = bin
+      }
+      args = c(list(x = x), as.list(norm.res$par))
+      res = do.call("dtnorm", args)
+      if(scale) res * sum(bin.data$Freq)
+      else res
+    }
     rtn$norm = norm.res
   }
 
@@ -163,8 +187,19 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
                        method = "L-BFGS-B",
                        .dist = "gamma",
                        control = list(fnscale = 1),
-                       lower = c(0.001, 0.01))
-
+                       #lower = c(0.001, 0.01)
+                       lower =c(0.001, 0.000001)
+                       )
+    names(gamma.res$par) <- c("shape", "rate")
+    gamma.res$dens = function(x = NULL, scale = TRUE) {
+      if(missing(x)) {
+        x = bin
+      }
+      args = c(list(x = x), as.list(gamma.res$par))
+      res = do.call("dtgamma", args)
+      if(scale) res * sum(bin.data$Freq)
+      else res
+    }
     rtn$gamma = gamma.res
   }
 
