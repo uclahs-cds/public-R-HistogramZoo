@@ -9,7 +9,7 @@ attach(data)
 # Only look at second peak
 filenames <- NULL
 metrics = c("intersect", "jaccard")
-I = c(2, 4)
+I = c(1, 2, 4)
 for(metric in metrics) {
   for(i in I) {
     seg.start = GenomicRanges::start(seg.gr)[i]

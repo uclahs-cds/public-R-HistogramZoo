@@ -66,51 +66,38 @@ identify.uniform.segments = function(
 # )
 
 #' Finds the largest uniform segment that is longer than threshold
-find.uniform.segment <- function(x, threshold = 0.5, step.size = 1, max.metric = "jaccard") {
+find.uniform.segment <- function(x, metric = c("jaccard", "intersection", "ks"), threshold = 0.5, step.size = 1, max.sd.size = 1) {
+  metric = match.arg(metric)
   num.bins <- length(x)
   min.seg.size <- ceiling(num.bins * threshold)
+  metric.func = get(paste('histogram', metric, sep = "."))
 
   p.unif = generate.unif(x)
   res <- lapply(seq(from = 1, to = num.bins - min.seg.size, by = step.size), function(a) {
     lapply(seq(from = min.seg.size + a, to = num.bins, by = step.size), function(b) {
-      unif.entropy = rel.entropy(
-        h = x / sum(x),
-        p = p.unif,
-        a = a,
-        b = b
-      )
-
-      # MSE
       x.sub = x[a:b]
       p.unif.sub = generate.unif(x.sub)
       h.sub = x.sub / sum(x.sub)
-      mse = mean((p.unif.sub - h.sub)^2)
 
-      # Chi-Squared
-      chi.stat = sum((h.sub - p.unif.sub)^2 / p.unif.sub)
-      chi.df = b - a + 1
+      m = metric.func(h.sub, p.unif.sub)
+      if(metric %in% c("jaccard", "intersection")) m = 1 - m
 
-      # Jaccard
-      overlap = pmin(a = h.sub, b = p.unif.sub, na.rm = T)
-      union = pmax(a = h.sub, b = p.unif.sub, na.rm = T)
-      jc = sum(overlap)/sum(union)
-
-      c(a = a, b = b,
-        unif.entropy = unif.entropy,
-        mse = mse,
-        chi.stat = chi.stat,
-        chi.pvalue = pchisq(chi.stat, df = b - a + 1, lower.tail = FALSE),
-        jaccard = jc
-        )
+      list(a = a, b = b, metric = m)
     })
   })
 
   res.df <- do.call(rbind.data.frame, unlist(res, recursive = F))
-  colnames(res.df) <- c("a", "b", "entropy", "mse", "chi.stat", "chi.pvalue", "jaccard.index")
-  res.df %>%
-    arrange(desc(jaccard.index), desc(b - a)) %>%
-    slice(1) %>%
-    as.list(.)
+  colnames(res.df) <- c("a", "b", "metric")
+  res.df$length = res.df$b - res.df$a
+
+  # Select the longest interval that is within 1 sd of the maximum
+  max.metric = max(res.df$metric)
+  sd.metric = sd(res.df$metric)
+  # The range in which we are looking for the maximum
+  res.sd.range = res.df[res.df$metric >= max.metric - sd.metric * max.sd.size, ]
+  max.interval.index = which.max(res.sd.range$length)
+
+  as.list(res.sd.range[max.interval.index,])
 }
 
 # Uniform Generation
