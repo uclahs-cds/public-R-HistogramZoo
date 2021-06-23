@@ -33,9 +33,9 @@ bpg.plot = function(
   lineplot.data = rbind(lineplot.data, bin.counts)
 
   # Colours
-  col.reference = structure(c("black", "gold", "chartreuse4", "chartreuse3", "darkorange", "darkorchid4"),
-                            names = c("coverage", "tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
-  col.numeric = structure(1:5, names = c("tnorm", "tgamma", "tgamma_flip", "norm_mixture", "unif"))
+  col.reference = structure(c("black", "gold", "chartreuse4", "darkorchid4"),
+                            names = c("coverage", "norm", "gamma", "unif"))
+  col.numeric = structure(1:5, names = c("norm", "gamma", "unif"))
   col.used = unique(lineplot.data[,c("dist", "i")])
   col.used = col.used[order(col.used$i),]
   col.vec = col.reference[col.used$dist]
@@ -85,10 +85,10 @@ bpg.plot = function(
   # bins$p.value[S4Vectors::queryHits(ovl)] = seg.gr$p.value[S4Vectors::subjectHits(ovl)]
   bins$i = 0
   bins$i[S4Vectors::queryHits(ovl)] = seg.gr$i[S4Vectors::subjectHits(ovl)]
-  bins$mse = NA
-  bins$mse[S4Vectors::queryHits(ovl)] = results$mse[S4Vectors::subjectHits(ovl)]
-  bins$jc = NA
-  bins$jc[S4Vectors::queryHits(ovl)] = results$jc[S4Vectors::subjectHits(ovl)]
+  # bins$mse = NA
+  # bins$mse[S4Vectors::queryHits(ovl)] = results$mse[S4Vectors::subjectHits(ovl)]
+  bins$metric = NA
+  bins$metric[S4Vectors::queryHits(ovl)] = results$metric[S4Vectors::subjectHits(ovl)]
 
   # Adding segment fits
   ovl = GenomicRanges::findOverlaps(bins, fitted.seg.gr)
@@ -97,7 +97,7 @@ bpg.plot = function(
 
   # Plotting Heatmap
   heatmap.data = data.frame(bins, stringsAsFactors = F)
-  heatmap.data = heatmap.data[,c("start", "i", "fitted.uniform", "jc", "mse")]
+  heatmap.data = heatmap.data[,c("start", "i", "fitted.uniform", "metric")]
   heatmap.data = heatmap.data[order(heatmap.data$start),]
 
   hm.fu = BoutrosLab.plotting.general::create.heatmap(
@@ -141,7 +141,7 @@ bpg.plot = function(
   )
 
   hm.gof = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("jc", "jc")],
+    heatmap.data[,c("metric", "metric")],
     clustering.method = 'none',
     # Plotting Characteristics
     axes.lwd = 1,

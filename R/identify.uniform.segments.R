@@ -66,14 +66,14 @@ identify.uniform.segments = function(
 # )
 
 #' Finds the largest uniform segment that is longer than threshold
-find.uniform.segment <- function(x, metric = c("jaccard", "intersection", "ks"), threshold = 0.5, step.size = 1, max.sd.size = 1) {
+find.uniform.segment = function(x, metric = c("jaccard", "intersection", "ks"), threshold = 0.5, step.size = 1, max.sd.size = 1) {
   metric = match.arg(metric)
-  num.bins <- length(x)
-  min.seg.size <- ceiling(num.bins * threshold)
+  num.bins = length(x)
+  min.seg.size = ceiling(num.bins * threshold)
   metric.func = get(paste('histogram', metric, sep = "."))
 
   p.unif = generate.unif(x)
-  res <- lapply(seq(from = 1, to = num.bins - min.seg.size, by = step.size), function(a) {
+  res = lapply(seq(from = 1, to = num.bins - min.seg.size, by = step.size), function(a) {
     lapply(seq(from = min.seg.size + a, to = num.bins, by = step.size), function(b) {
       x.sub = x[a:b]
       p.unif.sub = generate.unif(x.sub)
@@ -86,8 +86,8 @@ find.uniform.segment <- function(x, metric = c("jaccard", "intersection", "ks"),
     })
   })
 
-  res.df <- do.call(rbind.data.frame, unlist(res, recursive = F))
-  colnames(res.df) <- c("a", "b", "metric")
+  res.df = do.call(rbind.data.frame, unlist(res, recursive = F))
+  colnames(res.df) = c("a", "b", "metric")
   res.df$length = res.df$b - res.df$a
 
   # Select the longest interval that is within 1 sd of the maximum

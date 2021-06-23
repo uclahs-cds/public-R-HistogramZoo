@@ -40,9 +40,7 @@ for(metric in metrics) {
     filename <- sprintf("plots/foxa1_%s_uniform_seg_%s.png", metric, i)
     filenames <- c(filenames, filename)
     png(filename = filename, width = 8, height = 8, units = "in", res = 500)
-    par(oma = c(0, 0, 2, 0))
-    hist.optim.plot.all(bin.data, dist.optim.subset, metric = metric, bounds = unif.segment.adj)
-    mtext(sprintf("FOXA1 Max Uniform Segment %d: %s", i, metric), side = 3, line = 0, outer = TRUE, cex = 2)
+    hist.optim.plot(bin.data, dist.optim.subset, dist = "unif", metric = metric, bounds = unif.segment.adj, legend = TRUE)
     dev.off()
   }
 }

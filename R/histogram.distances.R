@@ -9,7 +9,7 @@ histogram.intersection <- function(x, y) {
 }
 
 #' Jaccard index
-#'@param x histogram 1
+#' @param x histogram 1
 #' @param y histogram 2
 histogram.jaccard <- function(x, y) {
   overlap = pmin(a = x, b = y, na.rm = T)

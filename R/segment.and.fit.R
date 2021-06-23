@@ -24,11 +24,11 @@ segment.and.fit = function(
   output.dir,
   plot.merged.peaks,
   diagnostic,
-  fit.mixtures,
-  trim.peak.threshold,
-  trim.peak.stepsize,
-  residual.tolerance,
-  eps
+  truncated.models = FALSE,
+  uniform.peak.threshold = 0.75,
+  uniform.peak.stepsize = 5,
+  histogram.metric = "jaccard",
+  eps = 1
 ){
 
   # If the gene doesn't have peaks
@@ -39,8 +39,8 @@ segment.and.fit = function(
   }
 
   # Use the parameters if they are defined and default to FALSE if not defined
-  # plot.diagnostic <- diagnostic %||% FALSE
-  # fit.norm_mixture <- fit.mixtures %||% FALSE
+  # plot.diagnostic = diagnostic %||% FALSE
+  # fit.norm_mixture = fit.mixtures %||% FALSE
 
   # peaksgr
   peaksgr = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = F)
@@ -106,113 +106,73 @@ segment.and.fit = function(
     seg.end = GenomicRanges::end(seg.gr)[i]
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     # Adjusting X
-    x.adjusted <- (x - seg.start) + 1e-10
-    x.range = seg.start:seg.end
-    x.range.adjusted <- (x - seg.start) + 1e-10
+    x.adjusted = (x - seg.start) + 1
+    #x.range = seg.start:seg.end
+    #x.range.adjusted = (x - seg.start) + 1e-10
 
-    # Refit models
-    mod = fit.continuous.distributions(
-      x = x.adjusted,
-      seg.start = seg.start,
-      seg.end = seg.end,
-      fit.mixtures = fit.mixtures,
-      max.iterations = 500)
+    bin.data = obs.to.int.hist(x.adjusted, as.data.frame = TRUE, add.zero.endpoints = FALSE)
+    dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models)
+    dist.optim = lapply(dist.optim, function(y) {
+      y$seg.start = seg.start
+      y$seg.end = seg.end
+      y
+    })
 
-    # Extracting Fit Data
-    fits = extract.distribution.parameters(
-      mod = mod,
-      x = x.adjusted)
+    # Find the maximum uniform segment
+    max.unif.results = find.uniform.segment(bin.data$Freq, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
+    # Use the maximum segment
+    unif.segment = unlist(max.unif.results[c('a', 'b')])
+    unif.segment.adj =  unif.segment
+    x.subset = x[x >= unif.segment.adj[1] & x <= unif.segment.adj[2]]
+    bin.data.subset = bin.data[bin.data$x >= unif.segment.adj[1] & bin.data$x <= unif.segment.adj[2],]
+    bin.data.subset$x = bin.data.subset$x - unif.segment.adj[1] + 1
+    # Fit uniform distribution on maximum uniform segment
+    dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
+    # Adjust the segment starts from the shifted max uniform segment
+    dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
+    dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
 
-    # Extract Residuals
-    # mod.optim = which(fits$aic == min(fits$aic))
-    mod.optim = which(fits$jc == min(fits$jc))
-    jc.optim.multi.distr = fits$jc[mod.optim]
+    dist.optim$max_unif = dist.optim.subset$unif
 
-    if(jc.optim.multi.distr < residual.tolerance){
+    # Extract all of the "value" keys from each of the models
+    # The value = the metric we were optimizing
+    metric.values = unlist(lapply(dist.optim, `[[`, "value"))
 
-      # Calculating Threshold
-      peak.length = seg.end - seg.start +1
-      shortest.peak =  trim.peak.threshold*peak.length
-      peak.shift.max = floor((peak.length - shortest.peak)/trim.peak.stepsize)*trim.peak.stepsize
+    mod.final = dist.optim[[which.min(metric.values)]]
 
-      # Initializing Refit
-      refit.values = c()
-      seg.start.values = seq(seg.start, seg.start + peak.shift.max, trim.peak.stepsize)
-      seg.end.values = seq(seg.end - peak.shift.max, seg.end, trim.peak.stepsize)
-      todo = expand.grid("seg.start.values" = seg.start.values, "seg.end.values" = seg.end.values)
-      todo = todo[todo$seg.end.values - todo$seg.start.values > shortest.peak,]
+    seg.gr.i = GenomicRanges::GRanges(
+             seqnames = geneinfo$chr,
+             IRanges::IRanges(
+               start = mod.final$seg.start,
+               end = mod.final$seg.end),
+             strand = geneinfo$strand)
 
-      for (j in 1:nrow(todo)) {
-        seg.unif.start = todo[j, "seg.start.values"]
-        seg.unif.end = todo[j, "seg.end.values"]
-        x.unif = peak.counts[peak.counts >=  seg.unif.start & peak.counts <= seg.unif.end]
-        x.unif.adjusted = x.unif - seg.unif.start + 1e-10
-        mod.unif <- fit.continuous.distributions(
-          x = x.unif.adjusted,
-          seg.start = seg.unif.start,
-          seg.end = seg.unif.end,
-          fit.mixtures = "unif",
-          max.iterations = 500)
-        fits.tmp = extract.distribution.parameters(
-          mod = mod.unif,
-          x = x.unif.adjusted)
-        refit.values <- c(refit.values, fits.tmp$jc[1])
-      }
-
-      # Picking optimal fit & updating model
-      max.jc = max(refit.values)
-      if(max.jc > jc.optim.multi.distr){
-        optim.model = which(refit.values == max.jc)
-        seg.unif.start.final = todo[optim.model, "seg.start.values"][1]
-        seg.unif.end.final = todo[optim.model, "seg.end.values"][1]
-        x.unif.final = peak.counts[peak.counts >= seg.unif.start.final & peak.counts <= seg.unif.end.final]
-        x.unif.final.adjusted = x.unif.final - seg.unif.start.final + 1e-10
-
-        mod.final = fit.continuous.distributions(
-          x = x.unif.final.adjusted,
-          seg.start = seg.unif.start.final,
-          seg.end = seg.unif.end.final,
-          fit.mixtures = "unif",
-          max.iterations = 500)
-        res.final = extract.distribution.parameters(
-          mod = mod.final,
-          x = x.unif.final.adjusted)
-        seg.gr.i = GenomicRanges::GRanges(
-          seqnames = geneinfo$chr,
-          IRanges::IRanges(
-            start = seg.unif.start.final,
-            end = seg.unif.end.final),
-          strand = geneinfo$strand)
-        mod.final = mod.final[[1]]
-      } else {
-        # Adding the results to the table
-        res.final = fits[fits$aic == min(fits$aic),]
-        mod.final = mod[[res.final$dist]]
-        seg.gr.i = seg.gr[i]
-      }
-    } else {
-      # Adding the results to the table
-      res.final = fits[fits$aic == min(fits$aic),]
-      mod.final = mod[[res.final$dist]]
-      seg.gr.i = seg.gr[i]
-    }
-    results = rbind(results, res.final)
     models[[i]] = mod.final
     fitted.seg.gr = c(fitted.seg.gr, seg.gr.i)
   }
 
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
-    distr.plotting.data = lapply(1:length(fitted.seg.gr), function(i){
-      calculate.density(
-        m = models[[i]],
-        x = NULL,
-        seg.start = GenomicRanges::start(fitted.seg.gr)[i],
-        seg.end = GenomicRanges::end(fitted.seg.gr)[i],
-        stepsize = 1,
-        scale.density = T,
-        return.df = T)
+    distr.plotting.data = lapply(models, function(m) {
+      x = seq(m$seg.start + 1, m$seg.end, by = 1)
+      # Since the density is from 1 to max of segment, pass in the sequence 1...max
+      dens = m$dens(seq_along(x) + 1)
+      data.frame(
+        x = x,
+        dens = dens,
+        dist = m$dist
+      )
     })
+
+    results = do.call(rbind.data.frame, lapply(models, function(m) {
+       if(histogram.metric %in% c("jaccard", "intersect")) {
+         metric = 1 - m$value
+       } else {
+         metric = m$value
+       }
+      data.frame(dist = m$dist, params = dput.str(m$par), metric = 1 - m$value)
+    }))
+
     bpg.plot(
       output.tag = output.tag,
       output.dir = output.dir,
@@ -230,7 +190,7 @@ segment.and.fit = function(
   S4Vectors::mcols(merged.peaks)$i = 1:length(seg.gr)
   S4Vectors::mcols(merged.peaks)$dist = results$dist
   S4Vectors::mcols(merged.peaks)$params = results$params
-  S4Vectors::mcols(merged.peaks)$mse = results$mse
+  S4Vectors::mcols(merged.peaks)$metric = results$metric
   S4Vectors::mcols(merged.peaks)$name = geneinfo$gene
   merged.peaks = .rna.peaks.to.genome(merged.peaks, geneinfo)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1

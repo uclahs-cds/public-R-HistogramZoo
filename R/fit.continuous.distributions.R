@@ -20,7 +20,7 @@ fit.continuous.distributions = function(
   if("unif" %in% fit.mixtures){
     tryCatch(
       expr = {
-        mod$unif <- fitdistrplus::fitdist(
+        mod$unif = fitdistrplus::fitdist(
           data = x,
           distr = "unif")
       },
@@ -35,7 +35,7 @@ fit.continuous.distributions = function(
   if("tnorm" %in% fit.mixtures){
     tryCatch(
       expr = {
-        mod$tnorm <- fitdistrplus::fitdist(
+        mod$tnorm = fitdistrplus::fitdist(
           data = x,
           distr = "tnorm",
           fix.arg = list(a = 0, b = max(x) + 1e-10),
@@ -53,7 +53,7 @@ fit.continuous.distributions = function(
   if("tgamma" %in% fit.mixtures){
     tryCatch(
       expr = {
-        mod$tgamma <- fitdistrplus::fitdist(
+        mod$tgamma = fitdistrplus::fitdist(
           data = x,
           distr = "tgamma",
           fix.arg = list(a = 0, b = max(x)),
@@ -72,7 +72,7 @@ fit.continuous.distributions = function(
   if("tgamma_flip" %in% fit.mixtures){
     tryCatch(
       expr = {
-        mod$tgamma_flip <- fitdistrplus::fitdist(
+        mod$tgamma_flip = fitdistrplus::fitdist(
           data = x,
           distr = "tgamma_flip",
           fix.arg = list(b = max(x) + 1e-10),
@@ -90,12 +90,12 @@ fit.continuous.distributions = function(
   # Mixture of Normals
   if("mixEM" %in% fit.mixtures) {
     # Fit a Normal Mixture model
-    maxiter <- max.iterations
+    maxiter = max.iterations
     # Fit mixture model, silencing output
     out = tryCatch(
       {
       invisible(capture.output({
-        mixfit <- mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
+        mixfit = mixtools::normalmixEM(x, verb = FALSE, maxit = maxiter, epsilon = 1e-04, k = 2)
       }))
       mixfit
       },
@@ -104,7 +104,7 @@ fit.continuous.distributions = function(
         return(NULL)
       }
     )
-    mod$norm_mixture <- out
+    mod$norm_mixture = out
   }
 
   return(mod)
@@ -112,7 +112,7 @@ fit.continuous.distributions = function(
 }
 
 # Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE, distr = c("norm", "gamma")) {
+fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
   metric = match.arg(metric)
   distr = match.arg(distr, several.ok = TRUE)
   # Get one of the metrics from histogram.distances
@@ -121,7 +121,7 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
   freq = x[, 2]
   N = sum(freq)
 
-  .hist.optim <- function(params, .dist = c("norm", "gamma")) {
+  .hist.optim = function(params, .dist = c("norm", "gamma")) {
     # Compute the expected counts for the given parameters
     args = c(list(x = bin), params)
     if(truncated) {
@@ -138,26 +138,29 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
 
   L = sum(bin)
 
-  rtn <- list()
-  # Add uniform distribution
-  unif.dens = 1 / (max(x) - min(x))
-  rtn$unif = list(
-    value = metric.func(freq, rep(unif.dens * N, length(L))),
-    dens = function(x = NULL, scale = TRUE) {
-      if(missing(x)) {
-        x = bin
+  rtn = list()
+  if("unif" %in% distr) {
+    # Add uniform distribution
+    unif.dens = 1 / (max(bin) - min(bin))
+    rtn$unif = list(
+      dist = "unif",
+      value = metric.func(freq, rep(unif.dens * N, length(L))),
+      dens = function(x = NULL, scale = TRUE) {
+        if(missing(x)) {
+          x = bin
+        }
+        res = ifelse(x >= min(bin) & x <= max(bin), unif.dens, 0)
+        if(scale) res * N
+        else res
       }
-      res = ifelse(x >= min(bin) & x <= max(bin), unif.dens, 0)
-      if(scale) res * N
-      else res
-    }
-  )
+    )
+  }
 
   if("norm" %in% distr) {
     hist.mean = sum(freq * bin) / L
     hist.var = sum(freq * (bin - hist.mean)^2) / L
 
-    norm.res <- optim(par = c(hist.mean, sqrt(hist.var)),
+    norm.res = optim(par = c(hist.mean, sqrt(hist.var)),
                       fn = .hist.optim,
                       method = "L-BFGS-B",
                       .dist = "norm",
@@ -165,14 +168,15 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
                       control = list(fnscale = 1),
                       lower = c(-Inf, 0.001),
                       upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
-    names(norm.res$par) <- c("mean", "sd")
+    names(norm.res$par) = c("mean", "sd")
+    norm.res$dist = "norm"
     norm.res$dens = function(x = NULL, scale = TRUE) {
       if(missing(x)) {
         x = bin
       }
       args = c(list(x = x), as.list(norm.res$par))
       res = do.call("dtnorm", args)
-      if(scale) res * sum(bin.data$Freq)
+      if(scale) res * N
       else res
     }
     rtn$norm = norm.res
@@ -182,22 +186,21 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
   if("gamma" %in% distr) {
     shape.init = hist.mean^2 / hist.var
     rate.init = hist.mean / hist.var
-    gamma.res <- optim(par = c(shape.init, rate.init),
+    gamma.res = optim(par = c(shape.init, rate.init),
                        fn = .hist.optim,
                        method = "L-BFGS-B",
                        .dist = "gamma",
                        control = list(fnscale = 1),
-                       #lower = c(0.001, 0.01)
-                       lower =c(0.001, 0.000001)
-                       )
-    names(gamma.res$par) <- c("shape", "rate")
+                       lower =c(0.001, 0.000001))
+    names(gamma.res$par) = c("shape", "rate")
+    gamma.res$dist = "gamma"
     gamma.res$dens = function(x = NULL, scale = TRUE) {
       if(missing(x)) {
         x = bin
       }
       args = c(list(x = x), as.list(gamma.res$par))
       res = do.call("dtgamma", args)
-      if(scale) res * sum(bin.data$Freq)
+      if(scale) res * N
       else res
     }
     rtn$gamma = gamma.res
@@ -205,3 +208,5 @@ fit.distributions.optim <- function(x, metric = c("jaccard", "intersection", "ks
 
   rtn
 }
+
+# fit.histogram.metric.distributions = function(x, seg.start, seg.end, fit.mixtures = c("norm", "gamma"), optimal.uniform = TRUE)
