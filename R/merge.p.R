@@ -3,14 +3,15 @@
   merged.peaks,
   annotation,
   all.samples,
-  id.cols
+  name.id,
+  peak.id
 ){
 
   # Numeric Stability
   peaksgr$score = ifelse(peaksgr$score == 0, 2e-16, peaksgr$score)
 
   # Tag
-  merged.peaks$tag = apply(GenomicRanges::mcols(merged.peaks)[,id.cols], 1, function(x) paste(x, collapse = ":"))
+  merged.peaks$tag = paste0(GenomicRanges::mcols(merged.peaks)[,name.id], ":", GenomicRanges::mcols(merged.peaks)[,peak.id])
 
   # Finding Overlaps
   overlaps = GenomicRanges::findOverlaps(merged.peaks, peaksgr)

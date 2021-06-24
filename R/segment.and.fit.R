@@ -151,6 +151,16 @@ segment.and.fit = function(
     fitted.seg.gr = c(fitted.seg.gr, seg.gr.i)
   }
 
+  results = do.call(rbind.data.frame, lapply(models, function(m) {
+     if(histogram.metric %in% c("jaccard", "intersect")) {
+       metric = 1 - m$value
+     } else {
+       metric = m$value
+     }
+    data.frame(dist = m$dist, params = dput.str(m$par), metric = 1 - m$value)
+  }))
+
+
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
     distr.plotting.data = lapply(models, function(m) {
@@ -163,15 +173,6 @@ segment.and.fit = function(
         dist = m$dist
       )
     })
-
-    results = do.call(rbind.data.frame, lapply(models, function(m) {
-       if(histogram.metric %in% c("jaccard", "intersect")) {
-         metric = 1 - m$value
-       } else {
-         metric = m$value
-       }
-      data.frame(dist = m$dist, params = dput.str(m$par), metric = 1 - m$value)
-    }))
 
     bpg.plot(
       output.tag = output.tag,
@@ -196,9 +197,25 @@ segment.and.fit = function(
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
 
   # Generating BED12 File
-  peaks.final = .bed6tobed12(merged.peaks = merged.peaks, id.cols = c("name", "i", "dist"))
+  peaks.final = .bed6tobed12(
+    merged.peaks = merged.peaks,
+    name.id = "name",
+    peak.id = "i",
+    score.id = "metric",
+    distribution.id = "dist",
+    meta.id = "params"
+  )
+
   # P-Value Table
-  sample.pval = .merge.p(peaksgr, merged.peaks = merged.peaks, annotation, all.samples, id.cols = c("name", "i", "dist"))
+  sample.pval = .merge.p(
+    peaksgr = peaksgr,
+    merged.peaks = merged.peaks,
+    annotation = annotation,
+    all.samples = all.samples,
+    name.id = "name",
+    peak.id = "i"
+  )
+
   # Output Table
   output.table = merge(peaks.final, sample.pval, by = "peak", all = T)
 
