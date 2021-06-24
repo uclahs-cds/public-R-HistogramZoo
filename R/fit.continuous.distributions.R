@@ -111,7 +111,7 @@ fit.continuous.distributions = function(
 
 }
 
-# Fit the model parameters by optimizing a histogram metric
+#' Fit the model parameters by optimizing a histogram metric
 fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
   metric = match.arg(metric)
   distr = match.arg(distr, several.ok = TRUE)
@@ -179,7 +179,9 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
       if(scale) res * N
       else res
     }
-    rtn$norm = norm.res
+    # Only
+    if(norm.res$convergence == 0) rtn$norm = norm.res
+    else warning("fit.distributions.optim: Normal distribution did not converge.")
   }
 
 
@@ -203,7 +205,8 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
       if(scale) res * N
       else res
     }
-    rtn$gamma = gamma.res
+    if(gamma.res$convergence == 0) rtn$gamma = gamma.res
+    else warning("fit.distributions.optim: Gamma distribution did not converge.")
   }
 
   rtn
