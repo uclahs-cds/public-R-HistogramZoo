@@ -157,7 +157,7 @@ segment.and.fit = function(
      } else {
        metric = m$value
      }
-    data.frame(dist = m$dist, params = dput.str(m$par), metric = 1 - m$value)
+    data.frame(dist = m$dist, params = dput.str(m$par), metric = metric)
   }))
 
 
