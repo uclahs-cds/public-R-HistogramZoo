@@ -80,7 +80,6 @@ find.uniform.segment = function(x, metric = c("jaccard", "intersection", "ks"), 
       h.sub = x.sub / sum(x.sub)
 
       m = metric.func(h.sub, p.unif.sub)
-      if(metric %in% c("jaccard", "intersection")) m = 1 - m
 
       list(a = a, b = b, metric = m)
     })
@@ -91,13 +90,13 @@ find.uniform.segment = function(x, metric = c("jaccard", "intersection", "ks"), 
   res.df$length = res.df$b - res.df$a
 
   # Select the longest interval that is within 1 sd of the maximum
-  max.metric = max(res.df$metric)
-  sd.metric = sd(res.df$metric)
-  # The range in which we are looking for the maximum
-  res.sd.range = res.df[res.df$metric >= max.metric - sd.metric * max.sd.size, ]
-  max.interval.index = which.max(res.sd.range$length)
+  min.metric = min(res.df$metric, na.rm = T)
+  sd.metric = sd(res.df$metric, na.rm = T)
+  # The range in which we are looking for the minimum
+  res.sd.range = res.df[res.df$metric <= min.metric + sd.metric * max.sd.size, ]
+  min.interval.index = which.min(res.sd.range$length)
 
-  as.list(res.sd.range[max.interval.index,])
+  as.list(res.sd.range[min.interval.index,])
 }
 
 # Uniform Generation
