@@ -120,6 +120,9 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
   bin = x[, 1]
   freq = x[, 2]
   N = sum(freq)
+  L = sum(bin)
+  hist.mean = sum(freq * bin) / L
+  hist.var = sum(freq * (bin - hist.mean)^2) / L
 
   .hist.optim = function(params, .dist = c("norm", "gamma")) {
     # Compute the expected counts for the given parameters
@@ -129,14 +132,16 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
       args$b = max(bin) + 1e-10
     }
     trunc.letter = if(truncated) "t" else ""
-    dens = do.call(paste0("d", trunc.letter, .dist), args) * N
+    dens = tryCatch({
+      do.call(paste0("d", trunc.letter, .dist), args) * N
+    }, error = function(err) {
+      rep(0, length(bin))
+    })
     dens[is.na(dens)] = 0
     res = metric.func(freq, dens)
     if(is.na(res) || res == -Inf) browser()
     res
   }
-
-  L = sum(bin)
 
   rtn = list()
   if("unif" %in% distr) {
@@ -157,9 +162,6 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
   }
 
   if("norm" %in% distr) {
-    hist.mean = sum(freq * bin) / L
-    hist.var = sum(freq * (bin - hist.mean)^2) / L
-
     norm.res = optim(par = c(hist.mean, sqrt(hist.var)),
                       fn = .hist.optim,
                       method = "L-BFGS-B",
