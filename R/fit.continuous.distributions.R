@@ -112,7 +112,7 @@ fit.continuous.distributions = function(
 }
 
 #' Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
+fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks", "mse", "chisq"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
   metric = match.arg(metric)
   distr = match.arg(distr, several.ok = TRUE)
   # Get one of the metrics from histogram.distances
@@ -139,7 +139,7 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
     })
     dens[is.na(dens)] = 0
     res = metric.func(freq, dens)
-    if(is.na(res) || res == -Inf) browser()
+    if(is.na(res) || res == -Inf || res == Inf) browser()
     res
   }
 
@@ -168,9 +168,14 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
                       .dist = "norm",
                       # fnscale = -1 does maximization and 1 for minimization
                       control = list(fnscale = 1),
-                      lower = c(-Inf, 0.001),
+                      lower = c(0, 0.001),
                       upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
     names(norm.res$par) = c("mean", "sd")
+    norm.res$par <- as.list(norm.res$par)
+    if(truncated) {
+      norm.res$par$a =  min(bin) - 1e-10
+      norm.res$par$b = max(bin) + 1e-10
+    }
     norm.res$dist = "norm"
     norm.res$dens = function(x = NULL, scale = TRUE) {
       if(missing(x)) {
@@ -197,6 +202,11 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
                        control = list(fnscale = 1),
                        lower =c(0.001, 0.000001))
     names(gamma.res$par) = c("shape", "rate")
+    gamma.res$par <- as.list(gamma.res$par)
+    if(truncated) {
+      gamma.res$par$a =  min(bin) - 1e-10
+      gamma.res$par$b = max(bin) + 1e-10
+    }
     gamma.res$dist = "gamma"
     gamma.res$dens = function(x = NULL, scale = TRUE) {
       if(missing(x)) {
