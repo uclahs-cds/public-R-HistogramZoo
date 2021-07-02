@@ -23,3 +23,13 @@ histogram.jaccard <- function(x, y) {
 histogram.ks <- function(x, y) {
   max(abs(x - y), na.rm = TRUE)
 }
+
+#' Mean-squared error
+histogram.mse <- function(x, y) {
+  mean((x - y)^2)
+}
+
+#' Chi-Squared
+histogram.chisq <- function(x, y) {
+  sum((x - y)^2 / x + y)
+}
