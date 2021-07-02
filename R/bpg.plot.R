@@ -131,7 +131,7 @@ bpg.plot = function(
     metric.at =  seq(0.75, 1, 0.05) # fix this when scaled
   } else {
     min.at = 0
-    max.at = max(heatmap.data$metric)
+    max.at = max(heatmap.data$metric, na.rm = T)
     hm.gof.colour.scheme = rev(hm.gof.colour.scheme)
   }
   metric.at = seq(min.at, max.at, length.out = 21)
