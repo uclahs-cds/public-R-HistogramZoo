@@ -200,7 +200,7 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
                        method = "L-BFGS-B",
                        .dist = "gamma",
                        control = list(fnscale = 1),
-                       lower =c(0.001, 0.000001))
+                       lower =c(0.001, 0.001))
     names(gamma.res$par) = c("shape", "rate")
     gamma.res$par <- as.list(gamma.res$par)
     if(truncated) {
