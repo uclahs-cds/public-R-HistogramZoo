@@ -184,7 +184,8 @@ segment.and.fit = function(
       seg.gr=seg.gr,
       p=p,
       fitted.seg.gr = fitted.seg.gr,
-      results = results)
+      results = results,
+      histogram.metric = histogram.metric)
   }
 
   # Generating Peaks

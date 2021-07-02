@@ -8,8 +8,18 @@ bpg.plot = function(
   seg.gr,
   p,
   fitted.seg.gr,
-  results
+  results,
+  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 ) {
+  histogram.metric = match.arg(histogram.metric)
+
+  metric.label = switch(histogram.metric,
+                        "jaccard" = "Jaccard Index",
+                        "intersection" = "Histogram Intersection",
+                        "ks" = "KS Statistic",
+                        "mse" = "Mean Squared Error",
+                        "chisq" = "Chi-square statistic"
+                        )
 
   # Plotting data
   n.distributions = length(distr.plotting.data)
@@ -114,15 +124,27 @@ bpg.plot = function(
     print.colour.key = F
   )
 
+  hm.gof.colour.scheme = c('dodgerblue4', 'firebrick')
+  if(histogram.metric %in% c("jaccard", "intersection")) {
+    max.at = 1
+    min.at = 0
+    metric.at =  seq(0.75, 1, 0.05) # fix this when scaled
+  } else {
+    min.at = 0
+    max.at = max(heatmap.data$metric)
+    hm.gof.colour.scheme = rev(hm.gof.colour.scheme)
+  }
+  metric.at = seq(min.at, max.at, length.out = 21)
+
   hm.gof = BoutrosLab.plotting.general::create.heatmap(
     heatmap.data[,c("metric", "metric")],
     clustering.method = 'none',
     # Plotting Characteristics
-    axes.lwd = 1,
+    axes.lwd = 0,
     yaxis.tck = 0,
     # Colours
-    colour.scheme = c('dodgerblue4', 'firebrick'),
-    at = seq(0, 1, 0.05), # fix this when scaled
+    colour.scheme = hm.gof.colour.scheme,
+    at = metric.at,
     fill.colour = "white",
     # Adding lines for segments
     force.grid.col = TRUE,
@@ -187,9 +209,9 @@ bpg.plot = function(
       lwd = 0.5
     ),
     legend = list(
-      colours = c('dodgerblue4', 'firebrick'),
-      labels = c(0, 1),
-      title = expression(bold(underline('Jaccard Index'))),
+      colours = hm.gof.colour.scheme,
+      labels = c(min.at, formatC(max.at, format = "e", digits = 2)),
+      title = bquote(bold(underline(.(metric.label)))),
       continuous = TRUE,
       height = 2,
       angle = -90,
