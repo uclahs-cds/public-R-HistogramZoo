@@ -27,9 +27,10 @@ segment.and.fit = function(
   truncated.models = FALSE,
   uniform.peak.threshold = 0.75,
   uniform.peak.stepsize = 5,
-  histogram.metric = "jaccard",
+  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   eps = 1
 ){
+  histogram.metric = match.arg(histogram.metric)
 
   # If the gene doesn't have peaks
   if(!gene %in% peaks$name){
@@ -219,6 +220,6 @@ segment.and.fit = function(
   # Output Table
   output.table = merge(peaks.final, sample.pval, by = "peak", all = T)
 
-  return(output.table)
+  return(list(output.table = output.table, results = results))
 
 }
