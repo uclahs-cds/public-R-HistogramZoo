@@ -220,7 +220,7 @@ segment.and.fit = function(
 
   # Output Table
   output.table = merge(peaks.final, sample.pval, by = "peak", all = T)
-
-  return(list(output.table = output.table, results = results))
+  return(output.table)
+  # return(list(output.table = output.table, results = results))
 
 }
