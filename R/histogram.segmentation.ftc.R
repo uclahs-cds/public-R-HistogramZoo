@@ -1,14 +1,14 @@
 #' Take a vector of values and get the histogram for integer breaks
 #' @param x the observation
 #' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
-obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.data.frame = FALSE) {
-  a = floor(min(x))
+obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
+  a = floor(min(x))-1
   b = ceiling(max(x))
   breaks = a:b
   if(add.zero.endpoints) breaks = c(a - 1, breaks, b + 1)
   rtn = table(cut(x, breaks = breaks))
   names(rtn) <- breaks[2:length(breaks)]
-  if(as.data.frame) {
+  if(as.df) {
     rtn <- as.data.frame(rtn)
     colnames(rtn) <- c("x", "Freq")
     rtn$x <- as.integer(as.character(rtn$x))

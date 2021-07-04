@@ -105,13 +105,14 @@ segment.and.fit = function(
     # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
+    seg.len = seg.end - seg.start + 1
     x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
     # Adjusting X
     x.adjusted = (x - seg.start) + 1
     #x.range = seg.start:seg.end
     #x.range.adjusted = (x - seg.start) + 1e-10
 
-    bin.data = obs.to.int.hist(x.adjusted, as.data.frame = TRUE, add.zero.endpoints = FALSE)
+    bin.data = obs.to.int.hist(x.adjusted, as.df = TRUE, add.zero.endpoints = FALSE)
     dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models)
     dist.optim = lapply(dist.optim, function(y) {
       y$seg.start = seg.start
@@ -120,20 +121,22 @@ segment.and.fit = function(
     })
 
     # Find the maximum uniform segment
-    max.unif.results = find.uniform.segment(bin.data$Freq, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
-    # Use the maximum segment
-    unif.segment = unlist(max.unif.results[c('a', 'b')])
-    unif.segment.adj =  unif.segment
-    x.subset = x[x >= unif.segment.adj[1] & x <= unif.segment.adj[2]]
-    bin.data.subset = bin.data[bin.data$x >= unif.segment.adj[1] & bin.data$x <= unif.segment.adj[2],]
-    bin.data.subset$x = bin.data.subset$x - unif.segment.adj[1] + 1
-    # Fit uniform distribution on maximum uniform segment
-    dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
-    # Adjust the segment starts from the shifted max uniform segment
-    dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
-    dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
+    if(seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
+      max.unif.results = find.uniform.segment(bin.data$Freq, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
+      # Use the maximum segment
+      unif.segment = unlist(max.unif.results[c('a', 'b')])
+      unif.segment.adj =  unif.segment
+      x.subset = x[x >= unif.segment.adj[1] & x <= unif.segment.adj[2]]
+      bin.data.subset = bin.data[bin.data$x >= unif.segment.adj[1] & bin.data$x <= unif.segment.adj[2],]
+      bin.data.subset$x = bin.data.subset$x - unif.segment.adj[1] + 1
+      # Fit uniform distribution on maximum uniform segment
+      dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
+      # Adjust the segment starts from the shifted max uniform segment
+      dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
+      dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
 
-    dist.optim$max_unif = dist.optim.subset$unif
+      dist.optim$max_unif = dist.optim.subset$unif
+    }
 
     # Extract all of the "value" keys from each of the models
     # The value = the metric we were optimizing
