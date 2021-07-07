@@ -64,10 +64,6 @@ segment.and.fit = function(
   bins = unlist(GenomicRanges::tile(genegr, width = 1))
   bin.counts = data.frame(GenomicRanges::binnedAverage(bins, peak.coverage, "Coverage"), stringsAsFactors = F)
 
-  # Segmenting & Determining which segments are peaks
-  # smooth.coverage = smooth.spline( bin.counts$start, bin.counts$Coverage, spar = 0.3)
-  # p = find.peaks(x = -smooth.coverage$y, m = 150, diff.threshold = 10^-7)
-
   # Tiling Peaks
   peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
   peak.counts = GenomicRanges::start(peak.counts)
@@ -122,7 +118,7 @@ segment.and.fit = function(
 
     # Find the maximum uniform segment
     if(seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
-      max.unif.results = find.uniform.segment(bin.data$Freq, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
+      max.unif.results = find.uniform.segment(bin.data$Freq, metric = histogram.metric, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
       # Use the maximum segment
       unif.segment = unlist(max.unif.results[c('a', 'b')])
       unif.segment.adj =  unif.segment
