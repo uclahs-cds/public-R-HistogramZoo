@@ -31,5 +31,5 @@ histogram.mse <- function(x, y) {
 
 #' Chi-Squared
 histogram.chisq <- function(x, y) {
-  sum((x - y)^2 / x + y)
+  sum((x - y)^2 / (x + y))
 }
