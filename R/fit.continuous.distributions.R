@@ -121,8 +121,8 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
   freq = x[, 2]
   N = sum(freq)
   L = sum(bin)
-  hist.mean = sum(freq * bin) / L
-  hist.var = sum(freq * (bin - hist.mean)^2) / L
+  hist.mean = sum(freq * bin) / N
+  hist.var = sum(freq * (bin - hist.mean)^2) / N
 
   .hist.optim = function(params, .dist = c("norm", "gamma")) {
     # Compute the expected counts for the given parameters
