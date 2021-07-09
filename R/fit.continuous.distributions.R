@@ -168,7 +168,7 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
                       .dist = "norm",
                       # fnscale = -1 does maximization and 1 for minimization
                       control = list(fnscale = 1),
-                      lower = c(0, 0.001),
+                      lower = c(min(bin), 0.001),
                       upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
     names(norm.res$par) = c("mean", "sd")
     norm.res$par <- as.list(norm.res$par)
