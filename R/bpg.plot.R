@@ -38,6 +38,11 @@ bpg.plot = function(
   # Plotting Data
   lineplot.data = rbind(distplot.data, bin.counts)
 
+  # Residuals
+  residual.data = merge(distplot.data[,c("x", "dens")], bin.counts[,c("x", "dens")], by = "x", all = T)
+  colnames(residual.data) = c("x", "fitted", "real")
+  residual.data$resid = residual.data$real - residual.data$fitted
+
   # Colours
   col.reference = structure(c("black", "darkorange", "chartreuse4", "darkorchid4"),
                             names = c("coverage", "norm", "gamma", "unif"))
@@ -73,6 +78,26 @@ bpg.plot = function(
     points.y = points$dens,
     points.pch = 19,
     points.col = 'red'
+  )
+
+  sc.res =  BoutrosLab.plotting.general::create.scatterplot(
+    resid ~ x,
+    residual.data,
+    # Groups
+    # groups = residual.data$something,
+    col = "darkgrey",
+    # Axes
+    xlimits = c(0, geneinfo$exome_length),
+    xaxis.cex = 0,
+    xlab.cex = 0,
+    ylab.cex = 1,
+    xaxis.tck = 0,
+    yaxis.cex = 1,
+    ylab.label = "Residuals",
+    main.cex = 0,
+    # Lines & PCH
+    type = c('p'),
+    cex = 0.5
   )
 
   # Generating Gene Segments
@@ -203,6 +228,12 @@ bpg.plot = function(
       lwd = 0.5
     ),
     legend = list(
+      colours = 'darkgrey',
+      labels = 'Obs - Exp',
+      title = expression(bold(underline('Residuals'))),
+      lwd = 0.5
+    ),
+    legend = list(
       colours = col.reference[2:length(col.reference)],
       labels = names(col.reference)[2:length(col.reference)],
       title = expression(bold(underline('Distributions'))),
@@ -245,8 +276,8 @@ bpg.plot = function(
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
-    plot.objects = list(sc, hm.fu, hm.gof, hm.coverage),
-    plot.objects.heights = c(10, 1, 1, transcript.height),
+    plot.objects = list(sc, sc.res, hm.fu, hm.gof, hm.coverage),
+    plot.objects.heights = c(10, 3, 1, 1, transcript.height),
     y.spacing = -4,
     # Labels
     main = geneinfo$gene,
