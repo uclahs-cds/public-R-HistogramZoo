@@ -80,12 +80,13 @@ bpg.plot = function(
     points.col = 'red'
   )
 
+  resid.chgpts = which(abs(diff(sign(residual.data$resid))) == 2)
   sc.res =  BoutrosLab.plotting.general::create.scatterplot(
     resid ~ x,
     residual.data,
     # Groups
     # groups = residual.data$something,
-    col = "darkgrey",
+    col = "black",
     # Axes
     xlimits = c(0, geneinfo$exome_length),
     xaxis.cex = 0,
@@ -97,7 +98,13 @@ bpg.plot = function(
     main.cex = 0,
     # Lines & PCH
     type = c('p'),
-    cex = 0.5
+    cex = 0.01,
+    # Adding lines at changepoints
+    abline.v = resid.chgpts,
+    abline.h = 0,
+    abline.lty = "dotted",
+    abline.col = "lightgrey",
+    abline.lwd = 0.01
   )
 
   # Generating Gene Segments
@@ -228,8 +235,8 @@ bpg.plot = function(
       lwd = 0.5
     ),
     legend = list(
-      colours = 'darkgrey',
-      labels = 'Obs - Exp',
+      colours = c('black', 'lightgrey'),
+      labels = c('Obs - Exp', 'Intersect points'),
       title = expression(bold(underline('Residuals'))),
       lwd = 0.5
     ),
