@@ -130,5 +130,3 @@ fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks"
 
   rtn
 }
-
-# fit.histogram.metric.distributions = function(x, seg.start, seg.end, fit.mixtures = c("norm", "gamma"), optimal.uniform = TRUE)

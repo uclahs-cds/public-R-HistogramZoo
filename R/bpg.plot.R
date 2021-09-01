@@ -9,6 +9,14 @@ bpg.plot = function(
   results
 ) {
 
+  # metric.label = switch(
+  #   met,
+  #   "jaccard" = "Jaccard Index",
+  #   "intersection" = "Histogram Intersection",
+  #   "ks" = "KS Statistic",
+  #   "mse" = "Mean Squared Error",
+  #   "chisq" = "Chi-square statistic")
+
   # Bin counts
   bin.counts = bin.counts[,c("start", "Coverage")]
   bin.counts$dist = "coverage"
@@ -52,7 +60,7 @@ bpg.plot = function(
     xlab.cex = 0,
     ylab.cex = 1,
     xaxis.tck = 0,
-    yaxis.cex = 1,
+    yaxis.cex = 0.8,
     ylab.label = "Coverage (at BP resolution)",
     main.cex = 0,
     # Lines & PCH
@@ -78,9 +86,9 @@ bpg.plot = function(
     xaxis.cex = 0,
     xlab.cex = 0,
     ylab.cex = 1,
-    xaxis.tck = 0,
-    yaxis.cex = 1,
     ylab.label = "Residuals",
+    xaxis.tck = 0,
+    yaxis.cex = 0.8,
     main.cex = 0,
     # Lines & PCH
     type = c('p'),
@@ -94,85 +102,72 @@ bpg.plot = function(
   )
 
   # Goodness of Fit
+  gof.mat = matrix(NA, ncol = 1, nrow = geneinfo$exome_length, dimnames = list(1:geneinfo$exome_length, "val"))
+  res.final = results[results$final == 1,, drop = F]
+  for(i in 1:nrow(res.final)){gof.mat[res.final$seg.start[i]:res.final$seg.end[i],1] <- res.final$value[i]}
+  # Legend metrics
+  min.at = min(min(gof.mat, na.rm = T), 0.8)
+  max.at = 1
+
+  gof.hm = BoutrosLab.plotting.general::create.heatmap(
+      gof.mat[,c("val", "val")],
+      clustering.method = 'none',
+      # Plotting Characteristics
+      axes.lwd = 0,
+      yaxis.tck = 0,
+      # Y axis Labels
+      yaxis.cex = 0.8,
+      yaxis.lab = "Jaccard Index",
+      yat = 1.5,
+      # Colours
+      colour.scheme = c("dodgerblue4", "gold"),
+      at = seq(min.at, max.at, length.out = 10),
+      fill.colour = "white",
+      # Adding lines for segments
+      force.grid.col = TRUE,
+      grid.col = TRUE,
+      col.lines = peak.endpoints,
+      col.lwd = 1,
+      print.colour.key = F
+  )
+
+  # Distribution Voting
   peak.endpoints = sort(unique(c(results$seg.start, results$seg.end)))
-  unique.mets = sort(unique(results$metric))
+  results$metric[results$final == 1] <- "MaxVote"
+  unique.mets = unique(results$metric)
+  unique.mets = unique.mets[order(match(unique.mets, rev(c("MaxVote", "jaccard", "intersection", "mse", "chisq", "ks"))))]
   result.mat = matrix(NA, ncol = length(unique.mets), nrow = geneinfo$exome_length, dimnames = list(1:geneinfo$exome_length, unique.mets))
-  for(i in 1:nrow(results)){result.mat[results$seg.start[i]:results$seg.end[i],results$metric[i]] <- results$value[i]}
+  for(i in 1:nrow(results)){result.mat[results$seg.start[i]:results$seg.end[i],results$metric[i]] <- col.numeric[results$dist[i]]}
 
-  # Plotting modifications
-  res.plts = list()
-  leg.list = list()
-  for(met in unique.mets){
-
-    value.col = c("dodgerblue4", "gold")
-    if(met %in% c("jaccard", "intersection")) {
-      max.at = 1
-      min.at = 0
-      metric.at =  seq(0.75, 1, 0.05) # fix this when scaled
-    } else {
-      min.at = 0
-      max.at = max(result.mat[,met], na.rm = T)
-      value.col = rev(value.col)
-    }
-    metric.at = seq(min.at, max.at, length.out = 21)
-
-    # Determining if vote was correct
-    # governing.vote = results[results$metric == met & results$vote == 1,]
-    # governing.vote = rowMeans(governing.vote[,c("seg.start", "seg.end")])
-
-    plt.i = BoutrosLab.plotting.general::create.heatmap(
-        result.mat[,c(met, met)],
-        clustering.method = 'none',
-        # Plotting Characteristics
-        axes.lwd = 0,
-        yaxis.tck = 0,
-        # Y axis Labels
-        yaxis.cex = 1,
-        yaxis.lab = met,
-        yat = 1.5,
-        # Colours
-        colour.scheme = value.col,
-        at = metric.at,
-        fill.colour = "white",
-        # Adding lines for segments
-        force.grid.col = TRUE,
-        grid.col = TRUE,
-        col.lines = peak.endpoints,
-        col.lwd = 1,
-        # Adding Voting Metrics
-        # row.pos = 1.5,
-        # col.pos = as.numeric(governing.vote),
-        # cell.text = rep("V", length(governing.vote)),
-        # text.col = "black",
-        # text.cex = 0.9,
-        # Colourkey
-        print.colour.key = F
-      )
-    res.plts[[met]] <- plt.i
-
-    metric.label = switch(
-      met,
-      "jaccard" = "Jaccard Index",
-      "intersection" = "Histogram Intersection",
-      "ks" = "KS Statistic",
-      "mse" = "Mean Squared Error",
-      "chisq" = "Chi-square statistic")
-
-    legend = list(
-      colours = value.col,
-      labels = c(min.at, formatC(max.at, format = "e", digits = 2)),
-      title = bquote(bold(underline(.(metric.label)))),
-      continuous = TRUE,
-      height = 2,
-      angle = -90,
-      tck = 1,
-      tck.number = 3,
-      at = c(0,100),
-      labels.rot = 0,
-      lwd = 0.5
-    )
-    leg.list[[met]] <- legend
-  }
+  dist.hm = BoutrosLab.plotting.general::create.heatmap(
+    result.mat,
+    clustering.method = 'none',
+    # Plotting Characteristics
+    axes.lwd = 0,
+    yaxis.tck = 0,
+    # Y axis Labels
+    yaxis.cex = 0.8,
+    yaxis.lab = colnames(result.mat),
+    ylab.cex = 1,
+    ylab.label = "Metrics",
+    # Colours
+    at = seq(-0.5, length(col.reference), 1),
+    total.colours = length(col.reference) + 1,
+    colour.scheme = c('white', col.reference[2:length(col.reference)]),
+    fill.colour = "white",
+    # Adding lines for segments
+    force.grid.col = TRUE,
+    grid.col = TRUE,
+    col.lines = peak.endpoints,
+    col.lwd = 1,
+    force.grid.row = TRUE,
+    grid.row = T,
+    row.lines = 1:ncol(result.mat)+0.5,
+    row.lwd = 1,
+    row.colour = c(rep("black", ncol(result.mat)-2), "red"),
+    # Colourkey
+    print.colour.key = F
+  )
 
   # Generating Exons
   genegr = GenomicRanges::GRanges(seqnames = geneinfo$chr, IRanges::IRanges(start = 1, end = geneinfo$exome_length), strand = geneinfo$strand)
@@ -220,7 +215,7 @@ bpg.plot = function(
   )
 
   # Legend
-  covariate.legend.top <- list(
+  covariate.legend <- list(
     legend = list(
       colours = 'red',
       labels = c("FTC Endpoints"),
@@ -244,9 +239,20 @@ bpg.plot = function(
       labels = names(col.reference)[2:length(col.reference)],
       title = expression(bold(underline('Distributions'))),
       lwd = 0.5
-    )
-  )
-  covariate.legend.bottom <- list(
+    ),
+    legend = list(
+      colours = c('dodgerblue4', 'gold'),
+      labels = c(formatC(min.at, format = "g", digits = 2), max.at),
+      title = bquote(bold(underline(.("Jaccard Index")))),
+      continuous = TRUE,
+      height = 2,
+      angle = -90,
+      tck = 1,
+      tck.number = 3,
+      at = c(0,100),
+      labels.rot = 0,
+      lwd = 0.5
+    ),
     legend = list(
       colours = c("pink"),
       labels = c("Exon"),
@@ -254,8 +260,6 @@ bpg.plot = function(
       lwd = 0.5
     )
   )
-  covariate.legend = c(covariate.legend.top, leg.list, covariate.legend.bottom)
-  names(covariate.legend) = rep("legend", length(covariate.legend))
 
   side.legend <- BoutrosLab.plotting.general::legend.grob(
     legends = covariate.legend,
@@ -271,11 +275,11 @@ bpg.plot = function(
   pdf(filename, width = 10, height = 10)
 
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
-  res.height = max(0.8, length(res.plts)/5)
+  distplot.height = min(2.8, length(unique.mets)*0.8)
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
-    plot.objects = c(list(sc), list(sc.res), res.plts, list(hm.coverage)),
-    plot.objects.heights = c(10, 3, rep(res.height, length(res.plts)), transcript.height),
+    plot.objects = list(sc, sc.res, gof.hm, dist.hm, hm.coverage),
+    plot.objects.heights = c(10, 3, 1, distplot.height, transcript.height),
     y.spacing = -5,
     # Labels
     main = geneinfo$gene,

@@ -30,7 +30,7 @@ segment.and.fit = function(
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   eps = 1
 ){
-  histogram.metric = match.arg(histogram.metric)
+  histogram.metric = match.arg(histogram.metric, several.ok = T)
 
   # If the gene doesn't have peaks
   if(!gene %in% peaks$name){
@@ -149,19 +149,20 @@ segment.and.fit = function(
       "params" = unlist(lapply(dist.optim, function(m) dput.str(m$par))),
       "seg.start" = unlist(lapply(dist.optim, `[[`, "seg.start")),
       "seg.end" = unlist(lapply(dist.optim, `[[`, "seg.end")),
+      "final" = 0,
       stringsAsFactors=F
     )
-    value.mat = reshape2::acast(value.df, formula = metric ~ dist, value.var = "value")
-    distr.vote = colnames(value.mat)[apply(value.mat, 1, which.min)]
-    names(distr.vote) = rownames(value.mat)
-    distr.tally = table(distr.vote)
-    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, distr.vote["jaccard"], names(distr.tally)[which.max(distr.tally)])
-    governing.metric = names(distr.vote)[distr.vote == best.distr]
-    value.df$vote = ifelse(value.df$metric %in% governing.metric, 1, 0)
+    distr.vote = aggregate(value ~ metric, value.df, FUN = min)
+    vote.df = merge(value.df, distr.vote, by = c("metric", "value"))
+    distr.tally = table(vote.df$dist)
+    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, vote.df$dist["jaccard"], names(distr.tally)[which.max(distr.tally)])
+    final.res = value.df[value.df$metric == "jaccard" & value.df$dist == best.distr,]
+    final.res$final <- 1
+    vote.df = rbind.data.frame(vote.df, final.res)
 
     mod.final = dist.optim[[paste0("jaccard.", best.distr)]]
     models[[i]] = mod.final
-    results = rbind(results, value.df[value.df$dist == best.distr,])
+    results = rbind(results, vote.df)
   }
 
   # Correcting for optimization via finding the minimum
