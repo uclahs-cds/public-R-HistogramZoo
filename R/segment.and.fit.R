@@ -127,18 +127,38 @@ segment.and.fit = function(
       bin.data.subset$x = bin.data.subset$x - unif.segment.adj[1] + 1
       # Fit uniform distribution on maximum uniform segment
       dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
-      # Adjust the segment starts from the shifted max uniform segment
-      dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
-      dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
 
-      dist.optim$max_unif = dist.optim.subset$unif
+      # Adjust the segment starts from the shifted max uniform segment
+      # dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
+      # dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
+      # dist.optim$max_unif = dist.optim.subset$unif
+      dist.optim.subset = lapply(dist.optim.subset, function(y) {
+        y$seg.start = unif.segment.adj[1] + seg.start
+        y$seg.end = unif.segment.adj[2] + seg.start
+        y$dist = "unif"
+        y
+      })
+      for(munif in names(dist.optim.subset)){dist.optim[[munif]] <- dist.optim.subset[[munif]]}
     }
 
-    # Extract all of the "value" keys from each of the models
-    # The value = the metric we were optimizing
-    metric.values = unlist(lapply(dist.optim, `[[`, "value"))
+    # Metric Voting
+    value.df = data.frame(
+      "i" = i,
+      "value" = unlist(lapply(dist.optim, `[[`, "value")),
+      "dist" = unlist(lapply(dist.optim, `[[`, "dist")),
+      "metric" = unlist(lapply(dist.optim, `[[`, "metric")),
+      "params" = unlist(lapply(dist.optim, function(m) dput.str(m$par))),
+      "seg.start" = unlist(lapply(dist.optim, `[[`, "seg.start")),
+      "seg.end" = unlist(lapply(dist.optim, `[[`, "seg.end")),
+      stringsAsFactors=F
+    )
+    value.mat = reshape2::acast(value.df, formula = metric ~ dist, value.var = "value")
+    distr.vote = colnames(value.mat)[apply(value.mat, 1, which.min)]
+    names(distr.vote) = rownames(value.mat)
+    distr.tally = table(distr.vote)
+    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, distr.vote["jaccard"], names(distr.tally)[which.max(distr.tally)])
 
-    mod.final = dist.optim[[which.min(metric.values)]]
+    mod.final = dist.optim[[paste0("jaccard.", best.distr)]]
 
     seg.gr.i = GenomicRanges::GRanges(
              seqnames = geneinfo$chr,
@@ -148,18 +168,12 @@ segment.and.fit = function(
              strand = geneinfo$strand)
 
     models[[i]] = mod.final
+    results = rbind(results, value.df[value.df$dist == best.distr,])
     fitted.seg.gr = c(fitted.seg.gr, seg.gr.i)
   }
 
-  results = do.call(rbind.data.frame, lapply(models, function(m) {
-     if(histogram.metric %in% c("jaccard", "intersect")) {
-       metric = 1 - m$value
-     } else {
-       metric = m$value
-     }
-    data.frame(dist = m$dist, params = dput.str(m$par), metric = metric)
-  }))
-
+  # Correcting for optimization via finding the minimum
+  results$value[results$metric %in% c("jaccard", "intersect")] <- 1 - results$value[results$metric %in% c("jaccard", "intersect")]
 
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
