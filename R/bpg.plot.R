@@ -5,49 +5,35 @@ bpg.plot = function(
   distr.plotting.data,
   geneinfo,
   bin.counts,
-  seg.gr,
   p,
-  fitted.seg.gr,
-  results,
-  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+  results
 ) {
-  histogram.metric = match.arg(histogram.metric)
-
-  metric.label = switch(histogram.metric,
-                        "jaccard" = "Jaccard Index",
-                        "intersection" = "Histogram Intersection",
-                        "ks" = "KS Statistic",
-                        "mse" = "Mean Squared Error",
-                        "chisq" = "Chi-square statistic"
-                        )
-
-  # Plotting data
-  n.distributions = length(distr.plotting.data)
-  for(i in 1:n.distributions){distr.plotting.data[[i]]$'i' <- i}
-  distplot.data = do.call(rbind, distr.plotting.data)
 
   # Bin counts
   bin.counts = bin.counts[,c("start", "Coverage")]
   bin.counts$dist = "coverage"
-  bin.counts$i = n.distributions + 1
-  colnames(bin.counts) = c('x', 'dens', 'dist', 'i')
+  colnames(bin.counts) = c('x', 'dens', 'dist')
+
+  # Plotting data
+  distr.plotting.data = c(distr.plotting.data, list(bin.counts))
+  for(i in 1:length(distr.plotting.data)){distr.plotting.data[[i]]$'i' <- i}
+  lineplot.data = do.call(rbind, distr.plotting.data)
 
   # Points
   points = bin.counts[bin.counts$x %in% p,]
 
-  # Plotting Data
-  lineplot.data = rbind(distplot.data, bin.counts)
-
   # Residuals
-  residual.data = merge(distplot.data[,c("x", "dens")], bin.counts[,c("x", "dens")], by = "x", all = T)
+  fitted.distribution.density = lineplot.data[lineplot.data$dist != "coverage",]
+  residual.data = merge(fitted.distribution.density[,c("x", "dens")], bin.counts[,c("x", "dens")], by = "x", all = T)
   colnames(residual.data) = c("x", "fitted", "real")
   residual.data$resid = residual.data$real - residual.data$fitted
 
-  # Colours
-  col.reference = structure(c("black", "darkorange", "chartreuse4", "darkorchid4"),
-                            names = c("coverage", "norm", "gamma", "unif"))
+  # Reference Colours, Numeric & Line Width for Distributions
+  col.reference = structure(c("black", "darkorange", "chartreuse4", "darkorchid4"), names = c("coverage", "norm", "gamma", "unif"))
   col.numeric = structure(1:3, names = c("norm", "gamma", "unif"))
   lwd.reference = structure(c(1, 2.5, 2.5, 2.5), names = c("coverage", "norm", "gamma", "unif"))
+
+  # Plotting attributes for lineplot
   col.used = unique(lineplot.data[,c("dist", "i")])
   col.used = col.used[order(col.used$i),]
   col.vec = col.reference[col.used$dist]
@@ -107,7 +93,88 @@ bpg.plot = function(
     abline.lwd = 0.01
   )
 
-  # Generating Gene Segments
+  # Goodness of Fit
+  peak.endpoints = sort(unique(c(results$seg.start, results$seg.end)))
+  unique.mets = sort(unique(results$metric))
+  result.mat = matrix(NA, ncol = length(unique.mets), nrow = geneinfo$exome_length, dimnames = list(1:geneinfo$exome_length, unique.mets))
+  for(i in 1:nrow(results)){result.mat[results$seg.start[i]:results$seg.end[i],results$metric[i]] <- results$value[i]}
+
+  # Plotting modifications
+  res.plts = list()
+  leg.list = list()
+  for(met in unique.mets){
+
+    value.col = c("dodgerblue4", "gold")
+    if(met %in% c("jaccard", "intersection")) {
+      max.at = 1
+      min.at = 0
+      metric.at =  seq(0.75, 1, 0.05) # fix this when scaled
+    } else {
+      min.at = 0
+      max.at = max(result.mat[,met], na.rm = T)
+      value.col = rev(value.col)
+    }
+    metric.at = seq(min.at, max.at, length.out = 21)
+
+    # Determining if vote was correct
+    # governing.vote = results[results$metric == met & results$vote == 1,]
+    # governing.vote = rowMeans(governing.vote[,c("seg.start", "seg.end")])
+
+    plt.i = BoutrosLab.plotting.general::create.heatmap(
+        result.mat[,c(met, met)],
+        clustering.method = 'none',
+        # Plotting Characteristics
+        axes.lwd = 0,
+        yaxis.tck = 0,
+        # Y axis Labels
+        yaxis.cex = 1,
+        yaxis.lab = met,
+        yat = 1.5,
+        # Colours
+        colour.scheme = value.col,
+        at = metric.at,
+        fill.colour = "white",
+        # Adding lines for segments
+        force.grid.col = TRUE,
+        grid.col = TRUE,
+        col.lines = peak.endpoints,
+        col.lwd = 1,
+        # Adding Voting Metrics
+        # row.pos = 1.5,
+        # col.pos = as.numeric(governing.vote),
+        # cell.text = rep("V", length(governing.vote)),
+        # text.col = "black",
+        # text.cex = 0.9,
+        # Colourkey
+        print.colour.key = F
+      )
+    res.plts[[met]] <- plt.i
+
+    metric.label = switch(
+      met,
+      "jaccard" = "Jaccard Index",
+      "intersection" = "Histogram Intersection",
+      "ks" = "KS Statistic",
+      "mse" = "Mean Squared Error",
+      "chisq" = "Chi-square statistic")
+
+    legend = list(
+      colours = value.col,
+      labels = c(min.at, formatC(max.at, format = "e", digits = 2)),
+      title = bquote(bold(underline(.(metric.label)))),
+      continuous = TRUE,
+      height = 2,
+      angle = -90,
+      tck = 1,
+      tck.number = 3,
+      at = c(0,100),
+      labels.rot = 0,
+      lwd = 0.5
+    )
+    leg.list[[met]] <- legend
+  }
+
+  # Generating Exons
   genegr = GenomicRanges::GRanges(seqnames = geneinfo$chr, IRanges::IRanges(start = 1, end = geneinfo$exome_length), strand = geneinfo$strand)
   anno = geneinfo$anno
   anno$start = geneinfo$DNA2RNA[anno$start - geneinfo$left+1]
@@ -117,75 +184,7 @@ bpg.plot = function(
   anno.coverage = lapply(anno.gr, GenomicRanges::coverage)
   bins = unlist(GenomicRanges::tile(genegr, width = 1))
   anno.counts = lapply(anno.coverage, function(i) GenomicRanges::binnedAverage(bins, i, "Coverage"))
-  transcript.coverage = do.call(cbind, lapply(anno.counts, function(x) x$Coverage))
-  transcript.coverage = as.data.frame(transcript.coverage, stringsAsFactors = F)
-
-  # Adding p-values & segments
-  # Change seg.gr to fitted.seg.gr for just the fitted segments
-  ovl = GenomicRanges::findOverlaps(bins, seg.gr)
-  bins$metric = NA
-  bins$metric[S4Vectors::queryHits(ovl)] = results$metric[S4Vectors::subjectHits(ovl)]
-
-  # Adding segment fits
-  ovl = GenomicRanges::findOverlaps(bins, fitted.seg.gr)
-  bins$fitted = 0
-  bins$fitted[S4Vectors::queryHits(ovl)] = col.numeric[results$dist[S4Vectors::subjectHits(ovl)]]
-
-  # Plotting Heatmap
-  heatmap.data = data.frame(bins, stringsAsFactors = F)
-  heatmap.data = heatmap.data[,c("start", "fitted", "metric")]
-  heatmap.data = heatmap.data[order(heatmap.data$start),]
-
-  hm.fu = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("fitted", "fitted")],
-    clustering.method = 'none',
-    # Plotting Characteristics
-    axes.lwd = 1,
-    yaxis.tck = 0,
-    # Discrete Colours
-    at = seq(-0.5, length(col.reference), 1),
-    total.colours = length(col.reference) + 1,
-    colour.scheme = c('white', col.reference[2:length(col.reference)]),
-    # Adding lines for segments
-    force.grid.col = TRUE,
-    grid.col = TRUE,
-    col.lines = c(GenomicRanges::start(fitted.seg.gr), GenomicRanges::end(fitted.seg.gr)),
-    # Colourkey
-    # colourkey.labels.at = seq(0, length(seg.gr)+1, 1),
-    # colourkey.labels = seq(0, length(seg.gr)+1, 1),
-    print.colour.key = F
-  )
-
-  hm.gof.colour.scheme = c('dodgerblue4', 'firebrick')
-  if(histogram.metric %in% c("jaccard", "intersection")) {
-    max.at = 1
-    min.at = 0
-    metric.at =  seq(0.75, 1, 0.05) # fix this when scaled
-  } else {
-    min.at = 0
-    max.at = max(heatmap.data$metric, na.rm = T)
-    hm.gof.colour.scheme = rev(hm.gof.colour.scheme)
-  }
-  metric.at = seq(min.at, max.at, length.out = 21)
-
-  hm.gof = BoutrosLab.plotting.general::create.heatmap(
-    heatmap.data[,c("metric", "metric")],
-    clustering.method = 'none',
-    # Plotting Characteristics
-    axes.lwd = 0,
-    yaxis.tck = 0,
-    # Colours
-    colour.scheme = hm.gof.colour.scheme,
-    at = metric.at,
-    fill.colour = "white",
-    # Adding lines for segments
-    force.grid.col = TRUE,
-    grid.col = TRUE,
-    col.lines = c(GenomicRanges::start(seg.gr), GenomicRanges::end(seg.gr)),
-    col.lwd = 1,
-    # Colourkey
-    print.colour.key = F
-  )
+  transcript.coverage = do.call(cbind.data.frame, lapply(anno.counts, function(x) x$Coverage))
 
   x.digits = floor(log10(geneinfo$exome_length))-1
   x.at = seq(0, round(geneinfo$exome_length, digits = -x.digits), length.out = 5)
@@ -210,7 +209,7 @@ bpg.plot = function(
     # Adding lines for segments
     force.grid.col = TRUE,
     grid.col = TRUE,
-    col.lines = c(GenomicRanges::start(seg.gr), GenomicRanges::end(seg.gr)),
+    col.lines = peak.endpoints,
     col.lwd = 1,
     force.grid.row = TRUE,
     grid.row = TRUE,
@@ -221,7 +220,7 @@ bpg.plot = function(
   )
 
   # Legend
-  covariate.legend <- list(
+  covariate.legend.top <- list(
     legend = list(
       colours = 'red',
       labels = c("FTC Endpoints"),
@@ -245,20 +244,9 @@ bpg.plot = function(
       labels = names(col.reference)[2:length(col.reference)],
       title = expression(bold(underline('Distributions'))),
       lwd = 0.5
-    ),
-    legend = list(
-      colours = hm.gof.colour.scheme,
-      labels = c(min.at, formatC(max.at, format = "e", digits = 2)),
-      title = bquote(bold(underline(.(metric.label)))),
-      continuous = TRUE,
-      height = 2,
-      angle = -90,
-      tck = 1,
-      tck.number = 3,
-      at = c(0,100),
-      labels.rot = 0,
-      lwd = 0.5
-    ),
+    )
+  )
+  covariate.legend.bottom <- list(
     legend = list(
       colours = c("pink"),
       labels = c("Exon"),
@@ -266,6 +254,8 @@ bpg.plot = function(
       lwd = 0.5
     )
   )
+  covariate.legend = c(covariate.legend.top, leg.list, covariate.legend.bottom)
+  names(covariate.legend) = rep("legend", length(covariate.legend))
 
   side.legend <- BoutrosLab.plotting.general::legend.grob(
     legends = covariate.legend,
@@ -281,11 +271,12 @@ bpg.plot = function(
   pdf(filename, width = 10, height = 10)
 
   transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
+  res.height = max(0.8, length(res.plts)/5)
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
-    plot.objects = list(sc, sc.res, hm.fu, hm.gof, hm.coverage),
-    plot.objects.heights = c(10, 3, 1, 1, transcript.height),
-    y.spacing = -4,
+    plot.objects = c(list(sc), list(sc.res), res.plts, list(hm.coverage)),
+    plot.objects.heights = c(10, 3, rep(res.height, length(res.plts)), transcript.height),
+    y.spacing = -5,
     # Labels
     main = geneinfo$gene,
     main.cex = 2,

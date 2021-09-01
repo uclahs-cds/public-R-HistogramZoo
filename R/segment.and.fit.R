@@ -95,7 +95,6 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
-  fitted.seg.gr = GenomicRanges::GRanges()
   for(i in 1:length(seg.gr)){
     # cat(i , "\n")
     # Extracting data
@@ -157,19 +156,12 @@ segment.and.fit = function(
     names(distr.vote) = rownames(value.mat)
     distr.tally = table(distr.vote)
     best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, distr.vote["jaccard"], names(distr.tally)[which.max(distr.tally)])
+    governing.metric = names(distr.vote)[distr.vote == best.distr]
+    value.df$vote = ifelse(value.df$metric %in% governing.metric, 1, 0)
 
     mod.final = dist.optim[[paste0("jaccard.", best.distr)]]
-
-    seg.gr.i = GenomicRanges::GRanges(
-             seqnames = geneinfo$chr,
-             IRanges::IRanges(
-               start = mod.final$seg.start,
-               end = mod.final$seg.end),
-             strand = geneinfo$strand)
-
     models[[i]] = mod.final
     results = rbind(results, value.df[value.df$dist == best.distr,])
-    fitted.seg.gr = c(fitted.seg.gr, seg.gr.i)
   }
 
   # Correcting for optimization via finding the minimum
@@ -194,11 +186,8 @@ segment.and.fit = function(
       distr.plotting.data = distr.plotting.data,
       geneinfo=geneinfo,
       bin.counts=bin.counts,
-      seg.gr=seg.gr,
       p=p,
-      fitted.seg.gr = fitted.seg.gr,
-      results = results,
-      histogram.metric = histogram.metric)
+      results = results)
   }
 
   # Generating Peaks
