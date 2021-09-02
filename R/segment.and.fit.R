@@ -173,7 +173,7 @@ segment.and.fit = function(
     distr.vote = aggregate(value ~ metric, value.df, FUN = min)
     vote.df = merge(value.df, distr.vote, by = c("metric", "value"))
     distr.tally = table(vote.df$dist)
-    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, vote.df$dist["jaccard"], names(distr.tally)[which.max(distr.tally)])
+    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, vote.df$dist[vote.df$metric == "jaccard"], names(distr.tally)[which.max(distr.tally)])
     final.res = value.df[value.df$metric == "jaccard" & value.df$dist == best.distr,]
     final.res$final <- 1
     vote.df = rbind.data.frame(vote.df, final.res)
