@@ -28,7 +28,9 @@ segment.and.fit = function(
   uniform.peak.threshold = 0.75,
   uniform.peak.stepsize = 5,
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-  eps = 1
+  eps = 1,
+  remove.low.entropy = T,
+  max.uniform = T
 ){
   histogram.metric = match.arg(histogram.metric, several.ok = T)
 
@@ -64,12 +66,16 @@ segment.and.fit = function(
   bins = unlist(GenomicRanges::tile(genegr, width = 1))
   bin.counts = data.frame(GenomicRanges::binnedAverage(bins, peak.coverage, "Coverage"), stringsAsFactors = F)
 
-  find.chgpts = function(x){
+  # Looks for the lower changepoint of a step function
+  find.stepfunction.chgpts = function(x){
     chg.pts = which(diff(x) != 0)
-    c(chg.pts, chg.pts+1)
+    chg.pts.plus = chg.pts+1
+    keep.chg.pts = (x[chg.pts] < x[chg.pts.plus])
+    c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
   }
 
   p = c()
+  max.gaps = data.frame()
   reduced.gr = GenomicRanges::reduce(genepeaksgr)
   for(i in 1:length(reduced.gr)){
     # cat(i, "\n")
@@ -80,13 +86,24 @@ segment.and.fit = function(
     bin.data = bin.counts$Coverage[p.start:p.end]
 
     # Change points
-    p.init = find.chgpts(bin.data)
+    p.init = find.stepfunction.chgpts(bin.data)
     p.init = sort(unique(c(1, p.init, p.end - p.start + 1)))
 
     # FTC
     p.tmp = ftc.helen(bin.data, p.init, eps)
+
+    # Max Gap
+    if(remove.low.entropy){
+      mgaps = meaningful.gaps.local(x = bin.data, seg.points = p.tmp, change.points = chg.pts)
+      mgaps$Var1 = mgaps$Var1+p.start-1
+      mgaps$Var2 = mgaps$Var2+p.start-1
+      max.gaps = rbind(max.gaps, mgaps[,c("Var1", "Var2")])
+    }
+
+    # Updating
     p.tmp = p.tmp+p.start-1
     p = c(p, p.tmp)
+
   }
 
   # Formatting
@@ -95,6 +112,15 @@ segment.and.fit = function(
     genepeaksgr = genepeaksgr,
     geneinfo = geneinfo,
     m = 100)
+
+  # Removing Max Gaps
+  if(remove.low.entropy){
+    seg.gr = remove.max.gaps(
+      geneinfo = geneinfo,
+      seg.gr = seg.gr,
+      max.gaps = max.gaps,
+      remove.short.segment = 100)
+  }
 
   # Fitting different models
   results = data.frame()
@@ -115,7 +141,7 @@ segment.and.fit = function(
     })
 
     # Find the maximum uniform segment
-    if(seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
+    if(max.uniform & seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
       max.unif.results = find.uniform.segment(bin.data, metric = histogram.metric, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
       # Use the maximum segment
       unif.segment = unlist(max.unif.results[c('a', 'b')])

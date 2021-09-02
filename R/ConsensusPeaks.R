@@ -25,7 +25,6 @@
 #' @param annotation Only if the rna.or.dna parameter is set to 'rna'. A user can choose to provide a custom annotation file created using the read.gtf function for software efficiency.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
 #' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flip", "mixEM" (misxture of normals). "all" for all available distributions.
-#' @param residual.tolerance Only if the method parameter is set to 'sf'. The maximum threshold for a sum of residuals requiring the peak to be refit with a uniform.
 #' @param uniform.peak.stepsize Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim iteratively. Can also be given as a proportion of the peak.
 #' @param uniform.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
@@ -53,7 +52,6 @@
 #' annotation = NULL,
 #' diagnostic = F,
 #' fit.mixture = T,
-#' residual.tolerance = 0.1,
 #' uniform.peak.stepsize = 10,
 #' uniform.peak.threshold = 0.1,
 #' plot.merged.peaks = F,
@@ -70,13 +68,13 @@ ConsensusPeaks = function(
   gtf = NULL,
   annotation=NULL,
   diagnostic = F,
-  fit.mixtures = "all",
-  residual.tolerance = 0.1,
   truncated.models = FALSE,
   uniform.peak.stepsize = 5,
   uniform.peak.threshold = 0.75,
   histogram.metric = c("jaccard", "intersection", "ks"),
   eps = 1,
+  remove.low.entropy = T,
+  max.uniform = T,
   plot.merged.peaks = F,
   output.tag = "",
   output.dir = ".",
@@ -111,14 +109,9 @@ ConsensusPeaks = function(
   # Check the parameters required for sf
   if(method == "sf"){
     if(!is.character(fit.mixtures)){stop("Please provide a character vector for fit.mixture")}
-    if(fit.mixtures == "all"){
-      fit.mixtures = c("unif", "tnorm", "tgamma", "tgamma_flip", "mixEM")
-    } else {
-      fit.mixtures = intersect(fit.mixtures, c("unif", "tnorm", "tgamma", "tgamma_flip", "mixEM"))
-      if(length(fit.mixtures) == 0){stop("Please provide valid distributions")}
-    }
+    if(!is.logical(remove.low.entropy)){stop("Please provide a logical fore remove.low.entropy")}
+    if(!is.logical(max.uniform)){stop("Please provide a logical for max.uniform")}
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
-    if(!is.numeric(residual.tolerance) | residual.tolerance < 0){stop("Please provide a positive numeric for thresholding residuals")}
     if(!is.numeric(uniform.peak.stepsize) |  uniform.peak.stepsize < 0){stop("Please provide a positive integer or proportion for uniform.peak.stepsize")}
     if(!is.numeric(uniform.peak.threshold) | uniform.peak.threshold > 1 | uniform.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for uniform.peak.threshold")}
     if(!is.numeric(eps)){stop("Please provide a numeric for eps")}
@@ -168,7 +161,9 @@ ConsensusPeaks = function(
         uniform.peak.threshold = uniform.peak.threshold,
         uniform.peak.stepsize = uniform.peak.stepsize,
         histogram.metric = histogram.metric,
-        eps = eps)
+        eps = eps,
+        remove.low.entropy = remove.low.entropy,
+        max.uniform = max.uniform)
     }
     output.table = rbind(output.table, results)
   }
