@@ -184,7 +184,7 @@ segment.and.fit = function(
   }
 
   # Correcting for optimization via finding the minimum
-  results$value[results$metric %in% c("jaccard", "ks", "intersection")]
+  results$value[results$metric %in% c("jaccard", "ks", "intersection")] <- sqrt(results$value[results$metric %in% c("jaccard", "ks", "intersection")]) 
   results$value[results$metric %in% c("jaccard", "intersection")] <- 1 - results$value[results$metric %in% c("jaccard", "intersection")]
 
   # Making a Nice Figure
