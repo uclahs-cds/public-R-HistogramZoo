@@ -108,7 +108,6 @@ ConsensusPeaks = function(
 
   # Check the parameters required for sf
   if(method == "sf"){
-    if(!is.character(fit.mixtures)){stop("Please provide a character vector for fit.mixture")}
     if(!is.logical(remove.low.entropy)){stop("Please provide a logical fore remove.low.entropy")}
     if(!is.logical(max.uniform)){stop("Please provide a logical for max.uniform")}
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
