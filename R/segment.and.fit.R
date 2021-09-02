@@ -126,7 +126,7 @@ segment.and.fit = function(
   results = data.frame()
   models = list()
   for(i in 1:length(seg.gr)){
-    # cat(i , "\n")
+    cat(i , "\n")
     # Extracting data
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
@@ -184,7 +184,8 @@ segment.and.fit = function(
   }
 
   # Correcting for optimization via finding the minimum
-  results$value[results$metric %in% c("jaccard", "intersect")] <- 1 - results$value[results$metric %in% c("jaccard", "intersect")]
+  results$value[results$metric %in% c("jaccard", "ks", "intersection")]
+  results$value[results$metric %in% c("jaccard", "intersection")] <- 1 - results$value[results$metric %in% c("jaccard", "intersection")]
 
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
