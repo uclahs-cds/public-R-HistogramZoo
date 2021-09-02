@@ -1,16 +1,15 @@
 
 #' Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim = function(x, metric = c("jaccard", "intersection", "ks", "mse", "chisq"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
+fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "ks", "mse", "chisq"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
 
   # Matching arguments
   metric = match.arg(metric, several.ok = TRUE)
   distr = match.arg(distr, several.ok = TRUE)
 
   # Initializing Data
-  bin = x[, 1]
-  freq = x[, 2]
+  L = length(freq)
   N = sum(freq)
-  L = length(bin)
+  bin = 1:length(freq)
   hist.mean = sum(freq * bin) / N
   hist.var = sum(freq * (bin - hist.mean)^2) / N
   shape.init = hist.mean^2 / hist.var

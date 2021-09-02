@@ -64,23 +64,27 @@ segment.and.fit = function(
   bins = unlist(GenomicRanges::tile(genegr, width = 1))
   bin.counts = data.frame(GenomicRanges::binnedAverage(bins, peak.coverage, "Coverage"), stringsAsFactors = F)
 
-  # Tiling Peaks
-  peak.counts = unlist(GenomicRanges::tile(genepeaksgr, width = 1))
-  peak.counts = GenomicRanges::start(peak.counts)
+  find.chgpts = function(x){
+    chg.pts = which(diff(x) != 0)
+    c(chg.pts, chg.pts+1)
+  }
 
   p = c()
   reduced.gr = GenomicRanges::reduce(genepeaksgr)
   for(i in 1:length(reduced.gr)){
     # cat(i, "\n")
+
+    # Extracting Coverage
     p.start = GenomicRanges::start(reduced.gr)[i]
     p.end = GenomicRanges::end(reduced.gr)[i]
-    tmp.gr = genepeaksgr[S4Vectors::subjectHits(GenomicRanges::findOverlaps(reduced.gr[i], genepeaksgr))]
-    p.init = c(GenomicRanges::start(tmp.gr), GenomicRanges::end(tmp.gr))
-    p.init = c(p.start, p.init, p.end)
-    p.init = sort(unique(p.init))-p.start+1
-    x = peak.counts[peak.counts >= p.start & peak.counts <= p.end]
-    hist = obs.to.int.hist(x)
-    p.tmp = ftc.helen(hist, p.init, eps)
+    bin.data = bin.counts$Coverage[p.start:p.end]
+
+    # Change points
+    p.init = find.chgpts(bin.data)
+    p.init = sort(unique(c(1, p.init, p.end - p.start + 1)))
+
+    # FTC
+    p.tmp = ftc.helen(bin.data, p.init, eps)
     p.tmp = p.tmp+p.start-1
     p = c(p, p.tmp)
   }
@@ -101,13 +105,8 @@ segment.and.fit = function(
     seg.start = GenomicRanges::start(seg.gr)[i]
     seg.end = GenomicRanges::end(seg.gr)[i]
     seg.len = seg.end - seg.start + 1
-    x = peak.counts[peak.counts >= seg.start & peak.counts <= seg.end]
-    # Adjusting X
-    x.adjusted = (x - seg.start) + 1
-    #x.range = seg.start:seg.end
-    #x.range.adjusted = (x - seg.start) + 1e-10
+    bin.data = bin.counts$Coverage[seg.start:seg.end]
 
-    bin.data = obs.to.int.hist(x.adjusted, as.df = TRUE, add.zero.endpoints = FALSE)
     dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models)
     dist.optim = lapply(dist.optim, function(y) {
       y$seg.start = seg.start
@@ -117,23 +116,16 @@ segment.and.fit = function(
 
     # Find the maximum uniform segment
     if(seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
-      max.unif.results = find.uniform.segment(bin.data$Freq, metric = histogram.metric, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
+      max.unif.results = find.uniform.segment(bin.data, metric = histogram.metric, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
       # Use the maximum segment
       unif.segment = unlist(max.unif.results[c('a', 'b')])
-      unif.segment.adj =  unif.segment
-      x.subset = x[x >= unif.segment.adj[1] & x <= unif.segment.adj[2]]
-      bin.data.subset = bin.data[bin.data$x >= unif.segment.adj[1] & bin.data$x <= unif.segment.adj[2],]
-      bin.data.subset$x = bin.data.subset$x - unif.segment.adj[1] + 1
+      bin.data.subset = bin.data[unif.segment[1]:unif.segment[2]]
       # Fit uniform distribution on maximum uniform segment
       dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
-
       # Adjust the segment starts from the shifted max uniform segment
-      # dist.optim.subset$unif$seg.start = unif.segment.adj[1] + seg.start
-      # dist.optim.subset$unif$seg.end = unif.segment.adj[2] + seg.start
-      # dist.optim$max_unif = dist.optim.subset$unif
       dist.optim.subset = lapply(dist.optim.subset, function(y) {
-        y$seg.start = unif.segment.adj[1] + seg.start
-        y$seg.end = unif.segment.adj[2] + seg.start
+        y$seg.start = unif.segment[1] + seg.start
+        y$seg.end = unif.segment[2] + seg.start
         y$dist = "unif"
         y
       })
