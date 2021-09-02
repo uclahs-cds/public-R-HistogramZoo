@@ -192,12 +192,11 @@ segment.and.fit = function(
   }
 
   # Generating Peaks
-  merged.peaks = seg.gr
-  S4Vectors::mcols(merged.peaks)$i = 1:length(seg.gr)
-  S4Vectors::mcols(merged.peaks)$dist = results$dist
-  S4Vectors::mcols(merged.peaks)$params = results$params
-  S4Vectors::mcols(merged.peaks)$metric = results$metric
-  S4Vectors::mcols(merged.peaks)$name = geneinfo$gene
+  results$chr = geneinfo$chr
+  results$name = geneinfo$gene
+  results$strand = geneinfo$strand
+  results = results[results$final == 1,,drop = F]
+  merged.peaks = GenomicRanges::makeGRangesFromDataFrame(results, keep.extra.columns = T)
   merged.peaks = .rna.peaks.to.genome(merged.peaks, geneinfo)
   GenomicRanges::start(merged.peaks) = GenomicRanges::start(merged.peaks)-1
 
@@ -224,6 +223,5 @@ segment.and.fit = function(
   # Output Table
   output.table = merge(peaks.final, sample.pval, by = "peak", all = T)
   return(output.table)
-  # return(list(output.table = output.table, results = results))
 
 }
