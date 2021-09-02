@@ -94,7 +94,7 @@ segment.and.fit = function(
 
     # Max Gap
     if(remove.low.entropy){
-      mgaps = meaningful.gaps.local(x = bin.data, seg.points = p.tmp, change.points = chg.pts)
+      mgaps = meaningful.gaps.local(x = bin.data, seg.points = p.tmp, change.points = p.init)
       mgaps$Var1 = mgaps$Var1+p.start-1
       mgaps$Var2 = mgaps$Var2+p.start-1
       max.gaps = rbind(max.gaps, mgaps[,c("Var1", "Var2")])
