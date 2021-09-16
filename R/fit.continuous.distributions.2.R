@@ -92,7 +92,7 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
           if(missing(x)) {
             x = bin
           }
-          args = c(list(x = x), as.list(norm.res$par))
+          args = c(list(x = x), norm.par)
           res = do.call("dtnorm", args)
           if(scale) res * N
           else res
@@ -125,7 +125,7 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
           if(missing(x)) {
             x = bin
           }
-          args = c(list(x = x), as.list(gamma.res$par))
+          args = c(list(x = x), gamma.par)
           res = do.call("dtgamma", args)
           if(scale) res * N
           else res
