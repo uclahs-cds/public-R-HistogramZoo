@@ -69,14 +69,14 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
     }
     # Normal Distribution
     if(distr == "norm") {
-      norm.optim = DEoptim(fn = .hist.optim,
-                          .dist = "norm",
-                          lower = c(min(bin), 0.001),
-                          upper = c(max(bin), (max(bin) - min(bin)) * 0.5),
-                          control = list(
-                          trace = FALSE, # Do not print results
-                          itermax = 200 # Iterations
-                          ))
+      norm.optim = DEoptim::DEoptim(fn = .hist.optim,
+                                    .dist = "norm",
+                                    lower = c(min(bin), 0.001),
+                                    upper = c(max(bin), (max(bin) - min(bin)) * 0.5),
+                                    control = list(
+                                    trace = FALSE, # Do not print results
+                                    itermax = 200 # Iterations
+                                    ))
       names(norm.optim$optim$bestmem) = c("mean", "sd")
       norm.par = as.list(norm.optim$optim$bestmem)
       if(truncated) {
@@ -102,14 +102,14 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
 
     # Gamma Distribution
     if(distr == "gamma") {
-      gamma.optim = DEoptim(fn = .hist.optim,
-                            .dist = "gamma",
-                            lower = c(0.001, 0.001),
-                            upper = c(L, L),
-                            control = list(
-                            trace = FALSE, # Do not print results
-                            itermax = 200 # Iterations
-                            ))
+      gamma.optim = DEoptim::DEoptim(fn = .hist.optim,
+                                     .dist = "gamma",
+                                     lower = c(0.001, 0.001),
+                                     upper = c(L, L),
+                                     control = list(
+                                     trace = FALSE, # Do not print results
+                                     itermax = 200 # Iterations
+                                     ))
       names(gamma.optim$optim$bestmem) = c("shape", "rate")
       gamma.par <- as.list(gamma.optim$optim$bestmem)
       if(truncated) {
