@@ -33,7 +33,8 @@ Imports:
     mixtools,
     truncdist,
     BoutrosLab.plotting.general,
-    splus2R
+    splus2R,
+    DEoptim
 Suggests:
     knitr,
     rmarkdown,

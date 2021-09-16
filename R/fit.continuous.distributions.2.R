@@ -9,11 +9,12 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
   # Initializing Data
   L = length(freq)
   N = sum(freq)
-  bin = 1:length(freq)
-  hist.mean = sum(freq * bin) / N
-  hist.var = sum(freq * (bin - hist.mean)^2) / N
-  shape.init = hist.mean^2 / hist.var
-  rate.init = hist.mean / hist.var
+  bin = 1:L
+  # Used for initializing parameter estimations for norm and gamma
+  # hist.mean = sum(freq * bin) / N
+  # hist.var = sum(freq * (bin - hist.mean)^2) / N
+  # shape.init = hist.mean^2 / hist.var
+  # rate.init = hist.mean / hist.var
 
   # Optimization Function
   .hist.optim = function(params, .dist = c("norm", "gamma")) {
@@ -68,63 +69,69 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
     }
     # Normal Distribution
     if(distr == "norm") {
-      norm.res = optim(par = c(hist.mean, sqrt(hist.var)),
-                       fn = .hist.optim,
-                       method = "L-BFGS-B",
-                       .dist = "norm",
-                       # fnscale = -1 does maximization and 1 for minimization
-                       control = list(fnscale = 1),
-                       lower = c(min(bin), 0.001),
-                       upper = c(max(bin), (max(bin) - min(bin)) * 0.5))
-      names(norm.res$par) = c("mean", "sd")
-      norm.res$par <- as.list(norm.res$par)
+      norm.optim = DEoptim(fn = .hist.optim,
+                          .dist = "norm",
+                          lower = c(min(bin), 0.001),
+                          upper = c(max(bin), (max(bin) - min(bin)) * 0.5),
+                          control = list(
+                          trace = FALSE, # Do not print results
+                          itermax = 200 # Iterations
+                          ))
+      names(norm.optim$optim$bestmem) = c("mean", "sd")
+      norm.par = as.list(norm.optim$optim$bestmem)
       if(truncated) {
-        norm.res$par$a =  min(bin) - 1e-10
-        norm.res$par$b = max(bin) + 1e-10
+        norm.par$a =  min(bin) - 1e-10
+        norm.par$b = max(bin) + 1e-10
       }
-      norm.res$dist = "norm"
-      norm.res$metric = met
-      norm.res$dens = function(x = NULL, scale = TRUE) {
-        if(missing(x)) {
-          x = bin
+      rtn[[tag]] = list(
+        "par" = norm.par,
+        "dist" = "norm",
+        "metric" = met,
+        "value" = norm.optim$optim$bestval,
+        "dens" = function(x = NULL, scale = TRUE) {
+          if(missing(x)) {
+            x = bin
+          }
+          args = c(list(x = x), as.list(norm.res$par))
+          res = do.call("dtnorm", args)
+          if(scale) res * N
+          else res
         }
-        args = c(list(x = x), as.list(norm.res$par))
-        res = do.call("dtnorm", args)
-        if(scale) res * N
-        else res
-      }
-      # Only
-      if(norm.res$convergence == 0) rtn[[tag]] = norm.res
-      else warning("fit.distributions.optim: Normal distribution did not converge.")
+      )
     }
+
     # Gamma Distribution
     if(distr == "gamma") {
-      gamma.res = optim(par = c(shape.init, rate.init),
-                        fn = .hist.optim,
-                        method = "L-BFGS-B",
-                        .dist = "gamma",
-                        control = list(fnscale = 1),
-                        lower =c(0.001, 0.001))
-      names(gamma.res$par) = c("shape", "rate")
-      gamma.res$par <- as.list(gamma.res$par)
+      gamma.optim = DEoptim(fn = .hist.optim,
+                            .dist = "gamma",
+                            lower = c(0.001, 0.001),
+                            upper = c(L, L),
+                            control = list(
+                            trace = FALSE, # Do not print results
+                            itermax = 200 # Iterations
+                            ))
+      names(gamma.optim$optim$bestmem) = c("shape", "rate")
+      gamma.par <- as.list(gamma.optim$optim$bestmem)
       if(truncated) {
-        gamma.res$par$a =  min(bin) - 1e-10
-        gamma.res$par$b = max(bin) + 1e-10
+        gamma.par$a =  min(bin) - 1e-10
+        gamma.par$b = max(bin) + 1e-10
       }
-      gamma.res$dist = "gamma"
-      gamma.res$metric = met
-      gamma.res$dens = function(x = NULL, scale = TRUE) {
-        if(missing(x)) {
-          x = bin
+      rtn[[tag]] = list(
+        "par" = gamma.par,
+        "dist" = "gamma",
+        "metric" = met,
+        "value" = gamma.optim$optim$bestval,
+        "dens" = function(x = NULL, scale = TRUE) {
+          if(missing(x)) {
+            x = bin
+          }
+          args = c(list(x = x), as.list(gamma.res$par))
+          res = do.call("dtgamma", args)
+          if(scale) res * N
+          else res
         }
-        args = c(list(x = x), as.list(gamma.res$par))
-        res = do.call("dtgamma", args)
-        if(scale) res * N
-        else res
-      }
-      if(gamma.res$convergence == 0) rtn[[tag]] = gamma.res
-      else warning("fit.distributions.optim: Gamma distribution did not converge.")
-    }
+      )
+  }
   }
 
   rtn
