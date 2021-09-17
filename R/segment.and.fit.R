@@ -189,9 +189,9 @@ segment.and.fit = function(
   # Making a Nice Figure
   if(gene %in% plot.merged.peaks) {
     distr.plotting.data = lapply(models, function(m) {
-      x = seq(m$seg.start + 1, m$seg.end, by = 1)
+      x = seq(m$seg.start, m$seg.end, by = 1)
       # Since the density is from 1 to max of segment, pass in the sequence 1...max
-      dens = m$dens(seq_along(x) + 1)
+      dens = m$dens(x = seq_along(x), mpar = m$par)
       data.frame(
         x = x,
         dens = dens,

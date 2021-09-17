@@ -54,10 +54,11 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
       # Add uniform distribution
       unif.dens = 1 / (max(bin) - min(bin))
       rtn[[tag]] = list(
+        "par" = NULL,
         "dist" = "unif",
         "metric" = met,
         "value" = metric.func(freq, rep(unif.dens * N, L)),
-        "dens" = function(x = NULL, scale = TRUE) {
+        "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x = bin
           }
@@ -88,11 +89,11 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
         "dist" = "norm",
         "metric" = met,
         "value" = norm.optim$optim$bestval,
-        "dens" = function(x = NULL, scale = TRUE) {
+        "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x = bin
           }
-          args = c(list(x = x), norm.par)
+          args = c(list(x = x), as.list(mpar))
           res = do.call("dtnorm", args)
           if(scale) res * N
           else res
@@ -121,11 +122,11 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
         "dist" = "gamma",
         "metric" = met,
         "value" = gamma.optim$optim$bestval,
-        "dens" = function(x = NULL, scale = TRUE) {
+        "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x = bin
           }
-          args = c(list(x = x), gamma.par)
+          args = c(list(x = x), as.list(mpar))
           res = do.call("dtgamma", args)
           if(scale) res * N
           else res

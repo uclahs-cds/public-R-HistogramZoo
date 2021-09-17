@@ -133,9 +133,9 @@ bpg.plot = function(
 
   # Distribution Voting
   peak.endpoints = sort(unique(c(results$seg.start, results$seg.end)))
-  results$metric[results$final == 1] <- "MaxVote"
+  results$metric[results$final == 1] <- "Consensus"
   unique.mets = unique(results$metric)
-  unique.mets = unique.mets[order(match(unique.mets, rev(c("MaxVote", "jaccard", "intersection", "mse", "chisq", "ks"))))]
+  unique.mets = unique.mets[order(match(unique.mets, rev(c("Consensus", "jaccard", "intersection", "mse", "chisq", "ks"))))]
   result.mat = matrix(NA, ncol = length(unique.mets), nrow = geneinfo$exome_length, dimnames = list(1:geneinfo$exome_length, unique.mets))
   for(i in 1:nrow(results)){result.mat[results$seg.start[i]:results$seg.end[i],results$metric[i]] <- col.numeric[results$dist[i]]}
 
