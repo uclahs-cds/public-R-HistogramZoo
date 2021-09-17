@@ -150,8 +150,8 @@ segment.and.fit = function(
       dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
       # Adjust the segment starts from the shifted max uniform segment
       dist.optim.subset = lapply(dist.optim.subset, function(y) {
-        y$seg.start = unif.segment[1] + seg.start
-        y$seg.end = unif.segment[2] + seg.start
+        y$seg.start = unif.segment[1] + seg.start - 1
+        y$seg.end = unif.segment[2] + seg.start - 1
         y$dist = "unif"
         y
       })
