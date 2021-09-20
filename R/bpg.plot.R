@@ -63,6 +63,7 @@ bpg.plot = function(
     yaxis.cex = 0.8,
     ylab.label = "Coverage (at BP resolution)",
     main.cex = 0,
+    yaxis.fontface = 1,
     # Lines & PCH
     type = c('a'),
     lwd = lwd.vec,
@@ -90,6 +91,7 @@ bpg.plot = function(
     xaxis.tck = 0,
     yaxis.cex = 0.8,
     main.cex = 0,
+    yaxis.fontface = 1,
     # Lines & PCH
     type = c('p'),
     cex = 0.01,
@@ -119,6 +121,7 @@ bpg.plot = function(
       yaxis.cex = 0.8,
       yaxis.lab = "Jaccard Index",
       yat = 1.5,
+      yaxis.fontface = 1,
       # Colours
       colour.scheme = c("dodgerblue4", "gold"),
       at = seq(min.at, max.at, length.out = 10),
@@ -147,6 +150,8 @@ bpg.plot = function(
     yaxis.tck = 0,
     # Y axis Labels
     yaxis.cex = 0.8,
+    xaxis.fontface = 1,
+    yaxis.fontface = c(rep(1, ncol(result.mat)-1), 2),
     yaxis.lab = colnames(result.mat),
     ylab.cex = 1,
     ylab.label = "Metrics",
@@ -195,6 +200,7 @@ bpg.plot = function(
     yaxis.tck = 0,
     xlab.cex = 1,
     xlab.label = "Transcript Coordinate",
+    xaxis.fontface = 1,
     # Discrete Colours
     at = c(-0.5, 0.5, 1.5),
     total.colours = 3,
