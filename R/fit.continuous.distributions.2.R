@@ -76,7 +76,8 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
                                     upper = c(max(bin), (max(bin) - min(bin)) * 0.5),
                                     control = list(
                                     trace = FALSE, # Do not print results
-                                    itermax = 200 # Iterations
+                                    itermax = 500, # Iterations
+                                    VTR = 10^-2 # At 1 %, stop optimizing
                                     ))
       names(norm.optim$optim$bestmem) = c("mean", "sd")
       norm.par = as.list(norm.optim$optim$bestmem)
@@ -109,7 +110,8 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
                                      upper = c(L, L),
                                      control = list(
                                      trace = FALSE, # Do not print results
-                                     itermax = 200 # Iterations
+                                     itermax = 500, # Iterations
+                                     VTR = 10^-2 # At 1 %, stop optimizing
                                      ))
       names(gamma.optim$optim$bestmem) = c("shape", "rate")
       gamma.par <- as.list(gamma.optim$optim$bestmem)

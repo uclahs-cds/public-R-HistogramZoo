@@ -75,6 +75,7 @@ ConsensusPeaks = function(
   eps = 1,
   remove.low.entropy = T,
   max.uniform = T,
+  seed = 123,
   plot.merged.peaks = F,
   output.tag = "",
   output.dir = ".",
@@ -162,7 +163,8 @@ ConsensusPeaks = function(
         histogram.metric = histogram.metric,
         eps = eps,
         remove.low.entropy = remove.low.entropy,
-        max.uniform = max.uniform)
+        max.uniform = max.uniform,
+        seed = seed)
     }
     output.table = rbind(output.table, results)
   }

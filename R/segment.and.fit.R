@@ -30,7 +30,8 @@ segment.and.fit = function(
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   eps = 1,
   remove.low.entropy = T,
-  max.uniform = T
+  max.uniform = T,
+  seed = 123
 ){
   histogram.metric = match.arg(histogram.metric, several.ok = T)
 
@@ -125,6 +126,7 @@ segment.and.fit = function(
   # Fitting different models
   results = data.frame()
   models = list()
+  set.seed(seed)
   for(i in 1:length(seg.gr)){
     # cat(i , "\n")
     # Extracting data
