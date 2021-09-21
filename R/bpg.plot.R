@@ -9,13 +9,6 @@ bpg.plot = function(
   results
 ) {
 
-  # metric.label = switch(
-  #   met,
-  #   "jaccard" = "Jaccard Index",
-  #   "intersection" = "Histogram Intersection",
-  #   "ks" = "KS Statistic",
-  #   "mse" = "Mean Squared Error",
-  #   "chisq" = "Chi-square statistic")
 
   # Bin counts
   bin.counts = bin.counts[,c("start", "Coverage")]
@@ -142,6 +135,10 @@ bpg.plot = function(
   result.mat = matrix(NA, ncol = length(unique.mets), nrow = geneinfo$exome_length, dimnames = list(1:geneinfo$exome_length, unique.mets))
   for(i in 1:nrow(results)){result.mat[results$seg.start[i]:results$seg.end[i],results$metric[i]] <- col.numeric[results$dist[i]]}
 
+  metric.label = structure(
+    c(expression(bold("Consensus")), "Jaccard", "Intersection", "K-S", "MSE", expression(paste(chi^"2"))),
+    names = c("Consensus", "jaccard", "intersection", "ks", "mse", "chisq"))
+
   dist.hm = BoutrosLab.plotting.general::create.heatmap(
     result.mat,
     clustering.method = 'none',
@@ -151,8 +148,8 @@ bpg.plot = function(
     # Y axis Labels
     yaxis.cex = 0.8,
     xaxis.fontface = 1,
-    yaxis.fontface = c(rep(1, ncol(result.mat)-1), 2),
-    yaxis.lab = colnames(result.mat),
+    # yaxis.fontface = c(rep(1, ncol(result.mat)-1), 2),
+    yaxis.lab = metric.label[colnames(result.mat)],
     ylab.cex = 1,
     ylab.label = "Metrics",
     # Colours
@@ -188,6 +185,7 @@ bpg.plot = function(
 
   x.digits = floor(log10(geneinfo$exome_length))-1
   x.at = seq(0, round(geneinfo$exome_length, digits = -x.digits), length.out = 5)
+  x.at[x.at == 0] <- 1
   hm.coverage = BoutrosLab.plotting.general::create.heatmap(
     transcript.coverage,
     clustering.method = 'none',
@@ -280,7 +278,7 @@ bpg.plot = function(
   filename = file.path(output.dir, paste0(geneinfo$gene, ".", output.tag, ".SegmentAndFit.pdf"))
   pdf(filename, width = 10, height = 10)
 
-  transcript.height = min(3, ncol(transcript.coverage)*0.5) + 0.55
+  transcript.height = min(3.5, ncol(transcript.coverage)*0.5 + 0.8)
   distplot.height = min(2.8, length(unique.mets)*0.8)
 
   mpp = BoutrosLab.plotting.general::create.multipanelplot(
