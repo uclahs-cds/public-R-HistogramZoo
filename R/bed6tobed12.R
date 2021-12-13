@@ -1,12 +1,13 @@
 .bed6tobed12 = function(
   merged.peaks,
-  id.cols
+  name.id,
+  peak.id,
+  score.id,
+  distribution.id,
+  meta.id
 ){
-  if(length(id.cols) == 1){
-    merged.peaks$tag = GenomicRanges::mcols(merged.peaks)[,id.cols]
-  } else{
-    merged.peaks$tag = apply(GenomicRanges::mcols(merged.peaks)[,id.cols], 1, function(x) paste(x, collapse = ":"))
-  }
+
+  merged.peaks$tag = paste0(GenomicRanges::mcols(merged.peaks)[,name.id], ":", GenomicRanges::mcols(merged.peaks)[,peak.id])
 
   bed12 = do.call(rbind, lapply(unique(merged.peaks$tag), function(itag) {
     tmp.peak = merged.peaks[merged.peaks$tag == itag]
@@ -16,7 +17,7 @@
       "start" = min(GenomicRanges::start(tmp.peak)),
       "end" = max(GenomicRanges::end(tmp.peak)),
       "name" = GenomicRanges::mcols(tmp.peak)$name[1],
-      "score" = 0, # This might be changed to a p-value if there is one
+      "score" = GenomicRanges::mcols(tmp.peak)[1, score.id],
       "strand" = as.character(GenomicRanges::strand(tmp.peak))[1],
       "thickStart" = min(GenomicRanges::start(tmp.peak)),
       "thickEnd" = max(GenomicRanges::end(tmp.peak)),
@@ -24,6 +25,8 @@
       "blockCount" = length(tmp.peak),
       "blockSizes" = paste0(paste(GenomicRanges::end(tmp.peak) - GenomicRanges::start(tmp.peak), collapse = ","), ","),
       "blockStarts" = paste0(paste(GenomicRanges::start(tmp.peak) - min(GenomicRanges::start(tmp.peak)), collapse = ","), ","),
+      "distribution" = GenomicRanges::mcols(tmp.peak)[1, distribution.id],
+      "distribution.features" = GenomicRanges::mcols(tmp.peak)[1, meta.id],
       "peak" = itag,
       stringsAsFactors = F
       )

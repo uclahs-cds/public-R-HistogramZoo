@@ -26,8 +26,8 @@
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
 #' @param fit.mixtures Only if the method parameter is set to 'sf'. A vector of distribution names to be fitted including "unif", "tnorm", "tgamma", "tgamma_flip", "mixEM" (misxture of normals). "all" for all available distributions.
 #' @param residual.tolerance Only if the method parameter is set to 'sf'. The maximum threshold for a sum of residuals requiring the peak to be refit with a uniform.
-#' @param trim.peak.stepsize Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim iteratively. Can also be given as a proportion of the peak.
-#' @param trim.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
+#' @param uniform.peak.stepsize Only if the method parameter is set to 'sf'. An integer value > 0 indicating the number of base pairs to trim iteratively. Can also be given as a proportion of the peak.
+#' @param uniform.peak.threshold Only if the method parameter is set to 'sf'. A numeric value between 0 and 1 indicating the maximum proportion of the trimmed peak permitted for distribution fit optimization.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 #' @param output.tag A character string added to the names of any output files.
 #' @param output.dir Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
@@ -54,8 +54,8 @@
 #' diagnostic = F,
 #' fit.mixture = T,
 #' residual.tolerance = 0.1,
-#' trim.peak.stepsize = 10,
-#' trim.peak.threshold = 0.1,
+#' uniform.peak.stepsize = 10,
+#' uniform.peak.threshold = 0.1,
 #' plot.merged.peaks = F,
 #' output.tag = "TEST",
 #' output.dir = ".",
@@ -72,8 +72,10 @@ ConsensusPeaks = function(
   diagnostic = F,
   fit.mixtures = "all",
   residual.tolerance = 0.1,
-  trim.peak.stepsize = 10,
-  trim.peak.threshold = 0.8,
+  truncated.models = FALSE,
+  uniform.peak.stepsize = 5,
+  uniform.peak.threshold = 0.75,
+  histogram.metric = c("jaccard", "intersection", "ks"),
   eps = 1,
   plot.merged.peaks = F,
   output.tag = "",
@@ -117,8 +119,8 @@ ConsensusPeaks = function(
     }
     if(!is.logical(diagnostic)){stop("Please provide a logical for diagnostic")}
     if(!is.numeric(residual.tolerance) | residual.tolerance < 0){stop("Please provide a positive numeric for thresholding residuals")}
-    if(!is.numeric(trim.peak.stepsize) |  trim.peak.stepsize < 0){stop("Please provide a positive integer or proportion for trim.peak.stepsize")}
-    if(!is.numeric(trim.peak.threshold) | trim.peak.threshold > 1 | trim.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for trim.peak.threshold")}
+    if(!is.numeric(uniform.peak.stepsize) |  uniform.peak.stepsize < 0){stop("Please provide a positive integer or proportion for uniform.peak.stepsize")}
+    if(!is.numeric(uniform.peak.threshold) | uniform.peak.threshold > 1 | uniform.peak.threshold < 0){stop("Please provide a numeric between 0 and 1 for uniform.peak.threshold")}
     if(!is.numeric(eps)){stop("Please provide a numeric for eps")}
   }
 
@@ -162,10 +164,10 @@ ConsensusPeaks = function(
         output.dir = output.dir,
         plot.merged.peaks = plot.merged.peaks,
         diagnostic = diagnostic,
-        fit.mixtures = fit.mixtures,
-        trim.peak.threshold = trim.peak.threshold,
-        trim.peak.stepsize = trim.peak.stepsize,
-        residual.tolerance = residual.tolerance,
+        truncated.models = truncated.models,
+        uniform.peak.threshold = uniform.peak.threshold,
+        uniform.peak.stepsize = uniform.peak.stepsize,
+        histogram.metric = histogram.metric,
         eps = eps)
     }
     output.table = rbind(output.table, results)
