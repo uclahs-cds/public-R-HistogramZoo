@@ -1,6 +1,7 @@
 #' Take a vector of values and get the histogram for integer breaks
 #' @param x the observation
 #' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
+#' @export
 obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   a = floor(min(x))-1
   b = ceiling(max(x))

@@ -190,3 +190,11 @@ maximal.gaps.multiplot = function(x, seg.points, max.gaps, new.segments = NULL, 
     ...
   )
 }
+
+# Looks for the lower changepoint of a step function
+find.stepfunction.chgpts = function(x){
+  chg.pts = which(diff(x) != 0)
+  chg.pts.plus = chg.pts+1
+  keep.chg.pts = (x[chg.pts] < x[chg.pts.plus])
+  c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
+}

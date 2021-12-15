@@ -32,7 +32,9 @@ fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "
     })
     dens[is.na(dens)] = 0
     res = metric.func(freq, dens)
-    if(is.na(res) || res == -Inf || res == Inf) browser()
+    if(is.na(res) || res == -Inf || res == Inf) {
+      res = Inf
+    }
     res
   }
 
