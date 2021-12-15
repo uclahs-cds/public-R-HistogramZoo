@@ -22,6 +22,7 @@ meaningful.interval = function(h, p, a, b, N, L){
 # Meaningful gap
 meaningful.gap = function(h, p, a, b, N, L){
   relative.entropy = rel.entropy(h, p, a, b)
+  if(is.na(relative.entropy)) relative.entropy = Inf
   prob.diff = calc.prob.diff(h, p, a, b)
   mgap = (relative.entropy >= (1/N)*log(L*(L+1)/2) && !prob.diff) || (all(h == 0))
   c(mgap = mgap, entropy = relative.entropy)
@@ -51,6 +52,7 @@ maximal.meaningful = function(x) {
   max.intervals
 }
 
+#' @export
 find.all.meaningful.gap = function(x, change.points) {
   # span = seq_along(x)
   # todo = expand.grid(span, span)
@@ -90,7 +92,7 @@ meaningful.gaps.local = function(x, seg.points, change.points) {
     max.gaps = find.all.meaningful.gap(x.sub, chg.pts)
 
     if(nrow(max.gaps) > 0) {
-      max.gaps[, c('Var1','Var2')] <- max.gaps[, c('Var1','Var2')] + seg.points[i-1] -1
+      max.gaps[, c('Var1','Var2')] <- max.gaps[, c('Var1','Var2')] + seg.points[i-1] - 1
       max.gaps$seg.start = seg.points[i-1]
       max.gaps$seg.end = seg.points[i]
       max.gaps

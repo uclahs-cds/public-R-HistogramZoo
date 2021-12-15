@@ -8,6 +8,8 @@ segment.fit.agnostic <- function(x,
                                  remove.low.entropy = T,
                                  max.uniform = T,
                                  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")) {
+  save.names <- names(x)
+  names(x) <- NULL
   # Change points
   chgpts = find.stepfunction.chgpts(x)
   p.init = sort(unique(c(1, chgpts, length(x))))
@@ -16,8 +18,8 @@ segment.fit.agnostic <- function(x,
   # Max Gap
   if(remove.low.entropy){
     mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
-    mgaps$Var1 = mgaps$Var1-1
-    mgaps$Var2 = mgaps$Var2-1
+    mgaps$Var1 = mgaps$Var1
+    mgaps$Var2 = mgaps$Var2
     max.gaps = mgaps[,c("Var1", "Var2")]
 
     p <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
