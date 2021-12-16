@@ -22,18 +22,17 @@ segment.fit.agnostic <- function(x,
     mgaps$Var2 = mgaps$Var2
     max.gaps = mgaps[,c("Var1", "Var2")]
 
-    p <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
+    p.pairs <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
   }
 
   # Fitting different models
   results = data.frame()
   models = list()
   set.seed(seed)
-  for(i in 2:length(p)){
-    # cat(i , "\n")
-    # Extracting data
-    seg.start = p[i - 1]
-    seg.end = p[i]
+  for(i in seq_along(p.pairs)){
+    seg = p.pairs[[i]]
+    seg.start = seg$start
+    seg.end = seg$end
     seg.len = seg.end - seg.start + 1
     bin.data = x[seg.start:seg.end]
 
