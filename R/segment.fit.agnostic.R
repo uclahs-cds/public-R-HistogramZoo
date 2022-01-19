@@ -1,4 +1,12 @@
+find.stepfunction.chgpts = function(x){
+  chg.pts = which(diff(x) != 0)
+  chg.pts.plus = chg.pts+1
+  keep.chg.pts = (x[chg.pts] < x[chg.pts.plus])
+  c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
+}
+
 #' Assume that x is a histogram (or raw data?)
+#' Needs to work as a standalone function
 segment.fit.agnostic <- function(x,
                                  eps = 1,
                                  seed = NULL,
