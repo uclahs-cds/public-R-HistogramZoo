@@ -16,8 +16,7 @@ segment.fit.agnostic <- function(x,
                                  remove.low.entropy = T,
                                  max.uniform = T,
                                  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")) {
-  save.names <- names(x)
-  names(x) <- NULL
+
   # Change points
   chgpts = find.stepfunction.chgpts(x)
   p.init = sort(unique(c(1, chgpts, length(x))))
@@ -26,15 +25,11 @@ segment.fit.agnostic <- function(x,
   # Max Gap
   if(remove.low.entropy){
     mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
-    mgaps$Var1 = mgaps$Var1
-    mgaps$Var2 = mgaps$Var2
     max.gaps = mgaps[,c("Var1", "Var2")]
-
     p.pairs <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
   }
 
   # Fitting different models
-  results = data.frame()
   models = list()
   set.seed(seed)
   for(i in seq_along(p.pairs)){
@@ -70,32 +65,32 @@ segment.fit.agnostic <- function(x,
     }
 
     # Metric Voting
-    value.df = data.frame(
-      "i" = i,
-      "value" = unlist(lapply(dist.optim, `[[`, "value")),
-      "dist" = unlist(lapply(dist.optim, `[[`, "dist")),
-      "metric" = unlist(lapply(dist.optim, `[[`, "metric")),
-      "params" = unlist(lapply(dist.optim, function(m) dput.str(m$par))),
-      "seg.start" = unlist(lapply(dist.optim, `[[`, "seg.start")),
-      "seg.end" = unlist(lapply(dist.optim, `[[`, "seg.end")),
-      "final" = 0,
-      stringsAsFactors=F
-    )
-    distr.vote = aggregate(value ~ metric, value.df, FUN = min)
-    vote.df = merge(value.df, distr.vote, by = c("metric", "value"))
-    distr.tally = table(vote.df$dist)
-    best.distr = ifelse(sum(distr.tally == max(distr.tally))>1, vote.df$dist[vote.df$metric == "jaccard"], names(distr.tally)[which.max(distr.tally)])
-    final.res = value.df[value.df$metric == "jaccard" & value.df$dist == best.distr,]
-    final.res$final <- 1
-    vote.df = rbind.data.frame(vote.df, final.res)
+    metric.idx = sapply(dist.optim, `[[`, "metric")
+    best.models = lapply(histogram.metric, function(met){
+      idx = which(metric.idx == met)
+      dist.optim.met = dist.optim[idx]
+      val = lapply(dist.optim.met, `[[`, "value")
+      dist.optim.met[which.min(val)]
+    })
+    best.models = unlist(best.models, recursive = F)
+    dist.extract = sapply(best.models, `[[`, "dist")
+    dist.vote = sort(table(dist.extract), decreasing = T)
+    if(length(dist.vote) > 1 & dist.vote[1] == dist.vote[2]){
+       mets = sapply(best.models, `[[`, "metric")
+       dist.majority = dist.extract[which(mets == "jaccard")]
+    } else {
+      dist.majority = names(dist.vote)[1]
+    }
+    best.models[['majority.vote']] <- dist.optim[[paste0("jaccard.", dist.majority)]]
 
-    mod.final = dist.optim[[paste0("jaccard.", best.distr)]]
-    models[[i]] = mod.final
-    results = rbind(results, vote.df)
+    # Correcting for optimization via finding the minimum
+    best.models = lapply(best.models, function(mod){
+      if(mod$metric %in% c("jaccard", "intersection")){ mod$value = 1 - mod$value }
+      mod
+    })
+
+    models[[i]] <- best.models
   }
 
-  # Correcting for optimization via finding the minimum
-  results$value[results$metric %in% c("jaccard", "intersection")] <- 1 - results$value[results$metric %in% c("jaccard", "intersection")]
-
-  return(results)
+  return(models)
 }
