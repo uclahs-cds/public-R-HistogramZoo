@@ -73,23 +73,16 @@ format.results = function(
     bins = GenomicRanges::tile(x = x, width = histogram.bin.size)
     bins = unlist(bins)
     res = results[[i]]
-    
-    # Extract ranges & collapse
-    # This part is specific to the code we have now 
-    # but can be easily changed to match the format of the results
-    # Note: We can also add in the rest of the bed12 columns
-    res = res[res$final == 1,]
-    seg.starts = res$seg.start
-    seg.ends = res$seg.end
-    formatted.res = GenomicRanges::GRanges()
-    for(j in 1:nrow(res)){
-      f.res = GenomicRanges::reduce(bins[seg.starts[j]:seg.ends[j]])
+    for(j in seq_along(res)){
+      id =  paste0(i, ":", j)
+      final.mod = res[[j]]$majority.vote
+      f.res = GenomicRanges::reduce(bins[final.mod$seg.start:final.mod$seg.end])
       f.res = bed6tobed12(f.res)
-      formatted.res = c(formatted.res, f.res)
+      S4Vectors::mcols(f.res)$name = id
+      S4Vectors::mcols(f.res)[,c( "value", "metric", "dist")] = final.mod[c( "value", "metric", "dist")]
+      S4Vectors::mcols(f.res)$params = dput.str(final.mod$par)
+      formatted.results[id] = f.res
     }
-    S4Vectors::mcols(formatted.res)$name = paste0(i, "::", res$i)
-    S4Vectors::mcols(formatted.res)[,c( "value", "metric", "dist", "params")] = res[,c( "value", "metric", "dist", "params")]
-    formatted.results = c(formatted.results, formatted.res)
   }
   # Reordering the columns
   S4Vectors::mcols(formatted.results) = S4Vectors::mcols(formatted.results)[,c("name", "value", "metric", "dist", "params", "blockCount", "blockSizes", "blockStarts")]
