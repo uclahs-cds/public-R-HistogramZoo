@@ -72,7 +72,7 @@ format.results = function(
     x = unlist(x)
     bins = GenomicRanges::tile(x = x, width = histogram.bin.size)
     bins = unlist(bins)
-    res = results[i]
+    res = results[[i]]
     
     # Extract ranges & collapse
     # This part is specific to the code we have now 
