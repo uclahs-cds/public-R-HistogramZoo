@@ -81,7 +81,8 @@ segment.fit.agnostic <- function(x,
     } else {
       dist.majority = names(dist.vote)[1]
     }
-    best.models[['majority.vote']] <- dist.optim[[paste0("jaccard.", dist.majority)]]
+    best.models[['majority.vote']] = dist.optim[[paste0("jaccard.", dist.majority)]]
+    best.models[['majority.vote']]$metric = "Consensus"
 
     # Correcting for optimization via finding the minimum
     best.models = lapply(best.models, function(mod){
@@ -92,5 +93,6 @@ segment.fit.agnostic <- function(x,
     models[[i]] <- best.models
   }
 
+  models$p = p
   return(models)
 }

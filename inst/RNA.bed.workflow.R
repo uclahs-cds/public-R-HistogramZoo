@@ -3,6 +3,9 @@
 # library(valr)
 # library(genomation)
 # library(GenomicRanges)
+# library(fitdistrplus)
+# library(truncdist)
+library(extraDistr)
 
 # Preamble ----------------------------------------------------------------
 # Testing the workflow of the tool on RNA based BED files
@@ -15,7 +18,7 @@ filenames = paste0("rna_bedfiles/Sample.", 1:20, ".bed")
 n_fields = 12
 gtf.file = "genes.gtf"
 gene.or.transcript = "gene"
-genes = c("ENSG00000198900.6", "ENSG00000103035.11")
+genes = c("ENSG00000103035.11", "ENSG00000198900.6")
 
 #
 eps = 10^-4
@@ -37,19 +40,6 @@ list.hist = bed.to.hist(
   histogram.bin.size = 1
 )
 
-names(list.hist)
-# [1] "histogram.coverage" "gene.model"         "histogram.bin.size"
-
-# Histogram coverage
-head(list.hist$histogram.coverage)
-
-# Gene model
-list.hist$gene.model
-
-# Bin size
-list.hist$histogram.bin.size
-# [1] 1
-
 # ### STEP 2 ###
 # Running the FTC algorithm
 ftc.res = bulk.segment.fit(
@@ -69,7 +59,6 @@ ftc.res = bulk.segment.fit(
 res = format.results(
   coverage.model.obj = ftc.res
 )
-
 res
 
 # ### STEP 4 (Optional) ###
