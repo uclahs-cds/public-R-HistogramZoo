@@ -5,29 +5,53 @@ find.stepfunction.chgpts = function(x){
   c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
 }
 
+trim.counts.identify.segments = function(
+  x,
+  threshold = 0){
+
+  x.thresh = rle(x > threshold)
+  seg.true = which(x.thresh$values)
+  start.coords = sapply(seg.true, function(x) sum(x.thresh$lengths[1:(x-1)], 1))
+  end.coords = sapply(seg.true, function(x) sum(x.thresh$lengths[1:x]))
+
+  return(list(start.coords, end.coords))
+}
+
 #' Assume that x is a histogram (or raw data?)
 #' Needs to work as a standalone function
-segment.fit.agnostic <- function(x,
-                                 eps = 1,
-                                 seed = NULL,
-                                 truncated.models = FALSE,
-                                 uniform.peak.threshold = 0.75,
-                                 uniform.peak.stepsize = 5,
-                                 remove.low.entropy = T,
-                                 max.uniform = T,
-                                 histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")) {
+segment.fit.agnostic <- function(
+  x,
+  histogram.count.threshold = 0,
+  eps = 1,
+  seed = NULL,
+  truncated.models = FALSE,
+  uniform.peak.threshold = 0.75,
+  uniform.peak.stepsize = 5,
+  remove.low.entropy = T,
+  max.uniform = T,
+  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+  ) {
 
   # Change points
   chgpts = find.stepfunction.chgpts(x)
-  p.init = sort(unique(c(1, chgpts, length(x))))
-  p = ftc.helen(x, p.init, eps)
-
-  # Max Gap
-  if(remove.low.entropy){
-    mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
-    max.gaps = mgaps[,c("Var1", "Var2")]
-    p.pairs <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
+  x.segs = trim.counts.identify.segments(x, threshold = histogram.count.threshold)
+  segs.start = x.segs[[1]]
+  segs.end = x.segs[[2]]
+  pts = list()
+  p.pairs = list()
+  for(k in seq_along(segs.start)){
+    p.init = c(segs.start[k], chgpts[chgpts > segs.start[k] & chgpts < segs.end[k]], segs.end[k])
+    p.init = sort(p.init)
+    p = ftc.helen(x, p.init, eps)
+    pts[[k]] = p
+    # Max Gap
+    if(remove.low.entropy){
+      mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
+      p.pairs.k <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
+      p.pairs = append(p.pairs, p.pairs.k)
+    }
   }
+  pts = unlist(pts)
 
   # Fitting different models
   models = list()
@@ -93,6 +117,6 @@ segment.fit.agnostic <- function(x,
     models[[i]] <- best.models
   }
 
-  models$p = p
+  models$p = pts
   return(models)
 }

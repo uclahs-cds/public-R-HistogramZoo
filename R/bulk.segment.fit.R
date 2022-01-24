@@ -73,6 +73,7 @@ format.results = function(
     bins = GenomicRanges::tile(x = x, width = histogram.bin.size)
     bins = unlist(bins)
     res = results[[i]]
+    res = res[names(res) != 'p']
     for(j in seq_along(res)){
       id =  paste0(i, ":", j)
       final.mod = res[[j]]$majority.vote

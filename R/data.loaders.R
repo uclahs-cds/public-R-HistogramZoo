@@ -35,7 +35,7 @@ coverage.to.hist = function(
   histogram.bin.size
 ){
   histogram.coverage = list()
-  for(i in 1:length(regions)){
+  for(i in seq_along(regions)){
     x = regions[i]
     x.name = names(x)
     x = unlist(x)
