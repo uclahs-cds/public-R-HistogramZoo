@@ -193,7 +193,7 @@ metrics.plot = function(
     # Colourkey
     print.colour.key = F
   )
-  return(list(plt, plt2))
+  return(list(plt, plt2, min.at))
 }
 
 plot.fitted.segments = function(
@@ -203,6 +203,7 @@ plot.fitted.segments = function(
   plot.types = c("coverage", "residuals", "metrics", "transcript")
 ){
  
+  compiled.plts = list()
   # Loop through genes to plot things
   for(i in histogram.names){
     
@@ -249,7 +250,8 @@ plot.fitted.segments = function(
       models = result,
       x.limit = xlim
     )
-    metrics.plt = unlist(metrics.plt, recursive = F)
+    min.at = metrics.plt[[3]]
+    metrics.plt = metrics.plt[1:2]
     
     # Legend
     covariate.legend <- list(
@@ -272,14 +274,14 @@ plot.fitted.segments = function(
         lwd = 0.5
       ),
       legend = list(
-        colours = col.reference[2:length(col.reference)],
-        labels = names(col.reference)[2:length(col.reference)],
+        colours = c("darkorange", "chartreuse4", "darkorchid4"),
+        labels = c("norm", "gamma", "unif"),
         title = expression(bold(underline('Distributions'))),
         lwd = 0.5
       ),
       legend = list(
         colours = c('dodgerblue4', 'gold'),
-        labels = c(formatC(min.at, format = "g", digits = 2), max.at),
+        labels = c(formatC(min.at, format = "g", digits = 2), 1),
         title = bquote(bold(underline(.("Jaccard Index")))),
         continuous = TRUE,
         height = 2,
@@ -302,12 +304,14 @@ plot.fitted.segments = function(
     )
     
     # Compile plot
-    BoutrosLab.plotting.general::create.multipanelplot(
+    distplot.height = min(2.8, length(result[[1]])*0.8)
+    
+    compiled.plts[[i]] = BoutrosLab.plotting.general::create.multipanelplot(
       plot.objects = c(list(coverage.plt, residual.plt), metrics.plt),
       plot.objects.heights = c(10, 3, 1, distplot.height),
       y.spacing = -5,
       # Labels
-      main = geneinfo$gene,
+      main = i,
       main.cex = 2,
       # Legend
       legend = list(
@@ -319,8 +323,10 @@ plot.fitted.segments = function(
       )
     )
     
-    
   }
   
   ## Generate file 
+  pdf(file.name, width = 10, height = 10)
+  print(compiled.plts)
+  dev.off()
 }

@@ -66,7 +66,7 @@ res
 plot.fitted.segments(
   histogram.names = genes,
   coverage.model.obj = ftc.res,
-  filename = "~/figures/test.pdf"
+  file.name = "~/figures/test.pdf"
 )
 
 # ### STEP 5 (Optional) ###
