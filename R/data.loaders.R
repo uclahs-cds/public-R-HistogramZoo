@@ -62,8 +62,8 @@ bed.to.hist = function(
 ){
 
   # Load BED files
-  bedfiles = valr::read_bed( filenames, n_fields = n_fields )
-  if(n_fields == 12){ segs = valr::bed12_to_exons( bedfiles ) }
+  segs = valr::read_bed( filenames, n_fields = n_fields )
+  if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
   segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs )
 
   # Calculating coverage using GenomicRanges

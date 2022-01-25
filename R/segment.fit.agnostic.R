@@ -34,9 +34,11 @@ segment.fit.agnostic <- function(
 
   # Change points
   chgpts = find.stepfunction.chgpts(x)
+  # Looking for regions that surpass a hard count threshold
   x.segs = trim.counts.identify.segments(x, threshold = histogram.count.threshold)
   segs.start = x.segs[[1]]
   segs.end = x.segs[[2]]
+  # Initializing
   pts = list()
   p.pairs = list()
   for(k in seq_along(segs.start)){
@@ -47,8 +49,10 @@ segment.fit.agnostic <- function(
     # Max Gap
     if(remove.low.entropy){
       mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
-      p.pairs.k <- remove.max.gaps.agnostic(p, max.gaps, remove.short.segment = 1)
-      p.pairs = append(p.pairs, p.pairs.k)
+      if(nrow(mgaps) > 0){
+        p.pairs.k <- remove.max.gaps.agnostic(p, mgaps, remove.short.segment = 1)
+        p.pairs = append(p.pairs, p.pairs.k)
+      }
     }
   }
   pts = unlist(pts)
