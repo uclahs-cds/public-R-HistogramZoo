@@ -38,6 +38,7 @@ segment.fit.agnostic <- function(
   uniform.peak.threshold = 0.75,
   uniform.peak.stepsize = 5,
   remove.low.entropy = T,
+  min.gap.size = 2,
   max.uniform = T,
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
   ) {
@@ -45,32 +46,41 @@ segment.fit.agnostic <- function(
   # Change points
   chgpts = find.stepfunction.chgpts(x)
   # Looking for regions that surpass a hard count threshold
-  x.segs = find.consecutive.threshold(x, threshold = histogram.count.threshold)
-  segs.start = x.segs$start
-  segs.end = x.segs$end
-  # Initializing
-  pts = vector("list", length(segs.start))
-  p.pairs = vector("list", length(segs.start))
-  for(k in seq_along(segs.start)){
-    p.init = c(segs.start[k], chgpts[chgpts > segs.start[k] & chgpts < segs.end[k]], segs.end[k])
+  x.segs = as.data.frame(find.consecutive.threshold(x, threshold = histogram.count.threshold))
+
+  all.points = apply(x.segs, 1, function(segs) {
+    p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
     p.init = sort(p.init)
     p = ftc.helen(x, p.init, eps)
-    pts[[k]] = p
+
+    p.start.end = data.frame(
+      start = p[1:(length(p) - 1)],
+      end = p[2:length(p)])
+
     # Max Gap
-    mgaps = if(remove.low.entropy) meaningful.gaps.local(x = x, seg.points = p, change.points = p.init) else data.frame()
-    p.pairs.k <- remove.max.gaps.iranges(p = p, max.gaps = mgaps, remove.short.segment = 1)
-    p.pairs[[k]] = p.pairs.k
-  }
-  p.pairs = unlist(p.pairs, recursive = F)
-  pts = unlist(pts)
+    if(remove.low.entropy) {
+      mgaps =  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min.gap.size)
+      p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
+      p.pairs$max.gap.removed = TRUE
+    } else {
+      p.pairs = p.start.end
+      p.pairs$max.gap.removed = FALSE
+    }
+
+    p.pairs
+  })
+
+  # Combine the results from each segment
+  all.points = do.call('rbind.data.frame', all.points)
+  rownames(all.points) <- NULL
 
   # Fitting different models
   models = list()
   set.seed(seed)
-  for(i in seq_along(p.pairs)){
-    seg = p.pairs[[i]]
-    seg.start = seg$start
-    seg.end = seg$end
+  for(i in seq_len(nrow(all.points))) {
+    seg = all.points[i, ]
+    seg.start = seg[['start']]
+    seg.end = seg[['end']]
     seg.len = seg.end - seg.start + 1
     bin.data = x[seg.start:seg.end]
 
@@ -130,7 +140,7 @@ segment.fit.agnostic <- function(
 
   rtn.list <- list(
     models = models,
-    p = pts
+    p = all.points
   )
 
   return(rtn.list)
