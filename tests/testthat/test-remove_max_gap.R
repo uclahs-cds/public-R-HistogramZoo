@@ -1,7 +1,6 @@
 test_that("segment.fit works", {
   # set.seed(26)
   # obs.to.int.hist(c(rnorm(100, mean = 1), runif(50, min = 25, max = 35)))
-  devtools::load_all("/Users/stefaneng/devel/ConsensusPeaks", quiet = T)
   x = c(`-3` = 0L, `-2` = 0L, `-1` = 3L, `0` = 18L, `1` = 33L, `2` = 30L,
                  `3` = 12L, `4` = 4L, `5` = 0L, `6` = 0L, `7` = 0L, `8` = 0L,
                  `9` = 0L, `10` = 0L, `11` = 0L, `12` = 0L, `13` = 0L, `14` = 0L,
