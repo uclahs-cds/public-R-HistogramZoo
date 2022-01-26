@@ -5,16 +5,26 @@ find.stepfunction.chgpts = function(x){
   c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
 }
 
-trim.counts.identify.segments = function(
+#' Returns the indicies for consecutive elements of a vector that are greater than a specified threshold
+#'
+#' @param x
+#' @param threshold
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+find.consecutive.threshold = function(
   x,
   threshold = 0){
-
   x.thresh = rle(x > threshold)
-  seg.true = which(x.thresh$values)
-  start.coords = sapply(seg.true, function(x) sum(x.thresh$lengths[1:(x-1)], 1))
-  end.coords = sapply(seg.true, function(x) sum(x.thresh$lengths[1:x]))
+  end.coords = cumsum(x.thresh$lengths)
+  start.coords = end.coords - x.thresh$lengths + 1
+  start.coords.above.threshold = start.coords[x.thresh$values]
+  end.coords.above.threshold = end.coords[x.thresh$values]
 
-  return(list(start.coords, end.coords))
+  list(start = start.coords.above.threshold, end = end.coords.above.threshold)
 }
 
 #' Assume that x is a histogram (or raw data?)
@@ -35,9 +45,9 @@ segment.fit.agnostic <- function(
   # Change points
   chgpts = find.stepfunction.chgpts(x)
   # Looking for regions that surpass a hard count threshold
-  x.segs = trim.counts.identify.segments(x, threshold = histogram.count.threshold)
-  segs.start = x.segs[[1]]
-  segs.end = x.segs[[2]]
+  x.segs = find.consecutive.threshold(x, threshold = histogram.count.threshold)
+  segs.start = x.segs$start
+  segs.end = x.segs$end
   # Initializing
   pts = vector("list", length(segs.start))
   p.pairs = vector("list", length(segs.start))
