@@ -39,22 +39,19 @@ segment.fit.agnostic <- function(
   segs.start = x.segs[[1]]
   segs.end = x.segs[[2]]
   # Initializing
-  pts = list()
-  p.pairs = list()
+  pts = vector("list", length(segs.start))
+  p.pairs = vector("list", length(segs.start))
   for(k in seq_along(segs.start)){
     p.init = c(segs.start[k], chgpts[chgpts > segs.start[k] & chgpts < segs.end[k]], segs.end[k])
     p.init = sort(p.init)
     p = ftc.helen(x, p.init, eps)
     pts[[k]] = p
     # Max Gap
-    if(remove.low.entropy){
-      mgaps = meaningful.gaps.local(x = x, seg.points = p, change.points = p.init)
-      if(nrow(mgaps) > 0){
-        p.pairs.k <- remove.max.gaps.agnostic(p, mgaps, remove.short.segment = 1)
-        p.pairs = append(p.pairs, p.pairs.k)
-      }
-    }
+    mgaps = if(remove.low.entropy) meaningful.gaps.local(x = x, seg.points = p, change.points = p.init) else data.frame()
+    p.pairs.k <- remove.max.gaps.iranges(p = p, max.gaps = mgaps, remove.short.segment = 1)
+    p.pairs[[k]] = p.pairs.k
   }
+  p.pairs = unlist(p.pairs, recursive = F)
   pts = unlist(pts)
 
   # Fitting different models
