@@ -22,4 +22,19 @@ test_that("segment.fit works", {
   mgaps
   p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
   p.pairs
+
+  # Tests that it splits at all p points
+  p = c(1, 5, 10)
+  mgaps = data.frame("start" = 7, "end" = 10)
+  p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
+
+  # Returns:
+  #  start end
+  #     1   6
+
+  # Needs to do this:
+  # start end
+  #     1   4
+  #     5   6
+
 })

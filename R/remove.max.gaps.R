@@ -40,19 +40,3 @@ remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 1) {
 
   do.call('rbind.data.frame', new.p)
 }
-
-remove.max.gaps.iranges = function(p, max.gaps, remove.short.segment = 1){
-  # Create IRanges object with the segments identified by p
-  l.p = length(p) - 1
-  p.ir = IRanges::IRanges(start = p[1:l.p], end = c(p[2:l.p] - 1, p[l.p+1]))
-  p.ir = S4Vectors::split(p.ir, seq_along(p.ir))
-  # Create IRanges object with max gap
-  maxgap.ir = if(nrow(max.gaps) > 0) IRanges::IRanges(start = max.gaps[,1], end = max.gaps[,2]) else IRanges::IRanges()
-  # Subtract maxgaps
-  segs.ir = IRanges::setdiff(p.ir, maxgap.ir)
-  segs.ir = unlist(segs.ir)
-  # Remove short segments
-  segs.ir = segs.ir[IRanges::width(segs.ir) > remove.short.segment]
-
-  as.data.frame(segs.ir)[, c('start', 'end')]
-}
