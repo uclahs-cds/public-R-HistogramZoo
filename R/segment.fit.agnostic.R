@@ -121,6 +121,10 @@ segment.fit.agnostic <- function(
     models[[i]] <- best.models
   }
 
-  models$p = pts
-  return(models)
+  rtn.list <- list(
+    models = models,
+    p = pts
+  )
+
+  return(rtn.list)
 }
