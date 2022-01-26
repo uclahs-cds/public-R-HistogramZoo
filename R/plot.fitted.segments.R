@@ -10,19 +10,19 @@ coverage.plot = function(
   plt.data = c(dist.data, list(histogram.coverage))
   for(i in 1:length(plt.data)){plt.data[[i]]$'i' <- i}
   plt.data = do.call(rbind, plt.data)
-  
+
   # Reference Colours, Numeric & Line Width for Distributions
   col.reference = c("black", "darkorange", "chartreuse4", "darkorchid4")
   names(col.reference) = c("coverage", "norm", "gamma", "unif")
   lwd.reference = c(1, 2.5, 2.5, 2.5)
   names(lwd.reference) = c("coverage", "norm", "gamma", "unif")
-  
+
   # Plotting attributes for lineplot
   col.used = unique(plt.data[,c("dist", "i")])
   col.used = col.used[order(col.used$i),]
   col.vec = col.reference[col.used$dist]
   lwd.vec = lwd.reference[col.used$dist]
-  
+
   plt = BoutrosLab.plotting.general::create.scatterplot(
     dens ~ x,
     plt.data,
@@ -49,21 +49,21 @@ coverage.plot = function(
     points.pch = 19,
     points.col = 'red'
   )
-  
-  return(plt) 
+
+  return(plt)
 }
 
 residual.plot = function(
   histogram.coverage,
   dist.data
 ){
- 
+
   xlim = nrow(histogram.coverage)
   dist.data = do.call(rbind, dist.data)
   residual.data = merge(dist.data[,c("x", "dens")], histogram.coverage[,c("x", "dens")], by = "x", all = T)
   colnames(residual.data) = c("x", "fitted", "real")
   residual.data$resid = residual.data$real - residual.data$fitted
-  
+
   residual.chgpts = which(abs(diff(sign(residual.data$resid))) == 2)
   plt =  BoutrosLab.plotting.general::create.scatterplot(
     resid ~ x,
@@ -91,14 +91,14 @@ residual.plot = function(
     abline.col = "lightgrey",
     abline.lwd = 0.01
   )
-  return(plt) 
+  return(plt)
 }
 
 metrics.plot = function(
   models,
   x.limit
 ){
-  
+
   # Goodness of Fit
   init = rep(NA, x.limit)
   for(i in seq_along(models)){
@@ -106,12 +106,12 @@ metrics.plot = function(
     init[m$seg.start:m$seg.end] = m$value
   }
   final.mat = matrix(init, ncol = 1)
-  
+
   # Legend metrics
   min.at = min(final.mat, na.rm = T)
   min.at = min(min.at, 0.8)
   max.at = 1
-  
+
   plt = BoutrosLab.plotting.general::create.heatmap(
     final.mat[,c(1, 1)],
     clustering.method = 'none',
@@ -134,18 +134,18 @@ metrics.plot = function(
     # col.lwd = 1,
     print.colour.key = F
   )
-  
+
   # Colors to numeric
   col.num = 1:3
   names(col.num) =  c("norm", "gamma", "unif")
-  
+
   # Distribution Voting
   ref.mets = c("Consensus", "jaccard", "intersection", "mse", "chisq", "ks")
-  unique.mets = sapply(models[[1]], '[[', 'metric')
+  unique.mets = sapply(models[[1]], `[[`, 'metric')
   unique.mets = unique.mets[order(match(unique.mets, rev(ref.mets)))]
   metric.mat = matrix(
-    NA, 
-    ncol = length(unique.mets), 
+    NA,
+    ncol = length(unique.mets),
     nrow = x.limit,
     dimnames = list(NULL, unique.mets)
     )
@@ -154,27 +154,40 @@ metrics.plot = function(
     m = models[[i]]
     metric.mat[m$seg.start:m$seg.end, m$metric] <- col.num[m$dist]
   }
-  
+
   # Labels
   metric.label = c(expression(bold("Consensus")), "Jaccard", "Intersection", "K-S", "MSE", expression(paste(chi^"2")))
   names(metric.label) = c("Consensus", "jaccard", "intersection", "ks", "mse", "chisq")
-  
+
   # Colours
   col.reference = c("black", "darkorange", "chartreuse4", "darkorchid4")
   names(col.reference) = c("coverage", "norm", "gamma", "unif")
-  
+
+  # X axis
+  x.digits = floor(log10(x.limit))-1
+  x.at = seq(0, round(x.limit, digits = -x.digits), length.out = 5)
+  x.at[x.at == 0] <- 1
+
   plt2 = BoutrosLab.plotting.general::create.heatmap(
     metric.mat,
     clustering.method = 'none',
-    # Plotting Characteristics
+    # Plotting characteristics
     axes.lwd = 0,
-    yaxis.tck = 0,
-    # Y axis Labels
-    yaxis.cex = 0.8,
-    xaxis.fontface = 1,
+    # Y axis labels
     yaxis.lab = metric.label[colnames(metric.mat)],
+    yaxis.cex = 0.8,
     ylab.cex = 1,
+    yaxis.tck = 0,
     ylab.label = "Metrics",
+    # X axis labels
+    xaxis.lab = x.at,
+    xat = x.at,
+    xaxis.rot = 0,
+    xaxis.cex = 1,
+    xaxis.tck = 1,
+    xlab.cex = 1,
+    xlab.label = "Transcript Coordinate",
+    xaxis.fontface = 1,
     # Colours
     at = seq(-0.5, length(col.reference), 1),
     total.colours = length(col.reference) + 1,
@@ -202,11 +215,14 @@ plot.fitted.segments = function(
   file.name,
   plot.types = c("coverage", "residuals", "metrics", "transcript")
 ){
- 
+
+  models = lapply(coverage.model.obj$results, `[[`, "models")
+  point.vals = lapply(coverage.model.obj$results, `[[`, "p")
+
   compiled.plts = list()
   # Loop through genes to plot things
   for(i in histogram.names){
-    
+
     # Histogram coverage
     histogram.coverage = coverage.model.obj$histogram.coverage[[i]]
     xlim = length(histogram.coverage)
@@ -215,15 +231,14 @@ plot.fitted.segments = function(
       "dens" = histogram.coverage,
       "dist" = "coverage"
     )
-    
+
     # Gene Model
     gene.model = coverage.model.obj$gene.model[[i]]
-    
+
     # Fitted models & p
-    result = coverage.model.obj$results[[i]]
-    p = result[['p']]
-    result = result[names(result) != 'p']
-    
+    p = point.vals[[i]]
+    result = models[[i]]
+
     # Extract fitted distributions of majority vote model
     majority.vote.plt.data = lapply(result, function(m) {
       mv.model = m[['majority.vote']]
@@ -231,7 +246,7 @@ plot.fitted.segments = function(
       dens = mv.model$dens(x = seq_along(x), mpar = mv.model$par)
       data.frame("x" = x, "dens" = dens, "dist" = mv.model$dist)
     })
-    
+
     # Coverage plot
     coverage.plt = coverage.plot(
       histogram.coverage = histogram.coverage,
@@ -252,7 +267,7 @@ plot.fitted.segments = function(
     )
     min.at = metrics.plt[[3]]
     metrics.plt = metrics.plt[1:2]
-    
+
     # Legend
     covariate.legend <- list(
       legend = list(
@@ -293,7 +308,7 @@ plot.fitted.segments = function(
         lwd = 0.5
       )
     )
-    
+
     side.legend <- BoutrosLab.plotting.general::legend.grob(
       legends = covariate.legend,
       label.cex = 0.7,
@@ -302,10 +317,10 @@ plot.fitted.segments = function(
       title.fontface = 'bold',
       size = 2
     )
-    
+
     # Compile plot
     distplot.height = min(2.8, length(result[[1]])*0.8)
-    
+
     compiled.plts[[i]] = BoutrosLab.plotting.general::create.multipanelplot(
       plot.objects = c(list(coverage.plt, residual.plt), metrics.plt),
       plot.objects.heights = c(10, 3, 1, distplot.height),
@@ -322,10 +337,10 @@ plot.fitted.segments = function(
         )
       )
     )
-    
+
   }
-  
-  ## Generate file 
+
+  ## Generate file
   pdf(file.name, width = 10, height = 10)
   print(compiled.plts)
   dev.off()

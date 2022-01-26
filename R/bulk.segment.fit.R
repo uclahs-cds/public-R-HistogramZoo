@@ -11,11 +11,11 @@ bulk.segment.fit = function(
   max.uniform = T,
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 ){
-  
+
   # Coverage.model.obj
   cov = coverage.model.obj$histogram.coverage
   histogram.ids = names(cov)
-  
+
   results = list()
   # Running segmentation & distribution fitting
   # This part we can run in parallel
@@ -33,7 +33,7 @@ bulk.segment.fit = function(
     )
     results[[i]] <- res
   }
-  
+
   coverage.model.obj[['results']] <- results
   coverage.model.obj
 }
@@ -59,13 +59,13 @@ bed6tobed12 = function(
 format.results = function(
   coverage.model.obj
 ){
-  
+
   # Coverage.model.obj
   gene.model = coverage.model.obj$gene.model
   histogram.ids = names(gene.model)
   histogram.bin.size = coverage.model.obj$histogram.bin.size
-  results = coverage.model.obj$results
-  
+  results = lapply(coverage.model.obj$results, `[[`, "models")
+
   formatted.results = GenomicRanges::GRanges()
   for(i in histogram.ids){
     x = gene.model[i]
@@ -73,7 +73,6 @@ format.results = function(
     bins = GenomicRanges::tile(x = x, width = histogram.bin.size)
     bins = unlist(bins)
     res = results[[i]]
-    res = res[names(res) != 'p']
     for(j in seq_along(res)){
       id =  paste0(i, ":", j)
       final.mod = res[[j]]$majority.vote
