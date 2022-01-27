@@ -1,4 +1,4 @@
-test_that("segment.fit works", {
+test_that("remove.max.gap works", {
   # set.seed(26)
   # obs.to.int.hist(c(rnorm(100, mean = 1), runif(50, min = 25, max = 35)))
   x = c(`-3` = 0L, `-2` = 0L, `-1` = 3L, `0` = 18L, `1` = 33L, `2` = 30L,
@@ -22,19 +22,14 @@ test_that("segment.fit works", {
   mgaps
   p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
   p.pairs
+})
 
-  # Tests that it splits at all p points
+
+test_that("remove.max.gap works on multiple points", {
   p = c(1, 5, 10)
   mgaps = data.frame("start" = 7, "end" = 10)
   p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
 
-  # Returns:
-  #  start end
-  #     1   6
-
-  # Needs to do this:
-  # start end
-  #     1   4
-  #     5   6
-
+  expect_equal(p.pairs$start, c(1,4))
+  expect_equal(p.pairs$end, c(5,6))
 })

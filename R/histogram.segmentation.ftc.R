@@ -9,6 +9,8 @@ obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   if(add.zero.endpoints) breaks = c(a - 1, breaks, b + 1)
   rtn = table(cut(x, breaks = breaks))
   names(rtn) <- breaks[2:length(breaks)]
+  # Convert from table to named vector
+  rtn <- unlist(as.list(rtn))
   if(as.df) {
     rtn <- as.data.frame(rtn)
     colnames(rtn) <- c("x", "Freq")
