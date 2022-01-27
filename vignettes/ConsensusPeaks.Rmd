@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500, eval=FALSE)
 options(max.print=35)
 
 library(ConsensusPeaks)
