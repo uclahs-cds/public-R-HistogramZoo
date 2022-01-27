@@ -1,6 +1,16 @@
 
 #' Fit the model parameters by optimizing a histogram metric
-fit.distributions.optim = function(freq, metric = c("jaccard", "intersection", "ks", "mse", "chisq"), truncated = FALSE, distr = c("norm", "gamma", "unif")) {
+#'
+#' @param freq TODO
+#' @param metric TODO
+#' @param truncated TODO
+#' @param distr TODO
+#' @export
+fit.distributions.optim = function(
+  freq,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+  truncated = FALSE,
+  distr = c("norm", "gamma", "unif")) {
 
   # Matching arguments
   metric = match.arg(metric, several.ok = TRUE)

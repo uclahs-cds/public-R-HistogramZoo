@@ -1,6 +1,6 @@
 #' Histogram intersection
-#' @param x histogram 1
-#' @param y histogram 2
+#' @param x histogram (vector of counts) 1
+#' @param y histogram (vector of counts) 2
 histogram.intersection <- function(x, y) {
   overlap = pmin(a = x, b = y, na.rm = T)
   # sums = c(sum(x), sum(y))
@@ -9,8 +9,8 @@ histogram.intersection <- function(x, y) {
 }
 
 #' Jaccard index
-#' @param x histogram 1
-#' @param y histogram 2
+#' @param x histogram (vector of counts) 1
+#' @param y histogram (vector of counts) 2
 histogram.jaccard <- function(x, y) {
   overlap = pmin(a = x, b = y, na.rm = T)
   union = pmax(a = x, b = y, na.rm = T)
@@ -18,18 +18,22 @@ histogram.jaccard <- function(x, y) {
 }
 
 #' Kolmogorov-Smirnov Divergance
-#' @param x histogram 1
-#' @param y histogram 2
+#' @param x histogram (vector of counts) 1
+#' @param y histogram (vector of counts) 2
 histogram.ks <- function(x, y) {
   max(abs(x - y), na.rm = TRUE)
 }
 
 #' Mean-squared error
+#' @param x histogram (vector of counts) 1
+#' @param y histogram (vector of counts) 2
 histogram.mse <- function(x, y) {
   mean((x - y)^2)
 }
 
 #' Chi-Squared
+#' @param x histogram (vector of counts) 1
+#' @param y histogram (vector of counts) 2
 histogram.chisq <- function(x, y) {
   sum((x - y)^2 / (x + y))
 }

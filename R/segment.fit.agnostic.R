@@ -5,16 +5,17 @@ find.stepfunction.chgpts = function(x){
   c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
 }
 
-#' Returns the indicies for consecutive elements of a vector that are greater than a specified threshold
+#' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
 #'
-#' @param x
-#' @param threshold
+#' @param x A numeric vector
+#' @param threshold numeric threshold
 #'
 #' @return
 #' @export
 #'
 #' @examples
-#'
+#' find.consecutive.threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
+#' find.consecutive.threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
 find.consecutive.threshold = function(
   x,
   threshold = 0){

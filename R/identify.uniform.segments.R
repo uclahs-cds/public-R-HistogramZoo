@@ -66,7 +66,19 @@ identify.uniform.segments = function(
 # )
 
 #' Finds the largest uniform segment that is longer than threshold
-find.uniform.segment = function(x, metric = c("jaccard", "intersection", "ks", "mse", "chisq"), threshold = 0.5, step.size = 1, max.sd.size = 1) {
+#'
+#' @param x TODO
+#' @param metric TODO
+#' @param threshold TODO
+#' @param step.size TODO
+#' @param max.sd.size TODO
+#' @export
+find.uniform.segment = function(
+  x,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+  threshold = 0.5,
+  step.size = 1,
+  max.sd.size = 1) {
   metric = match.arg(metric)
   num.bins = length(x)
   min.seg.size = ceiling(num.bins * threshold)

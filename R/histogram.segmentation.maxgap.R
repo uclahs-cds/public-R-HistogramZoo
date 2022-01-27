@@ -91,8 +91,6 @@ find.all.meaningful.gap = function(x, change.points) {
 #'
 #' @return
 #' @export
-#'
-#' @examples
 meaningful.gaps.local = function(x, seg.points, change.points, min.gap = 2) {
 
   max.gaps.list <- lapply(seq(2, length(seg.points)), function(i) {

@@ -8,10 +8,14 @@
 #' @param output.dir Output directory. If the directory does not exist, ConsensusPeaks will attempt to create the directory.
 #' @param plot.merged.peaks Only if the method parameter is set to 'sf'. Either a logical value (TRUE or FALSE) indicating all or none of the merged peaks should be plotted. Otherwise, a character vector of genes whose merged peaks should be plotted.
 #' @param diagnostic Only if the method parameter is set to 'sf'. A logical value indicating whether diagnostic plots for fitted distributions should be plotted.
-#' @param fit.mixtures Only if the method parameter is set to 'sf'. A character vector indicating distributions to fit.
-#' @param trim.peak.threshold See ConsensusPeaks
-#' @param trim.peak.stepsize See ConsensusPeaks
-#' @param residual.tolerance See ConsensusPeaks
+#' @param truncated.models TODO
+#' @param uniform.peak.threshold TODO
+#' @param uniform.peak.stepsize TODO
+#' @param histogram.metric TODO
+#' @param eps TODO
+#' @param remove.low.entropy TODO
+#' @param max.uniform TODO
+#' @param seed TODO
 #'
 #' @import extraDistr
 #' @export
@@ -41,10 +45,6 @@ segment.and.fit = function(
     warning(warn.message, call. = TRUE, domain = NULL)
     return(.generate.null.result(all.samples))
   }
-
-  # Use the parameters if they are defined and default to FALSE if not defined
-  # plot.diagnostic = diagnostic %||% FALSE
-  # fit.norm_mixture = fit.mixtures %||% FALSE
 
   # peaksgr
   peaksgr = .retrieve.peaks.as.granges(peaks = peaks, gene = gene, return.df = F)

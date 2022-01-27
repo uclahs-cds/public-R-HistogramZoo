@@ -1,6 +1,7 @@
 #' Take a vector of values and get the histogram for integer breaks
 #' @param x the observation
 #' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
+#' @param as.df Should a dataframe be returned? Default FALSE (e.g return a named vector)
 #' @export
 obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   a = floor(min(x))-1
@@ -52,6 +53,11 @@ plot.segments = function(x, s = NULL, threshold = 0, ...) {
 }
 
 #' Kullback-Leibler divergence (Relative Entropy)
+#'
+#' @param h TODO
+#' @param p TODO
+#' @param a interval left endpoint
+#' @param b interval right endpoint
 rel.entropy = function(h, p, a, b) {
   interval = a:b
   # Round to prevent floating point issues
@@ -87,6 +93,11 @@ local.max = function(x) {
 
 #' Get the max relative entropy in the interval
 #' Computes H, the maximum H_{h,p}([a,b])
+#'
+#' @param x numeric vector of counts representing a histogram
+#' @param s TODO
+#' @param increasing Should the Grenader estimator be increasing or descreasing?
+#' @export
 max.entropy = function(x, s = NULL, increasing = TRUE) {
   N = ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s = 1:length(x)}
@@ -107,6 +118,9 @@ max.entropy = function(x, s = NULL, increasing = TRUE) {
 
 #' Finds the local minima m and maxima M such that
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
+#'
+#' @param x numeric vector
+#' @param threshold TODO
 #' @export
 local.minmax = function(x, threshold = 0) {
   x = as.numeric(x)
@@ -190,6 +204,8 @@ monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 #' Fine-to-Course Algorithm from Lisani & Petro 2021
 #'
 #' @param x a vector (or table) of counts representing the histogram
+#' @param maxJ TODO
+#' @param threshold TODO
 #' @export
 ftc = function(x, maxJ = Inf, threshold = 0) {
   minmax = local.minmax(x, threshold = threshold)

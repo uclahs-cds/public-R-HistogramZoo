@@ -15,7 +15,7 @@ Authors@R:
     )
 Description: A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.
 Depends:
-    R (>= 3.4.1),
+    R (>= 3.5.0),
     extraDistr
 License: GPL-3
 Encoding: UTF-8
