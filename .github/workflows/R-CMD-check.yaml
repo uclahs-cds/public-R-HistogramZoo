@@ -1,20 +1,40 @@
----
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
 name: R-CMD-check
 
-on:
-   - push
-   - pull_request
-
 jobs:
-   R-CMD-check:
-      runs-on: ubuntu-latest
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    container:
+      image: blcdsdockerregistry/bl-r-devel:latest
+    steps:
+      - uses: actions/checkout@v2
 
-      container:
-         image: blcdsdockerregistry/bl-r-devel:latest
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          use-public-rspm: true
 
-      steps:
-         - uses: actions/checkout@v2
-           with:
-              path: BoutrosLabTemplate
-         - run: R CMD build --compact-vignettes="gs+qpdf" ConsensusPeaks
-         - run: R CMD check --as-cran ConsensusPeaks_*.tar.gz
+      - uses: r-lib/actions/setup-r-dependencies@v1
+        with:
+          extra-packages: rcmdcheck
+
+      - uses: r-lib/actions/check-r-package@v1
+
+      - name: Show testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check
