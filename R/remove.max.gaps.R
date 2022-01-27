@@ -17,7 +17,7 @@ remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 1) {
   }
 
   # For each segment, create a sequence of consecutive integers
-  seg.seq.list = mapply(seq.int, from = start.end.points$start, to = start.end.points$end, by = 1)
+  seg.seq.list = mapply(seq.int, from = start.end.points$start, to = start.end.points$end, by = 1, SIMPLIFY = FALSE)
 
   max.gaps.seq = unlist(lapply(1:nrow(max.gaps), function(i) {
     # TODO: Should this include the endpoints or no?
