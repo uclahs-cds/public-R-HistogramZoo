@@ -24,12 +24,24 @@ test_that("remove.max.gap works", {
   p.pairs
 })
 
-
 test_that("remove.max.gap works on multiple points", {
   p = c(1, 5, 10)
   mgaps = data.frame("start" = 7, "end" = 10)
   p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
 
-  expect_equal(p.pairs$start, c(1,4))
-  expect_equal(p.pairs$end, c(5,6))
+  expect_equal(p.pairs$start, c(1,5))
+  expect_equal(p.pairs$end, c(4,6))
+
+  # Should also work with an empty data frame
+  p.pairs.empty = remove.max.gaps.agnostic(p = p, max.gaps = data.frame(), remove.short.segment = 1)
+
+  expect_equal(p.pairs.empty$start, c(1,5))
+  expect_equal(p.pairs.empty$end, c(4,10))
+
+  # Short segments should be removed
+  mgaps.short = data.frame("start" = 6, "end" = 8)
+  p.pairs.no.remove = remove.max.gaps.agnostic(p = p, max.gaps = mgaps.short, remove.short.segment = 0)
+  p.pairs.remove = remove.max.gaps.agnostic(p = p, max.gaps = mgaps.short, remove.short.segment = 1)
+  expect_equal(nrow(p.pairs.no.remove), 3)
+  expect_equal(nrow(p.pairs.remove), 2)
 })

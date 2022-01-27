@@ -51,3 +51,9 @@ points.to.start.end <- function(p) {
 
   return.list
 }
+
+# Reset rownames
+reset.rownames <- function(x) {
+  rownames(x) <- NULL
+  x
+}

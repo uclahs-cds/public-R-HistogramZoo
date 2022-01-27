@@ -9,34 +9,43 @@
 #'
 #' @examples
 remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 1) {
+  # Maybe move this out of the function?
+  start.end.points = points.to.start.end(p)
   if(nrow(max.gaps) == 0) {
     # Return the original points as start/end data frame
-    p.start.end = data.frame(
-      start = p[1:(length(p) - 1)],
-      end = p[2:length(p)])
-
-    return(p.start.end)
+    return(start.end.points)
   }
-  p.seq = unlist(lapply(2:length(p), function(i) {
-    seq(p[i - 1], p[i], by = 1)
-    }))
+
+  # For each segment, create a sequence of consecutive integers
+  seg.seq.list = mapply(seq.int, from = start.end.points$start, to = start.end.points$end, by = 1)
 
   max.gaps.seq = unlist(lapply(1:nrow(max.gaps), function(i) {
     # TODO: Should this include the endpoints or no?
     seq(max.gaps[i, 1], max.gaps[i, 2], by = 1)
   }))
 
-  p.no.maxgap = sort(unique(setdiff(p.seq, max.gaps.seq)))
+  seg.seq.no.maxgap = lapply(seg.seq.list, function(p.seq) {
+    sort(unique(setdiff(p.seq, max.gaps.seq)))
+  })
 
   # https://stackoverflow.com/a/24837419
   # Take the segments and regroup into consecutive integers
-  new.p.seq <- split(p.no.maxgap, cumsum(c(1, diff(p.no.maxgap) != 1)))
-  new.p.seq <- new.p.seq[unlist(lapply(new.p.seq, length) > remove.short.segment)]
-
-  # Only take the first and last consecutive numbers
-  new.p <- lapply(new.p.seq, function(y) {
-    list(start = y[1], end = y[length(y)])
+  new.p.seq = lapply(seg.seq.no.maxgap, function(p.no.maxgap) {
+    consec.p = split(p.no.maxgap, cumsum(c(1, diff(p.no.maxgap) != 1)))
+    # Remove short segments
+    # TODO: Should we do this later? Do we need to join any segments first?
+    consec.p[unlist(lapply(consec.p, length) > remove.short.segment)]
   })
 
-  do.call('rbind.data.frame', new.p)
+  # Remove one level of the lists for a flat structure
+  new.p.seq.consec = unname(unlist(new.p.seq, recursive = FALSE))
+
+  # Extract the start and end points from the sequences
+  new.p.start.end = lapply(new.p.seq.consec, function(p.seq) {
+    list(start = p.seq[1], end = p.seq[length(p.seq)])
+  })
+
+  reset.rownames(
+    do.call('rbind.data.frame', new.p.start.end)
+  )
 }
