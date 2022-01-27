@@ -31,7 +31,7 @@ dput.str <- function(x) {
 #' @param p a vector of indices
 #'
 #' @return A list with keys: start and end representing the indices
-#' @export
+#' @export points.to.start.end
 #'
 #' @examples
 #' points.to.start.end(c(1,5,10))
