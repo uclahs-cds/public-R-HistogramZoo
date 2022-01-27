@@ -32,16 +32,16 @@ maximal.meaningful = function(x) {
   curr.df = x
   max.intervals = data.frame()
   while(nrow(curr.df) > 0) {
-    max.entropy.index = which.max(curr.df$entropy)
-    max.entropy = curr.df[max.entropy.index, ]
-    max.entropy.seq = seq(max.entropy$start, max.entropy$end)
-    max.intervals = rbind(max.intervals, max.entropy)
+    maximum.entropy.index = which.max(curr.df$entropy)
+    maximum.entropy = curr.df[maximum.entropy.index, ]
+    maximum.entropy.seq = seq(maximum.entropy$start, maximum.entropy$end)
+    max.intervals = rbind(max.intervals, maximum.entropy)
 
     # Find all of the segments that overlap.
     # These will all be less than the maximum
     overlap.max = mapply(function(from, to) {
       s = seq(from, to)
-      length(intersect(max.entropy.seq, s)) > 0
+      length(intersect(maximum.entropy.seq, s)) > 0
     }, from = curr.df$start, to = curr.df$end)
 
     curr.df = curr.df[!overlap.max, ]
@@ -52,12 +52,16 @@ maximal.meaningful = function(x) {
   max.intervals
 }
 
+
+#' Find all meaningful gaps
+#'
+#' @param x histogram (vector of counts)
+#' @param change.points Change points
+#'
+#' @return
 #' @export
 find.all.meaningful.gap = function(x, change.points) {
-  # span = seq_along(x)
-  # todo = expand.grid(span, span)
   todo = expand.grid(start = change.points, end = change.points)
-  # todo$end = todo$end - 1 # If there are segments
   todo = todo[todo$end > todo$start,]
 
   mgap = do.call(rbind, lapply(1:nrow(todo), function(i) {

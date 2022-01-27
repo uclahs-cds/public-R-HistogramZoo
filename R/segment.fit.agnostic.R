@@ -28,8 +28,23 @@ find.consecutive.threshold = function(
   list(start = start.coords.above.threshold, end = end.coords.above.threshold)
 }
 
-#' Assume that x is a histogram (or raw data?)
-#' Needs to work as a standalone function
+
+#' Segment and fit
+#'
+#' @param x histogram (vector of counts)
+#' @param histogram.count.threshold TODO
+#' @param eps TODO
+#' @param seed TODO
+#' @param truncated.models TODO
+#' @param uniform.peak.threshold TODO
+#' @param uniform.peak.stepsize TODO
+#' @param remove.low.entropy TODO
+#' @param min.gap.size TODO
+#' @param max.uniform TODO
+#' @param histogram.metric TODO
+#'
+#' @return
+#' @export
 segment.fit.agnostic <- function(
   x,
   histogram.count.threshold = 0,

@@ -97,8 +97,9 @@ local.max = function(x) {
 #' @param x numeric vector of counts representing a histogram
 #' @param s TODO
 #' @param increasing Should the Grenader estimator be increasing or descreasing?
+#'
 #' @export
-max.entropy = function(x, s = NULL, increasing = TRUE) {
+maximum.entropy = function(x, s = NULL, increasing = TRUE) {
   N = ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s = 1:length(x)}
   L = length(s)
@@ -194,7 +195,7 @@ local.minmax = function(x, threshold = 0) {
 
 # Compute the monotone cost,
 monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
-  max.rel.entropy = max.entropy(x, s, increasing)
+  max.rel.entropy = maximum.entropy(x, s, increasing)
   N = sum(x)
   L = length(x)
 

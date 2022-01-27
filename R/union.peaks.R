@@ -42,7 +42,7 @@ union.peaks = function(
     peaks.final = .bed6tobed12(merged.peaks = merged.peaks.genome, id.cols = c("name", "i"))
 
     # Merging P-Values
-    sample.pval = .merge.p(peaksgr, merged.peaks = merged.peaks.genome, annotation, all.samples, id.cols = c("name", "i"))
+    sample.pval = .merge.p(peaksgr, merged.peaks = merged.peaks.genome, annotation, all.samples)
 
     # Write Output Tables & Return Files
     output.table = merge(peaks.final, sample.pval, by = "peak", all = T)

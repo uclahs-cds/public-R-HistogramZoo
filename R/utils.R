@@ -15,11 +15,11 @@ dput.str <- function(x) {
 #' @param p a vector of indices
 #'
 #' @return A list with keys: start and end representing the indices
-#' @export points.to.start.end
+#' @export index.to.start.end
 #'
 #' @examples
-#' points.to.start.end(c(1,5,10))
-points.to.start.end <- function(p) {
+#' index.to.start.end(c(1,5,10))
+index.to.start.end <- function(p) {
   n = length(p)
   if(n <= 1) {
     stop("Need more than 1 point to compute start/end")
