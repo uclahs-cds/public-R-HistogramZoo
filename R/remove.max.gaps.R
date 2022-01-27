@@ -1,3 +1,24 @@
+#' Convert a vector of points into a list of start/end points
+#'
+#' @param p a vector of indices
+#'
+#' @return A list with keys: start and end representing the indices
+#' @export
+#'
+#' @examples
+#' points.to.start.end(c(1,5,10))
+points.to.start.end <- function(p) {
+  if(length(p) <= 1) {
+    stop("Need more than 1 point to compute start/end")
+  }
+  return.list = list(
+    start = p[1:(length(p) - 1)]
+  )
+  return.list$end = c(p[2:(length(p) - 1)] - 1,  p[length(p)])
+  return.list
+}
+
+
 #' Creates a new set of segments from a partition of points
 #'
 #' @param p a vector of points
