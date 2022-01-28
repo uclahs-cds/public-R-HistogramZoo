@@ -281,6 +281,7 @@ ftc.helen = function(x, s = NULL, eps = 1) {
   }
 
   # Initializing
+  s = sort(s)
   s.fixed = s
   K = length(s)
   cost = c(-Inf)
