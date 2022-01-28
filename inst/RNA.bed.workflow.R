@@ -47,7 +47,7 @@ ftc.res = bulk.segment.fit(
 
 # ### STEP 3 ###
 # Compiling results
-res = format.results(
+res = summarize.results(
   coverage.model.obj = ftc.res,
   output.format = "BED12"
 )

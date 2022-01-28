@@ -88,7 +88,7 @@ bed6tobed12 = function(
 #'
 #' @examples
 #' TODO: Create a reasonable format for basic histograms
-format.results = function(
+summarize.results = function(
   coverage.model.obj,
   output.format = c("stats.only", "BED6", "BED12")
 ){
