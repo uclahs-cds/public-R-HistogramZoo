@@ -90,6 +90,7 @@ coverage.to.hist = function(
 #' @param gtf.file
 #' @param gene.or.transcript
 #' @param histogram.bin.size
+#' @param ...
 #'
 #' @return
 #' @export
@@ -104,11 +105,12 @@ bed.to.hist = function(
   regions.of.interest = NULL,
   gtf.file = NULL,
   gene.or.transcript = c("gene", "transcript"),
-  histogram.bin.size = 1
+  histogram.bin.size = 1,
+  ...
 ){
 
   # Load BED files
-  segs = valr::read_bed( filenames, n_fields = n_fields )
+  segs = valr::read_bed( filenames, n_fields = n_fields, ...)
   if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
   segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs )
 

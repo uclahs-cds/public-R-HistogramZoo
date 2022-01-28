@@ -121,5 +121,5 @@ format.results = function(
   }
   # Reordering the columns
   S4Vectors::mcols(formatted.results) = S4Vectors::mcols(formatted.results)[,c("name", "value", "metric", "dist", "params", "blockCount", "blockSizes", "blockStarts")]
-  formatted.results
+  data.frame(formatted.results)
 }
