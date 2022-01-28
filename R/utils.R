@@ -14,7 +14,7 @@ dput.str <- function(x) {
 #'
 #' @param p a vector of indices
 #'
-#' @return A list with keys: start and end representing the indices
+#' @return A data.frame with column: start and end representing the indices
 #' @export index.to.start.end
 #'
 #' @examples
@@ -33,7 +33,7 @@ index.to.start.end <- function(p) {
     return.list$end = c(p[2:(n - 1)] - 1,  p[length(p)])
   }
 
-  return.list
+  do.call('rbind.data.frame', list(return.list))
 }
 
 # Reset rownames
