@@ -66,12 +66,7 @@ segment.fit.agnostic <- function(
 
   all.points = apply(x.segs, 1, function(segs) {
     p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
-    p.init = sort(p.init)
-    p = ftc.helen(x, p.init, eps)
-
-    p.start.end = data.frame(
-      start = p[1:(length(p) - 1)],
-      end = p[2:length(p)])
+    p = ftc.helen(x, p.init, eps) # Maybe change this to FTC is Stefan has more error checks in place
 
     # Max Gap
     if(remove.low.entropy) {
@@ -79,7 +74,7 @@ segment.fit.agnostic <- function(
       p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1)
       p.pairs$max.gap.removed = TRUE
     } else {
-      p.pairs = p.start.end
+      p.pairs = index.to.start.end(p)
       p.pairs$max.gap.removed = FALSE
     }
 
@@ -88,7 +83,7 @@ segment.fit.agnostic <- function(
 
   # Combine the results from each segment
   all.points = do.call('rbind.data.frame', all.points)
-  rownames(all.points) <- NULL
+  rownames(all.points) <- NULL # use reset.rownames?
 
   # Fitting different models
   models = list()
@@ -156,7 +151,7 @@ segment.fit.agnostic <- function(
 
   rtn.list <- list(
     models = models,
-    p = all.points
+    p = all.points # p went from all points to peaks, this is only used for plotting, can remove
   )
 
   return(rtn.list)
