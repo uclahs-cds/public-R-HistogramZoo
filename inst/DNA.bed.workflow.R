@@ -1,23 +1,17 @@
 
 
-# library(valr)
-# library(genomation)
-# library(GenomicRanges)
-# library(fitdistrplus)
-# library(truncdist)
 library(extraDistr)
 
 # Preamble ----------------------------------------------------------------
 # Testing the workflow of the tool on RNA based BED files
 
 # All example data should be in inst/extdata when package is installable
-# setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
+# setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData/dna_bedfiles")
 # setwd("inst/extdata")
 
 # Setting up baseline parameters
-filenames = paste0("rna_bedfiles/Sample.", 1:20, ".bed")
-n_fields = 12
-gtf.file = "genes.gtf"
+filenames = list.files(".", pattern = ".bed")
+n_fields = 6
 gene.or.transcript = "gene"
 genes = c("ENSG00000103035.11", "ENSG00000198900.6")
 
@@ -25,8 +19,8 @@ genes = c("ENSG00000103035.11", "ENSG00000198900.6")
 # Loading data into histograms with an appropriate gene model
 list.hist = bed.to.hist(
   filenames = filenames,
-  n_fields = 12,
-  gtf.file = gtf.file,
+  n_fields = 6,
+  gtf.file = NULL,
   gene.or.transcript = "gene",
   histogram.bin.size = 1
 )
@@ -35,9 +29,9 @@ list.hist = bed.to.hist(
 # Running the FTC algorithm
 ftc.res = bulk.segment.fit(
   coverage.model.obj = list.hist,
-  eps = 10^-4,
+  eps = 1,
   seed = NULL,
-  truncated.models = FALSE,
+  truncated.models = TRUE,
   uniform.peak.threshold = 0.75,
   uniform.peak.stepsize = 5,
   remove.low.entropy = T,
