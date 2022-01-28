@@ -1,5 +1,20 @@
 
-# Note: We should call this function whatever we end up naming the package
+#' Title
+#'
+#' @param coverage.model.obj
+#' @param eps
+#' @param seed
+#' @param truncated.models
+#' @param uniform.peak.threshold
+#' @param uniform.peak.stepsize
+#' @param remove.low.entropy
+#' @param max.uniform
+#' @param histogram.metric
+#'
+#' @return
+#' @export
+#'
+#' @examples
 bulk.segment.fit = function(
   coverage.model.obj,
   eps = 10^-4,
@@ -38,7 +53,15 @@ bulk.segment.fit = function(
   coverage.model.obj
 }
 
-# Check that this is compatible with Base 0 and Base 1 formatting
+#' Takes a GRanges object and creates a BED12 GRanges object
+#'
+#' @param gr
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' TODO: Check that this is compatible with Base 0 and Base 1 formatting
 bed6tobed12 = function(
   gr
 ){
@@ -55,10 +78,22 @@ bed6tobed12 = function(
   bed12.gr
 }
 
-# Formatting results
+#' Formats results
+#'
+#' @param coverage.model.obj
+#' @param output.format
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' TODO: Create a reasonable format for basic histograms
 format.results = function(
-  coverage.model.obj
+  coverage.model.obj,
+  output.format = c("stats.only", "BED6", "BED12")
 ){
+
+  output.format = match.arg(output.format)
 
   # Coverage.model.obj
   gene.model = coverage.model.obj$gene.model
@@ -77,7 +112,7 @@ format.results = function(
       id =  paste0(i, ":", j)
       final.mod = res[[j]]$majority.vote
       f.res = GenomicRanges::reduce(bins[final.mod$seg.start:final.mod$seg.end])
-      f.res = bed6tobed12(f.res)
+      f.res = if(output.format == "BED12") bed6tobed12(f.res)
       S4Vectors::mcols(f.res)$name = id
       S4Vectors::mcols(f.res)[,c( "value", "metric", "dist")] = final.mod[c( "value", "metric", "dist")]
       S4Vectors::mcols(f.res)$params = dput.str(final.mod$par)
