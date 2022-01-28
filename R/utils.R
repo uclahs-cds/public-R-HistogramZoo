@@ -33,7 +33,7 @@ index.to.start.end <- function(p) {
     return.list$end = c(p[2:(n - 1)] - 1,  p[length(p)])
   }
 
-  do.call('rbind.data.frame', list(return.list))
+  as.data.frame(return.list)
 }
 
 # Reset rownames
