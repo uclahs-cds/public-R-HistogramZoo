@@ -1,5 +1,4 @@
 
-
 #' Produces a GRangesList out of a GTF file, each element represents the exons of a gene or transcript
 #'
 #' @param gtf.file
@@ -13,6 +12,7 @@
 gtf.to.genemodel = function(
   gtf.file,
   gene.or.transcript = c("gene", "transcript"),
+  split.by.strand = TRUE,
   select.chrs = NULL,
   select.genes = NULL
 ){
@@ -20,7 +20,7 @@ gtf.to.genemodel = function(
   # Import GTF file
   gtf = valr::read_gtf(gtf.file, zero_based = F)
 
-  # Filtering
+  # Filtering exons, chromosomes, genes
   gtf = gtf[gtf$type == "exon",]
   if(!is.null(select.chrs)){
     gtf = gtf[gtf$chrom %in% select.chrs,]
@@ -36,15 +36,23 @@ gtf.to.genemodel = function(
     gtf[,"id"] = gtf[,"transcript_id"]
   }
 
+  # Creating a GRanges object
   seq.info = if(is.null(select.chrs)) sort(unique(gtf$chrom)) else select.chrs
   gtf = gtf[,c("chrom", "start", "end", "strand", "id")]
   gtf.gr = GenomicRanges::makeGRangesFromDataFrame(
-    gtf,
+    df = gtf,
     keep.extra.columns = T,
     seqinfo = seq.info
   )
-  gtf.gr = S4Vectors::split(gtf.gr, gtf.gr$id)
-  gtf.gr = GenomicRanges::reduce(gtf.gr)
+
+  # Splitting by strand
+  if(split.by.strand){
+    gtf.gr = split.strand(gr = gtf.gr)
+    gtf.gr = split.id(gr = gtf.gr, reduce = T)
+  } else {
+    gtf.gr = split.id(gr = gtf.gr, reduce = T)
+  }
+
   gtf.gr
 }
 
@@ -82,10 +90,12 @@ coverage.to.hist = function(
   histogram.coverage
 }
 
+
 #' Imports BED files and exports a list of count vectors, gene models and a histogram bin size
 #'
 #' @param filenames
 #' @param n_fields
+#' @param split.by.strand
 #' @param regions.of.interest
 #' @param gtf.file
 #' @param gene.or.transcript
@@ -99,60 +109,73 @@ coverage.to.hist = function(
 #'
 #' TODO: Add error checks
 #' TODO: Allow uses to offer a vector of gene names or a GRanges object of interested regions
+#' TODO: Incorporate strand splitting widely
 bed.to.hist = function(
   filenames,
   n_fields = 3,
   regions.of.interest = NULL,
+  split.by.strand = TRUE,
   gtf.file = NULL,
   gene.or.transcript = c("gene", "transcript"),
   histogram.bin.size = 1,
   ...
 ){
 
-  # Load BED files
+  # Load BED files & convert to base 1
   segs = valr::read_bed( filenames, n_fields = n_fields, ...)
   if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
   segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs )
-  # Change to 1 based
-  GenomicRanges::start(segs.gr) = GenomicRanges::start(segs.gr)+1
-
-  # Calculating coverage using GenomicRanges
-  segs.coverage = GenomicRanges::coverage( segs.gr )
+  segs.gr = base0.to.base1(segs.gr)
 
   # Creating a GRanges list
   if(!is.null(regions.of.interest)){
     if( is(regions.of.interest, "GRanges") ){
       # Selecting specific genomic regions
-      regions.gr = regions.of.interest
+      regions.gr = GenomicRanges::split(regions.of.interest, seq_along(regions.of.interest))
     } else if (is.character(regions.of.interest) & ! is.null(gtf.file) ){
       # RNA coordinates
       regions.gr = gtf.to.genemodel(
         gtf.file = gtf.file,
+        split.by.strand = split.by.strand,
         gene.or.transcript = gene.or.transcript,
-        select.chrs = names(segs.coverage),
+        select.chrs = levels(GenomicRanges::seqnames(segs.gr)),
         select.genes = regions.of.interest)
-      select.regions = S4Vectors::subjectHits(GenomicRanges::findOverlaps(segs.gr, regions.gr))
-      regions.gr = regions.gr[sort(unique(select.regions))]
+      # Filter regions (maybe)
     }
   } else if(!is.null(gtf.file)){
     # RNA coordinates
     regions.gr = gtf.to.genemodel(
       gtf.file = gtf.file,
+      split.by.strand = split.by.strand,
       gene.or.transcript = gene.or.transcript,
-      select.chrs = names(segs.coverage))
-    select.regions = S4Vectors::subjectHits(GenomicRanges::findOverlaps(segs.gr, regions.gr))
-    regions.gr = regions.gr[sort(unique(select.regions))]
+      select.chrs = levels(GenomicRanges::seqnames(segs.gr)))
+    # Filter regions (maybe)
   } else {
     # Genome coordinates
     regions.gr = GenomicRanges::reduce(segs.gr)
     regions.gr = GenomicRanges::split(regions.gr, seq_along(regions.gr))
   }
 
-  # Generate coverage vectors
-  histogram.coverage = coverage.to.hist(
-    cov = segs.coverage,
-    regions = regions.gr,
-    histogram.bin.size = histogram.bin.size)
+  if(split.by.strand){
+    segs.strand = split.strand(segs.gr)
+    segs.coverage = lapply(segs.strand, GenomicRanges::coverage)
+    common.strand = intersect(names(segs.coverage), names(regions.gr))
+    histogram.coverage = lapply(common.strand, function(st){
+      coverage.to.hist(
+        cov = segs.coverage[[st]],
+        regions = regions.gr[[st]],
+        histogram.bin.size = histogram.bin.size
+      )
+    })
+    histogram.coverage = unlist(histogram.coverage, recursive = F)
+    regions.gr = do.call(c, lapply(common.strand, function(i) regions.gr[[i]]))
+  } else {
+    segs.coverage = GenomicRanges::coverage( segs.gr )
+    histogram.coverage = coverage.to.hist(
+      cov = segs.coverage,
+      regions = regions.gr,
+      histogram.bin.size = histogram.bin.size)
+  }
 
   # Returning list of histograms, region coordinates
   list(
