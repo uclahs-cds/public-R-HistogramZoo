@@ -1,17 +1,12 @@
 
 
-# library(valr)
-# library(genomation)
-# library(GenomicRanges)
-# library(fitdistrplus)
-# library(truncdist)
-library(extraDistr)
+library(ConsensusPeaks)
 
 # Preamble ----------------------------------------------------------------
 # Testing the workflow of the tool on RNA based BED files
 
 # All example data should be in inst/extdata when package is installable
-# setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
+setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
 # setwd("inst/extdata")
 
 # Setting up baseline parameters
