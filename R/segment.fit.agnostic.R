@@ -66,8 +66,8 @@ segment.fit.agnostic <- function(
 
   all.points = apply(x.segs, 1, function(segs) {
     p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
-    p.init = sort(p.init) # meaningful gaps local also needs p.init to be sorted so temporarily adding this back
-    p = ftc.helen(x, p.init, eps) # Maybe change this to FTC is Stefan has more error checks in place
+    p.init = sort(unique(p.init)) # meaningful gaps local also needs p.init to be sorted so temporarily adding this back
+    p = ftc.helen(x, p.init, eps) # Maybe change this to FTC if Stefan has more error checks in place
 
     # Max Gap
     if(remove.low.entropy) {
