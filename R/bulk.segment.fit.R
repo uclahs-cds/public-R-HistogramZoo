@@ -31,9 +31,8 @@ bulk.segment.fit = function(
   cov = coverage.model.obj$histogram.coverage
   histogram.ids = names(cov)
 
-  results = list()
+  results = vector("list", length(histogram.ids))
   # Running segmentation & distribution fitting
-  # This part we can run in parallel
   for(i in histogram.ids){
     res = segment.fit.agnostic(
       x = cov[[i]],

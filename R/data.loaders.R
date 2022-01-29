@@ -18,7 +18,7 @@ gtf.to.genemodel = function(
 ){
 
   # Import GTF file
-  gtf = valr::read_gtf(gtf.file)
+  gtf = valr::read_gtf(gtf.file, zero_based = F)
 
   # Filtering
   gtf = gtf[gtf$type == "exon",]
@@ -113,6 +113,8 @@ bed.to.hist = function(
   segs = valr::read_bed( filenames, n_fields = n_fields, ...)
   if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
   segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs )
+  # Change to 1 based
+  GenomicRanges::start(segs.gr) = GenomicRanges::start(segs.gr)+1
 
   # Calculating coverage using GenomicRanges
   segs.coverage = GenomicRanges::coverage( segs.gr )
