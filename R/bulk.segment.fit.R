@@ -8,6 +8,7 @@
 #' @param uniform.peak.threshold
 #' @param uniform.peak.stepsize
 #' @param remove.low.entropy
+#' @param min.peak.size TODO
 #' @param max.uniform
 #' @param histogram.metric
 #'
@@ -17,12 +18,15 @@
 #' @examples
 bulk.segment.fit = function(
   coverage.model.obj,
+  histogram.count.threshold = 1,
   eps = 10^-4,
   seed = NULL,
   truncated.models = FALSE,
   uniform.peak.threshold = 0.75,
   uniform.peak.stepsize = 5,
   remove.low.entropy = T,
+  min.gap.size = 2,
+  min.peak.size = 1,
   max.uniform = T,
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 ){
@@ -42,6 +46,8 @@ bulk.segment.fit = function(
       uniform.peak.threshold = uniform.peak.threshold,
       uniform.peak.stepsize = uniform.peak.stepsize,
       remove.low.entropy = remove.low.entropy,
+      min.gap.size = min.gap.size,
+      min.peak.size = min.peak.size,
       max.uniform = max.uniform,
       histogram.metric = histogram.metric
     )
