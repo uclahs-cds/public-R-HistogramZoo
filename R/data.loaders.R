@@ -124,6 +124,10 @@ bed.to.hist = function(
   # Load BED files & convert to base 1
   segs = valr::read_bed( filenames, n_fields = n_fields, ...)
   if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
+  # This is a temporary fix to the overlapping exon issue, testing if we get the same results
+  if(is.character(regions.of.interest) & ! is.null(gtf.file) ){
+    segs = segs[segs$name %in% regions.of.interest,]
+  }
   segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs )
   segs.gr = base0.to.base1(segs.gr)
 
