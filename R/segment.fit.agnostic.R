@@ -62,7 +62,7 @@ segment.fit.agnostic <- function(
   ) {
 
   # Change points
-  chgpts = ConsensusPeaks:::find.stepfunction.chgpts(x)
+  chgpts = find.stepfunction.chgpts(x)
   # Looking for regions that surpass a hard count threshold
   x.segs = as.data.frame(find.consecutive.threshold(x, threshold = histogram.count.threshold))
 
