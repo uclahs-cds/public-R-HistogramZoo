@@ -1,16 +1,18 @@
 
 #' Title
 #'
-#' @param coverage.model.obj
-#' @param eps
-#' @param seed
-#' @param truncated.models
-#' @param uniform.peak.threshold
-#' @param uniform.peak.stepsize
-#' @param remove.low.entropy
+#' @param coverage.model.obj TODO
+#' @param histogram.count.threshold TODO
+#' @param eps TODO
+#' @param seed TODO
+#' @param truncated.models TODO
+#' @param uniform.peak.threshold TODO
+#' @param uniform.peak.stepsize TODO
+#' @param remove.low.entropy TODO
+#' @param min.gap.size TODO
 #' @param min.peak.size TODO
-#' @param max.uniform
-#' @param histogram.metric
+#' @param max.uniform TODO
+#' @param histogram.metric TODO
 #'
 #' @return
 #' @export
@@ -18,7 +20,7 @@
 #' @examples
 bulk.segment.fit = function(
   coverage.model.obj,
-  histogram.count.threshold = 1,
+  histogram.count.threshold = 0,
   eps = 10^-4,
   seed = NULL,
   truncated.models = FALSE,
