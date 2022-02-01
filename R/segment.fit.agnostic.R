@@ -142,13 +142,14 @@ segment.fit.agnostic <- function(
       dist.majority = names(dist.vote)[1]
     }
     best.models[['majority.vote']] = dist.optim[[paste0("jaccard.", dist.majority)]]
-    best.models[['majority.vote']]$metric = "Consensus"
 
     # Correcting for optimization via finding the minimum
     best.models = lapply(best.models, function(mod){
       if(mod$metric %in% c("jaccard", "intersection")){ mod$value = 1 - mod$value }
       mod
     })
+
+    best.models[['majority.vote']]$metric = "Consensus"
 
     models[[i]] <- best.models
   }
