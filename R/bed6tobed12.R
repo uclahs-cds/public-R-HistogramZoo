@@ -14,7 +14,7 @@ bed6tobed12 = function(
   # blockCount
   S4Vectors::mcols(bed12.gr)$blockCount = length(gr)
   # blockSizes
-  blockSizes = IRanges::width(gr)
+  blockSizes = IRanges::width(gr) - 1
   S4Vectors::mcols(bed12.gr)$blockSizes = paste0(blockSizes, ",", collapse = "")
   # blockStarts
   blockStarts = GenomicRanges::start(gr) - GenomicRanges::start(bed12.gr)
