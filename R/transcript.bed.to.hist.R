@@ -2,11 +2,11 @@
 #'
 #' @param filenames TODO
 #' @param n_fields TODO
-#' @param regions.of.interest TODO 
+#' @param regions.of.interest TODO
 #' @param gtf.file TODO
 #' @param gene.or.transcript TODO
 #' @param histogram.bin.size TODO
-#' @param ... 
+#' @param ...
 #'
 #' @return
 #' @export
@@ -21,7 +21,7 @@ transcript.bed.to.hist = function(
   histogram.bin.size = 1,
   ...
 ){
-  
+
   peaks = lapply(filenames, function(filename){
     segs = valr::read_bed( filename, n_fields = n_fields, ...)
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
@@ -33,10 +33,10 @@ transcript.bed.to.hist = function(
   })
   peaks = do.call(c, peaks)
   peaks = split(peaks, f = names(peaks))
-  
+
   genes = names(peaks)
   if(!is.null(regions.of.interest)){ genes = intersect(genes, regions.of.interest)}
-  
+
   regions = gtf.to.genemodel(
     gtf.file = gtf.file,
     split.by.strand = F,
@@ -45,12 +45,13 @@ transcript.bed.to.hist = function(
     select.genes = genes)
 
   # TODO: Error check to make sure names and genes match
-  
+
   histogram.coverage =  vector("list", length(genes))
   names(histogram.coverage) = genes
   for(i in genes){
     peaks.cov = GenomicRanges::coverage(peaks[[i]])
-    bins = GenomicRanges::tile(x = regions[[i]], width = histogram.bin.size)[[1]]
+    bins = GenomicRanges::tile(x = regions[[i]], width = histogram.bin.size)
+    bins = unlist(bins)
     GenomeInfoDb::seqlevels(bins) = GenomeInfoDb::seqlevels(peaks.cov)
     cvg = GenomicRanges::binnedAverage(
       bins = bins,
@@ -60,7 +61,7 @@ transcript.bed.to.hist = function(
     names(cvg) = NULL
     histogram.coverage[[i]] <- cvg
   }
-  
+
   list(
     histogram.coverage = histogram.coverage,
     gene.model = regions,
