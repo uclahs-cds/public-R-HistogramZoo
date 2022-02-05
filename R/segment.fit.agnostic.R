@@ -70,14 +70,15 @@ segment.fit.agnostic <- function(
     p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
     p.init = sort(unique(p.init)) # meaningful gaps local also needs p.init to be sorted so temporarily adding this back
     p = ftc.helen(x, p.init, eps) # Maybe change this to FTC if Stefan has more error checks in place
+    p = p[abs(p - segs['start']) > min.gap.size & abs(p - segs['end']) > min.peak.size]
 
     # Max Gap
     if(remove.low.entropy) {
       mgaps =  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min.gap.size)
-      p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = 1) # remove.short.segment can also be used to filter min.peak.size, but doesn't extend to non remove low entropy cases
+      p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min.peak.size) # remove.short.segment can also be used to filter min.peak.size, but doesn't extend to non remove low entropy cases
       p.pairs$max.gap.removed = TRUE
     } else {
-      p.pairs = index.to.start.end(p)
+      p.pairs = index.to.start.end.shifted1bp(p)
       p.pairs$max.gap.removed = FALSE
     }
 
@@ -86,7 +87,7 @@ segment.fit.agnostic <- function(
 
   # Combine the results from each segment
   all.points = do.call('rbind.data.frame', all.points)
-  all.points = all.points[(all.points$end - all.points$start + 1) > min.peak.size,, drop = FALSE] # Current solution for min.peak.size, open to alternatives
+  # all.points = all.points[(all.points$end - all.points$start + 1) > min.peak.size,, drop = FALSE] # Current solution for min.peak.size, open to alternatives
   rownames(all.points) <- NULL # use reset.rownames?
 
   # Fitting different models

@@ -8,7 +8,7 @@
 #' @export
 remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 0) {
   # Maybe move this out of the function?
-  start.end.points = index.to.start.end(p)
+  start.end.points = index.to.start.end.shifted1bp(p)
   if(nrow(max.gaps) == 0) {
     # Return the original points as start/end data frame
     return(start.end.points)

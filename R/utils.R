@@ -41,3 +41,21 @@ reset.rownames <- function(x) {
   rownames(x) <- NULL
   x
 }
+
+index.to.start.end.shifted1bp <- function(p) {
+  n = length(p)
+  if(n <= 1) {
+    stop("Need more than 1 point to compute start/end")
+  }
+  return.list = list(
+    start = p[1:(n - 1)]
+  )
+  if(n == 2) {
+    return.list = list(start = p[1])
+  } else {
+    return.list = list(start = c(p[1],  p[2:(length(p)-1)]+1))
+  }
+  return.list$end = c(p[2:length(p)])
+
+  as.data.frame(return.list)
+}
