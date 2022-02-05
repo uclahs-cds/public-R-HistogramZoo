@@ -15,10 +15,19 @@ n_fields = 12
 gtf.file = "genes.gtf"
 gene.or.transcript = "gene"
 genes = c("ENSG00000103035.11", "ENSG00000198900.6")
+regions.of.interest = genes[1]
 
 # ### STEP 1 ###
 # Loading data into histograms with an appropriate gene model
-list.hist = bed.to.hist(
+# list.hist = bed.to.hist(
+#   filenames = filenames,
+#   n_fields = 12,
+#   gtf.file = gtf.file,
+#   gene.or.transcript = "gene",
+#   histogram.bin.size = 1
+# )
+
+list.hist = transcript.bed.to.hist(
   filenames = filenames,
   n_fields = 12,
   gtf.file = gtf.file,
