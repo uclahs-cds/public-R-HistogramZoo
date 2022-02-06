@@ -74,7 +74,7 @@ segment.fit.agnostic <- function(
     # Max Gap
     if(remove.low.entropy) {
       mgaps =  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min.gap.size)
-      p = p[(abs(p - segs['start']) > min.gap.size & abs(p - segs['end']) > min.peak.size) | p %in% segs]
+      p = p[(abs(p - segs['start']) > min.peak.size & abs(p - segs['end']) > min.peak.size) | p %in% segs]
       p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min.peak.size) # remove.short.segment can also be used to filter min.peak.size, but doesn't extend to non remove low entropy cases
       # p.pairs$max.gap.removed = TRUE
     } else {
