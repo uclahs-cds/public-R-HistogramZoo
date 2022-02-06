@@ -87,7 +87,7 @@ segment.fit.agnostic <- function(
 
   # Combine the results from each segment
   all.points = do.call('rbind.data.frame', all.points)
-  # all.points = all.points[(all.points$end - all.points$start + 1) > min.peak.size,, drop = FALSE] # Current solution for min.peak.size, open to alternatives
+  all.points = all.points[(all.points$end - all.points$start + 1) > min.peak.size,, drop = FALSE] # Current solution for min.peak.size, open to alternatives
   rownames(all.points) <- NULL # use reset.rownames?
 
   # Fitting different models
