@@ -17,17 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/check-r-package@v1
-
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+           with:
+             path: ConsensusPeaks
+      - run: R CMD build --compact-vignettes="gs+qpdf" ConsensusPeaks
+      - run: R CMD check --as-cran --run-donttest ConsensusPeaks_*.tar.gz
