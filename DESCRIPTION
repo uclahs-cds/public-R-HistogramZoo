@@ -21,8 +21,6 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    GenomicRanges,
-    GenomicFeatures,
     ggplot2,
     reshape2,
     ggalt,
@@ -40,8 +38,11 @@ Suggests:
     rmarkdown,
     testthat,
     IRanges,
+    GenomeInfoDb,
+    GenomicRanges,
+    GenomicFeatures,
+    valr,
     isotone,
-    scales,
-    valr
+    scales
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
