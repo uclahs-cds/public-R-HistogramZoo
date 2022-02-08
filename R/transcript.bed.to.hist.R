@@ -10,8 +10,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
 transcript.bed.to.hist = function(
   filenames,
   n_fields = 3,

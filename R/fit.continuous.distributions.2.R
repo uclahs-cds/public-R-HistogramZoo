@@ -6,6 +6,7 @@
 #' @param truncated TODO
 #' @param distr TODO
 #' @export
+#' @importFrom DEoptim DEoptim
 fit.distributions.optim = function(
   freq,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
