@@ -1,13 +1,11 @@
+# TODO: Create a reasonable format for basic histograms
 #' Formats results
 #'
-#' @param coverage.model.obj
-#' @param output.format
+#' @param coverage.model.obj TODO
+#' @param output.format TODO
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' TODO: Create a reasonable format for basic histograms
 summarize.results = function(
   coverage.model.obj,
   output.format = c("stats.only", "BED6", "BED12")

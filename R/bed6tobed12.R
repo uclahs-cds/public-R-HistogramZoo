@@ -1,7 +1,7 @@
 # TODO: Check that this is compatible with Base 0 and Base 1 formatting
 #' Takes a GRanges object and creates a BED12 GRanges object
 #'
-#' @param gr
+#' @param gr TODO
 #'
 #' @return
 #' @export

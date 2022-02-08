@@ -1,14 +1,12 @@
 
 #' Produces a GRangesList out of a GTF file, each element represents the exons of a gene or transcript
 #'
-#' @param gtf.file
-#' @param gene.or.transcript
-#' @param select.chrs
+#' @param gtf.file TODO
+#' @param gene.or.transcript TODO
+#' @param select.chrs TODO
 #'
 #' @return
 #' @export
-#'
-#' @examples
 gtf.to.genemodel = function(
   gtf.file,
   gene.or.transcript = c("gene", "transcript"),
@@ -56,17 +54,15 @@ gtf.to.genemodel = function(
   gtf.gr
 }
 
+# TODO: Implement error checking
 #' Generates a list of histogram count vectors from a coverage RLE object and a GRangesList
 #'
-#' @param regions
-#' @param cov
-#' @param histogram.bin.size
+#' @param regions TODO
+#' @param cov TODO
+#' @param histogram.bin.size TODO
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' TODO: Implement error checking
 coverage.to.hist = function(
   regions,
   cov,
@@ -96,14 +92,14 @@ coverage.to.hist = function(
 # TODO: Incorporate strand splitting widely
 #' Imports BED files and exports a list of count vectors, gene models and a histogram bin size
 #'
-#' @param filenames
-#' @param n_fields
-#' @param split.by.strand
-#' @param regions.of.interest
-#' @param gtf.file
-#' @param gene.or.transcript
-#' @param histogram.bin.size
-#' @param ...
+#' @param filenames TODO
+#' @param n_fields TODO
+#' @param split.by.strand TODO
+#' @param regions.of.interest TODO
+#' @param gtf.file TODO
+#' @param gene.or.transcript TODO
+#' @param histogram.bin.size TODO
+#' @param ... TODO
 #'
 #' @return
 #' @export
