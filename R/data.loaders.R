@@ -91,6 +91,9 @@ coverage.to.hist = function(
 }
 
 
+# TODO: Add error checks
+# TODO: Allow uses to offer a vector of gene names or a GRanges object of interested regions
+# TODO: Incorporate strand splitting widely
 #' Imports BED files and exports a list of count vectors, gene models and a histogram bin size
 #'
 #' @param filenames
@@ -104,12 +107,6 @@ coverage.to.hist = function(
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#'
-#' TODO: Add error checks
-#' TODO: Allow uses to offer a vector of gene names or a GRanges object of interested regions
-#' TODO: Incorporate strand splitting widely
 bed.to.hist = function(
   filenames,
   n_fields = 3,
