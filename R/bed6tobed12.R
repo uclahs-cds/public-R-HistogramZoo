@@ -1,12 +1,10 @@
+# TODO: Check that this is compatible with Base 0 and Base 1 formatting
 #' Takes a GRanges object and creates a BED12 GRanges object
 #'
 #' @param gr
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' TODO: Check that this is compatible with Base 0 and Base 1 formatting
 bed6tobed12 = function(
   gr
 ){
