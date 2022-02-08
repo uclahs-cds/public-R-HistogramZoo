@@ -15,14 +15,12 @@ Authors@R:
     )
 Description: A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.
 Depends:
-    R (>= 3.4.1),
+    R (>= 3.5.0),
     extraDistr
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    GenomicRanges,
-    GenomicFeatures,
     ggplot2,
     reshape2,
     ggalt,
@@ -33,10 +31,18 @@ Imports:
     mixtools,
     truncdist,
     BoutrosLab.plotting.general,
-    splus2R
+    splus2R,
+    DEoptim
 Suggests:
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    IRanges,
+    GenomeInfoDb,
+    GenomicRanges,
+    GenomicFeatures,
+    valr,
+    isotone,
+    scales
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1

@@ -1,6 +1,8 @@
 #' Take a vector of values and get the histogram for integer breaks
 #' @param x the observation
 #' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
+#' @param as.df Should a dataframe be returned? Default FALSE (e.g return a named vector)
+#' @export
 obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   a = floor(min(x))-1
   b = ceiling(max(x))
@@ -8,6 +10,8 @@ obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   if(add.zero.endpoints) breaks = c(a - 1, breaks, b + 1)
   rtn = table(cut(x, breaks = breaks))
   names(rtn) <- breaks[2:length(breaks)]
+  # Convert from table to named vector
+  rtn <- unlist(as.list(rtn))
   if(as.df) {
     rtn <- as.data.frame(rtn)
     colnames(rtn) <- c("x", "Freq")
@@ -19,36 +23,41 @@ obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
 # Plots the vector x of counts (or table) and the optional segment points s
 plot.segments = function(x, s = NULL, threshold = 0, ...) {
   index = seq_along(x)
-  if(!is.null(s)) {
+  if(is.null(s)) {
     opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
+
+    plot(x, type = "h", ...)
+
+    minmax = local.minmax(x, threshold)
+    min.ind = minmax$min.ind
+    max.ind = minmax$max.ind
+    # min.ind = find_peaks(-x, strict = FALSE)
+    # max.ind = find_peaks(x, strict = TRUE)
+    # min.ind = local.min(x)
+    # max.ind = local.max(x)
+    both.ind = intersect(min.ind, max.ind)
+
+    # points(seq_along(x)[min.ind & !max.ind], x[min.ind & !max.ind], col = "green")
+    # points(seq_along(x)[max.ind & !min.ind], x[max.ind & !min.ind], col = "red")
+    # points(seq_along(x)[max.ind & min.ind], x[max.ind & min.ind], col = "orange")
+
+    points(seq_along(x)[min.ind], x[min.ind], col = "green")
+    points(seq_along(x)[max.ind], x[max.ind], col = "red")
+    points(seq_along(x)[both.ind], x[both.ind], col = "orange")
+    par(opar)
   }
-  plot(x, type = "h", ...)
-
-  minmax = local.minmax(x, threshold)
-  min.ind = minmax$min.ind
-  max.ind = minmax$max.ind
-  # min.ind = find_peaks(-x, strict = FALSE)
-  # max.ind = find_peaks(x, strict = TRUE)
-  # min.ind = local.min(x)
-  # max.ind = local.max(x)
-  both.ind = intersect(min.ind, max.ind)
-
-  # points(seq_along(x)[min.ind & !max.ind], x[min.ind & !max.ind], col = "green")
-  # points(seq_along(x)[max.ind & !min.ind], x[max.ind & !min.ind], col = "red")
-  # points(seq_along(x)[max.ind & min.ind], x[max.ind & min.ind], col = "orange")
-
-  points(seq_along(x)[min.ind], x[min.ind], col = "green")
-  points(seq_along(x)[max.ind], x[max.ind], col = "red")
-  points(seq_along(x)[both.ind], x[both.ind], col = "orange")
-
-  if(!is.null(s)) {
+  else if(!is.null(s)) {
     plot(x, type = "h")
     points(s, x[s], col = "orange")
-    par(opar)
   }
 }
 
 #' Kullback-Leibler divergence (Relative Entropy)
+#'
+#' @param h TODO
+#' @param p TODO
+#' @param a interval left endpoint
+#' @param b interval right endpoint
 rel.entropy = function(h, p, a, b) {
   interval = a:b
   # Round to prevent floating point issues
@@ -84,7 +93,13 @@ local.max = function(x) {
 
 #' Get the max relative entropy in the interval
 #' Computes H, the maximum H_{h,p}([a,b])
-max.entropy = function(x, s = NULL, increasing = TRUE) {
+#'
+#' @param x numeric vector of counts representing a histogram
+#' @param s TODO
+#' @param increasing Should the Grenader estimator be increasing or descreasing?
+#'
+#' @export
+maximum.entropy = function(x, s = NULL, increasing = TRUE) {
   N = ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s = 1:length(x)}
   L = length(s)
@@ -104,6 +119,9 @@ max.entropy = function(x, s = NULL, increasing = TRUE) {
 
 #' Finds the local minima m and maxima M such that
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
+#'
+#' @param x numeric vector
+#' @param threshold TODO
 #' @export
 local.minmax = function(x, threshold = 0) {
   x = as.numeric(x)
@@ -177,7 +195,7 @@ local.minmax = function(x, threshold = 0) {
 
 # Compute the monotone cost,
 monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
-  max.rel.entropy = max.entropy(x, s, increasing)
+  max.rel.entropy = maximum.entropy(x, s, increasing)
   N = sum(x)
   L = length(x)
 
@@ -187,6 +205,8 @@ monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 #' Fine-to-Course Algorithm from Lisani & Petro 2021
 #'
 #' @param x a vector (or table) of counts representing the histogram
+#' @param maxJ TODO
+#' @param threshold TODO
 #' @export
 ftc = function(x, maxJ = Inf, threshold = 0) {
   minmax = local.minmax(x, threshold = threshold)
@@ -261,6 +281,7 @@ ftc.helen = function(x, s = NULL, eps = 1) {
   }
 
   # Initializing
+  s = sort(unique(s))
   s.fixed = s
   K = length(s)
   cost = c(-Inf)
