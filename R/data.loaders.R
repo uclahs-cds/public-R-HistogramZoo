@@ -3,7 +3,9 @@
 #'
 #' @param gtf.file TODO
 #' @param gene.or.transcript TODO
+#' @param split.by.strand TODO
 #' @param select.chrs TODO
+#' @param select.genes TODO
 #'
 #' @return
 #' @export

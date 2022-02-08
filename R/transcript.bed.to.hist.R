@@ -6,7 +6,7 @@
 #' @param gtf.file TODO
 #' @param gene.or.transcript TODO
 #' @param histogram.bin.size TODO
-#' @param ...
+#' @param ... TODO
 #'
 #' @return
 #' @export

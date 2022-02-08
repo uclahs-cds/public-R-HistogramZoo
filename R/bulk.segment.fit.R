@@ -16,8 +16,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
 bulk.segment.fit = function(
   coverage.model.obj,
   histogram.count.threshold = 0,
