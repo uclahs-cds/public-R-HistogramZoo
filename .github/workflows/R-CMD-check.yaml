@@ -18,6 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Document roxygen2
+        run: devtools::document()
+        shell: Rscript {0}
+
       - uses: r-lib/actions/check-r-package@v1
 
       - name: Show testthat output
