@@ -15,7 +15,7 @@ score.threshold = 1
 
 regions = GenomicRanges::GRanges(
   seqnames = "chr1", 
-  IRanges(start = c(17950, 19350), 
+  IRanges::IRanges(start = c(17950, 19350), 
           end = c(18000, 19600)), 
   strand = "+")
 

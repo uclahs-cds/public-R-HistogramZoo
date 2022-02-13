@@ -78,7 +78,7 @@ coverage.to.histogram = function(
     GenomeInfoDb::seqlevels(bins) = GenomeInfoDb::seqlevels(coverage.rle)
     cvg = GenomicRanges::binnedAverage(
       bins = bins,
-      numvar = cov,
+      numvar = coverage.rle,
       varname = "cvg")
     histogram.coverage[[x.name]] <- cvg$cvg
   }
