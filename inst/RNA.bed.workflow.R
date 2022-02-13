@@ -14,20 +14,11 @@ filenames = paste0("rna_bedfiles/Sample.", 1:20, ".bed")
 n_fields = 12
 gtf.file = "genes.gtf"
 gene.or.transcript = "gene"
-genes = c("ENSG00000103035.11", "ENSG00000198900.6")
-regions.of.interest = genes[1]
+genes = c("ENSG00000178951.9", "ENSG00000185129.7")
 
 # ### STEP 1 ###
 # Loading data into histograms with an appropriate gene model
-# list.hist = bed.to.hist(
-#   filenames = filenames,
-#   n_fields = 12,
-#   gtf.file = gtf.file,
-#   gene.or.transcript = "gene",
-#   histogram.bin.size = 1
-# )
-
-list.hist = transcript.bed.to.hist(
+list.hist = transcript.bed.to.histogram(
   filenames = filenames,
   n_fields = 12,
   gtf.file = gtf.file,
