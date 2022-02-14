@@ -10,14 +10,14 @@ library(ConsensusPeaks)
 setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
 
 filename = "S1.bw"
-strand = "+"
+strand = "."
 score.threshold = 1
 
 regions = GenomicRanges::GRanges(
   seqnames = "chr1", 
   IRanges::IRanges(start = c(17950, 19350), 
           end = c(18000, 19600)), 
-  strand = "+")
+  strand = ".")
 
 histograms = bigwig.to.histogram(
   filename = "S1.bw",
