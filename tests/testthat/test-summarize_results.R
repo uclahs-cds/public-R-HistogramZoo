@@ -17,9 +17,7 @@ test_that("summarize.results returns an appropriate table for a basic histogram"
     histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
   )
 
-  results = summarize.results(
-    segment.fit.agnostic.result = histogram.results,
-    output.format = "stats.only")
+  results = summarize.results.agnostic(result = histogram.results)
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
