@@ -21,10 +21,10 @@ transcript.bed.to.histogram = function(
 ){
 
   peaks = lapply(filenames, function(filename){
-    segs = valr::read_bed( filename, n_fields = n_fields, comment = "#")
+    segs = valr::read_bed( filename, n_fields = n_fields, ...)
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
-    segs.gr = ConsensusPeaks:::base0.to.base1(segs.gr)
+    segs.gr = base0.to.base1(segs.gr)
     segs.gr = S4Vectors::split(segs.gr, f = segs.gr$name)
     segs.gr = GenomicRanges::reduce(segs.gr)
     unlist(segs.gr)
