@@ -23,7 +23,7 @@ extract.stats = function(models, gene = NULL, peak.id){
 #'
 #' @examples
 summarize.results.agnostic = function(
-  result = NULL,
+  result = NULL
 ){
   res = result[['models']]
   results.tbl = lapply(seq_along(res), function(i){
