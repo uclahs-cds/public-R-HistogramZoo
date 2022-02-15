@@ -37,9 +37,9 @@ list.hist = transcript.bed.to.hist(
 
 # ### STEP 2 ###
 # Running the FTC algorithm
-ftc.res = bulk.segment.fit(
+gene.results = bulk.segment.fit(
   coverage.model.obj = list.hist,
-  eps = 10^-4,
+  eps = 0.005,
   seed = NULL,
   truncated.models = FALSE,
   uniform.peak.threshold = 0.75,
@@ -51,11 +51,11 @@ ftc.res = bulk.segment.fit(
 
 # ### STEP 3 ###
 # Compiling results
-res = summarize.results(
-  coverage.model.obj = ftc.res,
-  output.format = "BED12"
+gene.results.summary = summarize.results(
+  segment.fit.bulk.result = gene.results,
+  output.format = "bed"
 )
-res
+gene.results.summary
 
 # ### STEP 4 (Optional) ###
 # Plotting the results

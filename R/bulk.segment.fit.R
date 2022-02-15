@@ -36,6 +36,7 @@ bulk.segment.fit = function(
   histogram.ids = names(cov)
 
   results = vector("list", length(histogram.ids))
+  names(results) = histogram.ids
   # Running segmentation & distribution fitting
   for(i in histogram.ids){
     res = segment.fit.agnostic(
