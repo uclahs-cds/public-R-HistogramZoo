@@ -14,9 +14,9 @@ strand = "."
 score.threshold = 1
 
 regions = GenomicRanges::GRanges(
-  seqnames = "chr1", 
-  IRanges::IRanges(start = c(17950, 19350), 
-          end = c(18000, 19600)), 
+  seqnames = "chr1",
+  IRanges::IRanges(start = c(17950, 19350),
+          end = c(18000, 19600)),
   strand = ".")
 
 histograms = bigwig.to.histogram(
@@ -39,8 +39,7 @@ results = bulk.segment.fit(
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
-gene.results.summary = summarize.results(
-  segment.fit.bulk.result = results,
+gene.results.summary = summarize.results.bulk(
+  result = results,
   output.format = "bed"
 )
-

@@ -42,8 +42,8 @@ gene.results = bulk.segment.fit(
 
 # ### STEP 3 ###
 # Compiling results
-gene.results.summary = summarize.results(
-  segment.fit.bulk.result = gene.results,
+gene.results.summary = summarize.results.bulk(
+  result = gene.results,
   output.format = "bed"
 )
 gene.results.summary
