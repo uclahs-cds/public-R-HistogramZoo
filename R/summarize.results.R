@@ -20,8 +20,6 @@ extract.stats = function(models, gene = NULL, peak.id){
 #'
 #' @return
 #' @export
-#'
-#' @examples
 summarize.results.agnostic = function(
   result = NULL
 ){
@@ -36,12 +34,12 @@ summarize.results.agnostic = function(
   results.tbl
 }
 
+# TODO: Extract the correct column names for BED12
 #' Formats results of bulk.segment.fit
 #'
 #' @param result TODO
 #' @param output.format TODO
 #'
-#' TODO: Extract the correct column names for BED12
 #'
 #' @return
 #' @export
