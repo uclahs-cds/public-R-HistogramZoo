@@ -14,19 +14,39 @@ extract.stats = function(models, gene = NULL, peak.id){
   df
 }
 
-#' Formats results
+#' Formats results of segment.fit.agnostic
 #'
-#' @param segment.fit.bulk.result TODO
-#' @param segment.fit.agnostic.result TODO
+#' @param result TODO
+#'
+#' @return
+#' @export
+#'
+#' @examples
+summarize.results.agnostic = function(
+  result = NULL,
+){
+  res = result[['models']]
+  results.tbl = lapply(seq_along(res), function(i){
+    extract.stats(
+      models = res[[i]],
+      gene = NULL,
+      peak.id = i)
+  })
+  results.tbl = do.call('rbind.data.frame', results.tbl)
+  results.tbl
+}
+
+#' Formats results of bulk.segment.fit
+#'
+#' @param result TODO
 #' @param output.format TODO
 #'
 #' TODO: Extract the correct column names for BED12
 #'
 #' @return
 #' @export
-summarize.results = function(
-  segment.fit.bulk.result = NULL,
-  segment.fit.agnostic.result = NULL,
+summarize.results.bulk = function(
+  result = NULL,
   output.format = c("stats.only", "bed")
 ){
 
@@ -34,38 +54,27 @@ summarize.results = function(
   output.format = match.arg(output.format)
 
   # Recovering output stats
-  if(!is.null(segment.fit.agnostic.result)){
-    results = segment.fit.agnostic.result[['models']]
-    results.tbl = lapply(seq_along(results), function(i){
+  res = result[['results']]
+  res = lapply(res, `[[`, "models")
+  results.tbl = lapply(seq_along(res), function(gene){
+    res.gene = res[[gene]]
+    lapply(seq_along(res.gene), function(i){
       extract.stats(
-        models = results[[i]],
-        gene = NULL,
+        models = res.gene[[i]],
+        gene = names(res)[[gene]],
         peak.id = i)
     })
-    results.tbl = do.call('rbind.data.frame', results.tbl)
-  } else if( !is.null(segment.fit.bulk.result)){
-    results = segment.fit.bulk.result[['results']]
-    results = lapply(results, `[[`, "models")
-    results.tbl = lapply(seq_along(results), function(gene){
-      res.gene = results[[gene]]
-      lapply(seq_along(res.gene), function(i){
-        extract.stats(
-          models = res.gene[[i]],
-          gene = names(results)[[gene]],
-          peak.id = i)
-      })
-    })
-    results.tbl = do.call('rbind.data.frame', unlist(results.tbl, recursive = F))
-  }
+  })
+  results.tbl = do.call('rbind.data.frame', unlist(results.tbl, recursive = F))
 
-  if(is.null(segment.fit.bulk.result$gene.model) & output.format == "bed"){
+  if(is.null(result$gene.model) & output.format == "bed"){
     stop("A gene model is required for BED output.")
   }
 
   # Recovering coordinates for genes
   if(output.format == "bed"){
-    gene.model = segment.fit.bulk.result$gene.model
-    histogram.bin.size = segment.fit.bulk.result$histogram.bin.size
+    gene.model = result$gene.model
+    histogram.bin.size = result$histogram.bin.size
     bed.coords = apply(results.tbl, 1, function(peak){
       gene = peak['gene']
       x = unlist(gene.model[gene])
