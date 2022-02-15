@@ -11,8 +11,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
 bigwig.to.histogram = function(
   filename,
   strand  = c("+", "-", "."),
