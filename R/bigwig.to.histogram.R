@@ -14,7 +14,7 @@
 bigwig.to.histogram = function(
   filename,
   strand  = c("+", "-", "."),
-  score.threshold = 1,
+  score.threshold = 0,
   regions = NULL,
   gtf.file = NULL,
   gene.or.transcript = c("gene", "transcript"),
