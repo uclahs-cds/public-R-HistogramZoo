@@ -5,29 +5,18 @@ library(ConsensusPeaks)
 # Preamble ----------------------------------------------------------------
 # Testing the workflow of the tool on RNA based BED files
 
-# All example data should be in inst/extdata when package is installable
-setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
-# setwd("inst/extdata")
+datadir = system.file("extdata", "rna_bedfiles",  package = "ConsensusPeaks")
 
 # Setting up baseline parameters
-filenames = paste0("rna_bedfiles/Sample.", 1:20, ".bed")
+filenames = list.files(datadir, pattern = ".bed$")
 n_fields = 12
-gtf.file = "genes.gtf"
+gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 gene.or.transcript = "gene"
-genes = c("ENSG00000103035.11", "ENSG00000198900.6")
-regions.of.interest = genes[1]
+genes = c("ENSG00000178951.9", "ENSG00000185129.7")
 
 # ### STEP 1 ###
 # Loading data into histograms with an appropriate gene model
-# list.hist = bed.to.hist(
-#   filenames = filenames,
-#   n_fields = 12,
-#   gtf.file = gtf.file,
-#   gene.or.transcript = "gene",
-#   histogram.bin.size = 1
-# )
-
-list.hist = transcript.bed.to.hist(
+list.hist = transcript.bed.to.histogram(
   filenames = filenames,
   n_fields = 12,
   gtf.file = gtf.file,
@@ -51,8 +40,8 @@ gene.results = bulk.segment.fit(
 
 # ### STEP 3 ###
 # Compiling results
-gene.results.summary = summarize.results(
-  segment.fit.bulk.result = gene.results,
+gene.results.summary = summarize.results.bulk(
+  result = gene.results,
   output.format = "bed"
 )
 gene.results.summary
