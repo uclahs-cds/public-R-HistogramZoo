@@ -214,7 +214,7 @@ test_that("Testing that selecting for strand yields correct results", {
     histogram.bin.size = histogram.bin.size)
   
   expect_named(
-    histogram.neg$gene.model,
+    histograms.neg$gene.model,
     "ENSG00000178951.9"
   )
 
@@ -227,7 +227,7 @@ test_that("Testing that selecting for strand yields correct results", {
     histogram.bin.size = histogram.bin.size)
   
   expect_named(
-    histogram.neutral$gene.model,
+    histograms.neutral$gene.model,
     c("ENSG00000178951.9","ENSG00000185129.7")
   )
 
@@ -254,8 +254,5 @@ test_that("Testing that varying the score threshold yields correct results", {
     histogram.bin.size = histogram.bin.size)
   
   expect_true(all(histograms.score.2$histogram.coverage[[1]] > 2))
-  
-  
-  
   
 })
