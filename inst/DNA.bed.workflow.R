@@ -5,12 +5,9 @@ library(extraDistr)
 # Preamble ----------------------------------------------------------------
 # Testing the workflow of the tool on RNA based BED files
 
-# All example data should be in inst/extdata when package is installable
-# setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData/dna_bedfiles")
-# setwd("inst/extdata")
-
 # Setting up baseline parameters
-filenames = list.files(".", pattern = ".bed")
+datadir = system.file("extdata", "dna_bedfiles",  package = "ConsensusPeaks")
+filenames = list.files(datadir, pattern = ".bed$")
 n_fields = 6
 gene.or.transcript = "gene"
 genes = c("ENSG00000103035.11", "ENSG00000198900.6")

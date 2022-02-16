@@ -4,12 +4,10 @@ library(ConsensusPeaks)
 # Preamble ----------------------------------------------------------------
 # Testing bigWig files
 
-
 # Loading Data ------------------------------------------------------------
 
-setwd("/cluster/home/helenzhu/Cluster_Helen/Snakemake_ConsensusPeaks/TestData")
-
-filename = "S1.bw"
+datadir = system.file("extdata", "bigwigs",  package = "ConsensusPeaks")
+filename = file.path(datadir, "S1.bw")
 strand = "."
 score.threshold = 1
 
@@ -20,9 +18,9 @@ regions = GenomicRanges::GRanges(
   strand = ".")
 
 histograms = bigwig.to.histogram(
-  filename = "S1.bw",
-  strand = "+",
-  score.threshold = 1,
+  filename = filename,
+  strand = strand
+  score.threshold = score.threshold,
   regions = regions,
   gtf.file = NULL,
   histogram.bin.size = 10)
