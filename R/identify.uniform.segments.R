@@ -44,8 +44,3 @@ find.uniform.segment = function(
 
   as.list(res.sd.range[min.interval.index,])
 }
-
-# Uniform Generation
-generate.unif = function(x){
-  rep(1/length(x), length(x))
-}
