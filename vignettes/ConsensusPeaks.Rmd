@@ -1,0 +1,60 @@
+---
+title: "Peak Tool Project"
+author: "Helen Zhu & Stefan Eng"
+output:
+  rmarkdown:::html_vignette:
+    toc: true
+bibliography: >
+  references.bib  
+vignette: >
+  %\VignetteIndexEntry{ConsensusPeaks}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500)
+options(max.print=35)
+
+library(ConsensusPeaks)
+
+peak_tool_name = "ConsensusPeaks"
+```
+
+# Introduction
+`peak_tool_name` is an R package that segments histograms and fits statistical distributions to the resulting segmentation. Implementing the segmentation algorithm from (reference), the methods found in this package can be applied broadly.
+
+# Quick Start
+
+## A basic workflow
+
+Peaks are represented as a vector of counts ordered by the indices of the vector.
+
+```{r basic_histogram_segmentation, include=FALSE}
+
+x = c(0, 0, 1, 2, 3, 2, 1, 0, 0)
+
+histograms = segment.fit.agnostic(x)
+
+results = summarize.results.agnostic(histograms)
+
+print(results)
+
+```
+
+# Applications in Genomics
+
+## 1. Identifying consensus regions across transcriptome BED files
+A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In such studies, it is often desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. It is easy to identify common peaks with few replicates by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. ConsensusPeaks is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments.
+
+## 2. Fine tuning peaks using coverage signals on bigWig files
+
+# Algorithmic components
+
+## The FTC segmentation algorithm
+
+## Removing max gaps
+
+## Fitting distributions
+
+# References
