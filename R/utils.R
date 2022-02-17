@@ -10,6 +10,12 @@ dput.str <- function(x) {
   paste0(capture.output(dput(x)), collapse = " ")
 }
 
+# Reset rownames
+reset.rownames <- function(x) {
+  rownames(x) <- NULL
+  x
+}
+
 #' Convert a vector of points into a list of start/end points
 #'
 #' @param p a vector of indices
@@ -20,29 +26,6 @@ dput.str <- function(x) {
 #' @examples
 #' index.to.start.end(c(1,5,10))
 index.to.start.end <- function(p) {
-  n = length(p)
-  if(n <= 1) {
-    stop("Need more than 1 point to compute start/end")
-  }
-  return.list = list(
-    start = p[1:(n - 1)]
-  )
-  if(n == 2) {
-    return.list$end = p[2]
-  } else {
-    return.list$end = c(p[2:(n - 1)] - 1,  p[length(p)])
-  }
-
-  as.data.frame(return.list)
-}
-
-# Reset rownames
-reset.rownames <- function(x) {
-  rownames(x) <- NULL
-  x
-}
-
-index.to.start.end.shifted1bp <- function(p) {
   n = length(p)
   if(n <= 1) {
     stop("Need more than 1 point to compute start/end")
