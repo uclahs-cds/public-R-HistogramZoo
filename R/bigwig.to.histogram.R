@@ -1,19 +1,35 @@
 #' Imports BigWig file and generates histograms
 #'
-#' @param filename TODO
-#' @param strand TODO
-#' @param score.threshold TODO
-#' @param regions TODO
-#' @param gtf.file TODO
-#' @param gene.or.transcript TODO
-#' @param histogram.bin.size TODO
-#' @param ... TODO
+#' @param filename Name of bigwig file for import
+#' @param strand The strand of bigwig file from which the data originates. Default ".". If strand is "+" or "-", the strand will also be used to select regions of matching strand.
+#' @param score.threshold A hard threshold for the score of the bigwig file. Scores higher than the threshold will be used in the computation of the histogram.
+#' @param regions A GRanges object to select regions of interest
+#' @param gtf.file A GTF file to select regions of interest
+#' @param gene.or.transcript If a GTF file is provided, whether histograms should be computed on a gene-based coordinate system or a transcript-based coordinate system
+#' @param histogram.bin.size The bin size (base-pairs) to bin signal into a histogram
+#' @param ... Additional parameters to be passed into gtf.to.genemodel
 #'
-#' @return
+#' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
+#'
+#' @example \dontrun{
+#' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
+#' regions = GenomicRanges::GRanges(
+#' seqnames = "chr1",
+#' IRanges::IRanges(start = c(17950, 19350),
+#'                  end = c(18000, 19600)),
+#' strand = ".")
+#'
+#' histograms = bigwig.to.histogram(
+#' filename = filename,
+#' regions = regions,
+#' histogram.bin.size = 10)
+#' }
+#'
+#'
 #' @export
 bigwig.to.histogram = function(
   filename,
-  strand  = c("+", "-", "."),
+  strand  = c(".", "+", "-"),
   score.threshold = 0,
   regions = NULL,
   gtf.file = NULL,
