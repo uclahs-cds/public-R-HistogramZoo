@@ -17,7 +17,7 @@ histogram.jaccard <- function(x, y) {
   1 - sum(overlap)/sum(union)
 }
 
-#' Kolmogorov-Smirnov Divergance
+#' Kolmogorov-Smirnov divergence
 #' @param x histogram (vector of counts) 1
 #' @param y histogram (vector of counts) 2
 histogram.ks <- function(x, y) {

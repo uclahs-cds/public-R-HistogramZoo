@@ -31,8 +31,8 @@ print(results)
 
 ```
 
-## Vignette
-For more information, refer to the ConsensusPeaks [vignette](https://github.com/uclahs-cds/public-R-ConsensusPeaks/tree/main/vignettes/ConsensusPeaks.html).
+## Additional features
+ConsensusPeaks supports common genomic data types including bigWig files and BED files. ConsensusPeaks supports both genomic and transcriptomic coordinate systems. For more information, refer to the ConsensusPeaks [vignette](https://github.com/uclahs-cds/public-R-ConsensusPeaks/tree/main/vignettes/ConsensusPeaks.html).
 
 ## Publication
 

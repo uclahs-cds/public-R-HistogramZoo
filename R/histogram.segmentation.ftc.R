@@ -20,38 +20,6 @@ obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   rtn
 }
 
-# Plots the vector x of counts (or table) and the optional segment points s
-plot.segments = function(x, s = NULL, threshold = 0, ...) {
-  index = seq_along(x)
-  if(is.null(s)) {
-    opar = par(mfrow = c(2,1), mar = c(2,2,2,2))
-
-    plot(x, type = "h", ...)
-
-    minmax = local.minmax(x, threshold)
-    min.ind = minmax$min.ind
-    max.ind = minmax$max.ind
-    # min.ind = find_peaks(-x, strict = FALSE)
-    # max.ind = find_peaks(x, strict = TRUE)
-    # min.ind = local.min(x)
-    # max.ind = local.max(x)
-    both.ind = intersect(min.ind, max.ind)
-
-    # points(seq_along(x)[min.ind & !max.ind], x[min.ind & !max.ind], col = "green")
-    # points(seq_along(x)[max.ind & !min.ind], x[max.ind & !min.ind], col = "red")
-    # points(seq_along(x)[max.ind & min.ind], x[max.ind & min.ind], col = "orange")
-
-    points(seq_along(x)[min.ind], x[min.ind], col = "green")
-    points(seq_along(x)[max.ind], x[max.ind], col = "red")
-    points(seq_along(x)[both.ind], x[both.ind], col = "orange")
-    par(opar)
-  }
-  else if(!is.null(s)) {
-    plot(x, type = "h")
-    points(s, x[s], col = "orange")
-  }
-}
-
 #' Kullback-Leibler divergence (Relative Entropy)
 #'
 #' @param h TODO

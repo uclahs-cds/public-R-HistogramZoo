@@ -34,7 +34,6 @@ summarize.results.agnostic = function(
   results.tbl
 }
 
-# TODO: Extract the correct column names for BED12
 #' Formats results of bulk.segment.fit
 #'
 #' @param result TODO
