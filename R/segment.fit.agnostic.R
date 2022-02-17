@@ -65,6 +65,7 @@ segment.fit.agnostic <- function(
   chgpts = find.stepfunction.chgpts(x)
   # Looking for regions that surpass a hard count threshold
   x.segs = as.data.frame(find.consecutive.threshold(x, threshold = histogram.count.threshold))
+  x.segs = x.segs[x.segs$start != x.segs$end,]
 
   all.points = apply(x.segs, 1, function(segs) {
     p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
