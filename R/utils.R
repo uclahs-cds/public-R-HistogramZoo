@@ -21,10 +21,12 @@ reset.rownames <- function(x) {
 #' @param p a vector of indices
 #'
 #' @return A data.frame with column: start and end representing the indices
-#' @export index.to.start.end
 #'
-#' @examples
+#' @examples \dontrun{
 #' index.to.start.end(c(1,5,10))
+#' }
+#'
+#' @export
 index.to.start.end <- function(p) {
   n = length(p)
   if(n <= 1) {

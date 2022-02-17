@@ -8,7 +8,7 @@
 #'
 #' @return A GRangesList object where each element is a GRanges object containing the exons of a gene or transcript
 #'
-#' @example \dontrun{
+#' @examples \dontrun{
 #' gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 #' gtf.gr = gtf.to.genemodel(gtf.file)
 #' }
@@ -42,8 +42,10 @@ gtf.to.genemodel = function(
   } else {
     gtf[,"id"] = gtf[,"transcript_id"]
   }
+
+  # Filtering by ID
   if(!is.null(select.ids)){
-    gtf = gtf[gtf$gene_id %in% select.ids,]
+    gtf = gtf[gtf$id %in% select.ids,]
   }
 
   # Creating a GRanges object

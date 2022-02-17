@@ -36,7 +36,7 @@ find.uniform.segment = function(
 
   # Select the longest interval that is within 1 sd of the maximum
   min.metric = min(res.df$metric, na.rm = T)
-  sd.metric = sd(res.df$metric, na.rm = T)
+  sd.metric = stats::sd(res.df$metric, na.rm = T)
   sd.metric = ifelse(is.na(sd.metric), 0, sd.metric) # If there's only 1 case
   # The range in which we are looking for the minimum
   res.sd.range = res.df[res.df$metric <= min.metric + sd.metric * max.sd.size, ]

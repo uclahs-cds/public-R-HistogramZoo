@@ -11,7 +11,7 @@
 #'
 #' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
 #'
-#' @example \dontrun{
+#' @examples \dontrun{
 #' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
 #' regions = GenomicRanges::GRanges(
 #' seqnames = "chr1",

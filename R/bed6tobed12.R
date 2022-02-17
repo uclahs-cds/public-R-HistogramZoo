@@ -4,7 +4,7 @@
 #'
 #' @return A GRanges object of length 1 with mcols matching the additional columns of a BED12 file
 #'
-#' @example \dontrun{
+#' @examples \dontrun{
 #' gr = GenomicRanges::GRanges(seqnames = "chr1", IRanges::IRanges(start = c(1, 4), end = c(3, 6)), strand = "+")
 #' bed6tobed12(gr)
 #' }

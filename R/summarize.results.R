@@ -86,7 +86,7 @@ summarize.results.bulk = function(
     coords.tbl = data.frame(coords.tbl)
     coords.tbl = subset(coords.tbl, select=-c(width))
     colnames(coords.tbl)[colnames(coords.tbl) == "seqnames"] <- "chr"
-    results.tbl = subset(results.tbl, select=-c(start, end))
+    results.tbl = subset(results.tbl, select=-c("start", "end"))
     results.tbl = cbind.data.frame(results.tbl, coords.tbl)
   }
 

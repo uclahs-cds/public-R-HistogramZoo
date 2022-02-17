@@ -10,7 +10,7 @@
 #'
 #' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
 #'
-#' @example \dontrun{
+#' @examples \dontrun{
 #' file.directory = system.file("extdata", "RNA_bedfiles", package = "ConsensusPeaks")
 #' filenames = list.files(file.directory)
 #' gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
