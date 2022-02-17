@@ -1,7 +1,7 @@
 #' Produces a GRangesList out of a GTF file, each element represents the exons of a gene or transcript
 #'
 #' @param gtf.file Path to GTF file
-#' @param gene.or.transcript Models are built on exons. Each model can be gene-centric or transcript-centric.
+#' @param gene.or.transcript Whether histograms should be computed on gene annotations or transcript annotations.
 #' @param select.strand Select elements belonging to a specific strand.
 #' @param select.chrs Select elements on specific chromosomes.
 #' @param select.ids Select elements by matching ids to genes or transcripts (depending on gene.or.transcript)

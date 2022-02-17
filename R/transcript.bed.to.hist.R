@@ -1,18 +1,32 @@
 #' Calculates coverage of genes from annotated RNA bed files
 #'
-#' @param filenames TODO
-#' @param n_fields TODO
-#' @param gtf.file TODO
-#' @param gene.or.transcript TODO
-#' @param select.ids TODO
-#' @param histogram.bin.size TODO
-#' @param ... TODO
+#' @param filenames A vector of BED filenames
+#' @param n_fields Number of columns in the BED file that conform to BED file standards
+#' @param gtf.file A GTF file
+#' @param gene.or.transcript Whether histograms should be computed on gene annotations or transcript annotations
+#' @param select.ids Select elements by matching ids to genes or transcripts (depending on gene.or.transcript)
+#' @param histogram.bin.size The bin size (base-pairs) to bin signal into a histogram
+#' @param ... Additional parameters to be passed into gtf.to.genemodel
 #'
-#' @return
+#' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
+#'
+#' @example \dontrun{
+#' file.directory = system.file("extdata", "RNA_bedfiles", package = "ConsensusPeaks")
+#' filenames = list.files(file.directory)
+#' gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
+#'
+#' histograms = transcript.bed.to.histogram(
+#' filenames = filenames,
+#' n_fields 12,
+#' gtf.file = gtf.file,
+#' gene.or.transcript = "gene",
+#' histogram.bin.size = 10)
+#' }
+#'
 #' @export
 transcript.bed.to.histogram = function(
   filenames,
-  n_fields = 3,
+  n_fields = c(3, 4, 6, 12),
   gtf.file = NULL,
   gene.or.transcript = c("gene", "transcript"),
   select.ids = NULL,
