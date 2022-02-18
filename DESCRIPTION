@@ -31,7 +31,7 @@ Imports:
     BoutrosLab.plotting.general,
     splus2R,
     DEoptim,
-    isotone,
+    isotone
 Suggests:
     knitr,
     rmarkdown,
@@ -40,6 +40,7 @@ Suggests:
     GenomeInfoDb,
     GenomicRanges,
     valr,
-    scales
+    scales,
+    rtracklayer
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2
