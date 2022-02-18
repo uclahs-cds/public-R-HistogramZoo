@@ -18,7 +18,7 @@ extract.stats = function(models, gene = NULL, peak.id){
 #'
 #' @param result TODO
 #'
-#' @return
+#' @return TODO
 #' @export
 summarize.results.agnostic = function(
   result = NULL
@@ -40,7 +40,7 @@ summarize.results.agnostic = function(
 #' @param output.format TODO
 #'
 #'
-#' @return
+#' @return TODO
 #' @export
 summarize.results.bulk = function(
   result = NULL,

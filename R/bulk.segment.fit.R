@@ -14,7 +14,7 @@
 #' @param max.uniform TODO
 #' @param histogram.metric TODO
 #'
-#' @return
+#' @return TODO
 #' @export
 bulk.segment.fit = function(
   coverage.model.obj,

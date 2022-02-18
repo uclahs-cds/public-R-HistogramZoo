@@ -10,7 +10,7 @@ find.stepfunction.chgpts = function(x){
 #' @param x A numeric vector
 #' @param threshold numeric threshold
 #'
-#' @return
+#' @return TODO
 #' @export
 #'
 #' @examples
@@ -44,7 +44,7 @@ find.consecutive.threshold = function(
 #' @param histogram.metric TODO
 #' @param min.peak.size TODO
 #'
-#' @return
+#' @return TODO
 #' @export
 segment.fit.agnostic <- function(
   x,

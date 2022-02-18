@@ -58,7 +58,7 @@ maximal.meaningful = function(x) {
 #' @param x histogram (vector of counts)
 #' @param change.points Change points
 #'
-#' @return
+#' @return TODO
 #' @export
 find.all.meaningful.gap = function(x, change.points) {
   todo = expand.grid(start = change.points, end = change.points)
@@ -93,7 +93,7 @@ find.all.meaningful.gap = function(x, change.points) {
 #' @param change.points the change points
 #' @param min.gap The minimum gap to be considered a meaningful gap
 #'
-#' @return
+#' @return TODO
 #' @export
 meaningful.gaps.local = function(x, seg.points, change.points, min.gap = 2) {
 

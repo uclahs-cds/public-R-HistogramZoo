@@ -4,7 +4,7 @@
 #' @param coverage.rle TODO
 #' @param histogram.bin.size TODO
 #'
-#' @return
+#' @return TODO
 #' @export
 coverage.to.histogram = function(
   regions,

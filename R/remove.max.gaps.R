@@ -4,7 +4,7 @@
 #' @param max.gaps A list (or data frame) with start and end named columns
 #' @param remove.short.segment The minimum segment length to include in the final segments
 #'
-#' @return
+#' @return TODO
 #' @export
 remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 0) {
   # Maybe move this out of the function?
