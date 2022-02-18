@@ -5,7 +5,6 @@
 #' @param score.threshold A hard threshold for the score of the bigwig file. Scores higher than the threshold will be used in the computation of the histogram.
 #' @param regions A GRanges object to select regions of interest
 #' @param gtf.file A GTF file to select regions of interest
-#' @param gene.or.transcript If a GTF file is provided, whether histograms should be computed on a gene-based coordinate system or a transcript-based coordinate system
 #' @param histogram.bin.size The bin size (base-pairs) to bin signal into a histogram
 #' @param ... Additional parameters to be passed into gtf.to.genemodel
 #'
@@ -33,7 +32,6 @@ bigwig.to.histogram = function(
   score.threshold = 0,
   regions = NULL,
   gtf.file = NULL,
-  gene.or.transcript = c("gene", "transcript"),
   histogram.bin.size = 50,
   ...
 ){
@@ -54,7 +52,6 @@ bigwig.to.histogram = function(
   } else if(!is.null(gtf.file)){
     regions = gtf.to.genemodel(
       gtf.file = gtf.file,
-      gene.or.transcript = gene.or.transcript,
       select.strand = if(strand %in% c("+", "-")) strand else NULL,
       ...)
   } else {
