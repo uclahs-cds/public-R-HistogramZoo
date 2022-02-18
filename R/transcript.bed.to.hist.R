@@ -1,10 +1,8 @@
 #' Calculates coverage of genes from annotated RNA bed files
 #'
-#' @param filenames A vector of BED filenames
+#' @param filenames A vector of BED filenames. The `name` column of the BED files must indicate gene or transcript name
 #' @param n_fields Number of columns in the BED file that conform to BED file standards
 #' @param gtf.file A GTF file
-#' @param gene.or.transcript Whether histograms should be computed on gene annotations or transcript annotations
-#' @param select.ids Select elements by matching ids to genes or transcripts (depending on gene.or.transcript)
 #' @param histogram.bin.size The bin size (base-pairs) to bin signal into a histogram
 #' @param ... Additional parameters to be passed into gtf.to.genemodel
 #'
@@ -12,12 +10,12 @@
 #'
 #' @examples \dontrun{
 #' file.directory = system.file("extdata", "RNA_bedfiles", package = "ConsensusPeaks")
-#' filenames = list.files(file.directory)
+#' filenames = file.path(datadir, paste0("Sample.", 1:20, ".bed"))
 #' gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 #'
 #' histograms = transcript.bed.to.histogram(
 #' filenames = filenames,
-#' n_fields 12,
+#' n_fields = 12,
 #' gtf.file = gtf.file,
 #' gene.or.transcript = "gene",
 #' histogram.bin.size = 10)
@@ -26,16 +24,14 @@
 #' @export
 transcript.bed.to.histogram = function(
   filenames,
-  n_fields = c(3, 4, 6, 12),
+  n_fields = c(4, 6, 12),
   gtf.file = NULL,
-  gene.or.transcript = c("gene", "transcript"),
-  select.ids = NULL,
   histogram.bin.size = 1,
   ...
 ){
 
   peaks = lapply(filenames, function(filename){
-    segs = valr::read_bed( filename, n_fields = n_fields, ...)
+    segs = valr::read_bed( filename, n_fields = n_fields)
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
     segs.gr = base0.to.base1(segs.gr)
@@ -46,16 +42,10 @@ transcript.bed.to.histogram = function(
   peaks = do.call(c, peaks)
   peaks = split(peaks, f = names(peaks))
 
-  ids = names(peaks)
-  if(!is.null(select.ids)){
-    ids = intersect(ids, select.ids)
-  }
+  regions = gtf.to.genemodel(gtf.file = gtf.file, ...)
 
-  regions = gtf.to.genemodel(
-    gtf.file = gtf.file,
-    gene.or.transcript = gene.or.transcript,
-    select.ids = ids,
-    ...)
+  ids = intersect(names(peaks), names(regions))
+  if(length(ids) == 0) warning("No intersecting IDs between regions and peaks!")
 
   histogram.coverage =  vector("list", length(ids))
   names(histogram.coverage) = ids

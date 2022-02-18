@@ -8,7 +8,7 @@ library(ConsensusPeaks)
 datadir = system.file("extdata", "rna_bedfiles",  package = "ConsensusPeaks")
 
 # Setting up baseline parameters
-filenames = list.files(datadir, pattern = ".bed$")
+filenames = file.path(datadir, paste0("Sample.", 1:20, ".bed"))
 n_fields = 12
 gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 gene.or.transcript = "gene"
