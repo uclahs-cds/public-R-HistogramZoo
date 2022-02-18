@@ -275,8 +275,8 @@ bpg.plot = function(
   )
 
   # Plotting
-  filename = file.path(output.dir, paste0(geneinfo$gene, ".", output.tag, ".SegmentAndFit.pdf"))
-  pdf(filename, width = 10, height = 10)
+  # filename = file.path(output.dir, paste0(geneinfo$gene, ".", output.tag, ".SegmentAndFit.pdf"))
+  # pdf(filename, width = 10, height = 10)
 
   transcript.height = min(3.5, ncol(transcript.coverage)*0.5 + 0.8)
   distplot.height = min(2.8, length(unique.mets)*0.8)
@@ -298,7 +298,7 @@ bpg.plot = function(
     )
   )
 
-  print(mpp)
-  dev.off()
-
+  # print(mpp)
+  # dev.off()
+  return(mpp)
 }

@@ -341,7 +341,8 @@ plot.fitted.segments = function(
   }
 
   ## Generate file
-  pdf(file.name, width = 10, height = 10)
+  # pdf(file.name, width = 10, height = 10)
   print(compiled.plts)
-  dev.off()
+  # dev.off()
+  return(compiled.plts)
 }
