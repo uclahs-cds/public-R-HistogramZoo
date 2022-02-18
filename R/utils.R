@@ -7,7 +7,7 @@ str.match <- function(x, pattern) {
 
 # Return a string representation of an object
 dput.str <- function(x) {
-  paste0(capture.output(dput(x)), collapse = " ")
+  paste0(utils::capture.output(dput(x)), collapse = " ")
 }
 
 # Reset rownames

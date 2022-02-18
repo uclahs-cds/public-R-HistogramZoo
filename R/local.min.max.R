@@ -26,9 +26,9 @@ local.minmax = function(x, threshold = 0) {
   if(rle_diff$values[1] == 0) {
     startIndex = rle_diff$lengths[1] + 1
   }
-  if(length(rle_diff$lengths) > 2 && tail(rle_diff$values, n = 1) == 0) {
+  if(length(rle_diff$lengths) > 2 && utils::tail(rle_diff$values, n = 1) == 0) {
     # Remove the last equal values
-    endIndex = n - tail(rle_diff$lengths, n = 1)
+    endIndex = n - utils::tail(rle_diff$lengths, n = 1)
   }
   x.trim = x[startIndex:endIndex]
   n.trim = length(x.trim)
