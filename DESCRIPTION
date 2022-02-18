@@ -23,16 +23,15 @@ LazyData: true
 Imports:
     ggplot2,
     reshape2,
-    ggalt,
     metap,
     S4Vectors,
-    AnnotationDbi,
     fitdistrplus,
     mixtools,
     truncdist,
     BoutrosLab.plotting.general,
     splus2R,
-    DEoptim
+    DEoptim,
+    isotone
 Suggests:
     knitr,
     rmarkdown,
@@ -40,9 +39,8 @@ Suggests:
     IRanges,
     GenomeInfoDb,
     GenomicRanges,
-    GenomicFeatures,
     valr,
-    isotone,
-    scales
+    scales,
+    rtracklayer
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
