@@ -84,9 +84,9 @@ summarize.results.bulk = function(
     })
     coords.tbl = do.call(c, bed.coords)
     coords.tbl = data.frame(coords.tbl)
-    coords.tbl = subset(coords.tbl, select=-c("width"))
+    coords.tbl = subset(coords.tbl, select=-width)
     colnames(coords.tbl)[colnames(coords.tbl) == "seqnames"] <- "chr"
-    results.tbl = subset(results.tbl, select=-c("start", "end"))
+    results.tbl = subset(results.tbl, select=-c(start, end))
     results.tbl = cbind.data.frame(results.tbl, coords.tbl)
   }
 
