@@ -27,11 +27,15 @@ transcript.bed.to.histogram = function(
   n_fields = c(4, 6, 12),
   gtf.file = NULL,
   histogram.bin.size = 1,
+  gene.or.transcript = c("gene", "transcript"),
+  select.strand = c(".", "+", "-"),
+  select.chrs = NULL,
+  select.ids = NULL
   ...
 ){
 
   peaks = lapply(filenames, function(filename){
-    segs = valr::read_bed( filename, n_fields = n_fields)
+    segs = valr::read_bed( filename, n_fields = n_fields, ...)
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
     segs.gr = base0.to.base1(segs.gr)
@@ -42,7 +46,13 @@ transcript.bed.to.histogram = function(
   peaks = do.call(c, peaks)
   peaks = split(peaks, f = names(peaks))
 
-  regions = gtf.to.genemodel(gtf.file = gtf.file, ...)
+  regions = gtf.to.genemodel(
+    gtf.file = gtf.file,
+    gene.or.transcript = gene.or.transcript,
+    select.strand = select.strand,
+    select.chrs = select.chrs,
+    select.ids = select.ids
+  )
 
   ids = intersect(names(peaks), names(regions))
   if(length(ids) == 0) warning("No intersecting IDs between regions and peaks!")
