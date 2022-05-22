@@ -30,7 +30,7 @@ transcript.bed.to.histogram = function(
   gene.or.transcript = c("gene", "transcript"),
   select.strand = c(".", "+", "-"),
   select.chrs = NULL,
-  select.ids = NULL
+  select.ids = NULL,
   ...
 ){
 
