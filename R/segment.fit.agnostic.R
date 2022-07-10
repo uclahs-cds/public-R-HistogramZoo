@@ -28,8 +28,8 @@ find.consecutive.threshold = function(
   list(start = start.coords.above.threshold, end = end.coords.above.threshold)
 }
 
-
-#' Segment and fit
+# Method dispatch
+#' SegmentAndFit
 #'
 #' @param x histogram (vector of counts)
 #' @param histogram.count.threshold TODO
@@ -46,7 +46,11 @@ find.consecutive.threshold = function(
 #'
 #' @return TODO
 #' @export
-segment.fit.agnostic <- function(
+SegmentAndFit <- function(...){
+  UseMethod("SegmentAndFit")
+}
+
+SegmentAndFit.Histogram <- function(
   x,
   histogram.count.threshold = 0,
   eps = 1,
@@ -161,4 +165,49 @@ segment.fit.agnostic <- function(
   )
 
   return(rtn.list)
+}
+
+
+# TODO: Fix this function
+SegmentAndFit.HistogramList = function(
+  coverage.model.obj,
+  histogram.count.threshold = 0,
+  eps = 10^-4,
+  seed = NULL,
+  truncated.models = FALSE,
+  uniform.peak.threshold = 0.75,
+  uniform.peak.stepsize = 5,
+  remove.low.entropy = T,
+  min.gap.size = 2,
+  min.peak.size = 1,
+  max.uniform = T,
+  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+){
+
+  # Coverage.model.obj
+  cov = coverage.model.obj$histogram.coverage
+  histogram.ids = names(cov)
+
+  results = vector("list", length(histogram.ids))
+  names(results) = histogram.ids
+  # Running segmentation & distribution fitting
+  for(i in histogram.ids){
+    res = segment.fit.agnostic(
+      x = cov[[i]],
+      eps = eps,
+      seed = seed,
+      truncated.models = truncated.models,
+      uniform.peak.threshold = uniform.peak.threshold,
+      uniform.peak.stepsize = uniform.peak.stepsize,
+      remove.low.entropy = remove.low.entropy,
+      min.gap.size = min.gap.size,
+      min.peak.size = min.peak.size,
+      max.uniform = max.uniform,
+      histogram.metric = histogram.metric
+    )
+    results[[i]] <- res
+  }
+
+  coverage.model.obj[['results']] <- results
+  coverage.model.obj
 }
