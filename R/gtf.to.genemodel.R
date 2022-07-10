@@ -16,7 +16,7 @@
 gtf.to.genemodel = function(
   gtf.file,
   gene.or.transcript = c("gene", "transcript"),
-  select.strand = c(".", "+", "-"),
+  select.strand = c("*", "+", "-"),
   select.chrs = NULL,
   select.ids = NULL
 ){
@@ -32,7 +32,7 @@ gtf.to.genemodel = function(
   if(!is.null(select.chrs)){
     gtf = gtf[gtf$chrom %in% select.chrs,]
   }
-  if(select.strand != "."){
+  if(select.strand != "*"){
     gtf = gtf[gtf$strand %in% select.strand,]
   }
 
