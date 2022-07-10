@@ -29,7 +29,13 @@ coverage.to.histogram = function(
       bins = bins,
       numvar = coverage.rle,
       varname = "cvg")
-    histogram.coverage[[x.name]] <- cvg$cvg
+    histogram.coverage[[x.name]] <- new_GenomicHistogram(
+      x = cvg$cvg,
+      interval_start = GenomicRanges::start(cvg),
+      interval_end = GenomicRanges::end(cvg),
+      chr = as.character(GenomicRanges::seqnames(cvg))[1],
+      strand = as.character(GenomicRanges::strand(cvg))[1]
+    )
   }
   histogram.coverage
 }
