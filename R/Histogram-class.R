@@ -17,8 +17,6 @@ new_Histogram = function(x, interval_start = NULL, interval_end = NULL){
 }
 
 # validator
-# TODO: What is the minimum length for a histogram?
-# TODO: Do all intervals need to be same length?
 validate_Histogram = function(x){
   
   # Attributes
@@ -43,14 +41,14 @@ validate_Histogram = function(x){
     stop("Interval start must be less than interval end for a valid interval", call. = FALSE)
   }
   
-  if(len(values) > 1){
+  if(length(values) > 1){
     # 3. Start/End have to be in order
     if(!all(diff(interval_start) > 0 & diff(interval_end) > 0)){
       stop("Intervals must be ordered and nonoverlapping.", call. = FALSE)
     }
     
     # 4. Intervals need to be non-overlapping
-    if(any(interval_start[2:(histogram_length)] < interval_end[1:(histogram_length-1)])){
+    if(any(interval_start[2:(histogram_length)] <= interval_end[1:(histogram_length-1)])){
       stop("Intervals must be ordered and nonoverlapping.", call. = FALSE)
     }
   }
@@ -59,12 +57,42 @@ validate_Histogram = function(x){
 }
 
 # helper
-Histogram = function(x = double(), interval_start = 1:length(x), interval_end = 1:length(x)){
+#' Generates an S3 `Histogram` object
+#'
+#' @param x vector of counts/density
+#' @param interval_start integer vector representing the starts of intervals
+#' @param interval_end integer vector representing the ends of intervals
+#'
+#' @return A Histogram object
+#' @export
+#'
+#' @examples
+#' x = Histogram(x = runif(10), interval_start = 1:10, interval_end = 1:10)
+Histogram = function(x = double(), interval_start = integer(), interval_end = integer()){
   
   # Coercing values to the right thing
-  x = as.double(x)
-  interval_start = as.integer(interval_start)
-  interval_end = as.integer(interval_end)
+  if(is.null(x)){
+    x = double()
+  } else if (!is.double(x)) {
+    x = as.double(x)
+  }
+  
+  if(length(x) > 0){
+    if( missing(interval_start) & missing(interval_end)){
+      interval_start = interval_end = seq(1, length(x), 1)
+    } else if (missing(interval_start)){
+      interval_start = interval_end
+    } else if (missing(interval_end)){
+      interval_end = interval_start
+    }
+  }
+  
+  if (!is.integer(interval_start)){
+    interval_start = as.integer(interval_start)
+  }
+  if (!is.integer(interval_end)){
+    interval_end = as.integer(interval_end)
+  }
   
   # Validate and return object
   validate_Histogram(new_Histogram(x = x, interval_start = interval_start, interval_end = interval_end))
