@@ -16,9 +16,9 @@
 #' seqnames = "chr1",
 #' IRanges::IRanges(start = c(17950, 19350),
 #'                  end = c(18000, 19600)),
-#' strand = ".")
+#' strand = "*")
 #'
-#' histograms = bigwig.to.histogram(
+#' histograms = BigWigToHistogram(
 #' filename = filename,
 #' regions = regions,
 #' histogram.bin.size = 10)
@@ -26,9 +26,9 @@
 #'
 #'
 #' @export
-bigwig.to.histogram = function(
+BigWigToHistogram = function(
   filename,
-  strand  = c(".", "+", "-"),
+  strand  = c("*", "+", "-"),
   score.threshold = 0,
   regions = NULL,
   gtf.file = NULL,
@@ -61,14 +61,9 @@ bigwig.to.histogram = function(
   }
 
   # Calculating Coverage
-  histogram.coverage = coverage.to.histogram(
+  coverage.to.histogram(
     coverage.rle = bigwig.coverage,
     regions = regions,
-    histogram.bin.size = histogram.bin.size)
-
-  # Returning list of histograms, region coordinates
-  list(
-    histogram.coverage = histogram.coverage,
-    gene.model = regions,
-    histogram.bin.size = histogram.bin.size)
+    histogram.bin.size = histogram.bin.size
+  )
 }

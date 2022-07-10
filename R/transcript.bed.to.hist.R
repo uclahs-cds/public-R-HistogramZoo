@@ -9,11 +9,11 @@
 #' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
 #'
 #' @examples \dontrun{
-#' file.directory = system.file("extdata", "RNA_bedfiles", package = "ConsensusPeaks")
-#' filenames = file.path(datadir, paste0("Sample.", 1:20, ".bed"))
+#' file.directory = system.file("extdata", "rna_bedfiles", package = "ConsensusPeaks")
+#' filenames = file.path(file.directory, paste0("Sample.", 1:20, ".bed"))
 #' gtf.file = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 #'
-#' histograms = transcript.bed.to.histogram(
+#' histograms = TranscriptBEDToHistogram(
 #' filenames = filenames,
 #' n_fields = 12,
 #' gtf.file = gtf.file,
@@ -22,20 +22,20 @@
 #' }
 #'
 #' @export
-transcript.bed.to.histogram = function(
+TranscriptBEDToHistogram = function(
   filenames,
   n_fields = c(4, 6, 12),
   gtf.file = NULL,
   histogram.bin.size = 1,
   gene.or.transcript = c("gene", "transcript"),
-  select.strand = c(".", "+", "-"),
+  select.strand = c("*", "+", "-"),
   select.chrs = NULL,
   select.ids = NULL,
   ...
 ){
 
   peaks = lapply(filenames, function(filename){
-    segs = valr::read_bed( filename, n_fields = n_fields, ...)
+    segs = valr::read_bed( filename, n_fields = n_fields, comment = "#")
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
     segs.gr = base0.to.base1(segs.gr)
@@ -68,11 +68,14 @@ transcript.bed.to.histogram = function(
       bins = bins,
       numvar = peaks.cov,
       varname = "cvg")
-    histogram.coverage[[i]] <- cvg$cvg
+    histogram.coverage[[i]] <- new_GenomicHistogram(
+      x = cvg$cvg,
+      interval_start = GenomicRanges::start(cvg),
+      interval_end = GenomicRanges::end(cvg),
+      chr = as.character(GenomicRanges::seqnames(cvg))[1],
+      strand = as.character(GenomicRanges::strand(cvg))[1]
+    )
   }
 
-  list(
-    histogram.coverage = histogram.coverage,
-    gene.model = regions,
-    histogram.bin.size = histogram.bin.size)
+  histogram.coverage
 }
