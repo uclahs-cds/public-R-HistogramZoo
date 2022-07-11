@@ -33,8 +33,8 @@ validate_Histogram = function(x){
   }
 
   # 1. Values always have to be greater than 0
-  if(!all(values > 0 & values > 0)){
-    stop("`x` must be non-missing and greater than 0", call. = FALSE)
+  if(!all(!is.na(values) & values >= 0)){
+    stop("`x` must be non-missing and nonnegative", call. = FALSE)
   }
 
   # 2. Start always has to be be less than or equal to end
