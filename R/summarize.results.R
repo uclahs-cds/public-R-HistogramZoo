@@ -15,8 +15,8 @@ extract.stats = function(models, gene = NULL, peak.id){
 }
 
 # Method Dispatch
-SummarizeResults = function(x, ...){
-  UseMethod('SummarizeResults', x, ...)
+SummarizeResults = function(result){
+  UseMethod('SummarizeResults', result)
 }
 
 #' Formats results of segment.fit.agnostic
@@ -55,8 +55,7 @@ SummarizeResults.Histogram = function(
 #' @return TODO
 #' @export
 SummarizeResults.GenomicHistogram = function(
-  result = NULL,
-  output.format = c("stats.only", "bed")
+  result = NULL
 ){
 
   # Error checking
@@ -64,7 +63,6 @@ SummarizeResults.GenomicHistogram = function(
   if(is.null(attr(result, "models")) | is.null(attr(result, "p"))){
     stop("No computed results. Please run SegmentAndFit first.")
   }
-  output.format = match.arg(output.format)
 
   # Recovering output stats
   res = attr(result, "models")
@@ -77,28 +75,26 @@ SummarizeResults.GenomicHistogram = function(
   results.tbl = do.call('rbind.data.frame', results.tbl)
 
   # Recovering coordinates for genes
-  if(output.format == "bed"){
-    interval_start = attr(result, "interval_start")
-    interval_end = attr(result, "interval_end")
-    bins = IRanges::IRanges(start = interval_start, end = interval_end)
-    bed.coords = apply(results.tbl, 1, function(peak){
-      coords.gr = IRanges::reduce(bins[peak['start']:peak['end']])
-      coords.gr = base1.to.base0(coords.gr)
-      coords.gr = bed6tobed12(coords.gr)
-      coords.gr
-    })
-    coords.tbl = do.call(c, bed.coords)
-    coords.tbl = data.frame(coords.tbl)
-    coords.tbl = subset(coords.tbl, select=-width)
+  interval_start = attr(result, "interval_start")
+  interval_end = attr(result, "interval_end")
+  bins = IRanges::IRanges(start = interval_start, end = interval_end)
+  bed.coords = apply(results.tbl, 1, function(peak){
+    coords.gr = IRanges::reduce(bins[peak['start']:peak['end']])
+    coords.gr = base1.to.base0(coords.gr)
+    coords.gr = bed6tobed12(coords.gr)
+    coords.gr
+  })
+  coords.tbl = do.call(c, bed.coords)
+  coords.tbl = data.frame(coords.tbl)
+  coords.tbl = subset(coords.tbl, select=-width)
 
-    # Technically this is the only part that might be unique to GenomicHistogram
-    coords.tbl['chr'] <- attr(results, "chr")
-    coords.tbl['strand'] <- attr(results, "strand")
+  # Technically this is the only part that might be unique to GenomicHistogram
+  coords.tbl['chr'] <- attr(results, "chr")
+  coords.tbl['strand'] <- attr(results, "strand")
 
-    # TODO: Potentially rewrite the bottom so that this is more efficient
-    results.tbl = subset(results.tbl, select=-c(start, end))
-    results.tbl = cbind.data.frame(results.tbl, coords.tbl)
-  }
-
+  # TODO: Potentially rewrite the bottom so that this is more efficient
+  results.tbl = subset(results.tbl, select=-c(start, end))
+  results.tbl = cbind.data.frame(results.tbl, coords.tbl)
+  
   results.tbl
 }
