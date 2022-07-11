@@ -17,10 +17,6 @@
 bed6tobed12 = function(
   gr
 ){
-  # Error checking
-  stopifnot(length(unique(GenomicRanges::strand(gr))) == 1)
-  stopifnot(length(unique(GenomicRanges::seqnames(gr))) == 1)
-
   # Generating BED12 columns
   bed12.gr = range(gr)
   S4Vectors::mcols(bed12.gr)$score = 0
