@@ -28,10 +28,9 @@ find.consecutive.threshold = function(
   list(start = start.coords.above.threshold, end = end.coords.above.threshold)
 }
 
-# Method dispatch
 #' SegmentAndFit
 #'
-#' @param x histogram (vector of counts)
+#' @param x a Histogram or HistogramList object
 #' @param histogram.count.threshold TODO
 #' @param eps TODO
 #' @param seed TODO
@@ -46,11 +45,11 @@ find.consecutive.threshold = function(
 #'
 #' @return TODO
 #' @export
-SegmentAndFit <- function(...){
-  UseMethod("SegmentAndFit")
-}
-
-SegmentAndFit.Histogram <- function(
+#' @example \dontrun{
+#' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
+#' res = SegmentAndFit(x)
+#' }
+SegmentAndFit <- function(
   x,
   histogram.count.threshold = 0,
   eps = 1,
@@ -64,6 +63,10 @@ SegmentAndFit.Histogram <- function(
   max.uniform = T,
   histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
   ) {
+
+  # Checking types
+  stopifnot(inherits(x, "Histogram"))
+  histogram.metric = match.arg(histogram.metric, several.ok = T)
 
   # Change points
   chgpts = find.stepfunction.chgpts(x)
@@ -159,12 +162,11 @@ SegmentAndFit.Histogram <- function(
     models[[i]] <- best.models
   }
 
-  rtn.list <- list(
-    models = models,
-    p = all.points # p went from all points to peaks, this is only used for plotting, can remove
-  )
+  attr(x, "models") <- models
+  attr(x, "p") <- all.points
+  # class(x) <- c("HistogramFit", class(x))
 
-  return(rtn.list)
+  return(x)
 }
 
 
