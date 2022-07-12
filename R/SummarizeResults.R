@@ -54,6 +54,7 @@ SummarizeResults.Histogram = function(
   models = attr(result, "models")
   interval_start = attr(result, "interval_start")
   interval_end = attr(result, "interval_end")
+  region_id = attr(result, "region_id")
 
   # Generating a results table
   results_table = lapply(seq_along(models), function(i){
@@ -74,6 +75,7 @@ SummarizeResults.Histogram = function(
   coords_table = subset(coords_table, select=-width)
 
   results_table = cbind.data.frame(results_table, coords_table)
+  results_table['region_id'] <- region_id
 
   # Reorder columns
   results_table = results_table[,order(match(colnames(results_table), results_columns))]
