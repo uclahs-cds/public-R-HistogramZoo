@@ -1,55 +1,89 @@
+results_columns = c(
+  "region_id",
+  "peak_id",
+  "chr",
+  "start",
+  "end",
+  "strand",
+  "blockCount",
+  "blockSizes",
+  "blockStarts",
+  "histogram_start",
+  "histogram_end",
+  "value",
+  "metric",
+  "dist",
+  "params"
+)
 
-extract.stats = function(models, gene = NULL, peak.id){
+extract.stats = function(models, peak.id){
   mod = models$majority.vote
   df = data.frame(
-    "peak.id" = peak.id,
-    "start" = mod$seg.start,
-    "end" = mod$seg.end,
+    "peak_id" = peak.id,
+    "histogram_start" = mod$seg.start,
+    "histogram_end" = mod$seg.end,
     "value" = mod$value,
     "metric" = mod$metric,
     "dist" = mod$dist,
     "params" = dput.str(mod$par)
   )
-  if(!is.null(gene)) {df = cbind("gene" = gene, df)}
   df
 }
 
-# Method Dispatch
+#' Formats results of SegmentAndFit
+#'
+#' @param result A Histogram object which have attributes 'models' and 'p' (i.e. the return object of running SegmentAndFit on a Histogram)
+#'
+#' @return TODO: Describe columns of dataframe
+#' @export
 SummarizeResults = function(result){
   UseMethod('SummarizeResults', result)
 }
 
-#' Formats results of segment.fit.agnostic
-#'
-#' @param result TODO
-#'
-#' @return TODO
-#' @export
 SummarizeResults.Histogram = function(
   result = NULL
 ){
 
   # Error checking
   stopifnot(inherits(result, "Histogram"))
-  if(is.null(attr(result, "models")) | is.null(attr(result, "p"))){
+  if(is.null(attr(result, "models"))){
     stop("No computed results. Please run SegmentAndFit first.")
   }
 
-  res = attr(result, "models")
-  results.tbl = lapply(seq_along(res), function(i){
-    extract.stats(
-      models = res[[i]],
-      gene = NULL,
-      peak.id = i)
+  # Attributes of the result
+  models = attr(result, "models")
+  interval_start = attr(result, "interval_start")
+  interval_end = attr(result, "interval_end")
+
+  # Generating a results table
+  results_table = lapply(seq_along(models), function(i){
+    extract.stats(models = models[[i]], peak.id = i)
   })
-  results.tbl = do.call('rbind.data.frame', results.tbl)
-  results.tbl
+  results_table = do.call('rbind.data.frame', results_table)
+
+  # Recovering coordinates for genes
+  bins = IRanges::IRanges(start = interval_start, end = interval_end)
+  bed.coords = apply(results_table, 1, function(peak){
+    coords.gr = IRanges::reduce(bins[peak['histogram_start']:peak['histogram_end']])
+    coords.gr = base1.to.base0(coords.gr)
+    coords.gr = bed6tobed12(coords.gr)
+    coords.gr
+  })
+  coords_table = do.call(c, bed.coords)
+  coords_table = data.frame(coords_table)
+  coords_table = subset(coords_table, select=-width)
+
+  results_table = cbind.data.frame(results_table, coords_table)
+
+  # Reorder columns
+  results_table = results_table[,order(match(colnames(results_table), results_columns))]
+
+  return(results_table)
 }
 
 #' Formats results of bulk.segment.fit
 #'
 #' @param result TODO
-#' @param output.format TODO
 #'
 #'
 #' @return TODO
@@ -60,41 +94,16 @@ SummarizeResults.GenomicHistogram = function(
 
   # Error checking
   stopifnot(inherits(result, "GenomicHistogram"))
-  if(is.null(attr(result, "models")) | is.null(attr(result, "p"))){
-    stop("No computed results. Please run SegmentAndFit first.")
-  }
 
-  # Recovering output stats
-  res = attr(result, "models")
-  results.tbl = lapply(seq_along(res), function(i){
-    extract.stats(
-      models = res[[i]],
-      gene = NULL,
-      peak.id = i)
-  })
-  results.tbl = do.call('rbind.data.frame', results.tbl)
+  # Calling SummarizeResults.Histogram
+  results_table = SummarizeResults.Histogram(result)
 
-  # Recovering coordinates for genes
-  interval_start = attr(result, "interval_start")
-  interval_end = attr(result, "interval_end")
-  bins = IRanges::IRanges(start = interval_start, end = interval_end)
-  bed.coords = apply(results.tbl, 1, function(peak){
-    coords.gr = IRanges::reduce(bins[peak['start']:peak['end']])
-    coords.gr = base1.to.base0(coords.gr)
-    coords.gr = bed6tobed12(coords.gr)
-    coords.gr
-  })
-  coords.tbl = do.call(c, bed.coords)
-  coords.tbl = data.frame(coords.tbl)
-  coords.tbl = subset(coords.tbl, select=-width)
+  # Add chromosome and strand for GenomicHistogram
+  results_table['chr'] <- attr(results, "chr")
+  results_table['strand'] <- attr(results, "strand")
 
-  # Technically this is the only part that might be unique to GenomicHistogram
-  coords.tbl['chr'] <- attr(results, "chr")
-  coords.tbl['strand'] <- attr(results, "strand")
+  # Reorder columns
+  results_table = results_table[,order(match(colnames(results_table), results_columns))]
 
-  # TODO: Potentially rewrite the bottom so that this is more efficient
-  results.tbl = subset(results.tbl, select=-c(start, end))
-  results.tbl = cbind.data.frame(results.tbl, coords.tbl)
-  
-  results.tbl
+  return(results_table)
 }
