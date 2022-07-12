@@ -1,6 +1,6 @@
 
 # constructor
-new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, chr = NULL, strand = NULL){
+new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
 
   # Checking types
   stopifnot(is.character(chr))
@@ -11,6 +11,7 @@ new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, c
     x,
     interval_start = interval_start,
     interval_end = interval_end,
+    region_id = region_id,
     chr = chr,
     strand = strand,
     class = "GenomicHistogram"
@@ -22,7 +23,6 @@ validate_GenomicHistogram = function(x){
 
   # Attributes
   chr = attr(x, "chr")
-  strand = attr(x, "strand")
 
   # Validate
   # 1. chr is of length 1
@@ -30,12 +30,7 @@ validate_GenomicHistogram = function(x){
     stop("`chr` must have length 1", call. = FALSE)
   }
 
-  # 2. strand is of length 1
-  if( length(strand) > 1 ) {
-    stop("`strand` must have length 1", call. = FALSE)
-  }
-
-  # 3. validate_Histogram passes
+  # 2. validate_Histogram passes
   validate_Histogram(x)
 }
 
@@ -53,7 +48,7 @@ validate_GenomicHistogram = function(x){
 #'
 #' @examples
 #' x = GenomicHistogram(x = runif(10), interval_start = 1:10, interval_end = 1:10, chr = "chr1", strand = "+")
-GenomicHistogram = function(x = double(), interval_start = integer(), interval_end = integer(), chr = character(), strand = c("*", "+", "-")){
+GenomicHistogram = function(x = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
 
   # Coercing values to the right thing
   strand = match.arg(strand)
@@ -81,7 +76,15 @@ GenomicHistogram = function(x = double(), interval_start = integer(), interval_e
     chr = as.character(chr)
   }
 
+  # Region ID
+  if( missing(region_id) & length(x) > 0 ){
+    region_id = paste0(chr, ":", interval_start[1], "-", interval_end[length(x)], ":", strand)
+  }
+  if(!is.character(region_id)){
+    region_id = as.character(region_id)
+  }
+
   # Validate and return object
-  validate_GenomicHistogram(new_GenomicHistogram(x = x, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand))
+  validate_GenomicHistogram(new_GenomicHistogram(x = x, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand, region_id = region_id))
 
 }

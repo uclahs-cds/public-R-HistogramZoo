@@ -1,17 +1,19 @@
 
 # constructor
-new_Histogram = function(x, interval_start = NULL, interval_end = NULL, class = character(), ...){
+new_Histogram = function(x, interval_start = NULL, interval_end = NULL, region_id = NULL, class = character(), ...){
 
   # Checking types
   stopifnot(is.double(x))
   stopifnot(is.integer(interval_start))
   stopifnot(is.integer(interval_end))
+  stopifnot(is.character(region_id))
 
   # Creating object
   structure(
     x,
     interval_start = interval_start,
     interval_end = interval_end,
+    region_id = region_id,
     ...,
     class = c(class, "Histogram")
   )
@@ -25,6 +27,7 @@ validate_Histogram = function(x){
   histogram_length = length(values)
   interval_start = attr(x, "interval_start")
   interval_end = attr(x, "interval_end")
+  region_id = attr(x, "region_id")
 
   # Validate
   # 0. Everything has to be the same length
@@ -54,6 +57,11 @@ validate_Histogram = function(x){
     }
   }
 
+  # 5. region_id is of length 1
+  if(length(region_id) != 1){
+    stop("region_id must have length 1.", call. = FALSE)
+  }
+
   x
 }
 
@@ -63,13 +71,14 @@ validate_Histogram = function(x){
 #' @param x vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
+#' @param region_id unique character id to denote region
 #'
 #' @return A Histogram object
 #' @export
 #'
 #' @examples
 #' x = Histogram(x = runif(10), interval_start = 1:10, interval_end = 1:10)
-Histogram = function(x = double(), interval_start = integer(), interval_end = integer()){
+Histogram = function(x = double(), interval_start = integer(), interval_end = integer(), region_id = character()){
 
   # Coercing values to the right thing
   if(length(x) > 0){
@@ -79,6 +88,9 @@ Histogram = function(x = double(), interval_start = integer(), interval_end = in
       interval_start = interval_end
     } else if (missing(interval_end)){
       interval_end = interval_start
+    }
+    if( missing(region_id) ){
+      region_id = paste0(interval_start[1], "-", interval_end[length(x)])
     }
   }
 
@@ -91,8 +103,11 @@ Histogram = function(x = double(), interval_start = integer(), interval_end = in
   if (!is.integer(interval_end)){
     interval_end = as.integer(interval_end)
   }
+  if(!is.character(region_id)){
+    region_id = as.character(region_id)
+  }
 
   # Validate and return object
-  validate_Histogram(new_Histogram(x = x, interval_start = interval_start, interval_end = interval_end))
+  validate_Histogram(new_Histogram(x = x, interval_start = interval_start, interval_end = interval_end, region_id = region_id))
 
 }
