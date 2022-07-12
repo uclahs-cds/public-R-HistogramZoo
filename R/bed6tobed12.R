@@ -19,10 +19,6 @@ bed6tobed12 = function(
 ){
   # Generating BED12 columns
   bed12.gr = range(gr)
-  S4Vectors::mcols(bed12.gr)$score = 0
-  S4Vectors::mcols(bed12.gr)$thickStart = GenomicRanges::start(bed12.gr)
-  S4Vectors::mcols(bed12.gr)$thickEnd = GenomicRanges::end(bed12.gr)
-  S4Vectors::mcols(bed12.gr)$itemRgb = 0
   S4Vectors::mcols(bed12.gr)$blockCount = length(gr)
   blockSizes = IRanges::width(gr) - 1
   S4Vectors::mcols(bed12.gr)$blockSizes = paste0(blockSizes, ",", collapse = "")
