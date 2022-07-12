@@ -9,5 +9,5 @@ base1.to.base0 = function(gr){
 }
 
 generate.identifiers = function(gr){
-  paste0(GenomicRanges::seqnames(gr), ":", GenomicRanges::start(gr), "-", GenomicRanges::end(gr))
+  paste0(GenomicRanges::seqnames(gr), ":", GenomicRanges::start(gr), "-", GenomicRanges::end(gr), ":", GenomicRanges::strand(gr))
 }
