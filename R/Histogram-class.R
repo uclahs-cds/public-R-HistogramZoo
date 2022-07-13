@@ -180,3 +180,32 @@ print.Histogram = function(x){
 
   invisible(x)
 }
+
+`[.Histogram` = function(x, i){
+  new_Histogram(
+    NextMethod(),
+    interval_start = attr(x, "interval_start")[i],
+    interval_end = attr(x, "interval_end")[i],
+    region_id = attr(x, "region_id"))
+}
+
+ReassignRegionID = function(x, region_id){
+  UseMethod('ReassignRegionID', x)
+}
+
+ReassignRegionID.Histogram = function(x, region_id){
+
+  stopifnot(inherits(x, "Histogram"))
+
+  # Creating a region id
+  if(missing(region_id)){
+    region_id = paste0(attr(x, "interval_start")[1], "-", attr(x, "interval_end")[length(x)])
+  }
+  if(!is.character(region_id)){
+    region_id = as.character(region_id)
+  }
+
+  attr(x, "region_id") <- region_id
+
+  return(x)
+}

@@ -88,3 +88,31 @@ GenomicHistogram = function(x = double(), interval_start = integer(), interval_e
   validate_GenomicHistogram(new_GenomicHistogram(x = x, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand, region_id = region_id))
 
 }
+
+`[.GenomicHistogram` = function(x, i){
+  new_GenomicHistogram(
+    NextMethod(),
+    interval_start = attr(x, "interval_start")[i],
+    interval_end = attr(x, "interval_end")[i],
+    region_id = attr(x, "region_id"),
+    chr = attr(x, "chr"),
+    strand = attr(x, "strand"))
+}
+
+ReassignRegionID.GenomicHistogram = function(x, region_id){
+
+  stopifnot(inherits(x, "Histogram"))
+
+  # Creating a region id
+  if(missing(region_id)){
+    region_id = paste0(attr(x, "chr"), ":", attr(x, "interval_start")[1], "-", attr(x, "interval_end")[length(x)], ":", attr(x, "strand"))
+  }
+  if(!is.character(region_id)){
+    region_id = as.character(region_id)
+  }
+
+  attr(x, "region_id") <- region_id
+
+  return(x)
+}
+
