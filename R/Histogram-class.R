@@ -111,3 +111,72 @@ Histogram = function(x = double(), interval_start = integer(), interval_end = in
   validate_Histogram(new_Histogram(x = x, interval_start = interval_start, interval_end = interval_end, region_id = region_id))
 
 }
+
+print.Histogram = function(x){
+
+  region_id = attr(x, "region_id")
+  interval_start = attr(x, "interval_start")
+  interval_end = attr(x, "interval_end")
+  models = attr(x, "models")
+
+  # extracting x data
+  # TODO: Check with Stefan if there's a more efficient way
+  x = unclass(x)
+  attributes(x) <- NULL
+
+  # Base case
+  cat("Region: ", region_id, "\n")
+
+  # Indices
+  if(length(x) > 10){
+
+    # Intervals
+    intervals_begin = ifelse(
+      interval_start[1:5] == interval_end[1:5],
+      interval_start[1:5],
+      paste0(interval_start[1:5], "-", interval_end[1:5]))
+
+    intervals_finish = ifelse(
+      tail(interval_start, 5) == tail(interval_end, 5),
+      tail(interval_start, 5),
+      paste0(tail(interval_start, 5), "-", tail(interval_end, 5))
+    )
+    x_start = as.character(formatC(x[1:5], digits = 2))
+    x_end = as.character(formatC(tail(x, 5), digits = 2))
+
+    # Spacing
+    spacing = max(nchar(c(intervals_begin, intervals_finish, x_start, x_end)))
+    intervals_begin = stringr::str_pad(intervals_begin, width = spacing)
+    intervals_finish = stringr::str_pad(intervals_finish, width = spacing)
+    x_start = stringr::str_pad(x_start, width = spacing)
+    x_end = stringr::str_pad(x_end, width = spacing)
+
+    # Printing
+    cat(intervals_begin, "...", intervals_finish, "\n")
+    cat(x_start, "...", x_end, "\n")
+
+  } else {
+
+    # Intervals
+    intervals = ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
+    intervals = as.character(intervals)
+
+    # Spacing
+    x = as.character(formatC(x, digits = 2))
+    spacing = max(nchar(c(intervals, x)))
+    intervals = stringr::str_pad(intervals, width = spacing)
+    x = stringr::str_pad(x, width = spacing)
+
+    # Printing
+    cat(intervals, "\n")
+    cat(x, "\n")
+  }
+
+  if(!is.null(models)){
+    cat("SegmentAndFit: \n")
+    cat("Number of Peaks: ", length(models), "\n")
+    # TODO: Add stuff about metrics, distributions, parameters, etc
+  }
+
+  invisible(x)
+}
