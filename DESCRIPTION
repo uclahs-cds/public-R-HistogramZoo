@@ -21,7 +21,6 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    ggplot2,
     reshape2,
     metap,
     S4Vectors,
@@ -31,16 +30,17 @@ Imports:
     BoutrosLab.plotting.general,
     splus2R,
     DEoptim,
-    isotone
+    isotone,
+    stringr,
+    IRanges,
+    GenomicRanges
 Suggests:
     knitr,
     rmarkdown,
     testthat,
-    IRanges,
     GenomeInfoDb,
-    GenomicRanges,
     valr,
     scales,
     rtracklayer
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
