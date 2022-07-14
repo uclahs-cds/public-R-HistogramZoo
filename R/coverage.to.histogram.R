@@ -30,7 +30,7 @@ coverage.to.histogram = function(
       numvar = coverage.rle,
       varname = "cvg")
     histogram.coverage[[x.name]] <- new_GenomicHistogram(
-      x = cvg$cvg,
+      histogram_data = cvg$cvg,
       interval_start = GenomicRanges::start(cvg),
       interval_end = GenomicRanges::end(cvg),
       region_id = x.name,

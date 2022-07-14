@@ -1,6 +1,6 @@
 
 # constructor
-new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
+new_GenomicHistogram = function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
 
   # Checking types
   stopifnot(is.character(chr))
@@ -8,7 +8,7 @@ new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, r
 
   # Creating object
   new_Histogram(
-    x,
+    histogram_data = histogram_data,
     interval_start = interval_start,
     interval_end = interval_end,
     region_id = region_id,
@@ -22,12 +22,12 @@ new_GenomicHistogram = function(x, interval_start = NULL, interval_end = NULL, r
 validate_GenomicHistogram = function(x){
 
   # Attributes
-  chr = attr(x, "chr")
+  chr = x$chr
 
   # Validate
   # 1. chr is of length 1
   if( length(chr) > 1 ) {
-    stop("`chr` must have length 1", call. = FALSE)
+    stop("chr must have length 1", call. = FALSE)
   }
 
   # 2. validate_Histogram passes
@@ -37,7 +37,7 @@ validate_GenomicHistogram = function(x){
 # helper
 #' Generates an S3 `GenomicHistogram` object
 #'
-#' @param x vector of counts/density
+#' @param histogram_data vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
 #' @param chr chromosome name
@@ -48,14 +48,14 @@ validate_GenomicHistogram = function(x){
 #'
 #' @examples
 #' x = GenomicHistogram(x = runif(10), interval_start = 1:10, interval_end = 1:10, chr = "chr1", strand = "+")
-GenomicHistogram = function(x = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
+GenomicHistogram = function(histogram_data = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
 
   # Coercing values to the right thing
   strand = match.arg(strand)
 
   if(length(x) > 0){
     if( missing(interval_start) & missing(interval_end)){
-      interval_start = interval_end = seq(1, length(x), 1)
+      interval_start = interval_end = seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
       interval_start = interval_end
     } else if (missing(interval_end)){
@@ -63,8 +63,8 @@ GenomicHistogram = function(x = double(), interval_start = integer(), interval_e
     }
   }
 
-  if (!is.double(x)) {
-    x = as.double(x)
+  if (!is.double(histogram_data)) {
+    histogram_data = as.double(histogram_data)
   }
   if (!is.integer(interval_start)){
     interval_start = as.integer(interval_start)
@@ -77,26 +77,35 @@ GenomicHistogram = function(x = double(), interval_start = integer(), interval_e
   }
 
   # Region ID
-  if( missing(region_id) & length(x) > 0 ){
-    region_id = paste0(chr, ":", interval_start[1], "-", interval_end[length(x)], ":", strand)
+  if( missing(region_id) & length(histogram_data) > 0 ){
+    region_id = paste0(chr, ":", interval_start[1], "-", interval_end[length(histogram_data)], ":", strand)
   }
   if(!is.character(region_id)){
     region_id = as.character(region_id)
   }
 
   # Validate and return object
-  validate_GenomicHistogram(new_GenomicHistogram(x = x, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand, region_id = region_id))
+  validate_GenomicHistogram(new_GenomicHistogram(histogram_data = histogram_data, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand, region_id = region_id))
 
 }
 
+#' Title
+#'
+#' @param x 
+#' @param i 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 `[.GenomicHistogram` = function(x, i){
   new_GenomicHistogram(
-    NextMethod(),
-    interval_start = attr(x, "interval_start")[i],
-    interval_end = attr(x, "interval_end")[i],
-    region_id = attr(x, "region_id"),
-    chr = attr(x, "chr"),
-    strand = attr(x, "strand"))
+    histogram_data = x$histogram_data[i],
+    interval_start = x$interval_start[i],
+    interval_end = x$interval_end[i],
+    region_id = x$region_id,
+    chr = x$chr,
+    strand = x$strand)
 }
 
 ReassignRegionID.GenomicHistogram = function(x, region_id){
@@ -104,14 +113,14 @@ ReassignRegionID.GenomicHistogram = function(x, region_id){
   stopifnot(inherits(x, "Histogram"))
 
   # Creating a region id
-  if(missing(region_id)){
-    region_id = paste0(attr(x, "chr"), ":", attr(x, "interval_start")[1], "-", attr(x, "interval_end")[length(x)], ":", attr(x, "strand"))
+  if(missing(region_id) & length(x$histogram_data) > 0){
+    region_id = paste0(x$chr, ":", x$interval_start[1], "-", x$interval_end[length(x$histogramm_data)], ":", x$strand)
   }
   if(!is.character(region_id)){
     region_id = as.character(region_id)
   }
 
-  attr(x, "region_id") <- region_id
+  x$region_id <- region_id
 
   return(x)
 }

@@ -69,7 +69,7 @@ TranscriptBEDToHistogram = function(
       numvar = peaks.cov,
       varname = "cvg")
     histogram.coverage[[i]] <- new_GenomicHistogram(
-      x = cvg$cvg,
+      histogram_data = cvg$cvg,
       interval_start = GenomicRanges::start(cvg),
       interval_end = GenomicRanges::end(cvg),
       region_id = i,

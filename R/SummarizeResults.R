@@ -37,24 +37,32 @@ extract.stats = function(models, peak.id){
 #' @return TODO: Describe columns of dataframe
 #' @export
 SummarizeResults = function(result){
-  UseMethod('SummarizeResults', result)
+  UseMethod('SummarizeResults')
 }
 
+#' Title
+#'
+#' @param result
+#'
+#' @return
+#' @export
+#'
+#' @examples
 SummarizeResults.Histogram = function(
   result = NULL
 ){
 
   # Error checking
   stopifnot(inherits(result, "Histogram"))
-  if(is.null(attr(result, "models"))){
-    stop("No computed results. Please run SegmentAndFit first.")
+  if(is.null(results$models)){
+    stop("No models found. Please run SegmentAndFit first.")
   }
 
   # Attributes of the result
-  models = attr(result, "models")
-  interval_start = attr(result, "interval_start")
-  interval_end = attr(result, "interval_end")
-  region_id = attr(result, "region_id")
+  models = result$models
+  interval_start = result$interval_start
+  interval_end = result$interval_end
+  region_id = result$region_id
 
   # Generating a results table
   results_table = lapply(seq_along(models), function(i){
@@ -83,7 +91,6 @@ SummarizeResults.Histogram = function(
   return(results_table)
 }
 
-#' Formats results of bulk.segment.fit
 #'
 #' @param result TODO
 #'
@@ -101,8 +108,8 @@ SummarizeResults.GenomicHistogram = function(
   results_table = SummarizeResults.Histogram(result)
 
   # Add chromosome and strand for GenomicHistogram
-  results_table['chr'] <- attr(results, "chr")
-  results_table['strand'] <- attr(results, "strand")
+  results_table['chr'] <- results$chr
+  results_table['strand'] <- results$strand
 
   # Reorder columns
   results_table = results_table[,order(match(colnames(results_table), results_columns))]

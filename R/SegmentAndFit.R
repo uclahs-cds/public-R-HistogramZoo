@@ -50,7 +50,7 @@ find.consecutive.threshold = function(
 #' res = SegmentAndFit(x)
 #' }
 SegmentAndFit <- function(
-  x,
+  histogram_obj,
   histogram.count.threshold = 0,
   eps = 1,
   seed = NULL,
@@ -65,8 +65,11 @@ SegmentAndFit <- function(
   ) {
 
   # Checking types
-  stopifnot(inherits(x, "Histogram"))
+  stopifnot(inherits(histogram_obj, "Histogram"))
   histogram.metric = match.arg(histogram.metric, several.ok = T)
+
+  # Extracting data
+  x = histogram_obj$histogram_data
 
   # Change points
   chgpts = find.stepfunction.chgpts(x)
@@ -162,9 +165,9 @@ SegmentAndFit <- function(
     models[[i]] <- best.models
   }
 
-  attr(x, "models") <- models
-  attr(x, "p") <- all.points
-  # class(x) <- c("HistogramFit", class(x))
+  histogram_obj$models <- models
+  histogram_obj$p <- all.points
+  # class(histogram_obj) <- c("HistogramFit", class(histogram_obj))
 
-  return(x)
+  return(histogram_obj)
 }
