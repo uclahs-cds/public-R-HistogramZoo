@@ -165,9 +165,13 @@ SegmentAndFit <- function(
     models[[i]] <- best.models
   }
 
-  histogram_obj$models <- models
-  histogram_obj$p <- all.points
-  # class(histogram_obj) <- c("HistogramFit", class(histogram_obj))
+  # Creating a HistogramFit object
+  res = list("models" = models, "p" = all.points,  "histogram.count.threshold" = histogram.count.threshold,
+             "eps" =  eps, "seed" = seed, "truncated.models" = truncated.models, "uniform.peak.threshold" = uniform.peak.threshold,
+             "uniform.peak.stepsize" = uniform.peak.stepsize, "remove.low.entropy" = remove.low.entropy, "min.gap.size" = min.gap.size,
+             "min.peak.size" = min.peak.size, "max.uniform" = max.uniform, "histogram.metric" = histogram.metric)
+  res = c(histogram_obj, res)
+  class(res) <- c("HistogramFit", class(histogram_obj))
 
-  return(histogram_obj)
+  return(res)
 }
