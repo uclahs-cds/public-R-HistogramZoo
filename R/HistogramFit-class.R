@@ -1,6 +1,6 @@
 #' Title
 #'
-#' @param x A HistogramFit object (results from running SegmentAndFit on a Histogram object) 
+#' @param x A HistogramFit object (results from running SegmentAndFit on a Histogram object)
 #'
 #' @return
 #' @export
@@ -18,6 +18,7 @@ print.HistogramFit = function(x){
   cat("\nParameters\n")
   cat("\teps: ", x$eps, "\n")
   cat("\tmetrics: ", paste0(x$histogram.metric, collapse = ", "), "\n")
+  cat("\tdistributions: ", paste0(x$distributions, collapse = ", "), "\n")
   cat("\tremove low entropy: ", x$remove.low.entropy, "\n")
   cat("\tmaximumize uniform fitting: ", x$max.uniform, "\n")
   cat("\ttruncated models: ", x$truncated.models, "\n")

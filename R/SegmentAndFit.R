@@ -42,6 +42,7 @@ find.consecutive.threshold = function(
 #' @param max.uniform TODO
 #' @param histogram.metric TODO
 #' @param min.peak.size TODO
+#' @param distributions TODO
 #'
 #' @return TODO
 #' @export
@@ -61,12 +62,14 @@ SegmentAndFit <- function(
   min.gap.size = 2,
   min.peak.size = 2,
   max.uniform = T,
-  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+  distributions = c("norm", "gamma", "unif")
   ) {
 
   # Checking types
   stopifnot(inherits(histogram_obj, "Histogram"))
   histogram.metric = match.arg(histogram.metric, several.ok = T)
+  distributions = match.arg(distributions, several.ok = T)
 
   # Extracting data
   x = histogram_obj$histogram_data
@@ -110,7 +113,7 @@ SegmentAndFit <- function(
     seg.len = seg.end - seg.start + 1
     bin.data = x[seg.start:seg.end]
 
-    dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models)
+    dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models, distr = distributions)
     dist.optim = lapply(dist.optim, function(y) {
       y$seg.start = seg.start
       y$seg.end = seg.end
@@ -169,7 +172,7 @@ SegmentAndFit <- function(
   res = list("models" = models, "p" = all.points,  "histogram.count.threshold" = histogram.count.threshold,
              "eps" =  eps, "seed" = seed, "truncated.models" = truncated.models, "uniform.peak.threshold" = uniform.peak.threshold,
              "uniform.peak.stepsize" = uniform.peak.stepsize, "remove.low.entropy" = remove.low.entropy, "min.gap.size" = min.gap.size,
-             "min.peak.size" = min.peak.size, "max.uniform" = max.uniform, "histogram.metric" = histogram.metric)
+             "min.peak.size" = min.peak.size, "max.uniform" = max.uniform, "histogram.metric" = histogram.metric, "distributions" = distributions)
   res = c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 
