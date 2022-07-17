@@ -17,7 +17,6 @@ results_columns = c(
 )
 
 extract_stats_from_models = function(model_list, model_name = "majority.vote"){
-  model_name = match.arg(model_name, c("majority.vote", names(model_list)))
   mod = model_list[[model_name]]
   list(
     "histogram_start" = mod$seg.start,
@@ -67,6 +66,7 @@ SummarizeResults.Histogram = function(
   # Error checking
   stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "Histogram"))
+  model_name = match.arg(model_name, c("majority.vote", result$histogram.metric))
 
   # Attributes of the result
   models = result$models
