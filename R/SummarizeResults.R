@@ -16,10 +16,10 @@ results_columns = c(
   "params"
 )
 
-extract.stats = function(models, peak.id){
-  mod = models$majority.vote
-  df = data.frame(
-    "peak_id" = peak.id,
+extract_stats_from_models = function(model_list, model_name = "majority.vote"){
+  model_name = match.arg(model_name, c("majority.vote", names(model_list)))
+  mod = model_list[[model_name]]
+  list(
     "histogram_start" = mod$seg.start,
     "histogram_end" = mod$seg.end,
     "value" = mod$value,
@@ -27,16 +27,27 @@ extract.stats = function(models, peak.id){
     "dist" = mod$dist,
     "params" = dput.str(mod$par)
   )
-  df
+}
+
+extract_peak_segments = function(iranges){
+  iranges_range = range(iranges)
+  list(
+    "start" = IRanges::start(iranges_range),
+    "end" = IRanges::end(iranges_range),
+    "interval_count" = length(iranges),
+    "interval_sizes" = paste0(IRanges::width(iranges), ",", collapse = ""),
+    "interval_starts" = paste0(IRanges::start(iranges) - IRanges::start(iranges_range) + 1, ",", collapse = "")
+  )
 }
 
 #' Formats results of SegmentAndFit
 #'
 #' @param result A Histogram object which have attributes 'models' and 'p' (i.e. the return object of running SegmentAndFit on a Histogram)
+#' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "majority.vote" if more than one metric was used to specify which model params to extract
 #'
 #' @return TODO: Describe columns of dataframe
 #' @export
-SummarizeResults = function(result){
+SummarizeResults = function(result, model_name){
   UseMethod('SummarizeResults')
 }
 
@@ -49,14 +60,13 @@ SummarizeResults = function(result){
 #'
 #' @examples
 SummarizeResults.Histogram = function(
-  result = NULL
+  result = NULL,
+  model_name = "majority.vote"
 ){
 
   # Error checking
+  stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "Histogram"))
-  if(is.null(results$models)){
-    stop("No models found. Please run SegmentAndFit first.")
-  }
 
   # Attributes of the result
   models = result$models
@@ -64,25 +74,15 @@ SummarizeResults.Histogram = function(
   interval_end = result$interval_end
   region_id = result$region_id
 
-  # Generating a results table
+  # Summarizing results
+  bins = IRanges::IRanges(start = interval_start, end = interval_end)
   results_table = lapply(seq_along(models), function(i){
-    extract.stats(models = models[[i]], peak.id = i)
+    stats = extract_stats_from_models(model_list = models[[i]], model_name = model_name)
+    coords = IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
+    coords = extract_peak_segments(coords)
+    c(stats, coords, list('peak_id' = i))
   })
   results_table = do.call('rbind.data.frame', results_table)
-
-  # Recovering coordinates for genes
-  bins = IRanges::IRanges(start = interval_start, end = interval_end)
-  bed.coords = apply(results_table, 1, function(peak){
-    coords.gr = IRanges::reduce(bins[peak['histogram_start']:peak['histogram_end']])
-    coords.gr = base1.to.base0(coords.gr)
-    coords.gr = bed6tobed12(coords.gr)
-    coords.gr
-  })
-  coords_table = do.call(c, bed.coords)
-  coords_table = data.frame(coords_table)
-  coords_table = subset(coords_table, select=-width)
-
-  results_table = cbind.data.frame(results_table, coords_table)
   results_table['region_id'] <- region_id
 
   # Reorder columns
@@ -98,14 +98,16 @@ SummarizeResults.Histogram = function(
 #' @return TODO
 #' @export
 SummarizeResults.GenomicHistogram = function(
-  result = NULL
+  result = NULL,
+  model_name = "majority.vote"
 ){
 
   # Error checking
+  stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "GenomicHistogram"))
 
   # Calling SummarizeResults.Histogram
-  results_table = SummarizeResults.Histogram(result)
+  results_table = SummarizeResults.Histogram(result, model_name)
 
   # Add chromosome and strand for GenomicHistogram
   results_table['chr'] <- results$chr
