@@ -16,7 +16,7 @@ results_columns = c(
   "params"
 )
 
-extract_stats_from_models = function(model_list, model_name = "majority.vote"){
+extract_stats_from_models = function(model_list, model_name = "consensus"){
   mod = model_list[[model_name]]
   list(
     "histogram_start" = mod$seg.start,
@@ -42,7 +42,7 @@ extract_peak_segments = function(iranges){
 #' Formats results of SegmentAndFit
 #'
 #' @param result A Histogram object which have attributes 'models' and 'p' (i.e. the return object of running SegmentAndFit on a Histogram)
-#' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "majority.vote" if more than one metric was used to specify which model params to extract
+#' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "consensus" if more than one metric was used to specify which model params to extract
 #'
 #' @return TODO: Describe columns of dataframe
 #' @export
@@ -60,13 +60,13 @@ SummarizeResults = function(result, model_name){
 #' @examples
 SummarizeResults.Histogram = function(
   result = NULL,
-  model_name = "majority.vote"
+  model_name = "consensus"
 ){
 
   # Error checking
   stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "Histogram"))
-  model_name = match.arg(model_name, c("majority.vote", result$histogram.metric))
+  model_name = match.arg(model_name, c("consensus", result$histogram.metric))
 
   # Attributes of the result
   models = result$models
@@ -99,7 +99,7 @@ SummarizeResults.Histogram = function(
 #' @export
 SummarizeResults.GenomicHistogram = function(
   result = NULL,
-  model_name = "majority.vote"
+  model_name = "consensus"
 ){
 
   # Error checking

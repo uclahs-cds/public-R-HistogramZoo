@@ -141,10 +141,9 @@ SegmentAndFit <- function(
     # Metric Voting
     metric.idx = sapply(dist.optim, `[[`, "metric")
     best.models = lapply(histogram.metric, function(met){
-      idx = which(metric.idx == met)
-      dist.optim.met = dist.optim[idx]
-      val = lapply(dist.optim.met, `[[`, "value")
-      dist.optim.met[which.min(val)]
+      metric_histograms = dist.optim[which(metric.idx == met)]
+      metric_fit = lapply(metric_histograms, `[[`, "value")
+      metric_histograms[which.min(metric_fit)]
     })
     best.models = unlist(best.models, recursive = F)
     dist.extract = sapply(best.models, `[[`, "dist")
@@ -155,7 +154,7 @@ SegmentAndFit <- function(
     } else {
       dist.majority = names(dist.vote)[1]
     }
-    best.models[['majority.vote']] = dist.optim[[paste0("jaccard.", dist.majority)]]
+    best.models[['consensus']] = dist.optim[[paste0("jaccard.", dist.majority)]]
 
     # Correcting for optimization via finding the minimum
     best.models = lapply(best.models, function(mod){
@@ -163,7 +162,9 @@ SegmentAndFit <- function(
       mod
     })
 
-    best.models[['majority.vote']]$metric = "Consensus"
+    best.models[['consensus']]$metric = "consensus"
+    names(best.models) = gsub("[.].*", "", names(best.models))
+
 
     models[[i]] <- best.models
   }
