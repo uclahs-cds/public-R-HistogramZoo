@@ -1,3 +1,11 @@
+#' Title
+#'
+#' @param x A HistogramFit object (results from running SegmentAndFit on a Histogram object) 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 print.HistogramFit = function(x){
 
   print.Histogram(x) # NextMethod?
