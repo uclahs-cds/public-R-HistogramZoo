@@ -21,8 +21,6 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    reshape2,
-    metap,
     S4Vectors,
     fitdistrplus,
     mixtools,
