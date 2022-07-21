@@ -29,6 +29,6 @@ test_that("generate.identifiers works", {
 
   id = generate.identifiers(granges)
   expect_length(id, 2)
-  expect_equal(id, c("chr1:3-4", "chr1:5-9"))
+  expect_equal(id, c("chr1:3-4:+", "chr1:5-9:+"))
 
 })
