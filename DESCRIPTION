@@ -31,14 +31,14 @@ Imports:
     isotone,
     stringr,
     IRanges,
-    GenomicRanges
+    GenomicRanges,
+    valr,
+    rtracklayer,
+    GenomeInfoDb
 Suggests:
     knitr,
     rmarkdown,
     testthat,
-    GenomeInfoDb,
-    valr,
-    scales,
-    rtracklayer
+    scales
 VignetteBuilder: knitr
 RoxygenNote: 7.2.0
