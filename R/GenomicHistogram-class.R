@@ -53,7 +53,7 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
   # Coercing values to the right thing
   strand = match.arg(strand)
 
-  if(length(x) > 0){
+  if(length(histogram_data) > 0){
     if( missing(interval_start) & missing(interval_end)){
       interval_start = interval_end = seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
@@ -91,8 +91,8 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
 
 #' Title
 #'
-#' @param x 
-#' @param i 
+#' @param x
+#' @param i
 #'
 #' @return
 #' @export
@@ -124,4 +124,3 @@ ReassignRegionID.GenomicHistogram = function(x, region_id){
 
   return(x)
 }
-
