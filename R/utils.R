@@ -23,16 +23,16 @@ reset.rownames <- function(x) {
 #' @return A data.frame with column: start and end representing the indices
 #'
 #' @examples \dontrun{
-#' index.to.start.end(c(1,5,10))
+#' index_to_start_end(c(1,5,10))
 #' }
 #'
 #' @export
-index.to.start.end <- function(p) {
-  n = length(p)
+index_to_start_end <- function(p) {
+  n <- length(p)
   if(n <= 1) {
     stop("Need more than 1 point to compute start/end")
   }
-  return.list = list(
+  return_list <- list(
     start = p[1:(n - 1)]
   )
   if(n == 2) {
@@ -40,7 +40,7 @@ index.to.start.end <- function(p) {
   } else {
     return.list = list(start = c(p[1],  p[2:(length(p)-1)]+1))
   }
-  return.list$end = c(p[2:length(p)])
+  return.list$end <- c(p[2:length(p)])
 
-  as.data.frame(return.list)
+  return( as.data.frame(return.list) )
 }

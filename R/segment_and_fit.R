@@ -92,7 +92,7 @@ segment_and_fit <- function(
       p.pairs <- remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min_peak_size) # remove.short.segment can also be used to filter min_peak_size, but doesn't extend to non remove low entropy cases
     } else {
       p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
-      p.pairs <- index.to.start.end(p)
+      p.pairs <- index_to_start_end(p)
     }
 
     p.pairs
