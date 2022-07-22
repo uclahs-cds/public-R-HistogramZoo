@@ -1,8 +1,8 @@
-find.stepfunction.chgpts = function(x){
-  chg.pts = which(diff(x) != 0)
-  chg.pts.plus = chg.pts+1
-  keep.chg.pts = (x[chg.pts] < x[chg.pts.plus])
-  c(chg.pts[keep.chg.pts], chg.pts.plus[!keep.chg.pts])
+find_stepfunction_chgpts = function(x){
+  change_points = which(diff(x) != 0)
+  change_points_plus = change_points+1
+  keep = (x[change_points] < x[change_points_plus])
+  return( c(change_points[keep], change_points_plus[!keep]) )
 }
 
 #' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
@@ -14,18 +14,18 @@ find.stepfunction.chgpts = function(x){
 #' @export
 #'
 #' @examples
-#' find.consecutive.threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
-#' find.consecutive.threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
-find.consecutive.threshold = function(
+#' find_consecutive_threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
+#' find_consecutive_threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
+find_consecutive_threshold = function(
   x,
   threshold = 0){
-  x.thresh = rle(x > threshold)
-  end.coords = cumsum(x.thresh$lengths)
-  start.coords = end.coords - x.thresh$lengths + 1
-  start.coords.above.threshold = start.coords[x.thresh$values]
-  end.coords.above.threshold = end.coords[x.thresh$values]
+  x_thresholded = rle(x > threshold)
+  end_coords = cumsum(x_thresholded$lengths)
+  start_coords = end_coords - x_thresholded$lengths + 1
+  start_coords_thresholded = start_coords[x_thresholded$values]
+  end_coords_thresholded = end_coords[x_thresholded$values]
 
-  list(start = start.coords.above.threshold, end = end.coords.above.threshold)
+  return(list(start = start_coords_thresholded, end = end_coords_thresholded))
 }
 
 #' segment_and_fit
@@ -75,9 +75,9 @@ segment_and_fit <- function(
   x <- histogram_obj$histogram_data
 
   # Change points
-  chgpts <- find.stepfunction.chgpts(x)
+  chgpts <- find_stepfunction_chgpts(x)
   # Looking for regions that surpass a hard count threshold
-  x.segs <- as.data.frame(find.consecutive.threshold(x, threshold = histogram_count_threshold))
+  x.segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
   x.segs <- x.segs[x.segs$start != x.segs$end,]
 
   all.points <- apply(x.segs, 1, function(segs) {
