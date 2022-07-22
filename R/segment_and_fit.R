@@ -122,7 +122,7 @@ segment_and_fit <- function(
 
     # Find the maximum uniform segment
     if(max_uniform & seg.len > uniform_peak_stepsize & seg.len > ceiling(uniform_peak_threshold*seg.len)){
-      max.unif.results <- find.uniform.segment(bin.data, metric = histogram_metric, threshold = uniform_peak_threshold, step.size = uniform_peak_stepsize, max.sd.size = 0)
+      max.unif.results <- identify_uniform_segment(bin.data, metric = histogram_metric, threshold = uniform_peak_threshold, step.size = uniform_peak_stepsize, max.sd.size = 0)
       # Use the maximum segment
       unif.segment <- unlist(max.unif.results[c('a', 'b')])
       bin.data.subset <- bin.data[unif.segment[1]:unif.segment[2]]

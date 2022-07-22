@@ -6,7 +6,7 @@
 #' @param step.size TODO
 #' @param max.sd.size TODO
 #' @export
-find.uniform.segment = function(
+identify_uniform_segment = function(
   x,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   threshold = 0.5,
@@ -17,11 +17,11 @@ find.uniform.segment = function(
   min.seg.size = ceiling(num.bins * threshold)
   metric.func = get(paste('histogram', metric, sep = "."))
 
-  p.unif = generate.unif(x)
+  p.unif = generate_uniform_distribution(x)
   res = lapply(seq(from = 1, to = num.bins - min.seg.size, by = step.size), function(a) {
     lapply(seq(from = min.seg.size + a, to = num.bins, by = step.size), function(b) {
       x.sub = x[a:b]
-      p.unif.sub = generate.unif(x.sub)
+      p.unif.sub = generate_uniform_distribution(x.sub)
       h.sub = x.sub / sum(x.sub)
 
       m = metric.func(h.sub, p.unif.sub)
