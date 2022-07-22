@@ -7,7 +7,7 @@
 #' @param distr TODO
 #' @export
 #' @importFrom DEoptim DEoptim
-fit.distributions.optim = function(
+fit_distributions = function(
   freq,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   truncated = FALSE,
