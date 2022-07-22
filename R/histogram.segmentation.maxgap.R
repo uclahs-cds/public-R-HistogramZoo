@@ -1,34 +1,41 @@
 
 # Uniform Generation
-generate.unif = function(x){
-  rep(1/length(x), length(x))
+generate_uniform_distribution = function(x){
+  return(
+    rep(1/length(x), length(x))
+  )
 }
 
-calc.prob.diff = function(h, p, a, b){
+calculate_probability_difference = function(h, p, a, b){
   interval = a:b
   # Round to prevent floating point issues
-  hab = round(sum(h[interval]), digits = 14)
-  pab = round(sum(p[interval]), digits = 14)
-  hab > pab
+  hab <- round(sum(h[interval]), digits = 14)
+  pab <- round(sum(p[interval]), digits = 14)
+  return(hab > pab)
 }
 
 # Meaningful interval
-meaningful.interval = function(h, p, a, b, N, L){
-  relative.entropy = rel.entropy(h, p, a, b)
-  prob.diff = calc.prob.diff(h, p, a, b)
-  c(mint = relative.entropy >= (1/N)*log(L*(L+1)/2) && prob.diff, entropy = relative.entropy)
+meaningful_interval = function(h, p, a, b, N, L){
+  rel_entropy <- relative_entropy(h, p, a, b)
+  prob_diff <- calculate_probability_difference(h, p, a, b)
+  return(
+    c(mint = rel_entropy >= (1/N)*log(L*(L+1)/2) && prob_diff,
+      entropy = rel_entropy)
+  )
 }
 
 # Meaningful gap
-meaningful.gap = function(h, p, a, b, N, L){
-  relative.entropy = rel.entropy(h, p, a, b)
-  if(is.na(relative.entropy)) relative.entropy = Inf
-  prob.diff = calc.prob.diff(h, p, a, b)
-  mgap = (relative.entropy >= (1/N)*log(L*(L+1)/2) && !prob.diff) || (all(h == 0))
-  c(mgap = mgap, entropy = relative.entropy)
+meaningful_gap = function(h, p, a, b, N, L){
+  rel_entropy <- relative_entropy(h, p, a, b)
+  if(is.na(rel_entropy)) rel_entropy <- Inf
+  prob_diff <- calculate_probability_difference(h, p, a, b)
+  mgap <- (rel_entropy >= (1/N)*log(L*(L+1)/2) && !prob_diff) || (all(h == 0))
+  return(
+    c(mgap = mgap, entropy = rel_entropy)
+  )
 }
 
-maximal.meaningful = function(x) {
+maximal_meaningful_interval = function(x) {
   curr.df = x
   max.intervals = data.frame()
   while(nrow(curr.df) > 0) {
@@ -65,9 +72,9 @@ find.all.meaningful.gap = function(x, change.points) {
   todo = todo[todo$end > todo$start,]
 
   mgap = do.call(rbind, lapply(1:nrow(todo), function(i) {
-    meaningful.gap(
+    meaningful_gap(
       h = x/sum(x),
-      p = generate.unif(x),
+      p = generate_uniform_distribution(x),
       a = todo$start[i],
       b = todo$end[i],
       N = sum(x),
@@ -83,7 +90,7 @@ find.all.meaningful.gap = function(x, change.points) {
   seg.gap.data = df[df$mgap > 0 & !is.na(df$mgap), ]
   # seg.gap.data$index = 1:nrow(seg.gap.data)
 
-  maximal.meaningful(seg.gap.data)
+  maximal_meaningful_interval(seg.gap.data)
 }
 
 #' Finds the meaningful gaps between the points in s
@@ -101,7 +108,7 @@ meaningful.gaps.local = function(x, seg.points, change.points, min.gap = 2) {
     x.sub = x[seg.points[i-1]:seg.points[i]]
     chg.pts = change.points[change.points >= seg.points[i-1] & change.points <= seg.points[i]] - seg.points[i-1] + 1
 
-    max.gaps = find.all.meaningful.gap(x.sub, chg.pts)
+    max.gaps = find.all.meaningful_gap(x.sub, chg.pts)
 
     if(nrow(max.gaps) > 0) {
       max.gaps[, c('start','end')] <- max.gaps[, c('start','end')] + seg.points[i-1] - 1
