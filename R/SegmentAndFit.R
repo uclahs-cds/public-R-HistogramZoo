@@ -28,153 +28,153 @@ find.consecutive.threshold = function(
   list(start = start.coords.above.threshold, end = end.coords.above.threshold)
 }
 
-#' SegmentAndFit
+#' segment_and_fit
 #'
-#' @param x a Histogram or HistogramList object
-#' @param histogram.count.threshold TODO
+#' @param histogram_obj a Histogram or HistogramList object
+#' @param histogram_count_threshold TODO
 #' @param eps TODO
 #' @param seed TODO
-#' @param truncated.models TODO
-#' @param uniform.peak.threshold TODO
-#' @param uniform.peak.stepsize TODO
-#' @param remove.low.entropy TODO
-#' @param min.gap.size TODO
-#' @param max.uniform TODO
-#' @param histogram.metric TODO
-#' @param min.peak.size TODO
+#' @param truncated_models TODO
+#' @param uniform_peak_threshold TODO
+#' @param uniform_peak_stepsize TODO
+#' @param remove_low_entropy TODO
+#' @param min_gap_size TODO
+#' @param max_uniform TODO
+#' @param histogram_metric TODO
+#' @param min_peak_size TODO
 #' @param distributions TODO
 #'
 #' @return TODO
 #' @export
 #' @example \dontrun{
 #' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
-#' res = SegmentAndFit(x)
+#' res = segment_and_fit(x)
 #' }
-SegmentAndFit <- function(
+segment_and_fit <- function(
   histogram_obj,
-  histogram.count.threshold = 0,
+  histogram_count_threshold = 0,
   eps = 1,
   seed = NULL,
-  truncated.models = FALSE,
-  uniform.peak.threshold = 0.75,
-  uniform.peak.stepsize = 5,
-  remove.low.entropy = T,
-  min.gap.size = 2,
-  min.peak.size = 2,
-  max.uniform = T,
-  histogram.metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+  truncated_models = FALSE,
+  uniform_peak_threshold = 0.75,
+  uniform_peak_stepsize = 5,
+  remove_low_entropy = T,
+  min_gap_size = 2,
+  min_peak_size = 2,
+  max_uniform = T,
+  histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   distributions = c("norm", "gamma", "unif")
   ) {
 
   # Checking types
   stopifnot(inherits(histogram_obj, "Histogram"))
-  histogram.metric = match.arg(histogram.metric, several.ok = T)
-  distributions = match.arg(distributions, several.ok = T)
+  histogram_metric <- match.arg(histogram_metric, several.ok = T)
+  distributions <- match.arg(distributions, several.ok = T)
 
   # Extracting data
-  x = histogram_obj$histogram_data
+  x <- histogram_obj$histogram_data
 
   # Change points
-  chgpts = find.stepfunction.chgpts(x)
+  chgpts <- find.stepfunction.chgpts(x)
   # Looking for regions that surpass a hard count threshold
-  x.segs = as.data.frame(find.consecutive.threshold(x, threshold = histogram.count.threshold))
-  x.segs = x.segs[x.segs$start != x.segs$end,]
+  x.segs <- as.data.frame(find.consecutive.threshold(x, threshold = histogram_count_threshold))
+  x.segs <- x.segs[x.segs$start != x.segs$end,]
 
-  all.points = apply(x.segs, 1, function(segs) {
-    p.init = unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
-    p.init = sort(unique(p.init)) # meaningful gaps local also needs p.init to be sorted so temporarily adding this back
-    p = ftc(x, p.init, eps)
+  all.points <- apply(x.segs, 1, function(segs) {
+    p.init <- unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
+    p.init <- sort(unique(p.init)) # meaningful gaps local also needs p.init to be sorted so temporarily adding this back
+    p <- ftc(x, p.init, eps)
 
     # Max Gap
-    if(remove.low.entropy) {
-      mgaps =  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min.gap.size)
-      p = p[(abs(p - segs['start']) > min.peak.size & abs(p - segs['end']) > min.peak.size) | p %in% segs]
-      p.pairs = remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min.peak.size) # remove.short.segment can also be used to filter min.peak.size, but doesn't extend to non remove low entropy cases
+    if(remove_low_entropy) {
+      mgaps <-  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min_gap_size)
+      p <- p[(abs(p - segs['start']) > min_peak_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
+      p.pairs <- remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min_peak_size) # remove.short.segment can also be used to filter min_peak_size, but doesn't extend to non remove low entropy cases
     } else {
-      p = p[(abs(p - segs['start']) > min.gap.size & abs(p - segs['end']) > min.peak.size) | p %in% segs]
-      p.pairs = index.to.start.end(p)
+      p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
+      p.pairs <- index.to.start.end(p)
     }
 
     p.pairs
   })
 
   # Combine the results from each segment
-  all.points = do.call('rbind.data.frame', all.points)
-  all.points = all.points[(all.points$end - all.points$start + 1) > min.peak.size,, drop = FALSE] # Current solution for min.peak.size, open to alternatives
+  all.points <- do.call('rbind.data.frame', all.points)
+  all.points <- all.points[(all.points$end - all.points$start + 1) > min_peak_size,, drop = FALSE] # Current solution for min_peak_size, open to alternatives
   rownames(all.points) <- NULL # use reset.rownames?
 
   # Fitting different models
-  models = list()
+  models <- list()
   set.seed(seed)
   for(i in seq_len(nrow(all.points))) {
-    seg = all.points[i, ]
-    seg.start = seg[['start']]
-    seg.end = seg[['end']]
-    seg.len = seg.end - seg.start + 1
-    bin.data = x[seg.start:seg.end]
+    seg <- all.points[i, ]
+    seg.start <- seg[['start']]
+    seg.end <- seg[['end']]
+    seg.len <- seg.end - seg.start + 1
+    bin.data <- x[seg.start:seg.end]
 
-    dist.optim = fit.distributions.optim(bin.data, metric = histogram.metric, truncated = truncated.models, distr = distributions)
-    dist.optim = lapply(dist.optim, function(y) {
-      y$seg.start = seg.start
-      y$seg.end = seg.end
+    dist.optim <- fit.distributions.optim(bin.data, metric = histogram_metric, truncated = truncated_models, distr = distributions)
+    dist.optim <- lapply(dist.optim, function(y) {
+      y$seg.start <- seg.start
+      y$seg.end <- seg.end
       y
     })
 
     # Find the maximum uniform segment
-    if(max.uniform & seg.len > uniform.peak.stepsize & seg.len > ceiling(uniform.peak.threshold*seg.len)){
-      max.unif.results = find.uniform.segment(bin.data, metric = histogram.metric, threshold = uniform.peak.threshold, step.size = uniform.peak.stepsize, max.sd.size = 0)
+    if(max_uniform & seg.len > uniform_peak_stepsize & seg.len > ceiling(uniform_peak_threshold*seg.len)){
+      max.unif.results <- find.uniform.segment(bin.data, metric = histogram_metric, threshold = uniform_peak_threshold, step.size = uniform_peak_stepsize, max.sd.size = 0)
       # Use the maximum segment
-      unif.segment = unlist(max.unif.results[c('a', 'b')])
-      bin.data.subset = bin.data[unif.segment[1]:unif.segment[2]]
+      unif.segment <- unlist(max.unif.results[c('a', 'b')])
+      bin.data.subset <- bin.data[unif.segment[1]:unif.segment[2]]
       # Fit uniform distribution on maximum uniform segment
-      dist.optim.subset = fit.distributions.optim(bin.data.subset, metric = histogram.metric, truncated = FALSE, distr = "unif")
+      dist.optim.subset <- fit.distributions.optim(bin.data.subset, metric = histogram_metric, truncated = FALSE, distr = "unif")
       # Adjust the segment starts from the shifted max uniform segment
-      dist.optim.subset = lapply(dist.optim.subset, function(y) {
-        y$seg.start = unif.segment[1] + seg.start - 1
-        y$seg.end = unif.segment[2] + seg.start - 1
-        y$dist = "unif"
+      dist.optim.subset <- lapply(dist.optim.subset, function(y) {
+        y$seg.start <- unif.segment[1] + seg.start - 1
+        y$seg.end <- unif.segment[2] + seg.start - 1
+        y$dist <- "unif"
         y
       })
       for(munif in names(dist.optim.subset)){dist.optim[[munif]] <- dist.optim.subset[[munif]]}
     }
 
     # Metric Voting
-    metric.idx = sapply(dist.optim, `[[`, "metric")
-    best.models = lapply(histogram.metric, function(met){
-      metric_histograms = dist.optim[which(metric.idx == met)]
-      metric_fit = lapply(metric_histograms, `[[`, "value")
-      metric_histograms[which.min(metric_fit)]
+    metric.idx <- sapply(dist.optim, `[[`, "metric")
+    best.models <- lapply(histogram_metric, function(met){
+      metric_histograms <- dist.optim[which(metric.idx == met)]
+      metric_fit <- lapply(metric_histograms, `[[`, "value")
+      return( metric_histograms[which.min(metric_fit)] )
     })
-    best.models = unlist(best.models, recursive = F)
-    dist.extract = sapply(best.models, `[[`, "dist")
-    dist.vote = sort(table(dist.extract), decreasing = T)
+    best.models <- unlist(best.models, recursive = F)
+    dist.extract <- sapply(best.models, `[[`, "dist")
+    dist.vote <- sort(table(dist.extract), decreasing = T)
     if(length(dist.vote) > 1 & dist.vote[1] == dist.vote[2]){
-       mets = sapply(best.models, `[[`, "metric")
-       dist.majority = dist.extract[which(mets == "jaccard")]
+       mets <- sapply(best.models, `[[`, "metric")
+       dist.majority <- dist.extract[which(mets == "jaccard")]
     } else {
-      dist.majority = names(dist.vote)[1]
+      dist.majority <- names(dist.vote)[1]
     }
-    best.models[['consensus']] = dist.optim[[paste0("jaccard.", dist.majority)]]
+    best.models[['consensus']] <- dist.optim[[paste0("jaccard.", dist.majority)]]
 
     # Correcting for optimization via finding the minimum
-    best.models = lapply(best.models, function(mod){
+    best.models <- lapply(best.models, function(mod){
       if(mod$metric %in% c("jaccard", "intersection")){ mod$value = 1 - mod$value }
       mod
     })
 
-    best.models[['consensus']]$metric = "consensus"
-    names(best.models) = gsub("[.].*", "", names(best.models))
+    best.models[['consensus']]$metric <- "consensus"
+    names(best.models) <- gsub("[.].*", "", names(best.models))
 
 
     models[[i]] <- best.models
   }
 
   # Creating a HistogramFit object
-  res = list("models" = models, "p" = all.points,  "histogram.count.threshold" = histogram.count.threshold,
-             "eps" =  eps, "seed" = seed, "truncated.models" = truncated.models, "uniform.peak.threshold" = uniform.peak.threshold,
-             "uniform.peak.stepsize" = uniform.peak.stepsize, "remove.low.entropy" = remove.low.entropy, "min.gap.size" = min.gap.size,
-             "min.peak.size" = min.peak.size, "max.uniform" = max.uniform, "histogram.metric" = histogram.metric, "distributions" = distributions)
-  res = c(histogram_obj, res)
+  res <- list("models" = models, "p" = all.points,  "histogram_count_threshold" = histogram_count_threshold,
+             "eps" =  eps, "seed" = seed, "truncated_models" = truncated_models, "uniform_peak_threshold" = uniform_peak_threshold,
+             "uniform_peak_stepsize" = uniform_peak_stepsize, "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size,
+             "min_peak_size" = min_peak_size, "max_uniform" = max_uniform, "histogram_metric" = histogram_metric, "distributions" = distributions)
+  res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 
   return(res)
