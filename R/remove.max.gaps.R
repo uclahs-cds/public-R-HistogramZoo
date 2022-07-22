@@ -6,7 +6,7 @@
 #'
 #' @return TODO
 #' @export
-remove.max.gaps.agnostic = function(p, max.gaps, remove.short.segment = 0) {
+remove_max_gaps = function(p, max.gaps, remove.short.segment = 0) {
   # Maybe move this out of the function?
   start.end.points = index_to_start_end(p)
   if(nrow(max.gaps) == 0) {

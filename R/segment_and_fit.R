@@ -89,7 +89,7 @@ segment_and_fit <- function(
     if(remove_low_entropy) {
       mgaps <-  meaningful.gaps.local(x = x, seg.points = p, change.points = p.init, min.gap = min_gap_size)
       p <- p[(abs(p - segs['start']) > min_peak_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
-      p.pairs <- remove.max.gaps.agnostic(p = p, max.gaps = mgaps, remove.short.segment = min_peak_size) # remove.short.segment can also be used to filter min_peak_size, but doesn't extend to non remove low entropy cases
+      p.pairs <- remove_max_gaps(p = p, max.gaps = mgaps, remove.short.segment = min_peak_size) # remove.short.segment can also be used to filter min_peak_size, but doesn't extend to non remove low entropy cases
     } else {
       p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
       p.pairs <- index_to_start_end(p)
