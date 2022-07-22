@@ -47,7 +47,7 @@ validate_GenomicHistogram = function(x){
 #' @export
 #'
 #' @examples
-#' x = GenomicHistogram(x = runif(10), interval_start = 1:10, interval_end = 1:10, chr = "chr1", strand = "+")
+#' x = GenomicHistogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 1:10, chr = "chr1", strand = "+")
 GenomicHistogram = function(histogram_data = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
 
   # Coercing values to the right thing
