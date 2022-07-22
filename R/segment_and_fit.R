@@ -1,7 +1,7 @@
 find_stepfunction_chgpts = function(x){
-  change_points = which(diff(x) != 0)
-  change_points_plus = change_points+1
-  keep = (x[change_points] < x[change_points_plus])
+  change_points <- which(diff(x) != 0)
+  change_points_plus <- change_points+1
+  keep <- (x[change_points] < x[change_points_plus])
   return( c(change_points[keep], change_points_plus[!keep]) )
 }
 
@@ -19,11 +19,11 @@ find_stepfunction_chgpts = function(x){
 find_consecutive_threshold = function(
   x,
   threshold = 0){
-  x_thresholded = rle(x > threshold)
-  end_coords = cumsum(x_thresholded$lengths)
-  start_coords = end_coords - x_thresholded$lengths + 1
-  start_coords_thresholded = start_coords[x_thresholded$values]
-  end_coords_thresholded = end_coords[x_thresholded$values]
+  x_thresholded <- rle(x > threshold)
+  end_coords <- cumsum(x_thresholded$lengths)
+  start_coords <- end_coords - x_thresholded$lengths + 1
+  start_coords_thresholded <- start_coords[x_thresholded$values]
+  end_coords_thresholded <- end_coords[x_thresholded$values]
 
   return(list(start = start_coords_thresholded, end = end_coords_thresholded))
 }
