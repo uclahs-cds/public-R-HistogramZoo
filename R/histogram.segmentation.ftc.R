@@ -7,7 +7,7 @@
 #' @return A vector representing the number observations from the minimum observed value to the maximum observed value
 #'
 #' @export
-obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
+observations_to_histogram = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
   a = floor(min(x))-1
   b = ceiling(max(x))
   breaks = a:b
@@ -30,7 +30,7 @@ obs.to.int.hist = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
 #' @param p TODO
 #' @param a interval left endpoint
 #' @param b interval right endpoint
-rel.entropy = function(h, p, a, b) {
+relative_entropy = function(h, p, a, b) {
   interval = a:b
   # Round to prevent floating point issues
   hab = round(sum(h[interval]), digits = 14)
@@ -63,7 +63,7 @@ grenader = function(x, increasing = T){
 #' @param increasing Should the Grenader estimator be increasing or descreasing?
 #'
 #' @export
-maximum.entropy = function(x, s = NULL, increasing = TRUE) {
+maximum_entropy = function(x, s = NULL, increasing = TRUE) {
   N = ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s = 1:length(x)}
   L = length(s)
@@ -72,22 +72,22 @@ maximum.entropy = function(x, s = NULL, increasing = TRUE) {
   h = x/N
   p = grenader(x, increasing)
 
-  max.rel.entropy = -Inf
+  max.relative_entropy = -Inf
   for(a in 1:L) {
     for(b in a:L) {
-      max.rel.entropy = max(max.rel.entropy, rel.entropy(h, p, s[a], s[b]), na.rm = TRUE)
+      max.relative_entropy = max(max.relative_entropy, relative_entropy(h, p, s[a], s[b]), na.rm = TRUE)
     }
   }
-  max.rel.entropy
+  max.relative_entropy
 }
 
 # Compute the monotone cost,
-monotone.cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
-  max.rel.entropy = maximum.entropy(x, s, increasing)
+monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
+  max.relative_entropy = maximum_entropy(x, s, increasing)
   N = sum(x)
   L = length(x)
 
-  max.rel.entropy * N - log(L * (L + 1) / 2 * eps)
+  max.relative_entropy * N - log(L * (L + 1) / 2 * eps)
 }
 
 #' Fine-to-coarse segmentation algorithm
@@ -132,8 +132,8 @@ ftc = function(x, s = NULL, eps = 1) {
       inc.s = s.fixed[s.fixed >= s[i] & s.fixed <= s[i+1]] - s[i] + 1
       dec.int = s[i+1]:s[i+2]
       dec.s = s.fixed[s.fixed >= s[i+1] & s.fixed <= s[i+2]] - s[i+1] + 1
-      cost_i = monotone.cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
-      cost_d = monotone.cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
+      cost_i = monotone_cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
+      cost_d = monotone_cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
       cost[i] = min(cost_i, cost_d)
     }
     # Removing minimum cost
@@ -147,5 +147,5 @@ ftc = function(x, s = NULL, eps = 1) {
   }
 
   # Return the final list of minima
-  s
+  return(s)
 }
