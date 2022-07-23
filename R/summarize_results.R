@@ -24,7 +24,7 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
     "value" = mod$value,
     "metric" = mod$metric,
     "dist" = mod$dist,
-    "params" = dput.str(mod$par)
+    "params" = dput_str(mod$par)
   )
 }
 

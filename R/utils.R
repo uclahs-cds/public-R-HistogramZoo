@@ -1,29 +1,38 @@
 #' Returns the group matches from a regular expression on a vector
 #' @param x the vector we want to match on
 #' @param pattern regular expression with groups
-str.match <- function(x, pattern) {
-  regmatches(x, regexec(pattern, x));
+str_match <- function(x, pattern) {
+  return(
+    regmatches(x, regexec(pattern, x)) 
+  )
 }
 
 # Return a string representation of an object
-dput.str <- function(x) {
-  paste0(utils::capture.output(dput(x)), collapse = " ")
+dput_str <- function(x) {
+  return(
+    paste0(utils::capture.output(dput(x)), collapse = " ")
+  )
 }
 
 # Reset rownames
-reset.rownames <- function(x) {
+reset_rownames <- function(x) {
   rownames(x) <- NULL
-  x
+  return(x)
 }
 
-#' Convert a vector of points into a list of start/end points
+#' Convert a vector of points into a data.frame of start/end points representing
+#' disjoint intervals
 #'
-#' @param p a vector of indices
+#' @param p integer, a vector of points to be broken up into intervals
+#' @param right logical, whether the points should represent interval starts 
+#' (FALSE) or interval ends (TRUE), default TRUE
 #'
-#' @return A data.frame with column: start and end representing the indices
+#' @return A data.frame with column: start and end representing the start and
+#' end points of the intervals
 #'
 #' @examples \dontrun{
 #' index_to_start_end(c(1,5,10))
+#' index_to_start_end(c(1,5,10), right = FALSE)
 #' }
 #'
 #' @export

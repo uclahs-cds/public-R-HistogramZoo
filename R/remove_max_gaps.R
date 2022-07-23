@@ -43,7 +43,7 @@ remove_max_gaps = function(p, max.gaps, remove.short.segment = 0) {
     list(start = p.seq[1], end = p.seq[length(p.seq)])
   })
 
-  reset.rownames(
+  reset_rownames(
     do.call('rbind.data.frame', new.p.start.end)
   )
 }
