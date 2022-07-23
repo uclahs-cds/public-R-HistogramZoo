@@ -59,7 +59,7 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
 
   if(length(histogram_data) > 0){
     if( missing(interval_start) & missing(interval_end)){
-      interval_start <- interval_end = seq(1, length(histogram_data), 1)
+      interval_start <- interval_end <- seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
       interval_start <- interval_end
     } else if (missing(interval_end)){
