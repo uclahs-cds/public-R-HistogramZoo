@@ -1,28 +1,3 @@
-#' Take a vector of values and get the histogram for integer breaks
-#'
-#' @param x A vector of integer observations
-#' @param add.zero.endpoints Should the left and right side be padded by 1? This will make one bin zero on each side.
-#' @param as.df Should a dataframe be returned? Default FALSE (e.g return a named vector)
-#'
-#' @return A vector representing the number observations from the minimum observed value to the maximum observed value
-#'
-#' @export
-observations_to_histogram = function(x, add.zero.endpoints = TRUE, as.df = FALSE) {
-  a = floor(min(x))-1
-  b = ceiling(max(x))
-  breaks = a:b
-  if(add.zero.endpoints) breaks = c(a - 1, breaks, b + 1)
-  rtn = table(cut(x, breaks = breaks))
-  names(rtn) <- breaks[2:length(breaks)]
-  # Convert from table to named vector
-  rtn <- unlist(as.list(rtn))
-  if(as.df) {
-    rtn <- as.data.frame(rtn)
-    colnames(rtn) <- c("x", "Freq")
-    rtn$x <- as.integer(as.character(rtn$x))
-  }
-  rtn
-}
 
 #' Kullback-Leibler divergence (Relative Entropy)
 #'
