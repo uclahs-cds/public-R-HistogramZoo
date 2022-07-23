@@ -1,3 +1,5 @@
+context("remove_max_gaps")
+
 test_that("remove_max_gaps works a single segment", {
   p = c(3, 8)
   mgaps = data.frame("start" = c(3,7), "end" = c(4, 8))
