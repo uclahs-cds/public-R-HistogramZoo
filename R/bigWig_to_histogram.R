@@ -1,4 +1,4 @@
-#' Imports bigWig file and generates histograms
+#' Imports a single bigWig file and generates histograms
 #'
 #' @param filename Name of bigwig file for import
 #' @param strand The strand of bigwig file from which the data originates. Default ".". If strand is "+" or "-", the strand will also be used to select regions of matching strand.
@@ -8,7 +8,7 @@
 #' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram
 #' @param ... Additional parameters to be passed into GTF_to_GRangesList
 #'
-#' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
+#' @return A list consisting of GenomicHistograms
 #'
 #' @examples \dontrun{
 #' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
