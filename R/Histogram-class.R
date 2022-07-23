@@ -64,7 +64,7 @@ validate_Histogram = function(x){
     stop("region_id must have length 1.", call. = FALSE)
   }
 
-  x
+  return(x)
 }
 
 # helper
@@ -133,10 +133,10 @@ Histogram = function(histogram_data = double(), interval_start = integer(), inte
 #' @examples
 print.Histogram = function(x){
 
-  histogram_data = x$histogram_data
-  region_id = x$region_id
-  interval_start = x$interval_start
-  interval_end = x$interval_end
+  histogram_data <- x$histogram_data
+  region_id <- x$region_id
+  interval_start <- x$interval_start
+  interval_end <- x$interval_end
 
   # Base case
   cat("Region: ", region_id, "\n")
@@ -145,25 +145,25 @@ print.Histogram = function(x){
   if(length(histogram_data) > 10){
 
     # Intervals
-    intervals_begin = ifelse(
+    intervals_begin <- ifelse(
       interval_start[1:5] == interval_end[1:5],
       interval_start[1:5],
       paste0(interval_start[1:5], "-", interval_end[1:5]))
 
-    intervals_finish = ifelse(
+    intervals_finish <- ifelse(
       tail(interval_start, 5) == tail(interval_end, 5),
       tail(interval_start, 5),
       paste0(tail(interval_start, 5), "-", tail(interval_end, 5))
     )
-    x_start = as.character(formatC(histogram_data[1:5], digits = 2))
-    x_end = as.character(formatC(tail(histogram_data, 5), digits = 2))
+    x_start <- as.character(formatC(histogram_data[1:5], digits = 2))
+    x_end <- as.character(formatC(tail(histogram_data, 5), digits = 2))
 
     # Spacing
-    spacing = max(nchar(c(intervals_begin, intervals_finish, x_start, x_end)))
-    intervals_begin = stringr::str_pad(intervals_begin, width = spacing)
-    intervals_finish = stringr::str_pad(intervals_finish, width = spacing)
-    x_start = stringr::str_pad(x_start, width = spacing)
-    x_end = stringr::str_pad(x_end, width = spacing)
+    spacing <- max(nchar(c(intervals_begin, intervals_finish, x_start, x_end)))
+    intervals_begin <- stringr::str_pad(intervals_begin, width = spacing)
+    intervals_finish <- stringr::str_pad(intervals_finish, width = spacing)
+    x_start <- stringr::str_pad(x_start, width = spacing)
+    x_end <- stringr::str_pad(x_end, width = spacing)
 
     # Printing
     cat(intervals_begin, "...", intervals_finish, "\n")
@@ -172,21 +172,21 @@ print.Histogram = function(x){
   } else {
 
     # Intervals
-    intervals = ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
-    intervals = as.character(intervals)
+    intervals <- ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
+    intervals <- as.character(intervals)
 
     # Spacing
-    x_full = as.character(formatC(histogram_data, digits = 2))
-    spacing = max(nchar(c(intervals, x_full)))
-    intervals = stringr::str_pad(intervals, width = spacing)
-    x_full = stringr::str_pad(x_full, width = spacing)
+    x_full <- as.character(formatC(histogram_data, digits = 2))
+    spacing <- max(nchar(c(intervals, x_full)))
+    intervals <- stringr::str_pad(intervals, width = spacing)
+    x_full <- stringr::str_pad(x_full, width = spacing)
 
     # Printing
     cat(intervals, "\n")
     cat(x_full, "\n")
   }
 
-  invisible(x)
+  return(invisible(x))
 }
 
 #' Title

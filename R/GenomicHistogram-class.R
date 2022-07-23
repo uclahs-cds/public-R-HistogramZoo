@@ -7,14 +7,16 @@ new_GenomicHistogram = function(histogram_data = NULL, interval_start = NULL, in
   stopifnot(is.character(strand))
 
   # Creating object
-  new_Histogram(
-    histogram_data = histogram_data,
-    interval_start = interval_start,
-    interval_end = interval_end,
-    region_id = region_id,
-    chr = chr,
-    strand = strand,
-    class = "GenomicHistogram"
+  return(
+    new_Histogram(
+      histogram_data = histogram_data,
+      interval_start = interval_start,
+      interval_end = interval_end,
+      region_id = region_id,
+      chr = chr,
+      strand = strand,
+      class = "GenomicHistogram"
+    )
   )
 }
 
@@ -22,7 +24,7 @@ new_GenomicHistogram = function(histogram_data = NULL, interval_start = NULL, in
 validate_GenomicHistogram = function(x){
 
   # Attributes
-  chr = x$chr
+  chr <- x$chr
 
   # Validate
   # 1. chr is of length 1
@@ -31,7 +33,9 @@ validate_GenomicHistogram = function(x){
   }
 
   # 2. validate_Histogram passes
-  validate_Histogram(x)
+  return(
+    validate_Histogram(x)
+  )
 }
 
 # helper
@@ -51,41 +55,52 @@ validate_GenomicHistogram = function(x){
 GenomicHistogram = function(histogram_data = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
 
   # Coercing values to the right thing
-  strand = match.arg(strand)
+  strand <- match.arg(strand)
 
   if(length(histogram_data) > 0){
     if( missing(interval_start) & missing(interval_end)){
-      interval_start = interval_end = seq(1, length(histogram_data), 1)
+      interval_start <- interval_end = seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
-      interval_start = interval_end
+      interval_start <- interval_end
     } else if (missing(interval_end)){
-      interval_end = interval_start
+      interval_end <- interval_start
     }
   }
 
   if (!is.double(histogram_data)) {
-    histogram_data = as.double(histogram_data)
+    histogram_data <- as.double(histogram_data)
   }
   if (!is.integer(interval_start)){
-    interval_start = as.integer(interval_start)
+    interval_start <- as.integer(interval_start)
   }
   if (!is.integer(interval_end)){
-    interval_end = as.integer(interval_end)
+    interval_end <- as.integer(interval_end)
   }
   if(!is.character(chr)){
-    chr = as.character(chr)
+    chr <- as.character(chr)
   }
 
   # Region ID
   if( missing(region_id) & length(histogram_data) > 0 ){
-    region_id = paste0(chr, ":", interval_start[1], "-", interval_end[length(histogram_data)], ":", strand)
+    region_id <- paste0(chr, ":", interval_start[1], "-", interval_end[length(histogram_data)], ":", strand)
   }
   if(!is.character(region_id)){
-    region_id = as.character(region_id)
+    region_id <- as.character(region_id)
   }
 
   # Validate and return object
-  validate_GenomicHistogram(new_GenomicHistogram(histogram_data = histogram_data, interval_start = interval_start, interval_end = interval_end, chr = chr, strand = strand, region_id = region_id))
+  return(
+    validate_GenomicHistogram(
+      new_GenomicHistogram(
+        histogram_data = histogram_data, 
+        interval_start = interval_start, 
+        interval_end = interval_end, 
+        chr = chr, 
+        strand = strand, 
+        region_id = region_id
+      )
+    )
+  )
 
 }
 
@@ -108,16 +123,25 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
     strand = x$strand)
 }
 
+#' Title
+#'
+#' @param x 
+#' @param region_id 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 reassign_region_id.GenomicHistogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))
 
   # Creating a region id
   if(missing(region_id) & length(x$histogram_data) > 0){
-    region_id = paste0(x$chr, ":", x$interval_start[1], "-", x$interval_end[length(x$histogramm_data)], ":", x$strand)
+    region_id <- paste0(x$chr, ":", x$interval_start[1], "-", x$interval_end[length(x$histogramm_data)], ":", x$strand)
   }
   if(!is.character(region_id)){
-    region_id = as.character(region_id)
+    region_id <- as.character(region_id)
   }
 
   x$region_id <- region_id
