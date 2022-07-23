@@ -25,7 +25,7 @@ genome_BED_to_histogram = function(
     segs = valr::read_bed( filename, n_fields = n_fields, comment = "#")
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs.gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
-    segs.gr = base0.to.base1(segs.gr)
+    segs.gr = base0_to_base1(segs.gr)
     segs.gr = GenomicRanges::reduce(segs.gr)
     segs.gr
   })
@@ -34,13 +34,13 @@ genome_BED_to_histogram = function(
 
   # Loading regions
   if(!is.null(regions)){
-    ids = if(!is.null(regions$name)) regions$name else generate.identifiers(regions)
+    ids = if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
     regions = S4Vectors::split(regions, f = ids)
   } else if(!is.null(gtf)){
     regions = GTF_to_GRangesList(gtf = gtf, ...)
   } else {
     regions = GenomicRanges::reduce(peaks.gr)
-    ids = generate.identifiers(regions)
+    ids = generate_identifiers(regions)
     regions = S4Vectors::split(regions, f = ids)
   }
 

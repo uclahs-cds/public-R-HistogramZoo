@@ -38,7 +38,7 @@ transcript_BED_to_histogram = function(
     segs = valr::read_bed( filename, n_fields = n_fields, comment = "#")
     if(n_fields == 12){ segs = valr::bed12_to_exons( segs ) }
     segs_gr = GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
-    segs_gr = base0.to.base1(segs_gr)
+    segs_gr = base0_to_base1(segs_gr)
     segs_gr = S4Vectors::split(segs_gr, f = segs_gr$name)
     segs_gr = GenomicRanges::reduce(segs_gr)
     unlist(segs_gr)

@@ -47,7 +47,7 @@ bigWig_to_histogram = function(
     if(strand %in% c("+", "-")){
       regions = regions[GenomicRanges::strand(regions) == strand]
     }
-    ids = if(!is.null(regions$name)) regions$name else generate.identifiers(regions)
+    ids = if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
     regions = S4Vectors::split(regions, f = ids)
   } else if(!is.null(gtf)){
     regions = GTF_to_GRangesList(
@@ -56,7 +56,7 @@ bigWig_to_histogram = function(
       ...)
   } else {
     regions = GenomicRanges::reduce(bigwig_gr)
-    ids = generate.identifiers(regions)
+    ids = generate_identifiers(regions)
     regions = S4Vectors::split(regions, f = ids)
   }
 
