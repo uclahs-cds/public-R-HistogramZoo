@@ -27,20 +27,32 @@ reset.rownames <- function(x) {
 #' }
 #'
 #' @export
-index_to_start_end <- function(p) {
+index_to_start_end <- function(p, right = TRUE) {
+
+  # Error checking
+  stopifnot(is.numeric(p))
+  stopifnot(is.logical(right))
+
+  # Generating segments
   n <- length(p)
   if(n <= 1) {
     stop("Need more than 1 point to compute start/end")
-  }
-  return_list <- list(
-    start = p[1:(n - 1)]
-  )
-  if(n == 2) {
-    return.list = list(start = p[1])
+  } else if(n == 2) {
+    return_list <- list(
+      "start" = p[1],
+      "end" = p[2]
+    )
+  } else if (right) {
+    return_list <- list(
+      "start" = c(p[1], p[2:(n-1)]+1),
+      "end" = p[2:n]
+    )
   } else {
-    return.list = list(start = c(p[1],  p[2:(length(p)-1)]+1))
+    return_list <- list(
+      "start" = p[1:(n-1)],
+      "end" = c(p[2:(n-1)]-1, p[n])
+    )
   }
-  return.list$end <- c(p[2:length(p)])
 
-  return( as.data.frame(return.list) )
+  return( as.data.frame(return_list) )
 }
