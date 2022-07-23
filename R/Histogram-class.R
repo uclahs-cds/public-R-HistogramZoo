@@ -9,14 +9,14 @@ new_Histogram = function(histogram_data = NULL, interval_start = NULL, interval_
   stopifnot(is.character(region_id))
 
   # Creating object
-  x = list(
+  x <- list(
     histogram_data = histogram_data,
     interval_start = interval_start,
     interval_end = interval_end,
     region_id = region_id,
     ...
   )
-  class(x) = c(class, "Histogram")
+  class(x) <- c(class, "Histogram")
 
   return(x)
 }
@@ -25,11 +25,11 @@ new_Histogram = function(histogram_data = NULL, interval_start = NULL, interval_
 validate_Histogram = function(x){
 
   # Attributes
-  histogram_data = x$histogram_data
-  histogram_length = length(histogram_data)
-  interval_start = x$interval_start
-  interval_end = x$interval_end
-  region_id = x$region_id
+  histogram_data <- x$histogram_data
+  histogram_length <- length(histogram_data)
+  interval_start <- x$interval_start
+  interval_end <- x$interval_end
+  region_id <- x$region_id
 
   # Validate
   # 0. Everything has to be the same length
@@ -85,32 +85,41 @@ Histogram = function(histogram_data = double(), interval_start = integer(), inte
   # Coercing values to the right thing
   if(length(histogram_data) > 0){
     if( missing(interval_start) & missing(interval_end)){
-      interval_start = interval_end = seq(1, length(histogram_data), 1)
+      interval_start <- interval_end <- seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
-      interval_start = interval_end
+      interval_start <- interval_end
     } else if (missing(interval_end)){
-      interval_end = interval_start
+      interval_end <- interval_start
     }
     if( missing(region_id) ){
-      region_id = paste0(interval_start[1], "-", interval_end[length(histogram_data)])
+      region_id <- paste0(interval_start[1], "-", interval_end[length(histogram_data)])
     }
   }
 
   if (!is.double(histogram_data)) {
-    histogram_data = as.double(histogram_data)
+    histogram_data <- as.double(histogram_data)
   }
   if (!is.integer(interval_start)){
-    interval_start = as.integer(interval_start)
+    interval_start <- as.integer(interval_start)
   }
   if (!is.integer(interval_end)){
-    interval_end = as.integer(interval_end)
+    interval_end <- as.integer(interval_end)
   }
   if(!is.character(region_id)){
-    region_id = as.character(region_id)
+    region_id <- as.character(region_id)
   }
 
   # Validate and return object
-  validate_Histogram(new_Histogram(histogram_data = histogram_data, interval_start = interval_start, interval_end = interval_end, region_id = region_id))
+  return(
+    validate_Histogram(
+      new_Histogram(
+        histogram_data = histogram_data,
+        interval_start = interval_start,
+        interval_end = interval_end,
+        region_id = region_id
+      )
+    )
+  )
 
 }
 
@@ -210,19 +219,42 @@ reassign_region_id = function(x, region_id){
   UseMethod('reassign_region_id', x)
 }
 
+#' Title
+#'
+#' @param x 
+#' @param region_id 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 reassign_region_id.Histogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))
 
   # Creating a region id
   if(missing(region_id) & length(x$histogram_data) > 0){
-    region_id = paste0(x$interval_start[1], "-", x$interval_end[length(x)])
+    region_id <- paste0(x$interval_start[1], "-", x$interval_end[length(x)])
   }
   if(!is.character(region_id)){
-    region_id = as.character(region_id)
+    region_id <- as.character(region_id)
   }
 
   x$region_id <- region_id
 
   return(x)
+}
+
+#' Title
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+length.Histogram = function(x){
+  return(
+    length(x$histogram_data)
+  )
 }
