@@ -206,11 +206,11 @@ print.Histogram = function(x){
 #' @export
 #'
 #' @examples
-ReassignRegionID = function(x, region_id){
-  UseMethod('ReassignRegionID', x)
+reassign_region_id = function(x, region_id){
+  UseMethod('reassign_region_id', x)
 }
 
-ReassignRegionID.Histogram = function(x, region_id){
+reassign_region_id.Histogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))
 

@@ -108,7 +108,7 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
     strand = x$strand)
 }
 
-ReassignRegionID.GenomicHistogram = function(x, region_id){
+reassign_region_id.GenomicHistogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))
 
