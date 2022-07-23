@@ -5,7 +5,7 @@
 #' @param x numeric vector
 #' @param threshold TODO
 #' @export
-local.minmax = function(x, threshold = 0) {
+local_min_max = function(x, threshold = 0) {
   x = as.numeric(x)
   stopifnot(length(x) > 1)
   # Get the first non-equal index
