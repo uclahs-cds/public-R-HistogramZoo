@@ -10,7 +10,7 @@ find_stepfunction_chgpts = function(x){
 #' @param x A numeric vector
 #' @param threshold numeric threshold
 #'
-#' @return TODO
+#' @return A list of coordinates with `start` and `end` coordinates
 #' @export
 #'
 #' @examples
@@ -32,21 +32,21 @@ find_consecutive_threshold = function(
 #'
 #' @param histogram_obj a Histogram or HistogramList object
 #' @param histogram_count_threshold TODO
-#' @param eps TODO
-#' @param seed TODO
-#' @param truncated_models TODO
-#' @param uniform_peak_threshold TODO
-#' @param uniform_peak_stepsize TODO
-#' @param remove_low_entropy TODO
-#' @param min_gap_size TODO
-#' @param max_uniform TODO
-#' @param histogram_metric TODO
-#' @param min_peak_size TODO
-#' @param distributions TODO
+#' @param eps numeric hyperparameter to finetune segmentation. See `Delon et al, 2005`
+#' @param seed numeric seed
+#' @param truncated_models logical, whether to fit truncated distributions
+#' @param max_uniform logical, whether to find a subsegment maximizing the fit of a uniform distribution
+#' @param uniform_peak_threshold numeric, indicating the minimum proportion of the subsegment
+#' @param uniform_peak_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
+#' @param remove_low_entropy logical, indicating whether to filter out low entropy regions
+#' @param min_gap_size integer, indicating the minimum gap size to be filtered
+#' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for histogram optimization
+#' @param min_peak_size integer, indication the minimum segment size
+#' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
 #'
-#' @return TODO
+#' @return A HistogramFit object representing the Histogram and results of the fit
 #' @export
-#' @example \dontrun{
+#' @examples \dontrun{
 #' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
 #' res = segment_and_fit(x)
 #' }
