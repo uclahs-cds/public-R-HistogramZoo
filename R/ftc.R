@@ -83,7 +83,7 @@ monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 ftc = function(x, s = NULL, eps = 1) {
   if(is.null(s)){
     # segments
-    minmax = local_minmax(x)
+    minmax = local_min_max(x)
     lmin = minmax$max.ind
     lmax = minmax$min.ind
     s = c(1, lmin, lmax, length(x) )
