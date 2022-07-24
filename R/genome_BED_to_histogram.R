@@ -30,7 +30,7 @@ genome_BED_to_histogram = function(
     segs.gr
   })
   peaks.gr = do.call(c, peaks)
-  coverage = GenomicRanges::coverage(peaks_gr)
+  coverage = GenomicRanges::coverage(peaks.gr)
 
   # Loading regions
   if(!is.null(regions)){
@@ -47,7 +47,7 @@ genome_BED_to_histogram = function(
   # Calculating Coverage
   return(
     coverage_to_histogram(
-      coverage = bigwig_coverage,
+      coverage = coverage,
       regions = regions,
       histogram_bin_size = histogram_bin_size
     )

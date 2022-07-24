@@ -131,7 +131,7 @@ Histogram = function(histogram_data = double(), interval_start = integer(), inte
 #' @export
 #'
 #' @examples
-print.Histogram = function(x){
+print.Histogram = function(x, ...){
 
   histogram_data <- x$histogram_data
   region_id <- x$region_id
@@ -151,12 +151,12 @@ print.Histogram = function(x){
       paste0(interval_start[1:5], "-", interval_end[1:5]))
 
     intervals_finish <- ifelse(
-      tail(interval_start, 5) == tail(interval_end, 5),
-      tail(interval_start, 5),
-      paste0(tail(interval_start, 5), "-", tail(interval_end, 5))
+      utils::tail(interval_start, 5) == utils::tail(interval_end, 5),
+      utils::tail(interval_start, 5),
+      paste0(utils::tail(interval_start, 5), "-", utils::tail(interval_end, 5))
     )
     x_start <- as.character(formatC(histogram_data[1:5], digits = 2))
-    x_end <- as.character(formatC(tail(histogram_data, 5), digits = 2))
+    x_end <- as.character(formatC(utils::tail(histogram_data, 5), digits = 2))
 
     # Spacing
     spacing <- max(nchar(c(intervals_begin, intervals_finish, x_start, x_end)))
@@ -221,8 +221,8 @@ reassign_region_id = function(x, region_id){
 
 #' Title
 #'
-#' @param x 
-#' @param region_id 
+#' @param x
+#' @param region_id
 #'
 #' @return
 #' @export
@@ -247,7 +247,7 @@ reassign_region_id.Histogram = function(x, region_id){
 
 #' Title
 #'
-#' @param x 
+#' @param x
 #'
 #' @return
 #' @export
