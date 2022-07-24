@@ -44,6 +44,7 @@ validate_GenomicHistogram = function(x){
 #' @param histogram_data vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
+#' @param region_id character identifier for the region of interest
 #' @param chr chromosome name
 #' @param strand strand
 #'
@@ -51,8 +52,20 @@ validate_GenomicHistogram = function(x){
 #' @export
 #'
 #' @examples
-#' x = GenomicHistogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 1:10, chr = "chr1", strand = "+")
-GenomicHistogram = function(histogram_data = double(), interval_start = integer(), interval_end = integer(), region_id = character(), chr = character(), strand = c("*", "+", "-")){
+#' x = GenomicHistogram(
+#' histogram_data = runif(10), 
+#' interval_start = 1:10, 
+#' interval_end = 1:10, 
+#' chr = "chr1", 
+#' strand = "+")
+GenomicHistogram = function(
+    histogram_data = double(), 
+    interval_start = integer(), 
+    interval_end = integer(), 
+    region_id = character(), 
+    chr = character(), 
+    strand = c("*", "+", "-")
+){
 
   # Coercing values to the right thing
   strand <- match.arg(strand)
@@ -104,15 +117,7 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
 
 }
 
-#' Title
-#'
-#' @param x
-#' @param i
-#'
-#' @return
 #' @export
-#'
-#' @examples
 `[.GenomicHistogram` = function(x, i){
   new_GenomicHistogram(
     histogram_data = x$histogram_data[i],
@@ -123,15 +128,8 @@ GenomicHistogram = function(histogram_data = double(), interval_start = integer(
     strand = x$strand)
 }
 
-#' Title
-#'
-#' @param x 
-#' @param region_id 
-#'
-#' @return
+
 #' @export
-#'
-#' @examples
 reassign_region_id.GenomicHistogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))

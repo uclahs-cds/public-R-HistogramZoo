@@ -73,14 +73,19 @@ validate_Histogram = function(x){
 #' @param histogram_data vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
-#' @param region_id unique character id to denote region
+#' @param region_id character identifier for the region of interest
 #'
 #' @return A Histogram object
 #' @export
 #'
 #' @examples
 #' x = Histogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 1:10)
-Histogram = function(histogram_data = double(), interval_start = integer(), interval_end = integer(), region_id = character()){
+Histogram = function(
+    histogram_data = double(),
+    interval_start = integer(),
+    interval_end = integer(),
+    region_id = character()
+  ){
 
   # Coercing values to the right thing
   if(length(histogram_data) > 0){
@@ -123,14 +128,8 @@ Histogram = function(histogram_data = double(), interval_start = integer(), inte
 
 }
 
-#' Title
-#'
-#' @param x
-#'
-#' @return
+
 #' @export
-#'
-#' @examples
 print.Histogram = function(x, ...){
 
   histogram_data <- x$histogram_data
@@ -189,15 +188,8 @@ print.Histogram = function(x, ...){
   return(invisible(x))
 }
 
-#' Title
-#'
-#' @param x
-#' @param i
-#'
-#' @return
+
 #' @export
-#'
-#' @examples
 `[.Histogram` = function(x, i){
   new_Histogram(
     histogram_data = x$histogram_data[i],
@@ -206,28 +198,23 @@ print.Histogram = function(x, ...){
     region_id = x$region_id)
 }
 
-#' Title
+#' reassign_region_id for Histogram objects
 #'
-#' @param x
-#' @param region_id
+#' @param x A Histogram object
+#' @param region_id A character region_id for the Histogram object
 #'
-#' @return
+#' @return A Histogram object with the right region_id
+#'
 #' @export
 #'
 #' @examples
+#' x = Histogram(sample(1:5, 20, replace = T), region_id = "TEST")
+#' y = reassign_region_id(x, "TEST2")
 reassign_region_id = function(x, region_id){
   UseMethod('reassign_region_id', x)
 }
 
-#' Title
-#'
-#' @param x
-#' @param region_id
-#'
-#' @return
 #' @export
-#'
-#' @examples
 reassign_region_id.Histogram = function(x, region_id){
 
   stopifnot(inherits(x, "Histogram"))
@@ -245,14 +232,8 @@ reassign_region_id.Histogram = function(x, region_id){
   return(x)
 }
 
-#' Title
-#'
-#' @param x
-#'
-#' @return
+
 #' @export
-#'
-#' @examples
 length.Histogram = function(x){
   return(
     length(x$histogram_data)

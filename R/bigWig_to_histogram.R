@@ -3,12 +3,12 @@
 #' @param filename Name of bigwig file for import
 #' @param strand The strand of bigwig file from which the data originates. Default ".". If strand is "+" or "-", the strand will also be used to select regions of matching strand.
 #' @param score_threshold A hard threshold for the score of the bigwig file. Scores higher than the threshold will be used in the computation of the histogram.
-#' @param regions A GRanges object to select regions of interest
+#' @param regions A GRanges object representing regions of interest defining histograms
 #' @param gtf A GTF file to select regions of interest
 #' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram
 #' @param ... Additional parameters to be passed into GTF_to_GRangesList
 #'
-#' @return A list consisting of GenomicHistograms
+#' @return A list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
 #' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
