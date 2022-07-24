@@ -56,7 +56,7 @@ maximal_meaningful_interval = function(x) {
   # Preserve the old index
   max.intervals$index = rownames(max.intervals)
   rownames(max.intervals) <- NULL
-  max.intervals
+  return(max.intervals)
 }
 
 
@@ -67,7 +67,7 @@ maximal_meaningful_interval = function(x) {
 #'
 #' @return TODO
 #' @export
-find.all.meaningful.gap = function(x, change.points) {
+find_all_meaningful_gap = function(x, change.points) {
   todo = expand.grid(start = change.points, end = change.points)
   todo = todo[todo$end > todo$start,]
 
@@ -90,7 +90,7 @@ find.all.meaningful.gap = function(x, change.points) {
   seg.gap.data = df[df$mgap > 0 & !is.na(df$mgap), ]
   # seg.gap.data$index = 1:nrow(seg.gap.data)
 
-  maximal_meaningful_interval(seg.gap.data)
+  return(maximal_meaningful_interval(seg.gap.data))
 }
 
 #' Finds the meaningful gaps between the points in s
@@ -102,13 +102,13 @@ find.all.meaningful.gap = function(x, change.points) {
 #'
 #' @return TODO
 #' @export
-meaningful.gaps.local = function(x, seg.points, change.points, min.gap = 2) {
+meaningful_gaps_local = function(x, seg.points, change.points, min.gap = 2) {
 
   max.gaps.list <- lapply(seq(2, length(seg.points)), function(i) {
     x.sub = x[seg.points[i-1]:seg.points[i]]
     chg.pts = change.points[change.points >= seg.points[i-1] & change.points <= seg.points[i]] - seg.points[i-1] + 1
 
-    max.gaps = find.all.meaningful_gap(x.sub, chg.pts)
+    max.gaps = find_all_meaningful_gap(x.sub, chg.pts)
 
     if(nrow(max.gaps) > 0) {
       max.gaps[, c('start','end')] <- max.gaps[, c('start','end')] + seg.points[i-1] - 1
@@ -120,10 +120,10 @@ meaningful.gaps.local = function(x, seg.points, change.points, min.gap = 2) {
 
   max.gaps <- do.call(rbind.data.frame, max.gaps.list)
   # Remove gaps that are smaller than min.gap
-  max.gaps[max.gaps$end - max.gaps$start >= min.gap, ]
+  return(max.gaps[max.gaps$end - max.gaps$start >= min.gap, ])
 }
 
-find.new.segments = function(gaps.df) {
+find_new_segments = function(gaps.df) {
   new.segments = c()
   for(i in rownames(gaps.df)) {
     r = gaps.df[i, ]
@@ -138,5 +138,5 @@ find.new.segments = function(gaps.df) {
       }
     }
   }
-  new.segments
+  return(new.segments)
 }
