@@ -208,7 +208,7 @@ print.Histogram = function(x, ...){
 #' @export
 #'
 #' @examples
-#' x = Histogram(sample(1:5, 20, replace = T), region_id = "TEST")
+#' x = Histogram(sample(1:5, 20, replace = TRUE), region_id = "TEST")
 #' y = reassign_region_id(x, "TEST2")
 reassign_region_id = function(x, region_id){
   UseMethod('reassign_region_id', x)
