@@ -44,20 +44,32 @@ extract_peak_segments <- function(iranges){
 #' @param result A Histogram object which have attributes 'models' and 'p' (i.e. the return object of running segment_and_fit on a Histogram)
 #' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "consensus" if more than one metric was used to specify which model params to extract
 #'
-#' @return TODO: Describe columns of dataframe
+#' @return A data.frame with the following columns summarizing the results of the fit
+#' \describe{
+#'     \item{region_id}{character string denoting the region_id of the Histogram}
+#'     \item{peak_id}{an integer id identifiying the ordinal segment of the Histogram segmentation}
+#'     \item{chr}{an optional column denoting the chromosome of a GenomicHistogram object}
+#'     \item{start}{the interval start of the segment}
+#'     \item{end}{the interval end of the segment}
+#'     \item{strand}{an optional column denoting the strand of a GenomicHistogram object}
+#'     \item{interval_count}{}
+#'     \item{interval_sizes}{}
+#'     \item{interval_starts}{}
+#'     \item{histogram_start}{}
+#'     \item{histogram_end}{}
+#'     \item{value}{}
+#'     \item{metric}{}
+#'     \item{dist}{}
+#'     \item{params}{}
+#' }
+#' 
 #' @export
 summarize_results <- function(result, model_name){
   UseMethod('summarize_results')
 }
 
-#' Title
-#'
-#' @param result
-#'
-#' @return
+
 #' @export
-#'
-#' @examples
 summarize_results.Histogram <- function(
   result = NULL,
   model_name = "consensus"
@@ -91,11 +103,6 @@ summarize_results.Histogram <- function(
   return(results_table)
 }
 
-#'
-#' @param result TODO
-#'
-#'
-#' @return TODO
 #' @export
 summarize_results.GenomicHistogram = function(
   result = NULL,
