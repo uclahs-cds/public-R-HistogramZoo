@@ -4,6 +4,10 @@
 #' @param n_fields Number of columns in the BED file that conform to BED file standards
 #' @param gtf A GTF file
 #' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram
+#' @param gene_or_transcript `gene` or `transcript` indicating whether histograms should be built on gene coordinates or transcript coordinates
+#' @param select_strand `*`, `+` or `-`  to filter regions by strand
+#' @param select_chrs a vector of chromosomes to filter regions by chromosome
+#' @param select_ids gene or transcript ids to filter regions by gene or transcript name, must correspond to GTF ids
 #' @param ... Additional parameters to be passed into GTF_to_GRangesList
 #'
 #' @return A list consisting of a list of histograms, a list of gene models and the histogram bin size
