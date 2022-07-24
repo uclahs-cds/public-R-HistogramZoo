@@ -1,4 +1,8 @@
 #' Generates a list of Histogram objects from a coverage RLE object and a GRangesList
+#'
+#' @param regions A GRangesList object of regions to generate Histogram objects
+#' @param coverage An RLE object representing genome coverage
+#' @param histogram_bin_size An integer representing the width of Histogram bins
 coverage_to_histogram = function(
   regions,
   coverage,
