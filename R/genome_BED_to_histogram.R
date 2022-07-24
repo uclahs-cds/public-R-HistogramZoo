@@ -1,17 +1,16 @@
 
-#' Title
+#' Calculates coverage of genes from annotated genome bed files
 #'
-#' @param filenames
-#' @param n_fields
-#' @param regions
-#' @param histogram_bin_size
-#' @param gtf
-#' @param ...
+#' @param filenames A vector of BED filenames. The `name` column of the BED files must indicate gene or transcript name
+#' @param n_fields Number of columns in the BED file that conform to BED file standards
+#' @param regions A GRanges object representing regions of interest defining histograms
+#' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram
+#' @param gtf A GTF file
+#' @param ... Additional parameters to be passed into GTF_to_GRangesList if selecting regions using a GTF file
 #'
-#' @return
+#' @return A list of GenomicHistogram objects
 #' @export
 #'
-#' @examples
 genome_BED_to_histogram = function(
   filenames,
   n_fields = c(4, 6, 12),
