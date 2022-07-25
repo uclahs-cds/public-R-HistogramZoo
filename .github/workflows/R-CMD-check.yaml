@@ -1,8 +1,10 @@
 ---
 name: R-CMD-check
-'on':
-  - push
-  - pull_request
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
