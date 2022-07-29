@@ -1,10 +1,10 @@
 
 #' Kullback-Leibler divergence (Relative Entropy)
 #'
-#' @param h TODO
-#' @param p TODO
-#' @param a interval left endpoint
-#' @param b interval right endpoint
+#' @param h density of a distribution
+#' @param p density of the reference distribution
+#' @param a start index to subset density
+#' @param b end index to subset density
 relative_entropy = function(h, p, a, b) {
   interval = a:b
   # Round to prevent floating point issues
@@ -17,7 +17,14 @@ relative_entropy = function(h, p, a, b) {
   }
 }
 
-# Estimate x with grenader estimator
+#' Calculate the Grenander estimator of a given density vector
+#'
+#' @param x numeric vector representing the density of a histogram
+#' @param increasing logical, whether the Grenander estimator should assume 
+#' x is increasing or decreasing 
+#'
+#' @return numeric vector with the same length as `x` representing the 
+#' Grenander estimator of `x`
 grenader = function(x, increasing = T){
   if(increasing){
     est = isotone::gpava(z = 1:length(x), y = x)
@@ -30,12 +37,12 @@ grenader = function(x, increasing = T){
   return(est / N)
 }
 
-#' Get the max relative entropy in the interval
 #' Computes H, the maximum H_{h,p}([a,b])
 #'
-#' @param x numeric vector of counts representing a histogram
-#' @param s TODO
-#' @param increasing Should the Grenader estimator be increasing or descreasing?
+#' @param x numeric vector representing the density of a histogram
+#' @param s  numeric vector representing initial segmentation indices
+#' @param increasing logical, whether the Grenander estimator should assume 
+#' x is increasing or decreasing 
 #'
 #' @export
 maximum_entropy = function(x, s = NULL, increasing = TRUE) {
@@ -56,7 +63,14 @@ maximum_entropy = function(x, s = NULL, increasing = TRUE) {
   max.relative_entropy
 }
 
-# Compute the monotone cost,
+#' Compute the monotone cost,
+#'
+#' @param x numeric vector representing the density of a histogram
+#' @param s numeric vector representing initial segmentation indices
+#' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation
+#' @param increasing 
+#'
+#' @return numeric, monotone cost
 monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
   max.relative_entropy = maximum_entropy(x, s, increasing)
   N = sum(x)
@@ -67,9 +81,9 @@ monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 
 #' Fine-to-coarse segmentation algorithm
 #'
-#' @param x A vector of counts representing the bins of a histogram
-#' @param s Initialization points
-#' @param eps The hyperparameter epsilon which can be used to tune the scale of segmentation
+#' @param x numeric vector representing the density of a histogram
+#' @param s numeric vector representing initial segmentation indices
+#' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation 
 #'
 #' @return A vector of points representing the boundaries between histograms
 #'
@@ -81,6 +95,14 @@ monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 #'
 #' @export
 ftc = function(x, s = NULL, eps = 1) {
+  
+  # Error checking
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(s)) # Technically, we want to check that s is an index
+  stopifnot(all(s <= length(x) & s >= 0))
+  stopifnot(is.numeric(eps)) # Other criteria on eps?
+  
+  # Generating change points if none are provided
   if(is.null(s)){
     # segments
     minmax = local_min_max(x)
@@ -89,7 +111,7 @@ ftc = function(x, s = NULL, eps = 1) {
     s = c(1, lmin, lmax, length(x) )
     s = sort(unique(s))
   }
-
+  
   # Initializing
   s = sort(unique(s))
   s.fixed = s
