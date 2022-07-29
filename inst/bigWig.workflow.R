@@ -6,8 +6,7 @@ library(ConsensusPeaks)
 
 # Loading Data ------------------------------------------------------------
 
-datadir = system.file("extdata", "bigwigs",  package = "ConsensusPeaks")
-filename = file.path(datadir, "S1.bw")
+filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
 strand = "."
 score.threshold = 1
 
