@@ -1,11 +1,21 @@
 
-# Uniform Generation
+#' Uniform density generation
+#' @param x A vector
+#' 
+#' @return A vector of uniform density with length of x
 generate_uniform_distribution = function(x){
   return(
     rep(1/length(x), length(x))
   )
 }
 
+#' Calculate whether h[a,b] > p[a,b]
+#' @param h density of a distribution
+#' @param p density of the reference distribution
+#' @param a start index to subset density
+#' @param b end index to subset density
+#'
+#' @return logical
 calculate_probability_difference = function(h, p, a, b){
   interval = a:b
   # Round to prevent floating point issues
@@ -14,7 +24,16 @@ calculate_probability_difference = function(h, p, a, b){
   return(hab > pab)
 }
 
-# Meaningful interval
+#' Determines whether h[a,b] is a meaningful interval
+#' @param h density of a distribution
+#' @param p density of the reference distribution
+#' @param a start index to subset density
+#' @param b end index to subset density
+#' @param N number of data points
+#' @param L length of interval
+#'
+#' @return a vector of length 2: binary indicating whether
+#' h[a,b] is a meaningful interval, relative entropy of the interval
 meaningful_interval = function(h, p, a, b, N, L){
   rel_entropy <- relative_entropy(h, p, a, b)
   prob_diff <- calculate_probability_difference(h, p, a, b)
@@ -24,7 +43,16 @@ meaningful_interval = function(h, p, a, b, N, L){
   )
 }
 
-# Meaningful gap
+#' Determines whether h[a,b] is a meaningful gap
+#' @param h density of a distribution
+#' @param p density of the reference distribution
+#' @param a start index to subset density
+#' @param b end index to subset density
+#' @param N number of data points
+#' @param L length of interval
+#'
+#' @return a vector of length 2: binary indicating whether
+#' h[a,b] is a meaningful gap, relative entropy of the interval
 meaningful_gap = function(h, p, a, b, N, L){
   rel_entropy <- relative_entropy(h, p, a, b)
   if(is.na(rel_entropy)) rel_entropy <- Inf
@@ -35,6 +63,18 @@ meaningful_gap = function(h, p, a, b, N, L){
   )
 }
 
+#' Identifies the maximum meaningful interval from a set of overlapping
+#' intervals, can also be applied to find the max gap
+#'
+#' @param x a data.frame with columns
+#' \describe{
+#'     \item{start}{start index of the histogram count vector}
+#'     \item{end}{end index of the histogram count vector}
+#'     \item{entropy}{relative entropy of the segment to a uniform distribution}
+#' } 
+#'
+#' @return a data.frame with the same columns + the index of the preserved 
+#' rows from the original data.frame
 maximal_meaningful_interval = function(x) {
   curr.df = x
   max.intervals = data.frame()
@@ -64,8 +104,14 @@ maximal_meaningful_interval = function(x) {
 #'
 #' @param x histogram (vector of counts)
 #' @param change.points Change points
-#'
-#' @return TODO
+#' 
+#' @return A data.frame with columns
+#' \describe{
+#'     \item{start}{start index of the histogram count vector}
+#'     \item{end}{end index of the histogram count vector}
+#'     \item{mgap}{max gap score}
+#'     \item{entropy}{relative entropy of the segment to a uniform distribution}
+#' } 
 #' @export
 find_all_meaningful_gap = function(x, change.points) {
   todo = expand.grid(start = change.points, end = change.points)
@@ -100,7 +146,13 @@ find_all_meaningful_gap = function(x, change.points) {
 #' @param change.points the change points
 #' @param min.gap The minimum gap to be considered a meaningful gap
 #'
-#' @return TODO
+#' @return A data.frame with columns
+#' \describe{
+#'     \item{start}{start index of the histogram count vector}
+#'     \item{end}{end index of the histogram count vector}
+#'     \item{mgap}{max gap score}
+#'     \item{entropy}{relative entropy of the segment to a uniform distribution}
+#' } 
 #' @export
 meaningful_gaps_local = function(x, seg.points, change.points, min.gap = 2) {
 
@@ -121,22 +173,4 @@ meaningful_gaps_local = function(x, seg.points, change.points, min.gap = 2) {
   max.gaps <- do.call(rbind.data.frame, max.gaps.list)
   # Remove gaps that are smaller than min.gap
   return(max.gaps[max.gaps$end - max.gaps$start >= min.gap, ])
-}
-
-find_new_segments = function(gaps.df) {
-  new.segments = c()
-  for(i in rownames(gaps.df)) {
-    r = gaps.df[i, ]
-    # Have a large gap
-    if(r$end - r$start > 1) {
-      left.diff = abs(r$seg.start - r$start)
-      right.diff = abs(r$seg.end-r$end)
-      if(left.diff < right.diff && right.diff > 2) {
-        new.segments = c(new.segments, r$end - 1)
-      } else if(left.diff > right.diff && left.diff > 2){
-        new.segments = c(new.segments, r$start + 1)
-      }
-    }
-  }
-  return(new.segments)
 }

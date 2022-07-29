@@ -31,7 +31,7 @@ find_consecutive_threshold = function(
 #' segment_and_fit
 #'
 #' @param histogram_obj a Histogram or HistogramList object
-#' @param histogram_count_threshold TODO
+#' @param histogram_count_threshold a hard threshold to filter histogram density
 #' @param eps numeric hyperparameter to finetune segmentation. See `Delon et al, 2005`
 #' @param seed numeric seed
 #' @param truncated_models logical, whether to fit truncated distributions
