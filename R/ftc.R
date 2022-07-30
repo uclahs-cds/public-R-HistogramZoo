@@ -22,10 +22,10 @@ relative_entropy <- function(h, p, a, b) {
 #' Calculate the Grenander estimator of a given density vector
 #'
 #' @param x numeric vector representing the density of a histogram
-#' @param increasing logical, whether the Grenander estimator should assume 
-#' x is increasing or decreasing 
+#' @param increasing logical, whether the Grenander estimator should assume
+#' x is increasing or decreasing
 #'
-#' @return numeric vector with the same length as `x` representing the 
+#' @return numeric vector with the same length as `x` representing the
 #' Grenander estimator of `x`
 grenader <- function(x, increasing = T){
   if(increasing){
@@ -43,8 +43,8 @@ grenader <- function(x, increasing = T){
 #'
 #' @param x numeric vector representing the density of a histogram
 #' @param s  numeric vector representing initial segmentation indices
-#' @param increasing logical, whether the Grenander estimator should assume 
-#' x is increasing or decreasing 
+#' @param increasing logical, whether the Grenander estimator should assume
+#' x is increasing or decreasing
 maximum_entropy <- function(x, s = NULL, increasing = TRUE) {
   N <- ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s <- 1:length(x)}
@@ -70,9 +70,9 @@ maximum_entropy <- function(x, s = NULL, increasing = TRUE) {
 #' @param x numeric vector representing the density of a histogram
 #' @param s numeric vector representing initial segmentation indices
 #' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation
-#' @param increasing logical, whether the Grenander estimator should assume 
-#' x is increasing or decreasing 
-#' 
+#' @param increasing logical, whether the Grenander estimator should assume
+#' x is increasing or decreasing
+#'
 #' @return numeric, monotone cost
 monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
   max_relative_entropy <- maximum_entropy(x, s, increasing)
@@ -88,7 +88,7 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 #'
 #' @param x numeric vector representing the density of a histogram
 #' @param s numeric vector representing initial segmentation indices
-#' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation 
+#' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation
 #'
 #' @return A vector of points representing the boundaries between histograms
 #'
@@ -100,23 +100,23 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 #'
 #' @export
 ftc <- function(x, s = NULL, eps = 1) {
-  
+
   # Error checking
   stopifnot(is.numeric(x))
   stopifnot(is.numeric(s)) # Technically, we want to check that s is an index
   stopifnot(all(s <= length(x) & s >= 0))
   stopifnot(is.numeric(eps)) # Other criteria on eps?
-  
+
   # Generating change points if none are provided
   if(is.null(s)){
     # segments
-    minmax <- local_min_max(x)
+    minmax <- find_local_optima(x)
     lmin <- minmax$max.ind
     lmax <- minmax$min.ind
     s <- c(1, lmin, lmax, length(x) )
     s <- sort(unique(s))
   }
-  
+
   # Initializing
   s <- sort(unique(s))
   s.fixed <- s
