@@ -5,15 +5,17 @@
 #' @param p density of the reference distribution
 #' @param a start index to subset density
 #' @param b end index to subset density
-relative_entropy = function(h, p, a, b) {
-  interval = a:b
+relative_entropy <- function(h, p, a, b) {
+  interval <- a:b
   # Round to prevent floating point issues
-  hab = round(sum(h[interval]), digits = 14)
-  pab = round(sum(p[interval]), digits = 14)
+  hab <- round(sum(h[interval]), digits = 14)
+  pab <- round(sum(p[interval]), digits = 14)
   if(pab == 0 || pab == 1) {
     return(0)
   } else {
-    hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
+    return(
+      hab * log(hab / pab) + (1 - hab) * log((1 - hab) / (1 - pab))
+    )
   }
 }
 
@@ -25,15 +27,15 @@ relative_entropy = function(h, p, a, b) {
 #'
 #' @return numeric vector with the same length as `x` representing the 
 #' Grenander estimator of `x`
-grenader = function(x, increasing = T){
+grenader <- function(x, increasing = T){
   if(increasing){
-    est = isotone::gpava(z = 1:length(x), y = x)
-    est = est$x
+    est <- isotone::gpava(z = 1:length(x), y = x)
+    est <- est$x
   } else {
-    est = isotone::gpava(z = 1:length(x), y = rev(x))
-    est = rev(est$x)
+    est <- isotone::gpava(z = 1:length(x), y = rev(x))
+    est <- rev(est$x)
   }
-  N = ifelse(sum(x) == 0, 1, sum(x))
+  N <- ifelse(sum(x) == 0, 1, sum(x))
   return(est / N)
 }
 
@@ -43,24 +45,24 @@ grenader = function(x, increasing = T){
 #' @param s  numeric vector representing initial segmentation indices
 #' @param increasing logical, whether the Grenander estimator should assume 
 #' x is increasing or decreasing 
-#'
-#' @export
-maximum_entropy = function(x, s = NULL, increasing = TRUE) {
-  N = ifelse(sum(x) == 0, 1, sum(x))
-  if(is.null(s)){s = 1:length(x)}
-  L = length(s)
+maximum_entropy <- function(x, s = NULL, increasing = TRUE) {
+  N <- ifelse(sum(x) == 0, 1, sum(x))
+  if(is.null(s)){s <- 1:length(x)}
+  L <- length(s)
 
   # Prob distributions
-  h = x/N
-  p = grenader(x, increasing)
+  h <- x/N
+  p <- grenader(x, increasing)
 
-  max.relative_entropy = -Inf
+  max_relative_entropy = -Inf
   for(a in 1:L) {
     for(b in a:L) {
-      max.relative_entropy = max(max.relative_entropy, relative_entropy(h, p, s[a], s[b]), na.rm = TRUE)
+      max_relative_entropy <- max(max_relative_entropy, relative_entropy(h, p, s[a], s[b]), na.rm = TRUE)
     }
   }
-  max.relative_entropy
+  return(
+    max_relative_entropy
+  )
 }
 
 #' Compute the monotone cost,
@@ -68,15 +70,18 @@ maximum_entropy = function(x, s = NULL, increasing = TRUE) {
 #' @param x numeric vector representing the density of a histogram
 #' @param s numeric vector representing initial segmentation indices
 #' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation
-#' @param increasing 
-#'
+#' @param increasing logical, whether the Grenander estimator should assume 
+#' x is increasing or decreasing 
+#' 
 #' @return numeric, monotone cost
-monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
-  max.relative_entropy = maximum_entropy(x, s, increasing)
-  N = sum(x)
-  L = length(x)
+monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
+  max_relative_entropy <- maximum_entropy(x, s, increasing)
+  N <- sum(x)
+  L <- length(x)
 
-  max.relative_entropy * N - log(L * (L + 1) / 2 * eps)
+  return(
+    max_relative_entropy * N - log(L * (L + 1) / 2 * eps)
+  )
 }
 
 #' Fine-to-coarse segmentation algorithm
@@ -94,7 +99,7 @@ monotone_cost = function(x, s = NULL, eps = 1, increasing = TRUE) {
 #' }
 #'
 #' @export
-ftc = function(x, s = NULL, eps = 1) {
+ftc <- function(x, s = NULL, eps = 1) {
   
   # Error checking
   stopifnot(is.numeric(x))
@@ -105,42 +110,42 @@ ftc = function(x, s = NULL, eps = 1) {
   # Generating change points if none are provided
   if(is.null(s)){
     # segments
-    minmax = local_min_max(x)
-    lmin = minmax$max.ind
-    lmax = minmax$min.ind
-    s = c(1, lmin, lmax, length(x) )
-    s = sort(unique(s))
+    minmax <- local_min_max(x)
+    lmin <- minmax$max.ind
+    lmax <- minmax$min.ind
+    s <- c(1, lmin, lmax, length(x) )
+    s <- sort(unique(s))
   }
   
   # Initializing
-  s = sort(unique(s))
-  s.fixed = s
-  K = length(s)
-  cost = c(-Inf)
-  J = 1
+  s <- sort(unique(s))
+  s.fixed <- s
+  K <- length(s)
+  cost <- c(-Inf)
+  J <- 1
 
   while(!all(cost > 0) & K > 2){
     # Initialize
-    cost = -Inf
+    cost <- -Inf
     # Loop through segments
     for(i in 1:(K-2)){
       # cat(K, " ", i, "\n")
-      inc.int = s[i]:s[i+1]
-      inc.s = s.fixed[s.fixed >= s[i] & s.fixed <= s[i+1]] - s[i] + 1
-      dec.int = s[i+1]:s[i+2]
-      dec.s = s.fixed[s.fixed >= s[i+1] & s.fixed <= s[i+2]] - s[i+1] + 1
-      cost_i = monotone_cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
-      cost_d = monotone_cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
-      cost[i] = min(cost_i, cost_d)
+      inc.int <- s[i]:s[i+1]
+      inc.s <- s.fixed[s.fixed >= s[i] & s.fixed <= s[i+1]] - s[i] + 1
+      dec.int <- s[i+1]:s[i+2]
+      dec.s <- s.fixed[s.fixed >= s[i+1] & s.fixed <= s[i+2]] - s[i+1] + 1
+      cost_i <- monotone_cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
+      cost_d <- monotone_cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
+      cost[i] <- min(cost_i, cost_d)
     }
     # Removing minimum cost
-    min.cost.index = which.min(cost)
-    min.cost = cost[min.cost.index]
+    min.cost.index <- which.min(cost)
+    min.cost <- cost[min.cost.index]
     if(length(min.cost) > 0 && min.cost < 0){
-      s = s[-(min.cost.index+1)]
+      s <- s[-(min.cost.index+1)]
     }
     # Update
-    K = length(s)
+    K <- length(s)
   }
 
   # Return the final list of minima
