@@ -40,7 +40,7 @@ find_consecutive_threshold = function(
 #' @param uniform_peak_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
 #' @param remove_low_entropy logical, indicating whether to filter out low entropy regions
 #' @param min_gap_size integer, indicating the minimum gap size to be filtered
-#' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for histogram optimization
+#' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization
 #' @param min_peak_size integer, indication the minimum segment size
 #' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
 #'
@@ -122,16 +122,15 @@ segment_and_fit <- function(
 
     # Find the maximum uniform segment
     if(max_uniform & seg.len > uniform_peak_stepsize & seg.len > ceiling(uniform_peak_threshold*seg.len)){
-      max.unif.results <- identify_uniform_segment(bin.data, metric = histogram_metric, threshold = uniform_peak_threshold, step.size = uniform_peak_stepsize, max.sd.size = 0)
+      unif.segment <- identify_uniform_segment(bin.data, metric = histogram_metric, threshold = uniform_peak_threshold, stepsize = uniform_peak_stepsize, max.sd.size = 0)
       # Use the maximum segment
-      unif.segment <- unlist(max.unif.results[c('a', 'b')])
-      bin.data.subset <- bin.data[unif.segment[1]:unif.segment[2]]
+      bin.data.subset <- bin.data[unif.segment[1, "start"]:unif.segment[1, "end"]]
       # Fit uniform distribution on maximum uniform segment
       dist.optim.subset <- fit_distributions(bin.data.subset, metric = histogram_metric, truncated = FALSE, distributions = "unif")
       # Adjust the segment starts from the shifted max uniform segment
       dist.optim.subset <- lapply(dist.optim.subset, function(y) {
-        y$seg.start <- unif.segment[1] + seg.start - 1
-        y$seg.end <- unif.segment[2] + seg.start - 1
+        y$seg.start <- unif.segment[1, "start"] + seg.start - 1
+        y$seg.end <- unif.segment[1, "end"] + seg.start - 1
         y$dist <- "unif"
         y
       })

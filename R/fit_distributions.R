@@ -2,14 +2,14 @@
 #' Fit the model parameters by optimizing a histogram metric
 #'
 #' @param histogram_data numeric vector, representing data to be fit
-#' @param metric character vector indicating metric used to optimize 
-#' distribution fit, subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
-#' @param distributions character vector indicating distributions, 
+#' @param distributions character vector indicating distributions,
 #' subset of `norm`, `gamma`, `unif`
-#' 
+#'
 #' @export
-#' 
+#'
 #' @importFrom DEoptim DEoptim
 fit_distributions = function(
   histogram_data,
