@@ -21,13 +21,11 @@ R CMD INSTALL public-R-ConsensusPeaks
 
 library(ConsensusPeaks)
 
-x = c(0, 0, 1, 2, 3, 2, 1, 0, 0)
+x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
 
-histograms = segment.fit.agnostic(x)
+results = segment_and_fit(x, eps = 0.005)
 
-results = summarize.results.agnostic(histograms)
-
-print(results)
+results_table = summarize_results(results)
 
 ```
 
