@@ -55,10 +55,10 @@ identify_uniform_segment <- function(
   sd.metric <- ifelse(is.na(sd.metric), 0, sd.metric) # If there's only 1 case
   # The range in which we are looking for the minimum
   res.sd.range <- res.df[res.df$metric <= min.metric + sd.metric * max.sd.size, ]
-  min.interval.index <- which.min(res.sd.range$length)
+  max.interval.index <- which.max(res.sd.range$length)
   
   return(
-    res.sd.range[min.interval.index,]
+    res.sd.range[max.interval.index,]
   )
   
 }
