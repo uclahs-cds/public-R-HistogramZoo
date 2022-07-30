@@ -113,7 +113,7 @@ segment_and_fit <- function(
     seg.len <- seg.end - seg.start + 1
     bin.data <- x[seg.start:seg.end]
 
-    dist.optim <- fit_distributions(bin.data, metric = histogram_metric, truncated = truncated_models, distr = distributions)
+    dist.optim <- fit_distributions(bin.data, metric = histogram_metric, truncated = truncated_models, distributions = distributions)
     dist.optim <- lapply(dist.optim, function(y) {
       y$seg.start <- seg.start
       y$seg.end <- seg.end
@@ -127,7 +127,7 @@ segment_and_fit <- function(
       unif.segment <- unlist(max.unif.results[c('a', 'b')])
       bin.data.subset <- bin.data[unif.segment[1]:unif.segment[2]]
       # Fit uniform distribution on maximum uniform segment
-      dist.optim.subset <- fit_distributions(bin.data.subset, metric = histogram_metric, truncated = FALSE, distr = "unif")
+      dist.optim.subset <- fit_distributions(bin.data.subset, metric = histogram_metric, truncated = FALSE, distributions = "unif")
       # Adjust the segment starts from the shifted max uniform segment
       dist.optim.subset <- lapply(dist.optim.subset, function(y) {
         y$seg.start <- unif.segment[1] + seg.start - 1

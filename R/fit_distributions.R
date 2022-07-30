@@ -1,30 +1,34 @@
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
-#' @param freq TODO
-#' @param metric TODO
-#' @param truncated TODO
-#' @param distr TODO
+#' @param histogram_data numeric vector, representing data to be fit
+#' @param metric character vector indicating metric used to optimize 
+#' distribution fit, subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param truncated logical, whether to fit truncated distributions
+#' @param distributions character vector indicating distributions, 
+#' subset of `norm`, `gamma`, `unif`
+#' 
 #' @export
+#' 
 #' @importFrom DEoptim DEoptim
 fit_distributions = function(
-  freq,
+  histogram_data,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   truncated = FALSE,
-  distr = c("norm", "gamma", "unif")) {
+  distributions = c("norm", "gamma", "unif")) {
 
   # Matching arguments
   metric <- match.arg(metric, several.ok = TRUE)
-  distr <- match.arg(distr, several.ok = TRUE)
+  distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Initializing Data
-  L <- length(freq)
-  N <- sum(freq)
+  L <- length(histogram_data)
+  N <- sum(histogram_data)
   bin <- 1:L
 
   # Used for initializing parameter estimations for norm and gamma
-  # hist.mean <- sum(freq * bin) / N
-  # hist.var <- sum(freq * (bin - hist.mean)^2) / N
+  # hist.mean <- sum(histogram_data * bin) / N
+  # hist.var <- sum(histogram_data * (bin - hist.mean)^2) / N
   # shape.init <- hist.mean^2 / hist.var
   # rate.init <- hist.mean / hist.var
 
@@ -43,7 +47,7 @@ fit_distributions = function(
       rep(0, length(bin))
     })
     dens[is.na(dens)] <- 0
-    res <- metric.func(freq, dens)
+    res <- metric.func(histogram_data, dens)
     if(is.na(res) || res == -Inf || res == Inf) {
       res <- Inf
     }
@@ -51,27 +55,27 @@ fit_distributions = function(
   }
 
   # Initializing Todo & Results
-  todo <- expand.grid(metric, distr, stringsAsFactors = F)
+  todo <- expand.grid(metric, distributions, stringsAsFactors = F)
   rtn <- list()
   for(i in 1:nrow(todo)){
 
     # Extracting Metric & Distribution
     met <- todo[i,1]
-    distr <- todo[i,2]
-    tag <- paste0(met, ".", distr)
+    dist <- todo[i,2]
+    tag <- paste0(met, ".", dist)
 
     # Get one of the metrics from histogram.distances
     metric.func <- get(paste('histogram', met, sep = "."))
 
     # Uniform Distribution
-    if(distr == "unif") {
+    if(dist == "unif") {
       # Add uniform distribution
       unif.dens <- 1 / (max(bin) - min(bin))
       rtn[[tag]] <- list(
         "par" = NULL,
         "dist" = "unif",
         "metric" = met,
-        "value" = metric.func(freq, rep(unif.dens * N, L)),
+        "value" = metric.func(histogram_data, rep(unif.dens * N, L)),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -83,7 +87,7 @@ fit_distributions = function(
       )
     }
     # Normal Distribution
-    if(distr == "norm") {
+    if(dist == "norm") {
       norm.optim <- DEoptim::DEoptim(fn = .hist.optim,
                                     .dist = "norm",
                                     lower = c(min(bin), 0.001),
@@ -117,7 +121,7 @@ fit_distributions = function(
     }
 
     # Gamma Distribution
-    if(distr == "gamma") {
+    if(dist == "gamma") {
       gamma.optim <- DEoptim::DEoptim(fn = .hist.optim,
                                      .dist = "gamma",
                                      lower = c(0.001, 0.001),
