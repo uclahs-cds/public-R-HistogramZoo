@@ -1,6 +1,6 @@
 
 #' truncated gamma
-#' 
+#'
 #' @param x numeric vector of quantiles
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
@@ -15,8 +15,8 @@ dtgamma <- function(x, shape, rate = 1, a = 0, b = Inf, ...) {
 }
 
 #' truncated gamma
-#' 
-#' @param x numeric vector of quantiles
+#'
+#' @param q numeric vector of quantiles
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param a distribution start
@@ -30,8 +30,8 @@ ptgamma <- function(q, shape, rate = 1, a = 0, b = Inf, ...) {
 }
 
 #' truncated gamma
-#' 
-#' @param x numeric vector of quantiles
+#'
+#' @param n number of observations
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param a distribution start
@@ -45,8 +45,8 @@ rtgamma <- function(n, shape, rate = 1, a = 0, b = Inf, ...) {
 }
 
 #' truncated gamma
-#' 
-#' @param x numeric vector of quantiles
+#'
+#' @param p vector of probabilities
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param a distribution start
