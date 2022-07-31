@@ -1,63 +1,58 @@
 
 
-#' create.residualplot creates a residual plot between fitted and observed data
+#' create_residualplot creates a residual plot between fitted and observed data
 #'
-#' @param data 
-#' @param distributions
-#' @param ... 
+#' @param histogram_obj a `Histogram` or `HistogramFit` object
+#' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "consensus", default consensus
+#' @param ... Additional parameters for the BoutrosLab.plotting.general function create.scatterplot
 #'
-#' @return
+#' @return Residual scatterplot, a Trellis object. For further details, see the 'Lattice' R package.
 #' @export
 #'
 #' @examples
-create.residualplot = function(
-  x,
-  distributions,
+create_residualplot <- function(histogram_obj, model_name){
+  UseMethod('create_residualplot')
+}
+
+create_residualplot.HistogramFit = function(
+  histogram_obj,
+  model_name,
   ...
 ){
   
   # Error checking
+  stopifnot(inherits(histogram_obj, "HistogramFit"))
+  model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
   
-  # x
-  if(!is.null(names(x))){
-    labels.x = names(x)
-    labels.x <- tryCatch(
-      { labels.x = as.numeric(labels.x) },
-      warning = function(cond) {
-        message("Warning message:")
-        message("Vector names are not coercible to numeric.")
-        message("Using default indices.")
-        return(1:length(x))
-      }
-    )
-  } else {
-    labels.x = 1:length(x)
-  }
-  plotting.data = data.frame("density" = x, "labels.x" = labels.x)
+  # Extracting histogram_data
+  x <- histogram_obj$histogram_data
+  xaxis.labels <- generate_interval_labels(x$interval_start, x$interval_end)
+  plotting.data <- data.frame(
+    "density" = x, 
+    "labels.x" = 1:length(x)
+  )
   
   # distribution
-  # Extract fitted distributions of majority vote model
-  if(!is.null(distributions)){
-    models = distributions[['models']]
-    majority_vote = lapply(models, `[[`, "majority.vote")
-    distribution_plotting_data = lapply(majority_vote, function(m) {
-      x = seq(m$seg.start, m$seg.end, by = 1)
-      dens = m$dens(x = seq_along(x), mpar = m$par)
-      data.frame("fitted" = dens, "labels.x" = labels.x[x])
-    })
-    distribution_plotting_data = do.call('rbind.data.frame', distribution_plotting_data)
-    
-  }
+  models <- distributions[['models']]
+  mods <- lapply(models, `[[`, model_name)
+  distribution_plotting_data <- lapply(mods, function(m) {
+    x <- seq(m$seg.start, m$seg.end, by = 1)
+    dens <- m$dens(x = seq_along(x), mpar = m$par)
+    return(
+      data.frame("fitted" = dens, "labels.x" = x)
+    )
+  })
+  distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
   
   # Calculating residuals
-  plotting.data = merge(plotting.data, distribution_plotting_data, by = "labels.x", all = T)
-  plotting.data$Residuals = plotting.data$density - plotting.data$fitted
+  plotting.data <- merge(plotting.data, distribution_plotting_data, by = "labels.x", all = T)
+  plotting.data$Residuals <- plotting.data$density - plotting.data$fitted
   
   # Adding lines to help with visualization (Can potentially remove)
-  plotting.chgpts = which(abs(diff(sign(plotting.data$Residuals))) == 2)
+  plotting.chgpts <- which(abs(diff(sign(plotting.data$Residuals))) == 2)
   
   # Plotting
-  plt =  BoutrosLab.plotting.general::create.scatterplot(
+  plt <-  BoutrosLab.plotting.general::create.scatterplot(
     Residuals ~ labels.x,
     plotting.data,
     # Colour
@@ -69,9 +64,9 @@ create.residualplot = function(
     abline.h = 0,
     abline.lty = "dotted",
     abline.col = "lightgrey",
-    abline.lwd = 0.01
+    abline.lwd = 0.01,
+    ...
   )
-  return(plt)
   
   # Return plt
   return(plt)

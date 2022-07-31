@@ -171,7 +171,7 @@ print.Histogram = function(x, ...){
   } else {
 
     # Intervals
-    intervals <- ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
+    intervals <- generate_interval_labels(interval_start, interval_end)
     intervals <- as.character(intervals)
 
     # Spacing

@@ -59,3 +59,7 @@ index_to_start_end <- function(p, right = TRUE) {
 
   return( as.data.frame(return_list) )
 }
+
+generate_interval_labels <- function(interval_start, interval_end){
+  ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
+}
