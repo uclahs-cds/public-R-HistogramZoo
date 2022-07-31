@@ -3,7 +3,7 @@
 #' @param pattern regular expression with groups
 str_match <- function(x, pattern) {
   return(
-    regmatches(x, regexec(pattern, x)) 
+    regmatches(x, regexec(pattern, x))
   )
 }
 
@@ -14,17 +14,11 @@ dput_str <- function(x) {
   )
 }
 
-# Reset rownames
-reset_rownames <- function(x) {
-  rownames(x) <- NULL
-  return(x)
-}
-
 #' Convert a vector of points into a data.frame of start/end points representing
 #' disjoint intervals
 #'
 #' @param p integer, a vector of points to be broken up into intervals
-#' @param right logical, whether the points should represent interval starts 
+#' @param right logical, whether the points should represent interval starts
 #' (FALSE) or interval ends (TRUE), default TRUE
 #'
 #' @return A data.frame with column: start and end representing the start and
