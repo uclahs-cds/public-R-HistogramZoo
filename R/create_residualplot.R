@@ -19,19 +19,19 @@ create_residualplot.HistogramFit = function(
   model_name,
   ...
 ){
-  
+
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
-  
+
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
   xaxis.labels <- generate_interval_labels(x$interval_start, x$interval_end)
   plotting.data <- data.frame(
-    "density" = x, 
+    "density" = x,
     "labels.x" = 1:length(x)
   )
-  
+
   # distribution
   models <- distributions[['models']]
   mods <- lapply(models, `[[`, model_name)
@@ -43,14 +43,14 @@ create_residualplot.HistogramFit = function(
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
-  
+
   # Calculating residuals
   plotting.data <- merge(plotting.data, distribution_plotting_data, by = "labels.x", all = T)
   plotting.data$Residuals <- plotting.data$density - plotting.data$fitted
-  
+
   # Adding lines to help with visualization (Can potentially remove)
   plotting.chgpts <- which(abs(diff(sign(plotting.data$Residuals))) == 2)
-  
+
   # Plotting
   plt <-  BoutrosLab.plotting.general::create.scatterplot(
     Residuals ~ labels.x,
@@ -67,7 +67,7 @@ create_residualplot.HistogramFit = function(
     abline.lwd = 0.01,
     ...
   )
-  
+
   # Return plt
   return(plt)
 }
