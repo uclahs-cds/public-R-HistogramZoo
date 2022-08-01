@@ -6,9 +6,27 @@ library(ConsensusPeaks)
 
 x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
 
-results = SegmentAndFit(x, eps = 0.005)
+results = segment_and_fit(x, eps = 0.005)
 
-results_table = SummarizeResults(results)
+results_table = summarize_results(results)
+
+create_coverageplot(
+  x
+)
+
+create_coverageplot(
+  results
+)
+
+create_coverageplot(
+  results,
+  xlab.label = "TEST",
+  col = rainbow(4)
+)
+
+create_residualplot(
+  results
+)
 
 # GenomicHistogram Example ------------------------------------------------
 
@@ -18,9 +36,13 @@ x = GenomicHistogram(
   chr = "chr1", 
   strand = c("-"))
 
-results = SegmentAndFit(x, eps = 0.005)
+results = segment_and_fit(x, eps = 0.005)
 
-results_table = SummarizeResults(results)
+results_table = summarize_results(results)
+
+create_coverageplot(
+  results
+)
 
 x = GenomicHistogram(
   runif(12), 
