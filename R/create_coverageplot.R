@@ -50,7 +50,7 @@ create_coverageplot <- function(
     xlab.top.label, xlab.top.cex, xlab.top.col, xlab.top.just, xlab.top.x, xlab.top.y,
     xlimits, ylimits, xat, yat, xaxis.lab, yaxis.lab, xaxis.cex, yaxis.cex,
     xaxis.rot, yaxis.rot, xaxis.fontface, yaxis.fontface, xaxis.col, yaxis.col, xaxis.tck, yaxis.tck,
-    type, cex, pch, lty, alpha,
+    type, cex, col.border, pch, lty, alpha,
     axes.lwd, 
     key, legend,
     top.padding, bottom.padding, right.padding, left.padding,
@@ -71,6 +71,7 @@ create_coverageplot <- function(
 create_coverageplot.Histogram <- function(
     histogram_obj,
     main = histogram_obj$region_id,
+    type = c('a'),
     ylab.label = "Histogram Data",
     xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
     ...
@@ -90,7 +91,7 @@ create_coverageplot.Histogram <- function(
     x ~ labels.x,
     data = plotting.data,
     # Lines & PCH
-    type = c('a'),
+    type = type,
     # Labels
     main = main,
     xlab.label = xlab.label,
@@ -137,6 +138,7 @@ create_coverageplot.HistogramFit <- function(
   points.y = return_y_points(histogram_obj),
   points.pch = 19,
   points.col = 'red',
+  type = c('a'),
   ...
 ){
 
@@ -150,7 +152,7 @@ create_coverageplot.HistogramFit <- function(
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   plotting.data <- data.frame("x" = x, "labels.x" = labels_x, "dist" = "coverage")
 
-  # distribution fit data
+  # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
     x <- seq(m$seg.start, m$seg.end, by = 1)
@@ -178,7 +180,7 @@ create_coverageplot.HistogramFit <- function(
     xlab.label = xlab.label,
     ylab.label = ylab.label,
     # Lines & PCH
-    type = c('a'),
+    type = type,
     # Adding extra points
     add.points = add.points,
     points.x = points.x,
