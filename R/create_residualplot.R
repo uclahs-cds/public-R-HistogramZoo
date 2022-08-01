@@ -14,9 +14,10 @@ create_residualplot <- function(histogram_obj, model_name){
   UseMethod('create_residualplot')
 }
 
+#' @export
 create_residualplot.HistogramFit = function(
   histogram_obj,
-  model_name,
+  model_name = c("consensus", histogram_obj$histogram_metric),
   ...
 ){
 
@@ -26,20 +27,20 @@ create_residualplot.HistogramFit = function(
 
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
-  xaxis.labels <- generate_interval_labels(x$interval_start, x$interval_end)
+  # choosing the midpoint of the start/end as the label
+  labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   plotting.data <- data.frame(
     "density" = x,
-    "labels.x" = 1:length(x)
+    "labels.x" = labels_x
   )
 
   # distribution
-  models <- distributions[['models']]
-  mods <- lapply(models, `[[`, model_name)
+  mods <- lapply(histogram_obj$models, `[[`, model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
     x <- seq(m$seg.start, m$seg.end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("fitted" = dens, "labels.x" = x)
+      data.frame("fitted" = dens, "labels.x" = labels_x[x])
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
@@ -68,6 +69,6 @@ create_residualplot.HistogramFit = function(
     ...
   )
 
-  # Return plt
+  # Return plot
   return(plt)
 }

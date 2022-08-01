@@ -1,9 +1,9 @@
 
 # Defining plotting parameters
 distributions = c(
-  "coverage", 
-  "norm", 
-  "gamma", 
+  "coverage",
+  "norm",
+  "gamma",
   "unif"
 )
 
@@ -48,24 +48,24 @@ create_coverageplot.HistogramFit <- function(
 
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
-  xaxis.labels <- generate_interval_labels(x$interval_start, x$interval_end)
+  # choosing the midpoint of the start/end as the label
+  labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   plotting.data <- data.frame(
-    "x" = x, 
-    "labels.x" = 1:length(x), 
+    "x" = x,
+    "labels.x" = 1:length(x),
     "dist" = "coverage")
 
   # points
-  points.x <- c(histogram_obj$p[,'start'], histogram_obj$p[,'end'])
+  points.x <- labels_x[c(histogram_obj$p[,'start'], histogram_obj$p[,'end'])]
   points.y <- x[points.x]
 
   # distribution
-  models <- distributions[['models']]
-  majority_vote <- lapply(models, `[[`,  model_name)
-  distribution_plotting_data <- lapply(majority_vote, function(m) {
+  mods <- lapply(histogram_obj$models, `[[`,  model_name)
+  distribution_plotting_data <- lapply(mods, function(m) {
     x <- seq(m$seg.start, m$seg.end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("x" = dens, "labels.x" = x, "dist" = m$dist)
+      data.frame("x" = dens, "labels.x" = labels_x[x], "dist" = m$dist)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
@@ -78,8 +78,6 @@ create_coverageplot.HistogramFit <- function(
   plt <- BoutrosLab.plotting.general::create.scatterplot(
     x ~ labels.x,
     data = plotting.data,
-    # Axes
-    xaxis.lab = xaxis.labels,
     # Groups
     groups = plotting.data$dist,
     col = distribution_colours,
@@ -96,6 +94,6 @@ create_coverageplot.HistogramFit <- function(
     ...
   )
 
-  # Returning plotting object
+  # Return plot
   return(plt)
 }
