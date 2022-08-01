@@ -1,19 +1,15 @@
 
 
-#' create.trackplot creates a horizontal plot with rows representing separate tracks
+#' create_trackplot creates a horizontal plot with rows representing separate tracks
 #'
-#' @param x A vector of histogram coverage
 #' @param track_data A dataframe detailing segments
 #' \describe{
 #'     \item{start}{the start position of the segment, based on histogram vector index}
 #'     \item{end}{the end position of the segment, based on histogram vector index}
 #'     \item{`metric_id`}{values; factor or continuous data for plotting}
 #'     \item{`row_id`}{character or factor; identifier for the row}
+#'     \item{colour}{colour for the row}
 #' }
-#' @param metric_id The name of the column containing the data used for plotting
-#' @param row_id The name of the column containing the data used to indicate the row of the track
-#' @param colour.scheme A colour scheme for the data
-#' @param ...
 #'
 #' TODO: Add attributes of x for labels and stuff?
 #'
@@ -21,14 +17,8 @@
 #' @export
 #'
 #' @examples
-create.trackplot = function(
-  x = NULL,
-  track_data,
-  metric_id,
-  row_id,
-  colour.scheme = distribution_colours,
-  scale.colours = c("continuous", "discrete"),
-  ...
+create_trackplot = function(
+  track_data
 ){
 
   # Error checking
@@ -43,25 +33,6 @@ create.trackplot = function(
   # Rows
   rows = unique(track_data[,row_id])
   nrows = length(rows)
-
-  # Columns
-  if(!is.null(x)){ # Add xlimits, figure out how to do this better
-    x.limits = c(1, length(x))
-    if(!is.null(names(x))){
-      labels.x = names(x)
-      labels.x <- tryCatch(
-        { labels.x = as.numeric(labels.x) },
-        warning = function(cond) {
-          message("Warning message:")
-          message("Vector names are not coercible to numeric.")
-          message("Using default indices.")
-          return(1:length(x))
-        }
-      )
-    } else {
-      labels.x = 1:length(x)
-    }
-  }
 
   # Initializing matrix
   initial.matrix = matrix(
