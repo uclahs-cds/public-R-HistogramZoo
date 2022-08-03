@@ -10,66 +10,240 @@
 #'     \item{`row_id`}{character or factor; identifier for the row}
 #'     \item{colour}{colour for the row}
 #' }
+#' @param row_id character, column name used to indicate the track row
+#' @param metric_id character, column name used to scale colour
+#' @param xlimits numeric vector of length 2 indicating the start and end indices of the track respectively
+#' @inheritParams BoutrosLab.plotting.general::create.heatmap
 #'
-#' TODO: Add attributes of x for labels and stuff?
-#'
-#' @return
+#' @return Track plot, a Trellis object. For further details, see the 'Lattice' R package.
+#' 
 #' @export
 #'
-#' @examples
+#' @examples \dontrun{
+#' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
+#' results = segment_and_fit(x, eps = 0.005)
+#' results_table = summarize_results(results)
+#' create_trackplot(
+#' track_data = results_table,
+#' row_id = "peak_id",
+#' metric_id = "value"
+#' )
+#' }
 create_trackplot = function(
-  track_data
+  track_data,
+  row_id,
+  metric_id,
+  xlimits = c(min(track_data$start), max(track_data$end)),
+  # BPG params for colours
+  colour.scheme = c("slateblue4", "violetred3"),
+  total.colours = 99,
+  colour.centering.value = 0,
+  colour.alpha = 1,
+  fill.colour = 'white',
+  at = NULL,
+  print.colour.key = TRUE,
+  colourkey.labels.at = NULL,
+  colourkey.labels = NULL,
+  # BPG defaults
+  filename = NULL,
+  main = list(label = ''),
+  main.just = "center",
+  main.x = 0.5,
+  main.y = 0.5,
+  main.cex = 3,
+  yaxis.lab = NULL,
+  xaxis.lab = NULL,
+  xaxis.lab.top = NULL,
+  xaxis.cex = 1.5,
+  xaxis.top.cex = NULL,
+  yaxis.cex = 1.5,
+  xlab.cex = 2,
+  ylab.cex = 2,
+  xlab.top.label = NULL,
+  xlab.top.cex = 2,
+  xlab.top.col = 'black',
+  xlab.top.just = "center",
+  xlab.top.x = 0.5,
+  xlab.top.y = 0,
+  xat = TRUE,
+  xat.top = NULL,
+  yat = TRUE,
+  xaxis.tck = NULL,
+  xaxis.top.tck = NULL,
+  yaxis.tck = NULL,
+  xaxis.col = 'black',
+  yaxis.col = 'black',
+  col.pos = NULL,
+  row.pos = NULL,
+  cell.text = '',
+  text.fontface = 1,
+  text.cex = 1,
+  text.col = 'black',
+  text.position = NULL,
+  text.offset = 0,
+  text.use.grid.coordinates = TRUE,
+  colourkey.cex = 3.6,
+  xaxis.rot = 90,
+  xaxis.rot.top = 90,
+  yaxis.rot = 0,
+  xlab.label = '' ,
+  ylab.label = '',
+  xlab.col = 'black',
+  ylab.col = 'black',
+  axes.lwd = 2,
+  gridline.order = 'h',
+  grid.row = FALSE,
+  grid.col = FALSE,
+  force.grid.row = FALSE,
+  force.grid.col = FALSE,
+  grid.limit = 50,
+  row.lines = seq(0, ncol(x), 1) + 0.5,
+  col.lines = seq(0, nrow(x), 1) + 0.5,
+  top.padding = 0.1,
+  bottom.padding = 0.5,
+  right.padding = 0.5,
+  left.padding = 0.5,
+  x.alternating = 1,
+  shrink = 1,
+  row.colour = 'black',
+  col.colour = 'black',
+  row.lwd = 1,
+  col.lwd = 1,
+  grid.colour = NULL,
+  grid.lwd = NULL,
+  width = 6,
+  height = 6,
+  size.units = 'in',
+  resolution = 1600,
+  enable.warnings = FALSE,
+  xaxis.fontface = 'bold',
+  yaxis.fontface = 'bold',
+  input.colours = FALSE,
+  axis.xlab.padding = 0.1,
+  ...
 ){
 
   # Error checking
-  scale.colours = match.arg(scale.colours, several.ok = FALSE)
-  if(scale.colours == "continuous"){
-    # Check that this is a colour vector of length 2
-    # Otherwise use the first two colours
-  } else if (scale.colours == "discrete"){
-    # Check that there are enough colours for each of the categories
-  }
-
+  # Checking the right format for track_data
+  # row_id and metric_id are in the data.frame
+  # row_id is integer or character?
+  # what if row_id is a factor like BPG?
+  # metric_id needs to be numeric
+  
   # Rows
-  rows = unique(track_data[,row_id])
+  rows = sort(unique(track_data[,row_id]))
   nrows = length(rows)
+  
+  # Columns
+  cols = seq(xlimits[1], xlimits[2])
+  ncols = length(cols)
 
   # Initializing matrix
   initial.matrix = matrix(
     NA,
-    ncol = nrows,
-    nrow = x.limits[2],
-    dimnames = list(labels.x, rows)
+    nrow = nrows,
+    ncol = ncols,
+    dimnames = list(rows, cols)
   )
 
-  # Encoding for discrete colours
-  if(scale == "discrete"){
-    track_data[,metric_id] = factor(track_data[,metric_id], levels = names(colour.scheme))
-  }
-
   # Filling in the matrix
-  for(i in 1:nrow(track_data) ){
-    initial.matrix[track_data[i, "start"]:track_data[i, "end"], track_data[i, row_id]] <- track_data[i, metric_id]
+  for(i in 1:nrow(track_data)){
+    initial.matrix[track_data[i, row_id], 
+                   (track_data[i, "start"] - xlimits[1] + 1):(track_data[i, "end"] - xlimits[1] + 1)] <- track_data[i, metric_id]
   }
-
-  # A hack for when there's only one row
-  if(nrows == 1){
-    initial.matrix = cbind(initial.matrix, initial.matrix)
-  }
-
-  # Colour scale # Add this as a default to a user-set parameter
-  colour.at = if(scale == "discrete") seq(0, length(colour.scheme), 1) + 0.5 else seq(min(track_data[, metric_id]), max(track_data[, metric_id]), length.out = 10)
 
   # Making a plot
   plt = BoutrosLab.plotting.general::create.heatmap(
     initial.matrix,
     clustering.method = 'none',
+    same.as.matrix = T,
     # Colours
     colour.scheme = colour.scheme,
-    at = colour.at,
-    fill.colour = "white",
-    # XX
-    print.colour.key = F
+    total.colours = total.colours,
+    colour.centering.value = colour.centering.value,
+    colour.alpha = colour.alpha,
+    fill.colour = fill.colour,
+    at = at,
+    print.colour.key = print.colour.key,
+    colourkey.labels.at = colourkey.labels.at,
+    colourkey.labels = colourkey.labels,
+    # BPG defaults
+    filename = filename,
+    main = main,
+    main.just = main.just,
+    main.x = main.x,
+    main.y = main.y,
+    main.cex = main.cex,
+    yaxis.lab = yaxis.lab,
+    xaxis.lab = xaxis.lab,
+    xaxis.lab.top = xaxis.lab.top,
+    xaxis.cex = xaxis.cex,
+    xaxis.top.cex = xaxis.top.cex,
+    yaxis.cex = yaxis.cex,
+    xlab.cex = xlab.cex,
+    ylab.cex = ylab.cex,
+    xlab.top.label = xlab.top.label,
+    xlab.top.cex = xlab.top.cex,
+    xlab.top.col = xlab.top.col,
+    xlab.top.just = xlab.top.just,
+    xlab.top.x = xlab.top.x,
+    xlab.top.y = xlab.top.y,
+    xat = xat,
+    xat.top = xat.top,
+    yat = yat,
+    xaxis.tck = xaxis.tck,
+    xaxis.top.tck = xaxis.top.tck,
+    yaxis.tck = yaxis.tck,
+    xaxis.col = xaxis.col,
+    yaxis.col = yaxis.col,
+    col.pos = col.pos,
+    row.pos = row.pos,
+    cell.text = cell.text,
+    text.fontface = text.fontface,
+    text.cex = text.cex,
+    text.col = text.col,
+    text.position = text.position,
+    text.offset = text.offset,
+    text.use.grid.coordinates = text.use.grid.coordinates,
+    colourkey.cex = colourkey.cex,
+    xaxis.rot = xaxis.rot,
+    xaxis.rot.top = xaxis.rot.top,
+    yaxis.rot = yaxis.rot,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    xlab.col = xlab.col,
+    ylab.col = ylab.col,
+    axes.lwd = axes.lwd,
+    gridline.order = gridline.order,
+    grid.row = grid.row,
+    grid.col = grid.col,
+    force.grid.row = force.grid.row,
+    force.grid.col = force.grid.col,
+    grid.limit = grid.limit,
+    row.lines = row.lines,
+    col.lines = col.lines,
+    top.padding = top.padding,
+    bottom.padding = bottom.padding,
+    right.padding = right.padding,
+    left.padding = left.padding,
+    x.alternating = x.alternating,
+    shrink = shrink,
+    row.colour = row.colour,
+    col.colour = col.colour,
+    row.lwd = row.lwd,
+    col.lwd = col.lwd,
+    grid.colour = grid.colour,
+    grid.lwd = grid.lwd,
+    width = width,
+    height = height,
+    size.units = size.units,
+    resolution = resolution,
+    enable.warnings = enable.warnings,
+    xaxis.fontface = xaxis.fontface,
+    yaxis.fontface = yaxis.fontface,
+    input.colours = input.colours,
+    axis.xlab.padding = axis.xlab.padding,
+    ...
   )
 
   # Return plt
