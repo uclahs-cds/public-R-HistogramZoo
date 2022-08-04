@@ -124,11 +124,31 @@ create_trackplot = function(
 ){
 
   # Error checking
-  # Checking the right format for track_data
-  # row_id and metric_id are in the data.frame
-  # row_id is integer or character?
-  # what if row_id is a factor like BPG?
-  # metric_id needs to be numeric
+  stopifnot(is.data.frame(track_data))
+  if(!row_id %in% colnames(track_data)){ 
+    stop("row_id not found in track_data columns") 
+  }
+  if(!metric_id %in% colnames(track_data)){
+    stop("metric_id not found in track_data columns")
+  }
+  if(!is.numeric(track_data[,metric_id])){
+    stop("metric_id column needs to be numeric")
+  }
+  if( !is.factor(track_data[,row_id]) & !is.character(track_data[,row_id]) & !is.numeric(track_data[,row_id]) ){
+    stop("row_id needs to be factor, character or numeric")
+  }
+  if(!is_equal_integer(xlimits)){
+    stop("xlimits must be integer")
+  }
+  if(!is_equal_integer(track_data[,"start"]) | ! is_equal_integer(track_data[,"end"]) ){
+    stop("start and end must be integer")
+  }
+  if(!all(track_data[,"start"] <= track_data[,"end"])){
+    stop("start and end must represent valid intervals")
+  }
+  if(!all(track_data[,"start"] >= xlimits[1]) | !all(track_data[,"end"] <= xlimits[2])){
+    warning("some intervals are truncated by xlimits")
+  }
   
   # Rows
   rows = sort(unique(track_data[,row_id]))
@@ -148,8 +168,9 @@ create_trackplot = function(
 
   # Filling in the matrix
   for(i in 1:nrow(track_data)){
-    initial.matrix[track_data[i, row_id], 
-                   (track_data[i, "start"] - xlimits[1] + 1):(track_data[i, "end"] - xlimits[1] + 1)] <- track_data[i, metric_id]
+    itv_start = max(c(1, track_data[i, "start"] - xlimits[1] + 1))
+    itv_end = min(c(xlimits[2] - xlimits[1] + 1, track_data[i, "end"] - xlimits[1] + 1))
+    initial.matrix[track_data[i, row_id], itv_start:itv_end] <- track_data[i, metric_id]
   }
 
   # Making a plot
