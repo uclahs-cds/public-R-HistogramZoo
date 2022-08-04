@@ -63,3 +63,7 @@ index_to_start_end <- function(p, right = TRUE) {
 generate_interval_labels <- function(interval_start, interval_end){
   ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
 }
+
+is_equal_integer <- function(x){
+  all(x%%1 == 0)
+}
