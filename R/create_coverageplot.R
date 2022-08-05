@@ -1,24 +1,31 @@
 
 # Defining plotting parameters
-distributions = c(
+distributions <- c(
   "coverage",
   "norm",
   "gamma",
   "unif"
 )
 
-distribution_colours = c(
+distribution_colours <- c(
   "coverage" = "black",
   "norm" = "darkorange",
   "gamma" = "chartreuse4",
   "unif" = "darkorchid4"
 )
 
-distribution_lwd = c(
+distribution_lwd <- c(
   "coverage" = 1,
   "norm" = 2.5,
   "gamma" = 2.5,
   "unif" = 2.5
+)
+
+distribution_names <- c(
+  "coverage" = "Coverage",
+  "norm" = "Normal",
+  "gamma" = "Gamma",
+  "unif" = "Uniform"
 )
 
 #' create_coverageplot creates a histogram/coverage plot with the potential to add annotations
@@ -155,6 +162,26 @@ create_coverageplot.HistogramFit <- function(
   type = c('a'),
   plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
   lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
+  legend = list(
+    right = list(
+      fun = lattice::draw.key,
+      args = list(
+        key = list(
+          points = list(
+            col = "black",
+            pch = 22,
+            cex = 2,
+            fill = distribution_colours[histogram_obj$distributions]
+          ),
+          text = list(
+            lab = distribution_names[histogram_obj$distributions]
+          ),
+          padding.text = 3,
+          cex = 1
+        )
+      )
+    )
+  ),
   ...
 ){
 
@@ -199,6 +226,8 @@ create_coverageplot.HistogramFit <- function(
       ylab.label = ylab.label,
       # Lines & PCH
       type = type,
+      # Legend
+      legend = legend,
       # Adding extra points
       add.points = add.points,
       points.x = points.x,
