@@ -94,6 +94,7 @@ create_coverageplot.Histogram <- function(
   
   # Error checking
   stopifnot(inherits(histogram_obj, "Histogram"))
+  plotting.func = match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
@@ -188,7 +189,8 @@ create_coverageplot.HistogramFit <- function(
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
-
+  plotting.func = match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
+  
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
