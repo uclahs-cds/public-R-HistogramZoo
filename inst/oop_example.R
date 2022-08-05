@@ -28,6 +28,19 @@ create_residualplot(
   results
 )
 
+# Testing a Longer Histogram ----------------------------------------------
+
+x = rnorm(1000, mean = 100, sd = 50)
+x = observations_to_histogram(round(x), histogram_bin_width = 5)
+
+create_coverageplot(x)
+
+results = segment_and_fit(x, eps = 1)
+
+create_coverageplot(
+  results
+)
+
 # GenomicHistogram Example ------------------------------------------------
 
 

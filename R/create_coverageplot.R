@@ -30,6 +30,8 @@ distribution_lwd = c(
 #' @param points.y The y co-ordinates where additional points should be drawn, if `histogram_obj` is a `HistogramFit` object, default segment_and_fit points
 #' @param col colour vector for the distributions, default see `HistogramZoo:::distribution_colours`
 #' @param lwd lwd vector for the distributions, default see `HistogramZoo:::distribution_lwd`
+#' @param type `type` in R graphics. Default: if histogram length < 50, plot `p`, otherwise `a`
+#' @param plotting.func if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
 #' @inheritParams BoutrosLab.plotting.general::create.scatterplot 
 #' 
 #' @return Coverage plot, a Trellis object. For further details, see the 'Lattice' R package.
@@ -43,6 +45,7 @@ distribution_lwd = c(
 create_coverageplot <- function(
     histogram_obj, model_name,
     col, lwd,
+    type, plotting.func,
     add.points, points.x, points.y, points.pch, points.col, points.col.border, points.cex,
     filename,
     main, main.just, main.x, main.y, main.cex,
@@ -50,7 +53,7 @@ create_coverageplot <- function(
     xlab.top.label, xlab.top.cex, xlab.top.col, xlab.top.just, xlab.top.x, xlab.top.y,
     xlimits, ylimits, xat, yat, xaxis.lab, yaxis.lab, xaxis.cex, yaxis.cex,
     xaxis.rot, yaxis.rot, xaxis.fontface, yaxis.fontface, xaxis.col, yaxis.col, xaxis.tck, yaxis.tck,
-    type, cex, col.border, pch, lty, alpha,
+    cex, col.border, pch, lty, alpha,
     axes.lwd, 
     key, legend,
     top.padding, bottom.padding, right.padding, left.padding,
@@ -61,6 +64,7 @@ create_coverageplot <- function(
     add.line.segments, line.start, line.end, line.col, line.lwd,
     add.text, text.labels, text.x, text.y, text.col, text.cex, text.fontface,
     height, width, size.units, resolution, enable.warnings, 
+    lollipop.bar.y, lollipop.bar.color,
     ...
 ){
   UseMethod('create_coverageplot')
@@ -68,10 +72,14 @@ create_coverageplot <- function(
 
 
 #' @export
+#' @importFrom BoutrosLab.plotting.general create.scatterplot
+#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.Histogram <- function(
     histogram_obj,
     main = histogram_obj$region_id,
-    type = c('a'),
+    type = if(length(histogram_obj) < 50) c('p') else c('a'),
+    plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
+    lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
     ylab.label = "Histogram Data",
     xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
     ...
@@ -87,17 +95,21 @@ create_coverageplot.Histogram <- function(
   plotting.data <- data.frame("x" = x, "labels.x" = labels_x)
 
   # Plotting
-  plt <- BoutrosLab.plotting.general::create.scatterplot(
-    x ~ labels.x,
-    data = plotting.data,
-    # Lines & PCH
-    type = type,
-    # Labels
-    main = main,
-    xlab.label = xlab.label,
-    ylab.label = ylab.label,
-    # Extra plotting parameters
-    ...
+  plt <- do.call(
+    plotting.func,
+    list(
+      x ~ labels.x,
+      data = plotting.data,
+      # Lines & PCH
+      type = type,
+      # Labels
+      main = main,
+      xlab.label = xlab.label,
+      ylab.label = ylab.label,
+      # Extra plotting parameters
+      lollipop.bar.y = lollipop.bar.y,
+      ...
+    )
   )
   
   # Return plot
@@ -125,6 +137,8 @@ return_y_points = function(histogram_obj){
 }
 
 #' @export
+#' @importFrom BoutrosLab.plotting.general create.scatterplot
+#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.HistogramFit <- function(
   histogram_obj,
   model_name = c("consensus", histogram_obj$histogram_metric),
@@ -139,6 +153,8 @@ create_coverageplot.HistogramFit <- function(
   points.pch = 19,
   points.col = 'red',
   type = c('a'),
+  plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
+  lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
   ...
 ){
 
@@ -168,27 +184,31 @@ create_coverageplot.HistogramFit <- function(
   plotting.data$dist <- factor(plotting.data$dist, levels = distributions)
 
   # Plotting
-  plt <- BoutrosLab.plotting.general::create.scatterplot(
-    x ~ labels.x,
-    data = plotting.data,
-    # Groups
-    groups = plotting.data$dist,
-    col = col,
-    lwd = lwd,
-    # Labels
-    main = main,
-    xlab.label = xlab.label,
-    ylab.label = ylab.label,
-    # Lines & PCH
-    type = type,
-    # Adding extra points
-    add.points = add.points,
-    points.x = points.x,
-    points.y = points.y,
-    points.pch = points.pch,
-    points.col = points.col,
-    # Extra plotting parameters
-    ...
+  plt <- do.call(
+    plotting.func,
+    list(
+      x ~ labels.x,
+      data = plotting.data,
+      # Groups
+      groups = plotting.data$dist,
+      col = col,
+      lwd = lwd,
+      # Labels
+      main = main,
+      xlab.label = xlab.label,
+      ylab.label = ylab.label,
+      # Lines & PCH
+      type = type,
+      # Adding extra points
+      add.points = add.points,
+      points.x = points.x,
+      points.y = points.y,
+      points.pch = points.pch,
+      points.col = points.col,
+      # Extra plotting parameters
+      lollipop.bar.y = lollipop.bar.y,
+      ...
+    )
   )
 
   # Return plot
