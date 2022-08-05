@@ -25,7 +25,11 @@ create_coverageplot(
 )
 
 create_residualplot(
-  results
+  results,
+  add_changepoint_lines = T,
+  abline.lwd = 2,
+  abline.col = "black",
+  ylimits = c(-1, 1)
 )
 
 # Testing a Longer Histogram ----------------------------------------------
