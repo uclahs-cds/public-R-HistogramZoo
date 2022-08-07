@@ -88,7 +88,12 @@ create_residualplot.HistogramFit = function(
   
   # Add changepoint lines
   if(add_changepoint_lines){
-    abline.v = c(abline.v, which(abs(diff(sign(plotting.data$Residuals))) == 2))
+    abline.v = unique(
+      c(abline.v, which(abs(diff(sign(plotting.data$Residuals))) == 2))
+    )
+    abline.h = unique(
+      c(abline.h, 0)
+    )
   }
 
   # Plotting
