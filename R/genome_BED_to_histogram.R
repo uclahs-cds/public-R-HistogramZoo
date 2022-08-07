@@ -47,7 +47,7 @@ genome_BED_to_histogram = function(
   # Formatting/generating regions, output: a GRangesList object defining regions
   if(inherits(regions, "CompressedGRangesList")){
     if(is.null(names(regions))){
-      names(regions) <- generate_identifiers( BiocGenerics::unlist( range(regions) ) )
+      names(regions) <- generate_identifiers( unlist( range(regions) ) )
     }
   } else if (inherits(regions, "GRanges")){
     ids <- if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
