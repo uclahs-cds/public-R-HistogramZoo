@@ -1,5 +1,5 @@
 
-#' Calculates coverage of genes from annotated genome bed files
+#' Generate Histograms from BED files
 #'
 #' @param filenames A vector of BED filenames. The `name` column of the BED files must indicate gene or transcript name
 #' @param n_fields Number of columns in the BED file that conform to BED file standards
@@ -22,7 +22,7 @@ genome_BED_to_histogram = function(
   if(!all(existing_files)){
     stop(paste0(basename(filenames[!existing_files]), collapse = ","), " don't exist")
   }
-  if(!(is(regions, "GRanges") | is(regions, "CompressedGRangesList") | is.null(regions))){
+  if(!(inherits(regions, "GRanges") | inherits(regions, "CompressedGRangesList") | is.null(regions))){
     stop("regions must be a GRanges or GRangesList object or set to NULL")
   }
   if(!is_equal_integer(histogram_bin_size) | histogram_bin_size < 1 ){
@@ -45,11 +45,11 @@ genome_BED_to_histogram = function(
   coverage <- GenomicRanges::coverage(peaks)
 
   # Formatting/generating regions, output: a GRangesList object defining regions
-  if(is(regions, "CompressedGRangesList")){
+  if(inherits(regions, "CompressedGRangesList")){
     if(is.null(names(regions))){
       names(regions) <- generate_identifiers( BiocGenerics::unlist( range(regions) ) )
     }
-  } else if (is(regions, "GRanges")){
+  } else if (inherits(regions, "GRanges")){
     ids <- if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
     regions <- S4Vectors::split(regions, f = ids)
   } else { # regions is NULL
