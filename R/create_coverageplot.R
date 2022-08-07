@@ -38,7 +38,7 @@ distribution_names <- c(
 #' @param col colour vector for the distributions, default see `HistogramZoo:::distribution_colours`
 #' @param lwd lwd vector for the distributions, default see `HistogramZoo:::distribution_lwd`
 #' @param type `type` in R graphics. Default: if histogram length < 50, plot `p`, otherwise `a`
-#' @param plotting.func if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
+#' @param plotting.func string, either 'create.lollipop' or 'create.scatterplot', Default: if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
 #' @inheritParams BoutrosLab.plotting.general::create.scatterplot 
 #' 
 #' @return Coverage plot, a Trellis object. For further details, see the 'Lattice' R package.
