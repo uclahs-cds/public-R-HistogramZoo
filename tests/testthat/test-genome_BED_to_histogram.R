@@ -18,7 +18,7 @@ gr_regions = GRanges(
 )
 
 # Defining regions as a GRangesList object
-glist_regions = split(gr_regions, f = 1:2)
+glist_regions = S4Vectors::split(gr_regions, f = 1:2)
 
 # GRangesList representes a set of segmented regions
 glist_segmented = GRangesList(gr_regions)
