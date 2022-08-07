@@ -14,6 +14,7 @@
 #' @param metric_id character, column name used to scale colour
 #' @param xlimits numeric vector of length 2 indicating the start and end indices of the track respectively
 #' @inheritParams BoutrosLab.plotting.general::create.heatmap
+#' @param ... Additional arguments to be passed to BoutrosLab.plottin.general::create.heatmap
 #'
 #' @return Track plot, a Trellis object. For further details, see the 'Lattice' R package.
 #' 
