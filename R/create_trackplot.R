@@ -169,7 +169,7 @@ create_trackplot = function(
   # Filling in the matrix
   for(i in 1:nrow(track_data)){
     itv_start <- max(c(1, track_data[i, "start"] - xlimits[1] + 1))
-    itv_end < min(c(xlimits[2] - xlimits[1] + 1, track_data[i, "end"] - xlimits[1] + 1))
+    itv_end <- min(c(xlimits[2] - xlimits[1] + 1, track_data[i, "end"] - xlimits[1] + 1))
     initial.matrix[track_data[i, row_id], itv_start:itv_end] <- track_data[i, metric_id]
   }
 
