@@ -7,7 +7,8 @@ str_match <- function(x, pattern) {
   )
 }
 
-# Return a string representation of an object
+#' Return a string representation of an object
+#' @param x an object
 dput_str <- function(x) {
   return(
     paste0(utils::capture.output(dput(x)), collapse = " ")
@@ -60,10 +61,8 @@ index_to_start_end <- function(p, right = TRUE) {
   return( as.data.frame(return_list) )
 }
 
-generate_interval_labels <- function(interval_start, interval_end){
-  ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
-}
-
+#' Checks if a numeric vector can be used as an integer vector
+#' @param x A numeric vector
 is_equal_integer <- function(x){
   all(x%%1 == 0)
 }
