@@ -22,18 +22,14 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     S4Vectors,
-    fitdistrplus,
-    mixtools,
     truncdist,
     BoutrosLab.plotting.general,
-    splus2R,
     DEoptim,
     isotone,
     stringr,
     IRanges,
     GenomicRanges,
     valr,
-    rtracklayer,
     GenomeInfoDb
 Suggests:
     knitr,
