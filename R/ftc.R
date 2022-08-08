@@ -102,10 +102,15 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 ftc <- function(x, s = NULL, eps = 1) {
 
   # Error checking
-  stopifnot(is.numeric(x))
-  stopifnot(is.numeric(s)) # Technically, we want to check that s is an index
-  stopifnot(all(s <= length(x) & s >= 0))
-  stopifnot(is.numeric(eps)) # Other criteria on eps?
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
+  if(!is_equal_integer(s) | !all(s <= length(x) & s >= 0)){
+    stop("s must be functional indices")
+  }
+  if(!is.numeric(eps) | !(eps > 0)){
+    stop("eps must be a positive numeric")
+  }
 
   # Generating change points if none are provided
   if(is.null(s)){
