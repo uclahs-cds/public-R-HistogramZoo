@@ -18,6 +18,14 @@ fit_distributions = function(
   distributions = c("norm", "gamma", "unif")) {
 
   # Matching arguments
+  # TODO: consider checking minimum length of histogram_data or 
+  # check if Histogram object
+  if(!is.numeric(histogram_data)){
+    stop('histogram_data has to be a numeric vector')
+  }
+  if(!is.logical(truncated) | length(truncated) != 1){
+    stop("truncated has to be a logical of length 1")
+  }
   metric <- match.arg(metric, several.ok = TRUE)
   distributions <- match.arg(distributions, several.ok = TRUE)
 
