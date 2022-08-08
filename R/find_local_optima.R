@@ -2,7 +2,7 @@
 #' Finds the local minima m and maxima M such that
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
 #'
-#' @param x numeric vector
+#' @param x a numeric vector, representing the density of a histogram
 #' @param threshold numeric, minimum distance between local optima
 #'
 #' @export
