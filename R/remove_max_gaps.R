@@ -13,11 +13,26 @@
 remove_max_gaps <- function(start.end.points, max.gaps, remove.short.segment = 0) {
 
   # Error checking
+  if(!is.data.frame(start.end.points) | !all(c("start", "end") %in% colnames(start.end.points))){
+    stop("start.end.points should be a data.frame with columns start and end")
+  }
+  if(!is_equal_integer(start.end.points[,"start"]) | !is_equal_integer(start.end.points[,"end"]) | !all(start.end.points[,"start"] <= start.end.points[,"end"])){
+    stop("start.end.points start and end columns must represent functional intervals, i.e end >= start and end and start are numeric integers")
+  }
   if(nrow(max.gaps) == 0) {
     # Return the original points as start/end data frame
     return(start.end.points)
   }
-
+  if(!is.data.frame(max.gaps) | !all(c("start", "end") %in% colnames(max.gaps))){
+    stop("max.gaps should be a data.frame with columns start and end")
+  }
+  if(!is_equal_integer(max.gaps[,"start"]) | !is_equal_integer(max.gaps[,"end"]) | !all(max.gaps[,"start"] <= max.gaps[,"end"])){
+    stop("max.gaps start and end columns must represent functional intervals, i.e end >= start and end and start are numeric integers")
+  }
+  if(!is_equal_integer(remove.short.segment) | length(remove.short.segment) != 1){
+    stop("remove.short.segment must be a numeric integer of length 1")
+  }
+  
   # For each segment, create a sequence of consecutive integers
   seg.seq.list <- mapply(seq.int, from = start.end.points$start, to = start.end.points$end, by = 1, SIMPLIFY = FALSE)
 
