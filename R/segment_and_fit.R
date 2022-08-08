@@ -1,3 +1,5 @@
+#' Find changepoints in a vector with uniform stretches of values
+#' @param x A numeric vector
 find_stepfunction_chgpts <- function(x){
   change_points <- which(diff(x) != 0)
   change_points_plus <- change_points+1
@@ -66,8 +68,38 @@ segment_and_fit <- function(
   distributions = c("norm", "gamma", "unif")
   ) {
 
-  # Checking types
+  # Error checking
   stopifnot(inherits(histogram_obj, "Histogram"))
+  if(!is.numeric(histogram_count_threshold) | !(histogram_count_threshold >= 0)){
+    stop("histogram_count_threshold should be a numeric greater than or equal to 0")
+  }
+  if(!is.numeric(eps) | !(eps > 0)){
+    stop("eps must be a positive numeric")
+  }
+  if(!is.logical(truncated_models) | length(truncated_models) != 1){
+    stop("truncated_models has to be a logical of length 1")
+  }
+  if(!is.numeric(uniform_peak_threshold) | length(uniform_peak_threshold) != 1 ){
+    stop("uniform_peak_threshold must be a numeric of length 1")
+  }
+  if(!(uniform_peak_threshold >= 0 & uniform_peak_threshold <= 1)) {
+    stop("uniform_peak_threshold must be between 0 and 1")
+  }
+  if(!is_equal_integer(uniform_peak_stepsize) | !(uniform_peak_stepsize > 0) | length(uniform_peak_stepsize) != 1){
+    stop("uniform_peak_stepsize must be functional as a positive integer of length 1")
+  }
+  if(!is.logical(remove_low_entropy) | length(remove_low_entropy) != 1){
+    stop("remove_low_entropy has to be a logical of length 1")
+  }
+  if(!is_equal_integer(min_gap_size) | length(min_gap_size) != 1){
+    stop("min_gap_size must be a numeric integer of length 1")
+  }
+  if(!is_equal_integer(min_peak_size) | length(min_peak_size) != 1){
+    stop("min_peak_size must be a numeric integer of length 1")
+  }
+  if(!is.logical(max_uniform) | length(max_uniform) != 1){
+    stop("max_uniform has to be a logical of length 1")
+  }
   histogram_metric <- match.arg(histogram_metric, several.ok = T)
   distributions <- match.arg(distributions, several.ok = T)
 
