@@ -1,6 +1,6 @@
 
 #' Uniform density generation
-#' @param x A vector
+#' @param x A numeric vector representing the density of a histogram
 #'
 #' @return A vector of uniform density with length of x
 generate_uniform_distribution <- function(x){
@@ -103,7 +103,7 @@ maximal_meaningful_interval <- function(x) {
 #' Find all meaningful gaps
 #'
 #' @param x histogram (vector of counts)
-#' @param change.points Change points
+#' @param change.points the change points (e.g. local min/max) in the vector x
 #'
 #' @return A data.frame with columns
 #' \describe{
@@ -114,9 +114,20 @@ maximal_meaningful_interval <- function(x) {
 #' }
 #' @export
 find_all_meaningful_gap <- function(x, change.points) {
+
+  # Error checking
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
+  if(!is_equal_integer(change.points) | !all(change.points <= length(x) & change.points >= 0)){
+    stop("change.points must be functional indices")
+  }
+
+  # Generating a todo set of segments
   todo <- expand.grid(start = change.points, end = change.points)
   todo <- todo[todo$end > todo$start,]
 
+  # Identifying meaningful gaps
   mgap <- do.call(rbind, lapply(1:nrow(todo), function(i) {
     meaningful_gap(
       h = x/sum(x),
@@ -142,8 +153,8 @@ find_all_meaningful_gap <- function(x, change.points) {
 #' Finds the meaningful gaps between the points in s
 #'
 #' @param x The histogram data
-#' @param seg.points the segment points
-#' @param change.points the change points
+#' @param seg.points the segment points in the vector x
+#' @param change.points the change points (e.g. local min/max) in the vector x
 #' @param min.gap The minimum gap to be considered a meaningful gap
 #'
 #' @return A data.frame with columns
@@ -156,6 +167,21 @@ find_all_meaningful_gap <- function(x, change.points) {
 #' @export
 meaningful_gaps_local <- function(x, seg.points, change.points, min.gap = 2) {
 
+  # Error checking
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
+  if(!is_equal_integer(seg.points) | !all(seg.points <= length(x) & seg.points >= 0)){
+    stop("change.points must be functional indices")
+  }
+  if(!is_equal_integer(change.points) | !all(change.points <= length(x) & change.points >= 0)){
+    stop("change.points must be functional indices")
+  }
+  if(!is_equal_integer(min.gap) | length(min.gap) != 1){
+    stop("min.gap must be a numeric integer of length 1")
+  }
+
+  # Identifying max gaps
   max.gaps.list <- lapply(seq(2, length(seg.points)), function(i) {
     x.sub <- x[seg.points[i-1]:seg.points[i]]
     chg.pts <- change.points[change.points >= seg.points[i-1] & change.points <= seg.points[i]] - seg.points[i-1] + 1
