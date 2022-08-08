@@ -126,6 +126,7 @@ create_coverageplot.Histogram <- function(
 
 
 #' Returns the segment_and_fit x coordinates of the identified points
+#' @param histogram_obj A HistogramFit object
 return_x_points = function(histogram_obj){
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   return(
@@ -136,6 +137,7 @@ return_x_points = function(histogram_obj){
 }
 
 #' Returns the segment_and_fit y coordinates of the identified points
+#' @param histogram_obj A HistogramFit object
 return_y_points = function(histogram_obj){
   return(
     histogram_obj$histogram_data[
