@@ -5,8 +5,18 @@
 #' @param n_fields Number of columns in the BED file that conform to BED file standards. Default 4
 #' @param regions A GRanges or GRangesList object representing regions of interest defining histograms, a GRangesList object allows for the specification of non-continuous segments, default NULL - regions are taken as the set of elements with nonzero coverage
 #' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram. Default 1
-#' @param allow_overlapping_segments_per_sample logical, if FALSE, overlapping segments in the same file will be de-duplicated in the coverage calculation, 
+#' @param allow_overlapping_segments_per_sample logical, if FALSE, overlapping segments in the same file will be de-duplicated in the coverage calculation,
 #' if TRUE, they will be taken as separate input, default FALSE
+#' 
+#' @examples \dontrun{
+#' datadir = system.file("extdata", "dna_bedfiles",  package = "ConsensusPeaks")
+#' filenames = list.files(datadir, pattern = ".bed$")
+#' filenames = file.path(datadir, filenames)
+#' histograms = genome_BED_to_histogram(
+#' filenames = filenames,
+#' n_fields = n_fields,
+#' histogram_bin_size = 1)
+#' }
 #'
 #' @return A list of GenomicHistogram objects
 #' @export
@@ -17,7 +27,7 @@ genome_BED_to_histogram = function(
   histogram_bin_size = 1,
   allow_overlapping_segments_per_sample = F
 ){
-  
+
   # Error checking
   existing_files <- file.exists(filenames)
   if(!all(existing_files)){
@@ -40,7 +50,7 @@ genome_BED_to_histogram = function(
     segs_gr <- GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
     segs_gr <- base0_to_base1(segs_gr)
     if(!allow_overlapping_segments_per_sample){ segs_gr <- GenomicRanges::reduce(segs_gr) }
-    return(segs_gr) 
+    return(segs_gr)
   })
   peaks <- do.call(c, peaks)
   coverage <- GenomicRanges::coverage(peaks)
@@ -59,14 +69,14 @@ genome_BED_to_histogram = function(
     ids <- generate_identifiers(regions)
     regions <- S4Vectors::split(regions, f = ids)
   }
-  
+
   # Sort regions
   regions <- sort(regions)
-  
+
   # Generating Histogram objects
   return(
     structure(
-      lapply(names(regions), function(id) ConsensusPeaks:::coverage_to_histogram(
+      lapply(names(regions), function(id) coverage_to_histogram(
         region = regions[[id]],
         region_id = id,
         coverage = coverage,
