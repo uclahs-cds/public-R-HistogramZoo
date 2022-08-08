@@ -1,6 +1,6 @@
 
 # constructor
-new_Histogram = function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, class = character(), ...){
+new_Histogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, class = character(), ...){
 
   # Checking types
   stopifnot(is.double(histogram_data))
@@ -22,7 +22,7 @@ new_Histogram = function(histogram_data = NULL, interval_start = NULL, interval_
 }
 
 # validator
-validate_Histogram = function(x){
+validate_Histogram <- function(x){
 
   # Attributes
   histogram_data <- x$histogram_data
@@ -80,7 +80,7 @@ validate_Histogram = function(x){
 #'
 #' @examples
 #' x = Histogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 1:10)
-Histogram = function(
+Histogram <- function(
     histogram_data = double(),
     interval_start = integer(),
     interval_end = integer(),

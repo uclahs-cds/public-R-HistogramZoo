@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples \dontrun{ observations_to_histogram(sample(1:10, 100, replace = T)) }
-observations_to_histogram = function(x, histogram_bin_width = 1) {
+observations_to_histogram <- function(x, histogram_bin_width = 1) {
 
   # Error checking
   stopifnot(is.numeric(x))

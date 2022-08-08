@@ -1,6 +1,6 @@
 
 #' @export
-print.HistogramFit = function(x, ...){
+print.HistogramFit <- function(x, ...){
 
   print.Histogram(x) # NextMethod?
 

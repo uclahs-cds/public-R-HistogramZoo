@@ -17,7 +17,7 @@
 #' @param ... Additional arguments to be passed to BoutrosLab.plottin.general::create.heatmap
 #'
 #' @return Track plot, a Trellis object. For further details, see the 'Lattice' R package.
-#' 
+#'
 #' @export
 #'
 #' @examples \dontrun{
@@ -126,8 +126,8 @@ create_trackplot = function(
 
   # Error checking
   stopifnot(is.data.frame(track_data))
-  if(!row_id %in% colnames(track_data)){ 
-    stop("row_id not found in track_data columns") 
+  if(!row_id %in% colnames(track_data)){
+    stop("row_id not found in track_data columns")
   }
   if(!metric_id %in% colnames(track_data)){
     stop("metric_id not found in track_data columns")
@@ -150,17 +150,17 @@ create_trackplot = function(
   if(!all(track_data[,"start"] >= xlimits[1]) | !all(track_data[,"end"] <= xlimits[2])){
     warning("some intervals are truncated by xlimits")
   }
-  
+
   # Rows
   rows <- sort(unique(track_data[,row_id]))
   nrows <- length(rows)
-  
+
   # Columns
   cols <- seq(xlimits[1], xlimits[2])
   ncols <- length(cols)
 
   # Initializing matrix
-  initial.matrix = matrix(
+  initial.matrix <- matrix(
     NA,
     nrow = nrows,
     ncol = ncols,

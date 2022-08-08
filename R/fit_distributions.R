@@ -33,7 +33,7 @@ fit_distributions = function(
   # rate.init <- hist.mean / hist.var
 
   # Optimization Function
-  .hist.optim = function(params, .dist = c("norm", "gamma")) {
+  .hist.optim <- function(params, .dist = c("norm", "gamma")) {
     # Compute the expected counts for the given parameters
     args <- c(list(x = bin), params)
     if(truncated) {

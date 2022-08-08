@@ -39,8 +39,8 @@ distribution_names <- c(
 #' @param lwd lwd vector for the distributions, default see `HistogramZoo:::distribution_lwd`
 #' @param type `type` in R graphics. Default: if histogram length < 50, plot `p`, otherwise `a`
 #' @param plotting.func string, either 'create.lollipop' or 'create.scatterplot', Default: if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
-#' @inheritParams BoutrosLab.plotting.general::create.scatterplot 
-#' 
+#' @inheritParams BoutrosLab.plotting.general::create.scatterplot
+#'
 #' @return Coverage plot, a Trellis object. For further details, see the 'Lattice' R package.
 #' @export
 #'
@@ -61,16 +61,16 @@ create_coverageplot <- function(
     xlimits, ylimits, xat, yat, xaxis.lab, yaxis.lab, xaxis.cex, yaxis.cex,
     xaxis.rot, yaxis.rot, xaxis.fontface, yaxis.fontface, xaxis.col, yaxis.col, xaxis.tck, yaxis.tck,
     cex, col.border, pch, lty, alpha,
-    axes.lwd, 
+    axes.lwd,
     key, legend,
     top.padding, bottom.padding, right.padding, left.padding,
     key.top, key.left.padding, ylab.axis.padding, axis.key.padding,
-    x.spacing, y.spacing,  
+    x.spacing, y.spacing,
     abline.h, abline.v, abline.col, abline.lwd, abline.lty,
     add.rectangle, xleft.rectangle, ybottom.rectangle, xright.rectangle, ytop.rectangle, col.rectangle, alpha.rectangle,
     add.line.segments, line.start, line.end, line.col, line.lwd,
     add.text, text.labels, text.x, text.y, text.col, text.cex, text.fontface,
-    height, width, size.units, resolution, enable.warnings, 
+    height, width, size.units, resolution, enable.warnings,
     lollipop.bar.y, lollipop.bar.color,
     ...
 ){
@@ -91,10 +91,10 @@ create_coverageplot.Histogram <- function(
     xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
     ...
 ){
-  
+
   # Error checking
   stopifnot(inherits(histogram_obj, "Histogram"))
-  plotting.func = match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
+  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
@@ -119,7 +119,7 @@ create_coverageplot.Histogram <- function(
       ...
     )
   )
-  
+
   # Return plot
   return(plt)
 }
@@ -127,7 +127,7 @@ create_coverageplot.Histogram <- function(
 
 #' Returns the segment_and_fit x coordinates of the identified points
 #' @param histogram_obj A HistogramFit object
-return_x_points = function(histogram_obj){
+return_x_points <- function(histogram_obj){
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   return(
     labels_x[
@@ -138,7 +138,7 @@ return_x_points = function(histogram_obj){
 
 #' Returns the segment_and_fit y coordinates of the identified points
 #' @param histogram_obj A HistogramFit object
-return_y_points = function(histogram_obj){
+return_y_points <- function(histogram_obj){
   return(
     histogram_obj$histogram_data[
       c(histogram_obj$p[,'start'], histogram_obj$p[,'end'])
@@ -191,8 +191,8 @@ create_coverageplot.HistogramFit <- function(
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
-  plotting.func = match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
-  
+  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
+
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label

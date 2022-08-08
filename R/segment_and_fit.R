@@ -1,4 +1,4 @@
-find_stepfunction_chgpts = function(x){
+find_stepfunction_chgpts <- function(x){
   change_points <- which(diff(x) != 0)
   change_points_plus <- change_points+1
   keep <- (x[change_points] < x[change_points_plus])
@@ -16,7 +16,7 @@ find_stepfunction_chgpts = function(x){
 #' @examples
 #' find_consecutive_threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
 #' find_consecutive_threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
-find_consecutive_threshold = function(
+find_consecutive_threshold <- function(
   x,
   threshold = 0){
   x_thresholded <- rle(x > threshold)

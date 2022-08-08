@@ -10,7 +10,7 @@
 #' @param abline.col line colour, defaults to lightgrey
 #' @param abline.lwd line width, defaults to 0.01
 #' @param abline.lty line style, defaults to dotted
-#' @inheritParams BoutrosLab.plotting.general::create.scatterplot 
+#' @inheritParams BoutrosLab.plotting.general::create.scatterplot
 #'
 #' @return Residual scatterplot, a Trellis object. For further details, see the 'Lattice' R package.
 #' @export
@@ -31,16 +31,16 @@ create_residualplot <- function(
     xlimits, ylimits, xat, yat, xaxis.lab, yaxis.lab, xaxis.cex, yaxis.cex,
     xaxis.rot, yaxis.rot, xaxis.fontface, yaxis.fontface, xaxis.col, yaxis.col, xaxis.tck, yaxis.tck,
     type, cex, pch, col, col.border, lty, lwd, alpha,
-    axes.lwd, 
+    axes.lwd,
     key, legend,
     top.padding, bottom.padding, right.padding, left.padding,
     key.top, key.left.padding, ylab.axis.padding, axis.key.padding,
-    x.spacing, y.spacing,  
+    x.spacing, y.spacing,
     add.rectangle, xleft.rectangle, ybottom.rectangle, xright.rectangle, ytop.rectangle, col.rectangle, alpha.rectangle,
     add.points, points.x, points.y, points.pch, points.col, points.col.border, points.cex,
     add.line.segments, line.start, line.end, line.col, line.lwd,
     add.text, text.labels, text.x, text.y, text.col, text.cex, text.fontface,
-    height, width, size.units, resolution, enable.warnings, 
+    height, width, size.units, resolution, enable.warnings,
     ...
 ){
   UseMethod('create_residualplot')
@@ -64,7 +64,7 @@ create_residualplot.HistogramFit = function(
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
   stopifnot(is.logical(add_changepoint_lines))
-  
+
   # Extracting histogram_data
   x <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
@@ -85,13 +85,13 @@ create_residualplot.HistogramFit = function(
   # Calculating residuals
   plotting.data <- merge(plotting.data, distribution_plotting_data, by = "labels.x", all = T)
   plotting.data$Residuals <- plotting.data$density - plotting.data$fitted
-  
+
   # Add changepoint lines
   if(add_changepoint_lines){
-    abline.v = unique(
+    abline.v <- unique(
       c(abline.v, which(abs(diff(sign(plotting.data$Residuals))) == 2))
     )
-    abline.h = unique(
+    abline.h <- unique(
       c(abline.h, 0)
     )
   }

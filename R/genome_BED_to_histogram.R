@@ -7,7 +7,7 @@
 #' @param histogram_bin_size The bin size (base-pairs) to bin signal into a histogram. Default 1
 #' @param allow_overlapping_segments_per_sample logical, if FALSE, overlapping segments in the same file will be de-duplicated in the coverage calculation,
 #' if TRUE, they will be taken as separate input, default FALSE
-#' 
+#'
 #' @examples \dontrun{
 #' datadir = system.file("extdata", "dna_bedfiles",  package = "ConsensusPeaks")
 #' filenames = list.files(datadir, pattern = ".bed$")
@@ -20,7 +20,7 @@
 #'
 #' @return A list of GenomicHistogram objects
 #' @export
-genome_BED_to_histogram = function(
+genome_BED_to_histogram <- function(
   filenames,
   n_fields = c(4, 6, 12),
   regions = NULL,

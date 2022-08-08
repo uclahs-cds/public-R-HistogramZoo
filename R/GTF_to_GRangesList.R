@@ -13,7 +13,7 @@
 #' gtf_gr = GTF_to_GRangesList(gtf)
 #' }
 #' @export
-GTF_to_GRangesList = function(
+GTF_to_GRangesList <- function(
   gtf,
   gene_or_transcript = c("gene", "transcript"),
   select_strand = c("*", "+", "-"),
@@ -60,7 +60,7 @@ GTF_to_GRangesList = function(
     warning("No rows remaining after filtering")
     return(NULL)
   }
-  
+
   # Creating a GRangesList object
   gtf <- gtf[,c("chrom", "start", "end", "strand", "id")]
   gtf_gr <- GenomicRanges::makeGRangesFromDataFrame(df = gtf, keep.extra.columns = T)

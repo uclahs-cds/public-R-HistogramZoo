@@ -1,6 +1,6 @@
 #' Creates a new set of segments from a partition of points
 #'
-#' @param start.end.points a data.frame with start and end named columns representing intervals 
+#' @param start.end.points a data.frame with start and end named columns representing intervals
 #' @param max.gaps a data.frame with start and end named columns representing gaps
 #' @param remove.short.segment the minimum segment length to include in the final segments
 #'
@@ -10,8 +10,8 @@
 #'     \item{end}{end indices of new intervals}
 #' }
 #' @export
-remove_max_gaps = function(start.end.points, max.gaps, remove.short.segment = 0) {
-  
+remove_max_gaps <- function(start.end.points, max.gaps, remove.short.segment = 0) {
+
   # Error checking
   if(nrow(max.gaps) == 0) {
     # Return the original points as start/end data frame
@@ -46,9 +46,9 @@ remove_max_gaps = function(start.end.points, max.gaps, remove.short.segment = 0)
   new.p.start.end <- lapply(new.p.seq.consec, function(p.seq) {
     list('start' = p.seq[1], 'end' = p.seq[length(p.seq)])
   })
-  
+
   res <- do.call('rbind.data.frame', new.p.start.end)
   rownames(res) <- NULL
-  
+
   return(res)
 }

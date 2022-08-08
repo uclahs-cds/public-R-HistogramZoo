@@ -4,14 +4,14 @@
 #'
 #' @param x numeric vector
 #' @param threshold numeric, minimum distance between local optima
-#' 
+#'
 #' @export
-find_local_optima = function(x, threshold = 0) {
-  
+find_local_optima <- function(x, threshold = 0) {
+
   # Error checking
   x <- as.numeric(x)
   stopifnot(length(x) > 1)
-  
+
   # Get the first non-equal index
   n <- length(x)
   min.ind <- NULL
@@ -25,12 +25,12 @@ find_local_optima = function(x, threshold = 0) {
   if(length(rle_diff$lengths) <= 1) {
     return(
       list(
-        'min.ind' = 1, 
+        'min.ind' = 1,
         'max.ind' = NULL
         )
       )
   }
-  
+
   startIndex <- 1
   endIndex <- n
   if(rle_diff$values[1] == 0) {
@@ -81,12 +81,12 @@ find_local_optima = function(x, threshold = 0) {
     max.ind <- c(max.ind, n.trim)
     min.appended <- FALSE
   }
-  
+
   return(
     list(
-      'min.ind' = min.ind + (startIndex - 1), 
+      'min.ind' = min.ind + (startIndex - 1),
       'max.ind' = max.ind + (startIndex - 1)
     )
   )
-  
+
 }
