@@ -24,7 +24,22 @@ identify_uniform_segment <- function(
   max.sd.size = 1) {
   
   # Error checking
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
   metric <- match.arg(metric)
+  if(!is.numeric(threshold) | length(threshold) != 1 ){
+    stop("threshold must be a numeric of length 1")
+  }
+  if(!(threshold >= 0 & threshold <= 1)) {
+    stop("threshold must be between 0 and 1")
+  }
+  if(!is_equal_integer(stepsize) | !(stepsize > 0) | length(stepsize) != 1){
+    stop("stepsize must be functional as a positive integer of length 1")
+  }
+  if(!is.numeric(max.sd.size) | !(max.sd.size >= 0) | length(max.sd.size) != 1){
+    stop("max.sd.size must be a positive or zero numeric of length 1")
+  }
   
   # Set-up
   num.bins <- length(x)
