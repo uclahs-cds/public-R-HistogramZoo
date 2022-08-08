@@ -58,37 +58,37 @@ bigWig_to_histogram = function(
     stop("histogram_bin_size must be a positive integer")
   }
   if(is.null(gtf) & is.null(regions)){
-    warning("computing regions on coverage data, this may take a long a time.")
+    message("computing regions on coverage data, this may take a long a time.")
   }
 
   # Load BigWig file
-  bigwig = valr::read_bigwig(filename, set_strand = strand)
-  bigwig_gr = GenomicRanges::makeGRangesFromDataFrame(bigwig, keep.extra.columns = T)
-  bigwig_gr = bigwig_gr[bigwig_gr$score > score_threshold]
-  bigwig_coverage = GenomicRanges::coverage(bigwig_gr, weight = "score")
+  bigwig <- valr::read_bigwig(filename, set_strand = strand)
+  bigwig_gr <- GenomicRanges::makeGRangesFromDataFrame(bigwig, keep.extra.columns = T)
+  bigwig_gr <- bigwig_gr[bigwig_gr$score > score_threshold]
+  bigwig_coverage <- GenomicRanges::coverage(bigwig_gr, weight = "score")
 
   # Loading regions
   if(inherits(regions, "GRanges")){
     # Filtering by strand
     if(strand %in% c("+", "-")){
-      regions = regions[GenomicRanges::strand(regions) == strand]
+      regions <- regions[GenomicRanges::strand(regions) == strand]
     }
     # Generate names for regions
-    ids = if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
-    regions = S4Vectors::split(regions, f = ids)
+    ids <- if(!is.null(regions$name)) regions$name else generate_identifiers(regions)
+    regions <- S4Vectors::split(regions, f = ids)
   } else if (inherits(regions, "CompressedGRangesList")){
     # Filtering by strand
-    region_strand = as.character(
+    region_strand <- as.character(
       sapply(regions, function(x) attributes(strand(x))$values)
     )
-    regions = regions[region_strand == strand]
+    regions <- regions[region_strand == strand]
     # Generate names for regions
     if(is.null(names(regions))){
       ids <- generate_identifiers( unlist( range(regions) ) )
       names(regions) <- ids
     }
   } else if(!is.null(gtf)){
-    regions = GTF_to_GRangesList(
+    regions <- GTF_to_GRangesList(
       gtf = gtf,
       gene_or_transcript = gene_or_transcript,
       select_strand = if(strand %in% c("+", "-")) strand else NULL,
@@ -96,13 +96,13 @@ bigWig_to_histogram = function(
       select_ids = select_ids
     )
   } else { # if no user-specified regions are provided
-    regions = GenomicRanges::reduce(bigwig_gr)
-    ids = generate_identifiers(regions)
-    regions = S4Vectors::split(regions, f = ids)
+    regions <- GenomicRanges::reduce(bigwig_gr)
+    ids <- generate_identifiers(regions)
+    regions <- S4Vectors::split(regions, f = ids)
   }
 
   # Sort regions
-  regions = sort(regions)
+  regions <- sort(regions)
   
   # Generating Histogram objects
   return(

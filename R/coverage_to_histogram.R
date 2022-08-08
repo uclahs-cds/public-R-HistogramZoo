@@ -12,13 +12,13 @@ coverage_to_histogram = function(
 ){
   
   # Generating bins
-  bins = unlist(
+  bins <- unlist(
     GenomicRanges::tile(x = region, width = histogram_bin_size)
   )
-  GenomeInfoDb::seqlevels(bins) = GenomeInfoDb::seqlevels(coverage)
+  GenomeInfoDb::seqlevels(bins) <- GenomeInfoDb::seqlevels(coverage)
   
   # Computing coverage
-  cvg = GenomicRanges::binnedAverage(
+  cvg <- GenomicRanges::binnedAverage(
     bins = bins,
     numvar = coverage,
     varname = "cvg"

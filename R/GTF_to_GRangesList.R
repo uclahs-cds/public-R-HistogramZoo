@@ -28,31 +28,31 @@ GTF_to_GRangesList = function(
   if(length(gtf) > 1){
     stop("Provide only 1 GTF file.")
   }
-  gene_or_transcript = match.arg(gene_or_transcript)
-  select_strand = match.arg(select_strand)
+  gene_or_transcript <- match.arg(gene_or_transcript)
+  select_strand <- match.arg(select_strand)
 
   # Import GTF file
-  gtf = valr::read_gtf(gtf, zero_based = F)
+  gtf <- valr::read_gtf(gtf, zero_based = F)
 
   # Filtering chromosomes, genes, and strand
-  gtf = gtf[gtf$type == "exon",]
+  gtf <- gtf[gtf$type == "exon",]
   if(!is.null(select_chrs)){
-    gtf = gtf[gtf$chrom %in% select_chrs,]
+    gtf <- gtf[gtf$chrom %in% select_chrs,]
   }
   if(select_strand != "*"){
-    gtf = gtf[gtf$strand %in% select_strand,]
+    gtf <- gtf[gtf$strand %in% select_strand,]
   }
 
   # Nominating the subsetting ID
   if(gene_or_transcript == "gene"){
-    gtf[,"id"] = gtf[,"gene_id"]
+    gtf[,"id"] <- gtf[,"gene_id"]
   } else {
-    gtf[,"id"] = gtf[,"transcript_id"]
+    gtf[,"id"] <- gtf[,"transcript_id"]
   }
 
   # Filtering by ID
   if(!is.null(select_ids)){
-    gtf = gtf[gtf$id %in% select_ids,]
+    gtf <- gtf[gtf$id %in% select_ids,]
   }
 
   # If filtering fails
@@ -62,10 +62,10 @@ GTF_to_GRangesList = function(
   }
   
   # Creating a GRangesList object
-  gtf = gtf[,c("chrom", "start", "end", "strand", "id")]
-  gtf_gr = GenomicRanges::makeGRangesFromDataFrame(df = gtf, keep.extra.columns = T)
-  gtf_gr = S4Vectors::split(gtf_gr, gtf_gr$id)
-  gtf_gr = GenomicRanges::reduce(gtf_gr)
+  gtf <- gtf[,c("chrom", "start", "end", "strand", "id")]
+  gtf_gr <- GenomicRanges::makeGRangesFromDataFrame(df = gtf, keep.extra.columns = T)
+  gtf_gr <- S4Vectors::split(gtf_gr, gtf_gr$id)
+  gtf_gr <- GenomicRanges::reduce(gtf_gr)
 
   return(gtf_gr)
 }

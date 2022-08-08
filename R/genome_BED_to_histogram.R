@@ -61,7 +61,7 @@ genome_BED_to_histogram = function(
   }
   
   # Sort regions
-  regions = sort(regions)
+  regions <- sort(regions)
   
   # Generating Histogram objects
   return(
