@@ -66,10 +66,10 @@ create_residualplot.HistogramFit = function(
   stopifnot(is.logical(add_changepoint_lines))
 
   # Extracting histogram_data
-  x <- histogram_obj$histogram_data
+  histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("density" = x, "labels.x" = labels_x)
+  plotting.data <- data.frame("density" = histogram_data, "labels.x" = labels_x)
 
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`, model_name)

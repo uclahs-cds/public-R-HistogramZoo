@@ -45,9 +45,12 @@ distribution_names <- c(
 #' @export
 #'
 #' @examples \dontrun{
-#' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
-#' results = segment_and_fit(x, eps = 0.005)
-#' create_coverageplot(results)
+#' x = rnorm(10000, mean = 100, sd = 50)
+#' x = observations_to_histogram(round(x), histogram_bin_width = 5)
+#' results = segment_and_fit(x, eps = 1)
+#' create_coverageplot(
+#'   results
+#' )
 #' }
 create_coverageplot <- function(
     histogram_obj, model_name,
@@ -97,16 +100,16 @@ create_coverageplot.Histogram <- function(
   plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
-  x <- histogram_obj$histogram_data
+  histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("x" = x, "labels.x" = labels_x)
+  plotting.data <- data.frame("dens" = histogram_data, "labels.x" = labels_x)
 
   # Plotting
   plt <- do.call(
     plotting.func,
     list(
-      x ~ labels.x,
+      dens ~ labels.x,
       data = plotting.data,
       # Lines & PCH
       type = type,
@@ -194,10 +197,10 @@ create_coverageplot.HistogramFit <- function(
   plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
-  x <- histogram_obj$histogram_data
+  histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("x" = x, "labels.x" = labels_x, "dist" = "coverage")
+  plotting.data <- data.frame("dens" = histogram_data, "labels.x" = labels_x, "dist" = "coverage")
 
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
@@ -205,7 +208,7 @@ create_coverageplot.HistogramFit <- function(
     x <- seq(m$seg.start, m$seg.end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("x" = dens, "labels.x" = labels_x[x], "dist" = m$dist)
+      data.frame("dens" = dens, "labels.x" = labels_x[x], "dist" = m$dist)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
@@ -218,7 +221,7 @@ create_coverageplot.HistogramFit <- function(
   plt <- do.call(
     plotting.func,
     list(
-      x ~ labels.x,
+      dens ~ labels.x,
       data = plotting.data,
       # Groups
       groups = plotting.data$dist,
