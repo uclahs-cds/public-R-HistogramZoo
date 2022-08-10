@@ -1,12 +1,3 @@
-#' Returns the group matches from a regular expression on a vector
-#' @param x the vector we want to match on
-#' @param pattern regular expression with groups
-str_match <- function(x, pattern) {
-  return(
-    regmatches(x, regexec(pattern, x))
-  )
-}
-
 #' Return a string representation of an object
 #' @param x an object
 dput_str <- function(x) {

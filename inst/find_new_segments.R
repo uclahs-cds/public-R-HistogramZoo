@@ -1,3 +1,11 @@
+#' Returns the group matches from a regular expression on a vector
+#' @param x the vector we want to match on
+#' @param pattern regular expression with groups
+str_match <- function(x, pattern) {
+  return(
+    regmatches(x, regexec(pattern, x))
+  )
+}
 
 find_new_segments = function(gaps.df) {
   new.segments = c()
