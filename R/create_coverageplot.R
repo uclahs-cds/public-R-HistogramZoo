@@ -37,8 +37,7 @@ distribution_names <- c(
 #' @param points.y The y co-ordinates where additional points should be drawn, if `histogram_obj` is a `HistogramFit` object, default segment_and_fit points
 #' @param col colour vector for the distributions, default see `HistogramZoo:::distribution_colours`
 #' @param lwd lwd vector for the distributions, default see `HistogramZoo:::distribution_lwd`
-#' @param type `type` in R graphics. Default: if histogram length < 50, plot `p`, otherwise `a`
-#' @param plotting.func string, either 'create.lollipop' or 'create.scatterplot', Default: if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
+#' @param type `type` in R graphics. Default: if histogram length < 50, plot `h`, otherwise `l`
 #' @inheritParams BoutrosLab.plotting.general::create.scatterplot
 #'
 #' @return Coverage plot, a Trellis object. For further details, see the 'Lattice' R package.
@@ -55,7 +54,7 @@ distribution_names <- c(
 create_coverageplot <- function(
     histogram_obj, model_name,
     col, lwd,
-    type, plotting.func,
+    type, 
     add.points, points.x, points.y, points.pch, points.col, points.col.border, points.cex,
     filename,
     main, main.just, main.x, main.y, main.cex,
@@ -82,14 +81,10 @@ create_coverageplot <- function(
 
 
 #' @export
-#' @importFrom BoutrosLab.plotting.general create.scatterplot
-#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.Histogram <- function(
     histogram_obj,
     main = histogram_obj$region_id,
-    type = if(length(histogram_obj) < 50) c('p') else c('a'),
-    plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
-    lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
+    type = if(length(histogram_obj) < 50) 'h' else 'l',
     ylab.label = "Histogram Data",
     xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
     ...
@@ -97,30 +92,25 @@ create_coverageplot.Histogram <- function(
 
   # Error checking
   stopifnot(inherits(histogram_obj, "Histogram"))
-  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("dens" = histogram_data, "labels.x" = labels_x)
+  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x)
 
   # Plotting
-  plt <- do.call(
-    plotting.func,
-    list(
-      dens ~ labels.x,
-      data = plotting.data,
-      # Lines & PCH
-      type = type,
-      # Labels
-      main = main,
-      xlab.label = xlab.label,
-      ylab.label = ylab.label,
-      # Extra plotting parameters
-      lollipop.bar.y = lollipop.bar.y,
-      ...
-    )
+  plt <- BoutrosLab.plotting.general::create.scatterplot(
+    dens ~ labels_x,
+    data = plotting_data,
+    # Lines & PCH
+    type = type,
+    # Labels
+    main = main,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    # Extra plotting parameters
+    ...
   )
 
   # Return plot
@@ -150,8 +140,6 @@ return_y_points <- function(histogram_obj){
 }
 
 #' @export
-#' @importFrom BoutrosLab.plotting.general create.scatterplot
-#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.HistogramFit <- function(
   histogram_obj,
   model_name = c("consensus", histogram_obj$histogram_metric),
@@ -165,9 +153,7 @@ create_coverageplot.HistogramFit <- function(
   points.y = return_y_points(histogram_obj),
   points.pch = 19,
   points.col = 'red',
-  type = c('a'),
-  plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
-  lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
+  type = if(length(histogram_obj) < 50) 'h' else 'l',
   legend = list(
     right = list(
       fun = lattice::draw.key,
@@ -194,14 +180,12 @@ create_coverageplot.HistogramFit <- function(
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
-  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("dens" = histogram_data, "labels.x" = labels_x, "dist" = "coverage")
-
+  plotting_data <- data.frame("dens" = histogram_data, "labels.x" = labels_x, "dist" = "coverage")
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
@@ -212,19 +196,16 @@ create_coverageplot.HistogramFit <- function(
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
-  plotting.data <- rbind(plotting.data, distribution_plotting_data)
 
   # Factoring plotting data distribution
-  plotting.data$dist <- factor(plotting.data$dist, levels = distributions)
-
+  distribution_plotting_data$dist <- factor(distribution_plotting_data$dist, levels = distributions)
+  
   # Plotting
-  plt <- do.call(
-    plotting.func,
-    list(
+  base_plot <- BoutrosLab.plotting.general::create.scatterplot(
       dens ~ labels.x,
-      data = plotting.data,
+      data = plotting_data,
       # Groups
-      groups = plotting.data$dist,
+      groups = plotting_data$dist,
       col = col,
       lwd = lwd,
       # Labels
@@ -242,11 +223,25 @@ create_coverageplot.HistogramFit <- function(
       points.pch = points.pch,
       points.col = points.col,
       # Extra plotting parameters
-      lollipop.bar.y = lollipop.bar.y,
       ...
-    )
   )
-
+  
+  dist_plot <- BoutrosLab.plotting.general::create.scatterplot(
+    formula = dens ~ labels.x,
+    data = distribution_plotting_data,
+    # Groups
+    groups = distribution_plotting_data$dist,
+    col = col,
+    lwd = lwd,
+    # Labels
+    main = main,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    # Lines & PCH
+    type = 'l'
+  )
+  
+  
   # Return plot
-  return(plt)
+  return(base_plot + dist_plot)
 }
