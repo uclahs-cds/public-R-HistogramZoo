@@ -54,7 +54,7 @@ distribution_names <- c(
 create_coverageplot <- function(
     histogram_obj, model_name,
     col, lwd,
-    type, 
+    type,
     add.points, points.x, points.y, points.pch, points.col, points.col.border, points.cex,
     filename,
     main, main.just, main.x, main.y, main.cex,
@@ -185,24 +185,24 @@ create_coverageplot.HistogramFit <- function(
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting_data <- data.frame("dens" = histogram_data, "labels.x" = labels_x, "dist" = "coverage")
+  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x, "dist" = "coverage")
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
-    x <- seq(m$seg.start, m$seg.end, by = 1)
+    x <- seq(m$seg_start, m$seg_end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("dens" = dens, "labels.x" = labels_x[x], "dist" = m$dist)
+      data.frame("dens" = dens, "labels_x" = labels_x[x], "dist" = m$dist)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
 
   # Factoring plotting data distribution
   distribution_plotting_data$dist <- factor(distribution_plotting_data$dist, levels = distributions)
-  
+
   # Plotting
   base_plot <- BoutrosLab.plotting.general::create.scatterplot(
-      dens ~ labels.x,
+      dens ~ labels_x,
       data = plotting_data,
       # Groups
       groups = plotting_data$dist,
@@ -225,9 +225,9 @@ create_coverageplot.HistogramFit <- function(
       # Extra plotting parameters
       ...
   )
-  
+
   dist_plot <- BoutrosLab.plotting.general::create.scatterplot(
-    formula = dens ~ labels.x,
+    formula = dens ~ labels_x,
     data = distribution_plotting_data,
     # Groups
     groups = distribution_plotting_data$dist,
@@ -240,8 +240,8 @@ create_coverageplot.HistogramFit <- function(
     # Lines & PCH
     type = 'l'
   )
-  
-  
+
+
   # Return plot
   return(base_plot + dist_plot)
 }

@@ -116,15 +116,15 @@ ftc <- function(x, s = NULL, eps = 1) {
   if(is.null(s)){
     # segments
     minmax <- find_local_optima(x)
-    lmin <- minmax$max.ind
-    lmax <- minmax$min.ind
+    lmin <- minmax$max_ind
+    lmax <- minmax$min_ind
     s <- c(1, lmin, lmax, length(x) )
     s <- sort(unique(s))
   }
 
   # Initializing
   s <- sort(unique(s))
-  s.fixed <- s
+  s_fixed <- s
   K <- length(s)
   cost <- c(-Inf)
   J <- 1
@@ -136,18 +136,18 @@ ftc <- function(x, s = NULL, eps = 1) {
     for(i in 1:(K-2)){
       # cat(K, " ", i, "\n")
       inc.int <- s[i]:s[i+1]
-      inc.s <- s.fixed[s.fixed >= s[i] & s.fixed <= s[i+1]] - s[i] + 1
+      inc.s <- s_fixed[s_fixed >= s[i] & s_fixed <= s[i+1]] - s[i] + 1
       dec.int <- s[i+1]:s[i+2]
-      dec.s <- s.fixed[s.fixed >= s[i+1] & s.fixed <= s[i+2]] - s[i+1] + 1
+      dec.s <- s_fixed[s_fixed >= s[i+1] & s_fixed <= s[i+2]] - s[i+1] + 1
       cost_i <- monotone_cost(x[inc.int], eps = eps, s=inc.s, increasing = TRUE)
       cost_d <- monotone_cost(x[dec.int], eps = eps, s=dec.s, increasing = FALSE)
       cost[i] <- min(cost_i, cost_d)
     }
     # Removing minimum cost
-    min.cost.index <- which.min(cost)
-    min.cost <- cost[min.cost.index]
-    if(length(min.cost) > 0 && min.cost < 0){
-      s <- s[-(min.cost.index+1)]
+    min_cost_index <- which.min(cost)
+    min_cost <- cost[min_cost_index]
+    if(length(min_cost) > 0 && min_cost < 0){
+      s <- s[-(min_cost_index+1)]
     }
     # Update
     K <- length(s)

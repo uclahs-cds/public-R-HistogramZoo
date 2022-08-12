@@ -14,8 +14,8 @@ find_local_optima <- function(x, threshold = 0) {
 
   # Get the first non-equal index
   n <- length(x)
-  min.ind <- NULL
-  max.ind <- NULL
+  min_ind <- NULL
+  max_ind <- NULL
   #init = x[1]
   # If x = c(1,1,1,1,2,3) then j = 4, the first index before the run ends
 
@@ -25,67 +25,67 @@ find_local_optima <- function(x, threshold = 0) {
   if(length(rle_diff$lengths) <= 1) {
     return(
       list(
-        'min.ind' = 1,
-        'max.ind' = NULL
+        'min_ind' = 1,
+        'max_ind' = NULL
         )
       )
   }
 
-  startIndex <- 1
-  endIndex <- n
+  start_index <- 1
+  end_index <- n
   if(rle_diff$values[1] == 0) {
-    startIndex <- rle_diff$lengths[1] + 1
+    start_index <- rle_diff$lengths[1] + 1
   }
   if(length(rle_diff$lengths) > 2 && utils::tail(rle_diff$values, n = 1) == 0) {
     # Remove the last equal values
-    endIndex <- n - utils::tail(rle_diff$lengths, n = 1)
+    end_index <- n - utils::tail(rle_diff$lengths, n = 1)
   }
-  x.trim <- x[startIndex:endIndex]
-  n.trim <- length(x.trim)
+  x_trim <- x[start_index:end_index]
+  n_trim <- length(x_trim)
   # Keep track if we last appended a min/max
-  min.appended <- NULL
+  min_appended <- NULL
   # Check the first point for min/max
-  if(x.trim[1] < x.trim[2]) {
-    min.ind <- 1
-    min.appended <- TRUE
-  } else if (x.trim[1] > x.trim[2]) {
-    max.ind <- 1
-    min.appended <- FALSE
+  if(x_trim[1] < x_trim[2]) {
+    min_ind <- 1
+    min_appended <- TRUE
+  } else if (x_trim[1] > x_trim[2]) {
+    max_ind <- 1
+    min_appended <- FALSE
   }
 
   # Do the middle segment
-  if(n.trim > 3) {
-    for(i in seq(2, n.trim - 1)) {
-      # min.appended ensures that we alternate minima and maxima
-      left.diff <- x.trim[i] - x.trim[i - 1]
-      right.diff <- x.trim[i] - x.trim[i + 1]
+  if(n_trim > 3) {
+    for(i in seq(2, n_trim - 1)) {
+      # min_appended ensures that we alternate minima and maxima
+      left_diff <- x_trim[i] - x_trim[i - 1]
+      right_diff <- x_trim[i] - x_trim[i + 1]
 
-      if (!min.appended &&
-          ((left.diff < -threshold && right.diff <= 0) ||
-           (left.diff <= 0 && right.diff < -threshold))) {
-        min.ind <- c(min.ind, i)
-        min.appended <- TRUE
-      } else if(min.appended &&
-                ((left.diff > threshold && right.diff >= 0) ||
-                (left.diff >= 0 && right.diff > threshold))) {
-        max.ind <- c(max.ind, i)
-        min.appended <- FALSE
+      if (!min_appended &&
+          ((left_diff < -threshold && right_diff <= 0) ||
+           (left_diff <= 0 && right_diff < -threshold))) {
+        min_ind <- c(min_ind, i)
+        min_appended <- TRUE
+      } else if(min_appended &&
+                ((left_diff > threshold && right_diff >= 0) ||
+                (left_diff >= 0 && right_diff > threshold))) {
+        max_ind <- c(max_ind, i)
+        min_appended <- FALSE
       }
     }
   }
 
-  if(x.trim[n.trim - 1] > x.trim[n.trim]) {
-    min.ind <- c(min.ind, n.trim)
-    min.appended <- TRUE
-  } else if (x.trim[n.trim - 1] < x.trim[n.trim]) {
-    max.ind <- c(max.ind, n.trim)
-    min.appended <- FALSE
+  if(x_trim[n_trim - 1] > x_trim[n_trim]) {
+    min_ind <- c(min_ind, n_trim)
+    min_appended <- TRUE
+  } else if (x_trim[n_trim - 1] < x_trim[n_trim]) {
+    max_ind <- c(max_ind, n_trim)
+    min_appended <- FALSE
   }
 
   return(
     list(
-      'min.ind' = min.ind + (startIndex - 1),
-      'max.ind' = max.ind + (startIndex - 1)
+      'min_ind' = min_ind + (start_index - 1),
+      'max_ind' = max_ind + (start_index - 1)
     )
   )
 

@@ -69,27 +69,27 @@ create_residualplot.HistogramFit = function(
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("density" = histogram_data, "labels.x" = labels_x)
+  plotting_data <- data.frame("density" = histogram_data, "labels_x" = labels_x)
 
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`, model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
-    x <- seq(m$seg.start, m$seg.end, by = 1)
+    x <- seq(m$seg_start, m$seg_end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("fitted" = dens, "labels.x" = labels_x[x])
+      data.frame("fitted" = dens, "labels_x" = labels_x[x])
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
 
   # Calculating residuals
-  plotting.data <- merge(plotting.data, distribution_plotting_data, by = "labels.x", all = T)
-  plotting.data$Residuals <- plotting.data$density - plotting.data$fitted
+  plotting_data <- merge(plotting_data, distribution_plotting_data, by = "labels_x", all = T)
+  plotting_data$Residuals <- plotting_data$density - plotting_data$fitted
 
   # Add changepoint lines
   if(add_changepoint_lines){
     abline.v <- unique(
-      c(abline.v, which(abs(diff(sign(plotting.data$Residuals))) == 2))
+      c(abline.v, which(abs(diff(sign(plotting_data$Residuals))) == 2))
     )
     abline.h <- unique(
       c(abline.h, 0)
@@ -98,8 +98,8 @@ create_residualplot.HistogramFit = function(
 
   # Plotting
   plt <-  BoutrosLab.plotting.general::create.scatterplot(
-    Residuals ~ labels.x,
-    plotting.data,
+    Residuals ~ labels_x,
+    plotting_data,
     # Axes labels
     xlab.label = xlab.label,
     # Lines
