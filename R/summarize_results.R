@@ -19,8 +19,8 @@ results_columns <- c(
 extract_stats_from_models <- function(model_list, model_name = "consensus"){
   mod <- model_list[[model_name]]
   list(
-    "histogram_start" = mod$seg.start,
-    "histogram_end" = mod$seg.end,
+    "histogram_start" = mod$seg_start,
+    "histogram_end" = mod$seg_end,
     "value" = mod$value,
     "metric" = mod$metric,
     "dist" = mod$dist,
@@ -62,7 +62,7 @@ extract_peak_segments <- function(iranges){
 #'     \item{dist}{}
 #'     \item{params}{}
 #' }
-#' 
+#'
 #' @export
 summarize_results <- function(result, model_name){
   UseMethod('summarize_results')

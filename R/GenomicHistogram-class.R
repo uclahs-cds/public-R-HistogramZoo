@@ -1,6 +1,6 @@
 
 # constructor
-new_GenomicHistogram = function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
+new_GenomicHistogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
 
   # Checking types
   stopifnot(is.character(chr))
@@ -21,7 +21,7 @@ new_GenomicHistogram = function(histogram_data = NULL, interval_start = NULL, in
 }
 
 # validator
-validate_GenomicHistogram = function(x){
+validate_GenomicHistogram <- function(x){
 
   # Attributes
   chr <- x$chr
@@ -53,17 +53,17 @@ validate_GenomicHistogram = function(x){
 #'
 #' @examples
 #' x = GenomicHistogram(
-#' histogram_data = runif(10), 
-#' interval_start = 1:10, 
-#' interval_end = 1:10, 
-#' chr = "chr1", 
+#' histogram_data = runif(10),
+#' interval_start = 1:10,
+#' interval_end = 1:10,
+#' chr = "chr1",
 #' strand = "+")
-GenomicHistogram = function(
-    histogram_data = double(), 
-    interval_start = integer(), 
-    interval_end = integer(), 
-    region_id = character(), 
-    chr = character(), 
+GenomicHistogram <- function(
+    histogram_data = double(),
+    interval_start = integer(),
+    interval_end = integer(),
+    region_id = character(),
+    chr = character(),
     strand = c("*", "+", "-")
 ){
 
@@ -105,11 +105,11 @@ GenomicHistogram = function(
   return(
     validate_GenomicHistogram(
       new_GenomicHistogram(
-        histogram_data = histogram_data, 
-        interval_start = interval_start, 
-        interval_end = interval_end, 
-        chr = chr, 
-        strand = strand, 
+        histogram_data = histogram_data,
+        interval_start = interval_start,
+        interval_end = interval_end,
+        chr = chr,
+        strand = strand,
         region_id = region_id
       )
     )

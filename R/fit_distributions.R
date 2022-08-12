@@ -1,35 +1,41 @@
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
-#' @param freq TODO
-#' @param metric TODO
-#' @param truncated TODO
-#' @param distr TODO
+#' @param histogram_data numeric vector, representing data to be fit
+#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' indicating metrics to use for fit optimization
+#' @param truncated logical, whether to fit truncated distributions
+#' @param distributions character vector indicating distributions,
+#' subset of `norm`, `gamma`, `unif`
+#'
 #' @export
+#'
 #' @importFrom DEoptim DEoptim
 fit_distributions = function(
-  freq,
+  histogram_data,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   truncated = FALSE,
-  distr = c("norm", "gamma", "unif")) {
+  distributions = c("norm", "gamma", "unif")) {
 
   # Matching arguments
+  # TODO: consider checking minimum length of histogram_data or
+  # check if Histogram object
+  if(!is.numeric(histogram_data)){
+    stop('histogram_data has to be a numeric vector')
+  }
+  if(!is.logical(truncated) | length(truncated) != 1){
+    stop("truncated has to be a logical of length 1")
+  }
   metric <- match.arg(metric, several.ok = TRUE)
-  distr <- match.arg(distr, several.ok = TRUE)
+  distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Initializing Data
-  L <- length(freq)
-  N <- sum(freq)
+  L <- length(histogram_data)
+  N <- sum(histogram_data)
   bin <- 1:L
 
-  # Used for initializing parameter estimations for norm and gamma
-  # hist.mean <- sum(freq * bin) / N
-  # hist.var <- sum(freq * (bin - hist.mean)^2) / N
-  # shape.init <- hist.mean^2 / hist.var
-  # rate.init <- hist.mean / hist.var
-
   # Optimization Function
-  .hist.optim = function(params, .dist = c("norm", "gamma")) {
+  .hist.optim <- function(params, .dist = c("norm", "gamma")) {
     # Compute the expected counts for the given parameters
     args <- c(list(x = bin), params)
     if(truncated) {
@@ -43,7 +49,7 @@ fit_distributions = function(
       rep(0, length(bin))
     })
     dens[is.na(dens)] <- 0
-    res <- metric.func(freq, dens)
+    res <- metric_func(histogram_data, dens)
     if(is.na(res) || res == -Inf || res == Inf) {
       res <- Inf
     }
@@ -51,40 +57,40 @@ fit_distributions = function(
   }
 
   # Initializing Todo & Results
-  todo <- expand.grid(metric, distr, stringsAsFactors = F)
+  todo <- expand.grid(metric, distributions, stringsAsFactors = F)
   rtn <- list()
   for(i in 1:nrow(todo)){
 
     # Extracting Metric & Distribution
     met <- todo[i,1]
-    distr <- todo[i,2]
-    tag <- paste0(met, ".", distr)
+    dist <- todo[i,2]
+    tag <- paste0(met, ".", dist)
 
     # Get one of the metrics from histogram.distances
-    metric.func <- get(paste('histogram', met, sep = "."))
+    metric_func <- get(paste('histogram', met, sep = "."))
 
     # Uniform Distribution
-    if(distr == "unif") {
+    if(dist == "unif") {
       # Add uniform distribution
-      unif.dens <- 1 / (max(bin) - min(bin))
+      unif_dens <- 1 / (max(bin) - min(bin))
       rtn[[tag]] <- list(
         "par" = NULL,
         "dist" = "unif",
         "metric" = met,
-        "value" = metric.func(freq, rep(unif.dens * N, L)),
+        "value" = metric_func(histogram_data, rep(unif_dens * N, L)),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
           }
-          res <- ifelse(x >= min(bin) & x <= max(bin), unif.dens, 0)
+          res <- ifelse(x >= min(bin) & x <= max(bin), unif_dens, 0)
           if(scale) res * N
           else res
         }
       )
     }
     # Normal Distribution
-    if(distr == "norm") {
-      norm.optim <- DEoptim::DEoptim(fn = .hist.optim,
+    if(dist == "norm") {
+      norm_optim <- DEoptim::DEoptim(fn = .hist.optim,
                                     .dist = "norm",
                                     lower = c(min(bin), 0.001),
                                     upper = c(max(bin), (max(bin) - min(bin)) * 0.5),
@@ -93,17 +99,17 @@ fit_distributions = function(
                                     itermax = 500, # Iterations
                                     VTR = 10^-2 # At 1 %, stop optimizing
                                     ))
-      names(norm.optim$optim$bestmem) <- c("mean", "sd")
-      norm.par <- as.list(norm.optim$optim$bestmem)
+      names(norm_optim$optim$bestmem) <- c("mean", "sd")
+      norm_par <- as.list(norm_optim$optim$bestmem)
       if(truncated) {
-        norm.par$a <-  min(bin) - 1e-10
-        norm.par$b <- max(bin) + 1e-10
+        norm_par$a <-  min(bin) - 1e-10
+        norm_par$b <- max(bin) + 1e-10
       }
       rtn[[tag]] <- list(
-        "par" = norm.par,
+        "par" = norm_par,
         "dist" = "norm",
         "metric" = met,
-        "value" = norm.optim$optim$bestval,
+        "value" = norm_optim$optim$bestval,
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -117,8 +123,8 @@ fit_distributions = function(
     }
 
     # Gamma Distribution
-    if(distr == "gamma") {
-      gamma.optim <- DEoptim::DEoptim(fn = .hist.optim,
+    if(dist == "gamma") {
+      gamma_optim <- DEoptim::DEoptim(fn = .hist.optim,
                                      .dist = "gamma",
                                      lower = c(0.001, 0.001),
                                      upper = c(L, L),
@@ -127,17 +133,17 @@ fit_distributions = function(
                                      itermax = 500, # Iterations
                                      VTR = 10^-2 # At 1 %, stop optimizing
                                      ))
-      names(gamma.optim$optim$bestmem) <- c("shape", "rate")
-      gamma.par <- as.list(gamma.optim$optim$bestmem)
+      names(gamma_optim$optim$bestmem) <- c("shape", "rate")
+      gamma_par <- as.list(gamma_optim$optim$bestmem)
       if(truncated) {
-        gamma.par$a <- min(bin) - 1e-10
-        gamma.par$b <- max(bin) + 1e-10
+        gamma_par$a <- min(bin) - 1e-10
+        gamma_par$b <- max(bin) + 1e-10
       }
       rtn[[tag]] <- list(
-        "par" = gamma.par,
+        "par" = gamma_par,
         "dist" = "gamma",
         "metric" = met,
-        "value" = gamma.optim$optim$bestval,
+        "value" = gamma_optim$optim$bestval,
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
