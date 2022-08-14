@@ -1,5 +1,5 @@
 
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 
 # Histogram Example -------------------------------------------------------

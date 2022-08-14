@@ -1,4 +1,4 @@
-Package: ConsensusPeaks
+Package: HistogramZoo
 Title: A Method for Peak Merging And Distribution Fitting Across Biological Replicates
 Version: 1.0.0
 Authors@R:

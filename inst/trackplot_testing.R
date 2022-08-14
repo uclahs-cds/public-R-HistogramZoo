@@ -1,5 +1,5 @@
 
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 # Preamble ----------------------------------------------------------------
 # Testing trackplot
@@ -30,7 +30,7 @@ create_trackplot(
 
 # Test having 1 row in the results table doesn't screw up orientation
 # THIS THROWS AN ERROR - figure out why
-# Error in valid.viewport(x, y, width, height, just, gp, clip, mask, xscale,  : 
+# Error in valid.viewport(x, y, width, height, just, gp, clip, mask, xscale,  :
 # invalid 'xscale' in viewport
 create_trackplot(
   track_data = results_table[1,],
@@ -82,4 +82,4 @@ create_trackplot(
 
 # Test incorrect input
 # Incorrect column types
-# Incorrect track_data 
+# Incorrect track_data

@@ -7,7 +7,7 @@ output:
 bibliography: >
   references.bib  
 vignette: >
-  %\VignetteIndexEntry{ConsensusPeaks}
+  %\VignetteIndexEntry{HistogramZoo}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -16,7 +16,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500)
 options(max.print=35)
 
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 ```
 
@@ -39,7 +39,7 @@ Finally, `summarize_results` returns a data.frame of segments and sumamry statis
 
 ```{r basic_histogram_segmentation, include=FALSE}
 
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 x = Histogram(
   histogram_data = c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0),
@@ -89,7 +89,7 @@ results_table = summarize_results(results)
 # Applications in Genomics
 
 ## Example 1: Identifying consensus regions across transcriptome BED files
-A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In such studies, it is often desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. It is easy to identify common peaks with few replicates by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. ConsensusPeaks is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments.
+A common step in the bioinformatic analysis of epigenetic pulldown experiments such as ChIP-seq, ATAC-seq, MeRIP-seq, CLIP-seq and other methods is to call peaks across biological replicates. In such studies, it is often desirable to identify a set of common peaks between replicates, count reads and conduct differential analysis. It is easy to identify common peaks with few replicates by simply taking the union of the set of peak regions. However, as datasets grow, the length of peak unions also grow, spanning the finite space defined by the genome or transcriptome. Additionally, epitranscriptomic pulldown experiments are growing in popularity. While peak callers for the transcriptome (e.g. exomePeak, MeTPeak) have been created, there is no available tool to identify overlapping peaks that span multiple exons. HistogramZoo is a tool that implements several models described in the literature to identify a consensus set of regions for RNA pulldown experiments.
 
 ```{r consensus_peaks_transcriptome, include=FALSE}
 
