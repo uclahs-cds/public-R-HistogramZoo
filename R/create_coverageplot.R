@@ -37,22 +37,24 @@ distribution_names <- c(
 #' @param points.y The y co-ordinates where additional points should be drawn, if `histogram_obj` is a `HistogramFit` object, default segment_and_fit points
 #' @param col colour vector for the distributions, default see `HistogramZoo:::distribution_colours`
 #' @param lwd lwd vector for the distributions, default see `HistogramZoo:::distribution_lwd`
-#' @param type `type` in R graphics. Default: if histogram length < 50, plot `p`, otherwise `a`
-#' @param plotting.func string, either 'create.lollipop' or 'create.scatterplot', Default: if histogram length < 50, use `BoutrosLab.plotting.general::create.lollipopplot` otherwise use `BoutrosLab.plotting.general::create.scatterplot`
+#' @param type `type` in R graphics. Default: if histogram length < 50, plot `h`, otherwise `l`
 #' @inheritParams BoutrosLab.plotting.general::create.scatterplot
 #'
 #' @return Coverage plot, a Trellis object. For further details, see the 'Lattice' R package.
 #' @export
 #'
 #' @examples \dontrun{
-#' x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
-#' results = segment_and_fit(x, eps = 0.005)
-#' create_coverageplot(results)
+#' x = rnorm(10000, mean = 100, sd = 50)
+#' x = observations_to_histogram(round(x), histogram_bin_width = 5)
+#' results = segment_and_fit(x, eps = 1)
+#' create_coverageplot(
+#'   results
+#' )
 #' }
 create_coverageplot <- function(
     histogram_obj, model_name,
     col, lwd,
-    type, plotting.func,
+    type,
     add.points, points.x, points.y, points.pch, points.col, points.col.border, points.cex,
     filename,
     main, main.just, main.x, main.y, main.cex,
@@ -71,7 +73,6 @@ create_coverageplot <- function(
     add.line.segments, line.start, line.end, line.col, line.lwd,
     add.text, text.labels, text.x, text.y, text.col, text.cex, text.fontface,
     height, width, size.units, resolution, enable.warnings,
-    lollipop.bar.y, lollipop.bar.color,
     ...
 ){
   UseMethod('create_coverageplot')
@@ -79,45 +80,143 @@ create_coverageplot <- function(
 
 
 #' @export
-#' @importFrom BoutrosLab.plotting.general create.scatterplot
-#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.Histogram <- function(
-    histogram_obj,
-    main = histogram_obj$region_id,
-    type = if(length(histogram_obj) < 50) c('p') else c('a'),
-    plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
-    lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
+    histogram_obj, model_name = NULL,
+    col = 'black', lwd = 1,
+    type = if(length(histogram_obj) < 50) 'h' else 'l',
+    add.points = FALSE, points.x = NULL, points.y = NULL, points.pch = 19, points.col = 'black', points.col.border = 'black', points.cex = 1,
+    filename = NULL,
+    main = histogram_obj$region_id, main.just = 'center', main.x = 0.5, main.y = 0.5, main.cex = 3,
+    xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates", 
     ylab.label = "Histogram Data",
-    xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
+    xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
+    xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
+    xlimits = NULL, ylimits = NULL, xat = TRUE, yat = TRUE, xaxis.lab = NA, yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
+    xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
+    cex = 0.75, col.border = 'black', pch = 19, lty = 1,alpha = 1,
+    axes.lwd = 1,
+    key = list(text = list(lab = c(''))), legend = NULL,
+    top.padding = 0.1, bottom.padding = 0.7, right.padding = 0.1, left.padding = 0.5,
+    key.top = 0.1, key.left.padding = 0, ylab.axis.padding = 1, axis.key.padding = 1,
+    x.spacing = 0, y.spacing = 0, 
+    abline.h = NULL, abline.v = NULL, abline.col = 'black', abline.lwd = 1, abline.lty = 1,
+    add.rectangle = FALSE, xleft.rectangle = NULL, ybottom.rectangle = NULL, xright.rectangle = NULL, ytop.rectangle = NULL, col.rectangle = 'transparent', alpha.rectangle = 1,
+    add.line.segments = FALSE, line.start = NULL, line.end = NULL, line.col = 'black', line.lwd = 1,
+    add.text = FALSE, text.labels = NULL, text.x = NULL, text.y = NULL, text.col = 'black', text.cex = 1, text.fontface = 'bold',
+    height = 6, width = 6, size.units = 'in', resolution = 1600, enable.warnings = FALSE,
     ...
 ){
 
   # Error checking
   stopifnot(inherits(histogram_obj, "Histogram"))
-  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
-  x <- histogram_obj$histogram_data
+  histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("x" = x, "labels.x" = labels_x)
-
+  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x)
+  
   # Plotting
-  plt <- do.call(
-    plotting.func,
-    list(
-      x ~ labels.x,
-      data = plotting.data,
-      # Lines & PCH
-      type = type,
-      # Labels
-      main = main,
-      xlab.label = xlab.label,
-      ylab.label = ylab.label,
-      # Extra plotting parameters
-      lollipop.bar.y = lollipop.bar.y,
-      ...
-    )
+  plt <- BoutrosLab.plotting.general::create.scatterplot(
+    dens ~ labels_x,
+    data = plotting_data,
+    filename = filename,
+    # Lines & PCH
+    cex = cex,
+    col.border = col.border,
+    pch = pch,
+    lty = lty,
+    alpha = alpha,
+    col = col,
+    lwd = lwd,
+    type = type,
+    axes.lwd = axes.lwd,
+    # Keys and legends and padding
+    key = key,
+    legend = legend,
+    top.padding = top.padding, 
+    bottom.padding = bottom.padding, 
+    right.padding = right.padding, 
+    left.padding = left.padding,
+    key.top = key.top, 
+    key.left.padding = key.left.padding, 
+    ylab.axis.padding = ylab.axis.padding, 
+    axis.key.padding = axis.key.padding,
+    x.spacing = x.spacing,
+    y.spacing = y.spacing,
+    # lines
+    abline.h = abline.h,
+    abline.v = abline.v,
+    abline.col = abline.col,
+    abline.lwd = abline.lwd,
+    abline.lty = abline.lty,
+    add.rectangle = add.rectangle,
+    xleft.rectangle = xleft.rectangle, 
+    ybottom.rectangle = ybottom.rectangle, 
+    xright.rectangle = xright.rectangle, 
+    ytop.rectangle = ytop.rectangle, 
+    col.rectangle = col.rectangle, 
+    alpha.rectangle = alpha.rectangle,
+    add.line.segments = add.line.segments,
+    line.start = line.start, 
+    line.end = line.end, 
+    line.col = line.col, 
+    line.lwd = line.lwd,
+    add.text = add.text, 
+    text.labels = text.labels, 
+    text.x = text.x, 
+    text.y = text.y, 
+    text.col = text.col, 
+    text.cex = text.cex, 
+    text.fontface = text.fontface,
+    height = height, 
+    width = width,
+    # Labels
+    main = main,
+    main.just = main.just,
+    main.x = main.x, 
+    main.y = main.y, 
+    main.cex = main.cex,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    xlab.cex = xlab.cex, 
+    ylab.cex = ylab.cex, 
+    xlab.col = xlab.col, 
+    ylab.col = ylab.col,
+    xlab.top.label = xlab.top.label, 
+    xlab.top.cex = xlab.top.cex, 
+    xlab.top.col = xlab.top.col, 
+    xlab.top.just = xlab.top.just, 
+    xlab.top.x = xlab.top.x, 
+    xlab.top.y = xlab.top.y,
+    xlimits = xlimits, 
+    ylimits = ylimits, 
+    xat = xat, 
+    yat = yat, 
+    xaxis.lab = xaxis.lab, 
+    yaxis.lab = yaxis.lab, 
+    xaxis.cex = xaxis.cex, 
+    yaxis.cex = yaxis.cex,
+    xaxis.rot = xaxis.rot, 
+    yaxis.rot = yaxis.rot,
+    xaxis.fontface = xaxis.fontface,
+    yaxis.fontface = yaxis.fontface, 
+    xaxis.col = xaxis.col, 
+    yaxis.col = yaxis.col, 
+    xaxis.tck = xaxis.tck, 
+    yaxis.tck = yaxis.tck,
+    # Extra plotting parameters
+    add.points = add.points,
+    points.x = points.x,
+    points.y = points.y, 
+    points.pch = points.pch, 
+    points.col = points.col, 
+    points.col.border = points.col.border, 
+    points.cex = points.cex,
+    size.units = size.units, 
+    resolution = resolution, 
+    enable.warnings = enable.warnings,
+    ...
   )
 
   # Return plot
@@ -147,24 +246,30 @@ return_y_points <- function(histogram_obj){
 }
 
 #' @export
-#' @importFrom BoutrosLab.plotting.general create.scatterplot
-#' @importFrom BoutrosLab.plotting.general create.lollipopplot
 create_coverageplot.HistogramFit <- function(
   histogram_obj,
   model_name = c("consensus", histogram_obj$histogram_metric),
   col = distribution_colours,
   lwd = distribution_lwd,
-  main = histogram_obj$region_id,
-  ylab.label = "Histogram Data",
-  xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
+  type = if(length(histogram_obj) < 50) 'h' else 'l',
   add.points = T,
   points.x = return_x_points(histogram_obj),
   points.y = return_y_points(histogram_obj),
   points.pch = 19,
   points.col = 'red',
-  type = c('a'),
-  plotting.func = if(length(histogram_obj) < 50) 'create.lollipopplot' else 'create.scatterplot',
-  lollipop.bar.y = if(length(histogram_obj) < 50) -10 else NULL,
+  points.col.border = 'black', 
+  points.cex = 1,
+  filename = NULL,
+  main = histogram_obj$region_id, main.just = 'center', main.x = 0.5, main.y = 0.5, main.cex = 3,
+  xlab.label = if(inherits(histogram_obj, "GenomicHistogram")) histogram_obj$chr else "Interval Coordinates",
+  ylab.label = "Histogram Data",
+  xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
+  xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
+  xlimits = NULL, ylimits = NULL, xat = TRUE, yat = TRUE, xaxis.lab = NA, yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
+  xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
+  cex = 0.75, col.border = 'black', pch = 19, lty = 1,alpha = 1,
+  axes.lwd = 1,
+  key = list(text = list(lab = c(''))),
   legend = list(
     right = list(
       fun = lattice::draw.key,
@@ -185,65 +290,160 @@ create_coverageplot.HistogramFit <- function(
       )
     )
   ),
+  top.padding = 0.1, bottom.padding = 0.7, right.padding = 0.1, left.padding = 0.5,
+  key.top = 0.1, key.left.padding = 0, ylab.axis.padding = 1, axis.key.padding = 1,
+  x.spacing = 0, y.spacing = 0, 
+  abline.h = NULL, abline.v = NULL, abline.col = 'black', abline.lwd = 1, abline.lty = 1,
+  add.rectangle = FALSE, xleft.rectangle = NULL, ybottom.rectangle = NULL, xright.rectangle = NULL, ytop.rectangle = NULL, col.rectangle = 'transparent', alpha.rectangle = 1,
+  add.line.segments = FALSE, line.start = NULL, line.end = NULL, line.col = 'black', line.lwd = 1,
+  add.text = FALSE, text.labels = NULL, text.x = NULL, text.y = NULL, text.col = 'black', text.cex = 1, text.fontface = 'bold',
+  height = 6, width = 6, size.units = 'in', resolution = 1600, enable.warnings = FALSE,
   ...
 ){
 
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
   model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
-  plotting.func <- match.arg(plotting.func, c('create.lollipopplot', 'create.scatterplot'))
 
   # Extracting histogram_data
-  x <- histogram_obj$histogram_data
+  histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting.data <- data.frame("x" = x, "labels.x" = labels_x, "dist" = "coverage")
-
+  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x, "dist" = "coverage")
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
   distribution_plotting_data <- lapply(mods, function(m) {
-    x <- seq(m$seg.start, m$seg.end, by = 1)
+    x <- seq(m$seg_start, m$seg_end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("x" = dens, "labels.x" = labels_x[x], "dist" = m$dist)
+      data.frame("dens" = dens, "labels_x" = labels_x[x], "dist" = m$dist)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
-  plotting.data <- rbind(plotting.data, distribution_plotting_data)
 
   # Factoring plotting data distribution
-  plotting.data$dist <- factor(plotting.data$dist, levels = distributions)
+  distribution_plotting_data$dist <- factor(distribution_plotting_data$dist, levels = distributions)
 
   # Plotting
-  plt <- do.call(
-    plotting.func,
-    list(
-      x ~ labels.x,
-      data = plotting.data,
-      # Groups
-      groups = plotting.data$dist,
-      col = col,
-      lwd = lwd,
-      # Labels
-      main = main,
-      xlab.label = xlab.label,
-      ylab.label = ylab.label,
-      # Lines & PCH
-      type = type,
-      # Legend
-      legend = legend,
-      # Adding extra points
-      add.points = add.points,
-      points.x = points.x,
-      points.y = points.y,
-      points.pch = points.pch,
-      points.col = points.col,
-      # Extra plotting parameters
-      lollipop.bar.y = lollipop.bar.y,
-      ...
-    )
+  base_plot <- BoutrosLab.plotting.general::create.scatterplot(
+    dens ~ labels_x,
+    data = plotting_data,
+    filename = filename,
+    # Lines & PCH
+    cex = cex,
+    col.border = col.border,
+    pch = pch,
+    lty = lty,
+    alpha = alpha,
+    col = col,
+    lwd = lwd,
+    type = type,
+    axes.lwd = axes.lwd,
+    # Keys and legends and padding
+    key = key,
+    legend = legend,
+    top.padding = top.padding, 
+    bottom.padding = bottom.padding, 
+    right.padding = right.padding, 
+    left.padding = left.padding,
+    key.top = key.top, 
+    key.left.padding = key.left.padding, 
+    ylab.axis.padding = ylab.axis.padding, 
+    axis.key.padding = axis.key.padding,
+    x.spacing = x.spacing,
+    y.spacing = y.spacing,
+    # lines
+    abline.h = abline.h,
+    abline.v = abline.v,
+    abline.col = abline.col,
+    abline.lwd = abline.lwd,
+    abline.lty = abline.lty,
+    add.rectangle = add.rectangle,
+    xleft.rectangle = xleft.rectangle, 
+    ybottom.rectangle = ybottom.rectangle, 
+    xright.rectangle = xright.rectangle, 
+    ytop.rectangle = ytop.rectangle, 
+    col.rectangle = col.rectangle, 
+    alpha.rectangle = alpha.rectangle,
+    add.line.segments = add.line.segments,
+    line.start = line.start, 
+    line.end = line.end, 
+    line.col = line.col, 
+    line.lwd = line.lwd,
+    add.text = add.text, 
+    text.labels = text.labels, 
+    text.x = text.x, 
+    text.y = text.y, 
+    text.col = text.col, 
+    text.cex = text.cex, 
+    text.fontface = text.fontface,
+    height = height, 
+    width = width,
+    # Labels
+    main = main,
+    main.just = main.just,
+    main.x = main.x, 
+    main.y = main.y, 
+    main.cex = main.cex,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    xlab.cex = xlab.cex, 
+    ylab.cex = ylab.cex, 
+    xlab.col = xlab.col, 
+    ylab.col = ylab.col,
+    xlab.top.label = xlab.top.label, 
+    xlab.top.cex = xlab.top.cex, 
+    xlab.top.col = xlab.top.col, 
+    xlab.top.just = xlab.top.just, 
+    xlab.top.x = xlab.top.x, 
+    xlab.top.y = xlab.top.y,
+    xlimits = xlimits, 
+    ylimits = ylimits, 
+    xat = xat, 
+    yat = yat, 
+    xaxis.lab = xaxis.lab, 
+    yaxis.lab = yaxis.lab, 
+    xaxis.cex = xaxis.cex, 
+    yaxis.cex = yaxis.cex,
+    xaxis.rot = xaxis.rot, 
+    yaxis.rot = yaxis.rot,
+    xaxis.fontface = xaxis.fontface,
+    yaxis.fontface = yaxis.fontface, 
+    xaxis.col = xaxis.col, 
+    yaxis.col = yaxis.col, 
+    xaxis.tck = xaxis.tck, 
+    yaxis.tck = yaxis.tck,
+    # Extra plotting parameters
+    add.points = add.points,
+    points.x = points.x,
+    points.y = points.y, 
+    points.pch = points.pch, 
+    points.col = points.col, 
+    points.col.border = points.col.border, 
+    points.cex = points.cex,
+    size.units = size.units, 
+    resolution = resolution, 
+    enable.warnings = enable.warnings,
+    ...
+  )
+  
+
+  dist_plot <- BoutrosLab.plotting.general::create.scatterplot(
+    formula = dens ~ labels_x,
+    data = distribution_plotting_data,
+    # Groups
+    groups = distribution_plotting_data$dist,
+    col = col,
+    lwd = lwd,
+    # Labels
+    main = main,
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    # Lines & PCH
+    type = 'l'
   )
 
+
   # Return plot
-  return(plt)
+  return(base_plot + dist_plot)
 }

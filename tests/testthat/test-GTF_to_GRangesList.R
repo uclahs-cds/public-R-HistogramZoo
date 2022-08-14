@@ -5,18 +5,18 @@ test_that("GTF_to_GRangesList yields correct results", {
   gtf = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
 
   # Basic input
-  gtf.gr = GTF_to_GRangesList(gtf)
+  gtf_gr = GTF_to_GRangesList(gtf)
   expect_named(
-    gtf.gr,
+    gtf_gr,
     c("ENSG00000178951.9",
       "ENSG00000185129.7"))
 
   # Selecting transcript
-  gtf.transcript = GTF_to_GRangesList(
+  gtf_transcript = GTF_to_GRangesList(
     gtf,
     gene_or_transcript = "transcript")
   expect_named(
-    gtf.transcript,
+    gtf_transcript,
     c("ENST00000322357.9",
       "ENST00000331327.5",
       "ENST00000502351.1",
@@ -25,46 +25,46 @@ test_that("GTF_to_GRangesList yields correct results", {
       "ENST00000651386.1"))
 
   # Selecting chromosome
-  gtf.chr = GTF_to_GRangesList(
+  gtf_chr = GTF_to_GRangesList(
     gtf,
     select_chrs = "chr5")
   expect_named(
-    gtf.chr,
+    gtf_chr,
     c("ENSG00000185129.7")
   )
 
   # Selecting strand
-  gtf.pos = GTF_to_GRangesList(
+  gtf_pos = GTF_to_GRangesList(
     gtf,
     select_strand = "+")
   expect_named(
-    gtf.pos,
+    gtf_pos,
     c("ENSG00000185129.7")
   )
 
-  gtf.neutral = GTF_to_GRangesList(
+  gtf_neutral = GTF_to_GRangesList(
     gtf,
     select_strand = "*")
   expect_named(
-    gtf.neutral,
+    gtf_neutral,
     c("ENSG00000178951.9",
       "ENSG00000185129.7"))
 
   # Selecting gene_id
-  gtf.gene.select = GTF_to_GRangesList(
+  gtf_gene_select = GTF_to_GRangesList(
     gtf,
     select_ids = "ENSG00000178951.9")
   expect_named(
-    gtf.gene.select,
+    gtf_gene_select,
     c("ENSG00000178951.9"))
 
   # Selecting transcript_id
-  gtf.transcript.select = GTF_to_GRangesList(
+  gtf_transcript_select = GTF_to_GRangesList(
     gtf,
     gene_or_transcript = 'transcript',
     select_ids = "ENST00000322357.9")
   expect_named(
-    gtf.transcript.select,
+    gtf_transcript_select,
     c("ENST00000322357.9"))
 
 })

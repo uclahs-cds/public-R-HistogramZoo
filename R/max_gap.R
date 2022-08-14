@@ -76,34 +76,34 @@ meaningful_gap <- function(h, p, a, b, N, L){
 #' @return a data.frame with the same columns + the index of the preserved
 #' rows from the original data.frame
 maximal_meaningful_interval <- function(x) {
-  curr.df <- x
-  max.intervals <- data.frame()
-  while(nrow(curr.df) > 0) {
-    maximum.entropy.index <- which.max(curr.df$entropy)
-    maximum.entropy <- curr.df[maximum.entropy.index, ]
-    maximum.entropy.seq <- seq(maximum.entropy$start, maximum.entropy$end)
-    max.intervals <- rbind(max.intervals, maximum.entropy)
+  curr_df <- x
+  max_intervals <- data.frame()
+  while(nrow(curr_df) > 0) {
+    maximum_entropy_index <- which.max(curr_df$entropy)
+    maximum_entropy <- curr_df[maximum_entropy_index, ]
+    maximum_entropy_seq <- seq(maximum_entropy$start, maximum_entropy$end)
+    max_intervals <- rbind(max_intervals, maximum_entropy)
 
     # Find all of the segments that overlap.
     # These will all be less than the maximum
-    overlap.max <- mapply(function(from, to) {
+    overlap_max <- mapply(function(from, to) {
       s <- seq(from, to)
-      length(intersect(maximum.entropy.seq, s)) > 0
-    }, from = curr.df$start, to = curr.df$end)
+      length(intersect(maximum_entropy_seq, s)) > 0
+    }, from = curr_df$start, to = curr_df$end)
 
-    curr.df = curr.df[!overlap.max, ]
+    curr_df = curr_df[!overlap_max, ]
   }
   # Preserve the old index
-  max.intervals$index <- rownames(max.intervals)
-  rownames(max.intervals) <- NULL
-  return(max.intervals)
+  max_intervals$index <- rownames(max_intervals)
+  rownames(max_intervals) <- NULL
+  return(max_intervals)
 }
 
 
 #' Find all meaningful gaps
 #'
 #' @param x histogram (vector of counts)
-#' @param change.points the change points (e.g. local min/max) in the vector x
+#' @param change_points the change points (e.g. local min/max) in the vector x
 #'
 #' @return A data.frame with columns
 #' \describe{
@@ -113,18 +113,18 @@ maximal_meaningful_interval <- function(x) {
 #'     \item{entropy}{relative entropy of the segment to a uniform distribution}
 #' }
 #' @export
-find_all_meaningful_gap <- function(x, change.points) {
+find_all_meaningful_gap <- function(x, change_points) {
 
   # Error checking
   if(!is.numeric(x)){
     stop("x must be a numeric vector")
   }
-  if(!is_equal_integer(change.points) | !all(change.points <= length(x) & change.points >= 0)){
-    stop("change.points must be functional indices")
+  if(!is_equal_integer(change_points) | !all(change_points <= length(x) & change_points >= 0)){
+    stop("change_points must be functional indices")
   }
 
   # Generating a todo set of segments
-  todo <- expand.grid(start = change.points, end = change.points)
+  todo <- expand.grid(start = change_points, end = change_points)
   todo <- todo[todo$end > todo$start,]
 
   # Identifying meaningful gaps
@@ -144,18 +144,18 @@ find_all_meaningful_gap <- function(x, change.points) {
   df$mgap <- as.numeric(df$mgap)
   # df$scaled_entropy = (df$entropy - min(df$entropy, na.rm = T)) / (max(df$entropy, na.rm = T) - min(df$entropy, na.rm = T))
 
-  seg.gap.data <- df[df$mgap > 0 & !is.na(df$mgap), ]
-  # seg.gap.data$index = 1:nrow(seg.gap.data)
+  seg_gap_data <- df[df$mgap > 0 & !is.na(df$mgap), ]
+  # seg_gap_data$index = 1:nrow(seg_gap_data)
 
-  return(maximal_meaningful_interval(seg.gap.data))
+  return(maximal_meaningful_interval(seg_gap_data))
 }
 
 #' Finds the meaningful gaps between the points in s
 #'
 #' @param x The histogram data
-#' @param seg.points the segment points in the vector x
-#' @param change.points the change points (e.g. local min/max) in the vector x
-#' @param min.gap The minimum gap to be considered a meaningful gap
+#' @param seg_points the segment points in the vector x
+#' @param change_points the change points (e.g. local min/max) in the vector x
+#' @param min_gap The minimum gap to be considered a meaningful gap
 #'
 #' @return A data.frame with columns
 #' \describe{
@@ -165,38 +165,38 @@ find_all_meaningful_gap <- function(x, change.points) {
 #'     \item{entropy}{relative entropy of the segment to a uniform distribution}
 #' }
 #' @export
-meaningful_gaps_local <- function(x, seg.points, change.points, min.gap = 2) {
+meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
 
   # Error checking
   if(!is.numeric(x)){
     stop("x must be a numeric vector")
   }
-  if(!is_equal_integer(seg.points) | !all(seg.points <= length(x) & seg.points >= 0)){
-    stop("change.points must be functional indices")
+  if(!is_equal_integer(seg_points) | !all(seg_points <= length(x) & seg_points >= 0)){
+    stop("change_points must be functional indices")
   }
-  if(!is_equal_integer(change.points) | !all(change.points <= length(x) & change.points >= 0)){
-    stop("change.points must be functional indices")
+  if(!is_equal_integer(change_points) | !all(change_points <= length(x) & change_points >= 0)){
+    stop("change_points must be functional indices")
   }
-  if(!is_equal_integer(min.gap) | length(min.gap) != 1){
-    stop("min.gap must be a numeric integer of length 1")
+  if(!is_equal_integer(min_gap) | length(min_gap) != 1){
+    stop("min_gap must be a numeric integer of length 1")
   }
 
   # Identifying max gaps
-  max.gaps.list <- lapply(seq(2, length(seg.points)), function(i) {
-    x.sub <- x[seg.points[i-1]:seg.points[i]]
-    chg.pts <- change.points[change.points >= seg.points[i-1] & change.points <= seg.points[i]] - seg.points[i-1] + 1
+  max_gaps_list <- lapply(seq(2, length(seg_points)), function(i) {
+    x_sub <- x[seg_points[i-1]:seg_points[i]]
+    chg_pts <- change_points[change_points >= seg_points[i-1] & change_points <= seg_points[i]] - seg_points[i-1] + 1
 
-    max.gaps <- find_all_meaningful_gap(x.sub, chg.pts)
+    max_gaps <- find_all_meaningful_gap(x_sub, chg_pts)
 
-    if(nrow(max.gaps) > 0) {
-      max.gaps[, c('start','end')] <- max.gaps[, c('start','end')] + seg.points[i-1] - 1
-      max.gaps$seg.start <- seg.points[i-1]
-      max.gaps$seg.end <- seg.points[i]
-      max.gaps
+    if(nrow(max_gaps) > 0) {
+      max_gaps[, c('start','end')] <- max_gaps[, c('start','end')] + seg_points[i-1] - 1
+      max_gaps$seg_start <- seg_points[i-1]
+      max_gaps$seg_end <- seg_points[i]
+      max_gaps
     }
   })
 
-  max.gaps <- do.call(rbind.data.frame, max.gaps.list)
-  # Remove gaps that are smaller than min.gap
-  return(max.gaps[max.gaps$end - max.gaps$start >= min.gap, ])
+  max_gaps <- do.call(rbind.data.frame, max_gaps_list)
+  # Remove gaps that are smaller than min_gap
+  return(max_gaps[max_gaps$end - max_gaps$start >= min_gap, ])
 }

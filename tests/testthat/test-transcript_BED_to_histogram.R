@@ -28,7 +28,7 @@ test_that("Standard input yields the correct result format", {
 
 test_that("Testing that selecting strand/transcript/chrs/ids return the correct results", {
 
-  histograms.pos = transcript_BED_to_histogram(
+  histograms_pos = transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -38,11 +38,11 @@ test_that("Testing that selecting strand/transcript/chrs/ids return the correct 
   )
 
   expect_named(
-    histograms.pos,
+    histograms_pos,
     "ENSG00000185129.7")
 
 
-  histograms.chr = transcript_BED_to_histogram(
+  histograms_chr = transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -52,10 +52,10 @@ test_that("Testing that selecting strand/transcript/chrs/ids return the correct 
   )
 
   expect_named(
-    histograms.chr,
+    histograms_chr,
     "ENSG00000185129.7")
 
-  histograms.gene = transcript_BED_to_histogram(
+  histograms_gene = transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -65,7 +65,7 @@ test_that("Testing that selecting strand/transcript/chrs/ids return the correct 
   )
 
   expect_named(
-    histograms.gene,
+    histograms_gene,
     "ENSG00000178951.9")
 
   expect_warning(
@@ -129,7 +129,7 @@ test_that("Testing that varying n_fields returns the correct results", {
 
 test_that("Testing that varying bin size yields correct results", {
 
-  histograms.5 = transcript_BED_to_histogram(
+  histograms_5 = transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -137,7 +137,7 @@ test_that("Testing that varying bin size yields correct results", {
     histogram_bin_size = 5
   )
 
-  histograms.10 = transcript_BED_to_histogram(
+  histograms_10 = transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -146,13 +146,13 @@ test_that("Testing that varying bin size yields correct results", {
   )
 
   # Creating bins
-  bins.5 = histograms.5[[1]]$interval_end - histograms.5[[1]]$interval_start + 1
-  bins.10 = histograms.10[[1]]$interval_end - histograms.10[[1]]$interval_start + 1
+  bins_5 = histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
+  bins_10 = histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
 
   # Checking that the binnedAverage add up to the same thing
   expect_equal(
-    sum(bins.5*histograms.5[[1]]$histogram_data),
-    sum(bins.10*histograms.10[[1]]$histogram_data)
+    sum(bins_5*histograms_5[[1]]$histogram_data),
+    sum(bins_10*histograms_10[[1]]$histogram_data)
   )
 
 })

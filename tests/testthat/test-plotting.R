@@ -14,7 +14,7 @@ long_x = observations_to_histogram(
   ), 
   histogram_bin_width = 5
 )
-results_long = segment_and_fit(x, eps = 1)
+results_long = segment_and_fit(long_x, eps = 1)
 
 # Genomic histogram
 genomic_hist = GenomicHistogram(
@@ -207,5 +207,32 @@ test_that("create_trackplot works ", {
     ),
     "some intervals are truncated by xlimits"
   )
+  
+})
+
+
+test_that("create_layerplot works ", {
+  
+  cvg_plt = create_coverageplot(results_long, legend = NULL)
+  resid_plt = create_residualplot(results_long)
+  
+  # 1. Testing that this works
+  expect_error(
+    create_layerplot(
+      plot.objects = list(cvg_plt, resid_plt)
+    ),
+    NA
+  )
+  
+  # 2. Testing that other parameters work
+  expect_error(
+    create_layerplot(
+      plot.objects = list(cvg_plt, resid_plt),
+      xlab.label = "TEST",
+      xlab.cex = 1
+    ),
+    NA
+  )
+  
   
 })
