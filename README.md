@@ -21,11 +21,20 @@ R CMD INSTALL public-R-HistogramZoo
 
 library(HistogramZoo)
 
-x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
+set.seed(271828)
 
-results = segment_and_fit(x, eps = 0.005)
+# Generating Data
+my_data = rnorm(10000, mean = 50, sd = 20)
+histogram_data = observations_to_histogram(my_data, histogram_bin_width=5)
 
+# Segmentation and fitting distributions
+results = segment_and_fit(histogram_data, eps = 1)
+
+# Summarizing results
 results_table = summarize_results(results)
+
+# Plotting
+create_coverageplot(results)
 
 ```
 
