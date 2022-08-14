@@ -78,6 +78,7 @@ create_coverageplot <- function(
 create_coverageplot.Histogram <- function(
     histogram_obj, model_name = NULL,
     col = 'black', lwd = 1, lty = 1,
+    col_distributions = NULL, lwd_distributions = NULL, lty_distributions = NULL,
     type = if(length(histogram_obj) < 50) 'h' else 'l',
     add.points = FALSE, points.x = NULL, points.y = NULL, points.pch = 19, points.col = 'black', points.col.border = 'black', points.cex = 1,
     filename = NULL,
