@@ -312,13 +312,16 @@ create_coverageplot.HistogramFit <- function(
   # choosing the midpoint of the start/end as the label
   labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x, "dist" = "coverage")
+  segment_dists <- unlist(lapply(histogram_obj$models, function(x) x$consensus$dist))
+  dist_colors <- col_distributions[segment_dists]
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
-  distribution_plotting_data <- lapply(mods, function(m) {
+  distribution_plotting_data <- lapply(seq_along(mods), function(i) {
+    m <- mods[[i]]
     x <- seq(m$seg_start, m$seg_end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("dens" = dens, "labels_x" = labels_x[x], "dist" = m$dist)
+      data.frame("dens" = dens, "labels_x" = labels_x[x], "dist" = m$dist, "segment" = i)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)
@@ -434,8 +437,8 @@ create_coverageplot.HistogramFit <- function(
     formula = dens ~ labels_x,
     data = distribution_plotting_data,
     # Groups
-    groups = distribution_plotting_data$dist,
-    col = col_distributions,
+    groups = distribution_plotting_data$segment,
+    col = dist_colors,
     lwd = lwd_distributions,
     lty = lty_distributions,
     # Labels
