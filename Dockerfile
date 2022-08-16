@@ -7,6 +7,6 @@ RUN Rscript -e 'install.packages("devtools")'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install(c("GenomicRanges", "metap", "S4Vectors", "rtracklayer"))'
 RUN chmod 777 /usr/local/lib/R/site-library
-COPY . /usr/local/src/ConsensusPeaks
-WORKDIR /usr/local/src/ConsensusPeaks
+COPY . /usr/local/src/HistogramZoo
+WORKDIR /usr/local/src/HistogramZoo
 RUN Rscript -e 'devtools::install_local(dependencies = T, force = T)'

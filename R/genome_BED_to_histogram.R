@@ -9,7 +9,7 @@
 #' if TRUE, they will be taken as separate input, default FALSE
 #'
 #' @examples \dontrun{
-#' datadir = system.file("extdata", "dna_bedfiles",  package = "ConsensusPeaks")
+#' datadir = system.file("extdata", "dna_bedfiles",  package = "HistogramZoo")
 #' filenames = list.files(datadir, pattern = ".bed$")
 #' filenames = file.path(datadir, filenames)
 #' histograms = genome_BED_to_histogram(

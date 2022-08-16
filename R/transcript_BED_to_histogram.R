@@ -14,9 +14,9 @@
 #' @return A list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
-#' file.directory = system.file("extdata", "rna_bedfiles", package = "ConsensusPeaks")
+#' file.directory = system.file("extdata", "rna_bedfiles", package = "HistogramZoo")
 #' filenames = file.path(file.directory, paste0("Sample.", 1:20, ".bed"))
-#' gtf = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
+#' gtf = system.file("extdata", "genes.gtf", package = "HistogramZoo")
 #'
 #' histograms = transcript_BED_to_histogram(
 #' filenames = filenames,

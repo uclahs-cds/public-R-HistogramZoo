@@ -2,7 +2,7 @@ context("genome_BED_to_histogram")
 
 library(GenomicRanges)
 
-datadir = system.file("extdata", "dna_bedfiles",  package = "ConsensusPeaks")
+datadir = system.file("extdata", "dna_bedfiles",  package = "HistogramZoo")
 filenames = list.files(datadir, pattern = ".bed$")
 filenames = file.path(datadir, filenames)
 n_fields = 6
@@ -24,12 +24,12 @@ glist_regions = S4Vectors::split(gr_regions, f = 1:2)
 glist_segmented = GRangesList(gr_regions)
 
 # Test overlap
-datadir_overlap = system.file("extdata", "dna_bed_test_overlap",  package = "ConsensusPeaks")
+datadir_overlap = system.file("extdata", "dna_bed_test_overlap",  package = "HistogramZoo")
 filenames_overlap = list.files(datadir_overlap, pattern = ".bed$")
 filenames_overlap = file.path(datadir_overlap, filenames_overlap)
 
 # Test strand
-datadir_strand = system.file("extdata", "dna_bed_test_strand",  package = "ConsensusPeaks")
+datadir_strand = system.file("extdata", "dna_bed_test_strand",  package = "HistogramZoo")
 filenames_strand = list.files(datadir_strand, pattern = ".bed$")
 filenames_strand = file.path(datadir_strand, filenames_strand)
 

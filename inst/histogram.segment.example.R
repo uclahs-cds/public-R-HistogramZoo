@@ -1,4 +1,4 @@
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 set.seed(13)
 # Example 1, uniform

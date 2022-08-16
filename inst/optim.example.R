@@ -1,4 +1,4 @@
-library(ConsensusPeaks)
+library(HistogramZoo)
 # Instead of using MLE, use the metrics we are interested in:
 # Jaccard or histogram intersection
 

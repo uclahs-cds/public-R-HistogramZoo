@@ -1,4 +1,4 @@
-library(ConsensusPeaks)
+library(HistogramZoo)
 
 # I don't think this is a bug in the code, but rather a strange result
 # Two clear distinct segments that are uniform but gets merged into one segment
