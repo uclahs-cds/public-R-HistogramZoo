@@ -21,7 +21,7 @@ library(HistogramZoo)
 ```
 
 # Introduction
-The HistogramZoo R package is a collection of functions which aims to identify and characterize patterns from histogram data.
+The HistogramZoo R package is a collection of functions which aim to identify and characterize patterns from histogram data.
 
 # Quick Start
 
