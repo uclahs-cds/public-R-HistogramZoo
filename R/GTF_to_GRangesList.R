@@ -9,7 +9,7 @@
 #' @return A GRangesList object where each element is a GRanges object containing the exons of a gene or transcript
 #'
 #' @examples \dontrun{
-#' gtf = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
+#' gtf = system.file("extdata", "genes.gtf", package = "HistogramZoo")
 #' gtf_gr = GTF_to_GRangesList(gtf)
 #' }
 #' @export

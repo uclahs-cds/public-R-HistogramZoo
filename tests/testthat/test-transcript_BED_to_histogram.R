@@ -1,9 +1,9 @@
 context("Testing input and parameter variations to transcript_BED_to_histogram")
 
 # Input Data
-datadir = system.file("extdata", "rna_bedfiles",  package = "ConsensusPeaks")
+datadir = system.file("extdata", "rna_bedfiles",  package = "HistogramZoo")
 filenames = file.path(datadir, paste0("Sample.", 1:20, ".bed"))
-gtf = system.file("extdata", "genes.gtf",  package = "ConsensusPeaks")
+gtf = system.file("extdata", "genes.gtf",  package = "HistogramZoo")
 
 
 test_that("Standard input yields the correct result format", {

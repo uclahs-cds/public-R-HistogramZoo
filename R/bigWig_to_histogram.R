@@ -14,7 +14,7 @@
 #' @return A list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
-#' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "ConsensusPeaks")
+#' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "HistogramZoo")
 #' regions = GenomicRanges::GRanges(
 #' seqnames = "chr1",
 #' IRanges::IRanges(start = c(17950, 19350),
