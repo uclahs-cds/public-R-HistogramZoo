@@ -2,7 +2,7 @@ context("GTF_to_GRangesList")
 
 test_that("GTF_to_GRangesList yields correct results", {
 
-  gtf = system.file("extdata", "genes.gtf", package = "ConsensusPeaks")
+  gtf = system.file("extdata", "genes.gtf", package = "HistogramZoo")
 
   # Basic input
   gtf_gr = GTF_to_GRangesList(gtf)

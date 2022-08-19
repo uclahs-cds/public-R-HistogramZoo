@@ -1,7 +1,7 @@
 context("Testing input and parameter variations to bigWig_to_histogram")
 
-filename = system.file("extdata", "bigwigs", "test.bw", package = "ConsensusPeaks")
-gtf = system.file("extdata", "genes.gtf",  package = "ConsensusPeaks")
+filename = system.file("extdata", "bigwigs", "test.bw", package = "HistogramZoo")
+gtf = system.file("extdata", "genes.gtf",  package = "HistogramZoo")
 
 strand = "*"
 score_threshold = 0

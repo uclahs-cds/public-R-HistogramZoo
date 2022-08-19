@@ -1,3 +1,3 @@
 library(testthat)
 
-test_check("ConsensusPeaks")
+test_check("HistogramZoo")
