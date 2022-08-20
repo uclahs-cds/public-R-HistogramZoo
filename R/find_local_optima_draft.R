@@ -1,6 +1,24 @@
 
 
-find_local_optima_draft <- function(x, threshold = 0, flat_endpoints = T){
+#' find_local_optima returns the local optima of histograms
+#'
+#' @param x numeric vector representing the density of a histogram
+#' @param threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbours by greater than the permitted threshold, default 0
+#' @param flat_endpoints in regions of flat density, whether to return the endpoints or the midpoints 
+#'
+#' @return A list of two vectors
+#' \describe{
+#'     \item{min_ind}{indices of local minima}
+#'     \item{max_ind}{indices of local maxima}
+#' }
+#' 
+#' @export
+#'
+#' @examples \dontrun{
+#' x <- c(1,2,3,2,1,2,3,2,1)
+#' find_local_optima(x)
+#' }
+find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
   
   # Error checking
   x <- as.numeric(x)
@@ -24,10 +42,17 @@ find_local_optima_draft <- function(x, threshold = 0, flat_endpoints = T){
   unflat_idx <- cumsum(unflat_x$lengths)
   length_unflat <- length(unflat_idx)
   x_change <- diff(unflat_x$values)
+  
+  # Identifying local optima
   x_sign <- sign(x_change)
   x_min <- which(diff(x_sign) == 2)+1
   x_max <- which(diff(x_sign) == -2)+1
   
+  # Filter by threshold
+  x_change_abs <- (abs(x_change) > threshold)
+  x_min <- x_min[x_change_abs[x_min-1] & x_change_abs[x_min]]
+  x_max <- x_max[x_change_abs[x_max-1] & x_change_abs[x_max]]
+    
   # If flat endpoints, take both ends of the flat segments as indices
   if(flat_endpoints){
     x_min <- c(unflat_idx[x_min], unflat_idx[x_min - 1] + 1)
