@@ -73,6 +73,9 @@ find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
   }
   
   # Assign start & end points to min/max
+  # This inherently has the same problem as the original find_local_optima
+  # i.e. this is the only place where min/max don't have to alternate in the event
+  # of a threshold (i.e. the if statements don't check if the thresholds hold)
   if(unflat_x$values[2] > unflat_x$values[1]){
     x_min <- c(start_point, x_min)
   } else {

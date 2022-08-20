@@ -99,6 +99,7 @@ segment_and_fit <- function(
 
   # Change points
   chgpts <- find_local_optima(x, threshold = 0, flat_endpoints = T)
+  chgpts <- sort(c(chgpts$min_ind, chgpts$max_ind))
   # Looking for regions that surpass a hard count threshold
   x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
