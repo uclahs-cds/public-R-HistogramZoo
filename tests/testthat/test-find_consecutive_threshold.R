@@ -1,3 +1,5 @@
+context("find_consecutive_threshold")
+
 test_that("find_consecutive_threshold works", {
   test1 <- c(0,0,0,1,1,1,0,0,0,1,1,1,0,0)
   test2 <- c(1,1,1)
