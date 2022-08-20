@@ -64,9 +64,13 @@ test_that("threshold works for clustered optima", {
   expect_equal(x_optima$max_ind, c(2, 6))
 })
 
-test_that("the one case that threshold doesn't work - endpoints", {
-  x <- c(1, 2, 3, 2, 1, 3, 5, 3, 1, 2)
+test_that("endpoints work", {
+  x <- c(2, 1, 2, 3, 2, 1, 2)
   x_optima <- find_local_optima(x, threshold = 1)
-  expect_equal(x_optima$min_ind, c(1))
-  expect_equal(x_optima$max_ind, c(7, 10))
+  expect_equal(x_optima$min_ind, c(2, 6))
+  expect_equal(x_optima$max_ind, c(1, 4, 7))
+  
+  x_optima <- find_local_optima(x, threshold = 2)
+  expect_equal(x_optima$min_ind, c(6))
+  expect_equal(x_optima$max_ind, c(1, 7))
 })
