@@ -3,7 +3,7 @@
 #' find_local_optima returns the local optima of histograms
 #'
 #' @param x numeric vector representing the density of a histogram
-#' @param threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbours by greater than the permitted threshold, default 0
+#' @param threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbour optima by greater than the permitted threshold, default 0
 #' @param flat_endpoints in regions of flat density, whether to return the endpoints or the midpoints 
 #'
 #' @return A list of two vectors
@@ -49,9 +49,23 @@ find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
   x_max <- which(diff(x_sign) == -2)+1
   
   # Filter by threshold
-  x_change_abs <- (abs(x_change) > threshold)
-  x_min <- x_min[x_change_abs[x_min-1] & x_change_abs[x_min]]
-  x_max <- x_max[x_change_abs[x_max-1] & x_change_abs[x_max]]
+  change_points <- sort(c(x_min, x_max))
+  change_points_vals <- unflat_x$values[change_points]
+  change_points_thresh <- (abs(diff(change_points_vals)) > threshold)
+  change_points_rle <- rle(change_points_thresh)
+  # if we have two consecutive optima points that fail the threshold, deleting them will result in consecutive mins/maxs
+  # therefore, we change the last consecutive optima pair to TRUE to ensure that stretchs of consecutive optima points
+  # will always be of an odd length
+  issue_points <- change_points_rle$lengths %% 2 == 0 & !change_points_rle$value
+  change_points_thresh[cumsum(change_points_rle$lengths)[issue_points]] <- TRUE
+  change_points_keep <- change_points[c(change_points_thresh, TRUE) & c(TRUE, change_points_thresh)]
+  x_min <- x_min[x_min %in% change_points_keep]
+  x_max <- x_max[x_max %in% change_points_keep]
+  
+  # Filter by (local) threshold
+  # x_change_abs <- (abs(x_change) > threshold)
+  # x_min <- x_min[x_change_abs[x_min-1] & x_change_abs[x_min]]
+  # x_max <- x_max[x_change_abs[x_max-1] & x_change_abs[x_max]]
     
   # If flat endpoints, take both ends of the flat segments as indices
   if(flat_endpoints){
