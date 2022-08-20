@@ -1,92 +1,97 @@
 
-#' Finds the local minima m and maxima M such that
-#' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
-#'
-#' @param x a numeric vector, representing the density of a histogram
-#' @param threshold numeric, minimum distance between local optima
-#'
-#' @export
-find_local_optima <- function(x, threshold = 0) {
 
+#' find_local_optima returns the local optima of histograms
+#'
+#' @param x numeric vector representing the density of a histogram
+#' @param threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbours by greater than the permitted threshold, default 0
+#' @param flat_endpoints in regions of flat density, whether to return the endpoints or the midpoints 
+#'
+#' @return A list of two vectors
+#' \describe{
+#'     \item{min_ind}{indices of local minima}
+#'     \item{max_ind}{indices of local maxima}
+#' }
+#' 
+#' @export
+#'
+#' @examples \dontrun{
+#' x <- c(1,2,3,2,1,2,3,2,1)
+#' find_local_optima(x)
+#' }
+find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
+  
   # Error checking
   x <- as.numeric(x)
   stopifnot(length(x) > 1)
-
-  # Get the first non-equal index
-  n <- length(x)
-  min_ind <- NULL
-  max_ind <- NULL
-  #init = x[1]
-  # If x = c(1,1,1,1,2,3) then j = 4, the first index before the run ends
-
-  # Trim the left and right side
-  rle_diff <- rle(diff(x))
-  # Return no min/max if all equal
-  if(length(rle_diff$lengths) <= 1) {
-    return(
-      list(
-        'min_ind' = 1,
-        'max_ind' = NULL
-        )
-      )
-  }
-
-  start_index <- 1
-  end_index <- n
-  if(rle_diff$values[1] == 0) {
-    start_index <- rle_diff$lengths[1] + 1
-  }
-  if(length(rle_diff$lengths) > 2 && utils::tail(rle_diff$values, n = 1) == 0) {
-    # Remove the last equal values
-    end_index <- n - utils::tail(rle_diff$lengths, n = 1)
-  }
-  x_trim <- x[start_index:end_index]
-  n_trim <- length(x_trim)
-  # Keep track if we last appended a min/max
-  min_appended <- NULL
-  # Check the first point for min/max
-  if(x_trim[1] < x_trim[2]) {
-    min_ind <- 1
-    min_appended <- TRUE
-  } else if (x_trim[1] > x_trim[2]) {
-    max_ind <- 1
-    min_appended <- FALSE
-  }
-
-  # Do the middle segment
-  if(n_trim > 3) {
-    for(i in seq(2, n_trim - 1)) {
-      # min_appended ensures that we alternate minima and maxima
-      left_diff <- x_trim[i] - x_trim[i - 1]
-      right_diff <- x_trim[i] - x_trim[i + 1]
-
-      if (!min_appended &&
-          ((left_diff < -threshold && right_diff <= 0) ||
-           (left_diff <= 0 && right_diff < -threshold))) {
-        min_ind <- c(min_ind, i)
-        min_appended <- TRUE
-      } else if(min_appended &&
-                ((left_diff > threshold && right_diff >= 0) ||
-                (left_diff >= 0 && right_diff > threshold))) {
-        max_ind <- c(max_ind, i)
-        min_appended <- FALSE
-      }
+  
+  # Extracting the changing values in x
+  unflat_x <- rle(x)
+  
+  # Edge case: If x is a flat block
+  if(length(unflat_x$lengths) <= 1) {
+    x_min <- c(1, length(x))
+    if(!flat_endpoints){ 
+      x_min <- round(mean(x_min))
     }
-  }
-
-  if(x_trim[n_trim - 1] > x_trim[n_trim]) {
-    min_ind <- c(min_ind, n_trim)
-    min_appended <- TRUE
-  } else if (x_trim[n_trim - 1] < x_trim[n_trim]) {
-    max_ind <- c(max_ind, n_trim)
-    min_appended <- FALSE
-  }
-
-  return(
-    list(
-      'min_ind' = min_ind + (start_index - 1),
-      'max_ind' = max_ind + (start_index - 1)
+    return( 
+      list('min_ind' = x_min, 'max_ind' = NULL)
     )
+  }
+  
+  # Assuming a stretch of points
+  unflat_idx <- cumsum(unflat_x$lengths)
+  length_unflat <- length(unflat_idx)
+  x_change <- diff(unflat_x$values)
+  
+  # Identifying local optima
+  x_sign <- sign(x_change)
+  x_min <- which(diff(x_sign) == 2)+1
+  x_max <- which(diff(x_sign) == -2)+1
+  
+  # Filter by threshold
+  x_change_abs <- (abs(x_change) > threshold)
+  x_min <- x_min[x_change_abs[x_min-1] & x_change_abs[x_min]]
+  x_max <- x_max[x_change_abs[x_max-1] & x_change_abs[x_max]]
+    
+  # If flat endpoints, take both ends of the flat segments as indices
+  if(flat_endpoints){
+    x_min <- c(unflat_idx[x_min], unflat_idx[x_min - 1] + 1)
+    x_max <- c(unflat_idx[x_max], unflat_idx[x_max - 1] + 1)
+  } else { # Take the midpoint
+    x_min <- rowMeans(cbind(unflat_idx[x_min], unflat_idx[x_min - 1] + 1))
+    x_min <- round(x_min)
+    x_max <- rowMeans(cbind(unflat_idx[x_max], unflat_idx[x_max - 1] + 1))
+    x_max <- round(x_max)
+  }
+  
+  # Start & end points
+  start_point <- unique(c(1, unflat_idx[1]))
+  end_point <- unique(c(length(x), unflat_idx[length_unflat-1]+1))
+  if(!flat_endpoints) {
+    start_point <- round(mean(start_point))
+    end_point <- round(mean(end_point))
+  }
+  
+  # Assign start & end points to min/max
+  if(unflat_x$values[2] > unflat_x$values[1]){
+    x_min <- c(start_point, x_min)
+  } else {
+    x_max <- c(start_point, x_max)
+  }
+  
+  if(unflat_x$values[length_unflat] < unflat_x$values[length_unflat - 1]){
+    x_min <- c(x_min, end_point)
+  } else {
+    x_max <- c(x_max, end_point)
+  }
+  
+  # Final sort
+  x_min <- sort(unique(x_min))
+  x_max <- sort(unique(x_max))
+  
+  # Return results
+  return( 
+    list('min_ind' = x_min, 'max_ind' = x_max)
   )
-
+  
 }
