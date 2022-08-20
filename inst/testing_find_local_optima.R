@@ -62,7 +62,7 @@ optima = sort(unlist(optima))
 create_coverageplot(xhist, add.points = T, points.x = interval_start[optima], points.y = data[optima], points.col = "red", type = "h")
 
 # find_local_optima with a threshold
-optima = find_local_optima(data, threshold = 5)
+optima = find_local_optima(data, threshold = 2)
 optima = sort(unlist(optima))
 create_coverageplot(xhist, add.points = T, points.x = interval_start[optima], points.y = data[optima], points.col = "red", type = "h")
 

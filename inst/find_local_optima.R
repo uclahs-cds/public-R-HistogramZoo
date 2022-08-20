@@ -1,3 +1,11 @@
+#' Find changepoints in a vector with uniform stretches of values
+#' @param x A numeric vector
+find_stepfunction_chgpts <- function(x){
+  change_points <- which(diff(x) != 0)
+  change_points_plus <- change_points+1
+  keep <- (x[change_points] < x[change_points_plus])
+  return( c(change_points[keep], change_points_plus[!keep]) )
+}
 
 #' Finds the local minima m and maxima M such that
 #' m_1 < M_1 < m_2 < M_2 < ... < M_{K - 1} < m_{k}
