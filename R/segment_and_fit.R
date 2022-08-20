@@ -1,12 +1,3 @@
-#' Find changepoints in a vector with uniform stretches of values
-#' @param x A numeric vector
-find_stepfunction_chgpts <- function(x){
-  change_points <- which(diff(x) != 0)
-  change_points_plus <- change_points+1
-  keep <- (x[change_points] < x[change_points_plus])
-  return( c(change_points[keep], change_points_plus[!keep]) )
-}
-
 #' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
 #'
 #' @param x A numeric vector
@@ -107,7 +98,7 @@ segment_and_fit <- function(
   x <- histogram_obj$histogram_data
 
   # Change points
-  chgpts <- find_stepfunction_chgpts(x)
+  chgpts <- find_local_optima(x, threshold = 0, flat_endpoints = T)
   # Looking for regions that surpass a hard count threshold
   x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
