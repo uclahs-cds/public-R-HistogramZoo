@@ -30,7 +30,9 @@ Imports:
     IRanges,
     GenomicRanges,
     valr,
-    GenomeInfoDb
+    GenomeInfoDb,
+    reshape2,
+    RobustRankAggreg
 Suggests:
     knitr,
     rmarkdown,
