@@ -3,8 +3,8 @@
 #'
 #' @param models A list of models, e.g. derived from `fit_distributions`
 #' @param method One of `weighted_majority_vote` and `rra` as a method of determining the best method
-#' @param metrics Metrics used to fit models
-#' @param weights Required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. A higher weight results in a higher priority of metric.
+#' @param metrics Metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param weights Required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
 #' @return A list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric.
 #' 
@@ -34,6 +34,9 @@ find_consensus_model <- function(
   metrics <- match.arg(metrics, several.ok = T)
   method <- match.arg(method)
   stopifnot(is.numeric(weights))
+  if(!all(sort(weights, decreasing = T) == weights)){
+    warning("Weights should be in decreasing order.")
+  }
   if(length(weights) != length(metrics) & method == "weighted_majority_voting"){
     stop("Numeric weights must be provided for all metrics.")
   }
