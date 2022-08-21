@@ -1,12 +1,12 @@
 
 #' Methods for voting for a consensus model based on the metrics of fit_distributions
 #'
-#' @param models A list of models, e.g. derived from `fit_distributions`
-#' @param method One of `weighted_majority_vote` and `rra` as a method of determining the best method
-#' @param metrics Metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param weights Required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
+#' @param models a list of models, e.g. derived from `fit_distributions`
+#' @param method one of `weighted_majority_vote` and `rra` as a method of determining the best method
+#' @param metrics metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
-#' @return A list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric.
+#' @return a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric.
 #' 
 #' @export
 #'
@@ -21,7 +21,7 @@ find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
     metrics = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    weights = rev(seq(1, 1.8, 0.2))
+    weights = rev(seq(1, 1.8, 0.2))[1:length(metrics)]
 ){
 
   # Initialization
@@ -93,7 +93,7 @@ find_consensus_model <- function(
   best_model_tags <- paste0(metrics, ".", rownames(model_metrics)[metric_best_model])
   best_models <- models[tag %in% best_model_tags]
   names(best_models) <- sapply(best_models, `[[`, "metric")
-  best_models[['consensus']] <- models[tag == paste0(metrics[1], ".", consensus_dist)]
+  best_models[['consensus']] <- models[[which(tag == paste0(metrics[1], ".", consensus_dist))]]
   
   return(
     best_models
