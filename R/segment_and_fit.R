@@ -119,7 +119,7 @@ segment_and_fit <- function(
     if(remove_low_entropy) {
       mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = p_init, min_gap = min_gap_size)
       p <- p[(abs(p - segs['start']) > min_peak_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
-      p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_peak_size) 
+      p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_peak_size)
     } else {
       p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
       p_pairs <- index_to_start_end(p)
@@ -166,12 +166,12 @@ segment_and_fit <- function(
       })
       for(munif in names(dist_optim_subset)){dist_optim[[munif]] <- dist_optim_subset[[munif]]}
     }
-    
+
     # Correcting for optimization via finding the minimum
     best_models <- find_consensus_model(
       models = dist_optim,
       method = consensus_method,
-      metrics = histogram_metric,
+      metric = histogram_metric,
       weights = metric_weights
     )
     best_models <- lapply(best_models, function(mod){
