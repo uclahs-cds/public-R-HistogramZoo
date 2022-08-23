@@ -2,12 +2,12 @@
 #' Methods for voting for a consensus model based on the metrics of fit_distributions
 #'
 #' @param models a list of models, e.g. derived from `fit_distributions`
-#' @param method one of `weighted_majority_vote` and `rra` as a method of determining the best method
+#' @param method one of `weighted_majority_vote` and `rra` as a method of determining the best method. `rra` requires the package `RobustRankAggreg`
 #' @param metric metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
 #' @param weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
 #' @return a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric.
-#' 
+#'
 #' @export
 #'
 #' @examples \dontrun{
@@ -15,7 +15,7 @@
 #'  data <- data$histogram_data
 #'  models <- fit_distributions(data)
 #'  find_consensus_models(models)
-#' 
+#'
 #' }
 find_consensus_model <- function(
     models,
@@ -29,7 +29,7 @@ find_consensus_model <- function(
   distr <- sapply(models, `[[`, "dist")
   val <- sapply(models, `[[`, "value")
   tag <- paste0(met, ".", distr)
-  
+
   # Error checking
   metric <- match.arg(metric, several.ok = T)
   method <- match.arg(method)
@@ -55,7 +55,7 @@ find_consensus_model <- function(
   if(length(tag) > length(unique(tag))){
     stop("Models cannot contain repeated fits using the same metric and distribution.")
   }
-  
+
   # Base case: if there is only 1 metric
   if(length(metric) == 1){
     best_models <- models[which.min(val)]
@@ -65,7 +65,7 @@ find_consensus_model <- function(
       best_models
     )
   }
-  
+
   # Base case: if there is only 1 distribution
   if(length(unique(distr)) == 1){
     names(models) <- sapply(models, `[[`, "metric")
@@ -74,16 +74,16 @@ find_consensus_model <- function(
       models
     )
   }
-  
+
   # Set-up
   model_metrics <- cbind.data.frame(met, distr, val)
   model_metrics <- reshape2::acast(
-    data = model_metrics, 
-    formula = distr ~ met, 
+    data = model_metrics,
+    formula = distr ~ met,
     value.var = "val"
   )
   model_metrics <- model_metrics[,metric]
-  
+
   # Majority voting
   if(method == "weighted_majority_vote"){
     model_metrics[] <- apply(model_metrics, 2, function(x) rank(-x))
@@ -96,27 +96,31 @@ find_consensus_model <- function(
     consensus_dist <- rownames(model_metrics)[1]
     metric_best_model <- apply(model_metrics, 2, which.max)
   }
-  
+
   # Rank aggregation
   if(method == "rra"){
-    model_metrics[] <- apply(model_metrics, 2, function(x) rank(x)/length(x))
-    rra <- RobustRankAggreg::aggregateRanks(
-      rmat = model_metrics, 
-      N = nrow(model_metrics)
-    )
-    if(sum(rra$Score == min(rra$Score)) > 1){
-      stop("Ties exist between distributions chosen by metric.")
+    if(requireNamespace("RobustRankAggreg", quietly = TRUE)) {
+      model_metrics[] <- apply(model_metrics, 2, function(x) rank(x)/length(x))
+      rra <- RobustRankAggreg::aggregateRanks(
+        rmat = model_metrics,
+        N = nrow(model_metrics)
+      )
+      if(sum(rra$Score == min(rra$Score)) > 1){
+        stop("Ties exist between distributions chosen by metric.")
+      }
+      consensus_dist <- rra[1, "Name"]
+      metric_best_model <- apply(model_metrics, 2, which.min)
+    } else {
+      stop('Please install RobustRankAggreg package for method `rra`')
     }
-    consensus_dist <- rra[1, "Name"]
-    metric_best_model <- apply(model_metrics, 2, which.min)
   }
-  
+
   # Extracting the best models
   best_model_tags <- paste0(metric, ".", rownames(model_metrics)[metric_best_model])
   best_models <- models[tag %in% best_model_tags]
   names(best_models) <- sapply(best_models, `[[`, "metric")
   best_models[['consensus']] <- models[[which(tag == paste0(metric[1], ".", consensus_dist))]]
-  
+
   return(
     best_models
   )

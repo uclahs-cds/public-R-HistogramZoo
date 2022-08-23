@@ -31,12 +31,12 @@ Imports:
     GenomicRanges,
     valr,
     GenomeInfoDb,
-    reshape2,
-    RobustRankAggreg
+    reshape2
 Suggests:
     knitr,
     rmarkdown,
     testthat,
-    scales
+    scales,
+    RobustRankAggreg
 VignetteBuilder: knitr
 RoxygenNote: 7.2.0
