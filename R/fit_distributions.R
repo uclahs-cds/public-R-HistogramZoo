@@ -110,9 +110,15 @@ fit_distributions = function(
         "dist" = "norm",
         "metric" = met,
         "value" = norm_optim$optim$bestval,
-        "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
+        "dens" = function(
+                  x = NULL,
+                  mpar = NULL,
+                  scale = TRUE) {
           if(missing(x)) {
             x <- bin
+          }
+          if(missing(mpar)) {
+            mpar <- norm_par
           }
           args <- c(list(x = x), as.list(mpar))
           res <- do.call("dtnorm", args)
@@ -144,9 +150,15 @@ fit_distributions = function(
         "dist" = "gamma",
         "metric" = met,
         "value" = gamma_optim$optim$bestval,
-        "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
+        "dens" = function(
+                  x = NULL,
+                  mpar = NULL,
+                  scale = TRUE) {
           if(missing(x)) {
             x <- bin
+          }
+          if(missing(mpar)) {
+            mpar <- gamma_par
           }
           args <- c(list(x = x), as.list(mpar))
           res <- do.call("dtgamma", args)
