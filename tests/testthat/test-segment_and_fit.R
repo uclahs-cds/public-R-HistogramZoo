@@ -1,3 +1,5 @@
+context("segment_and_fit")
+
 test_that("segment_and_fit works without removing low entropy regions", {
 
   x_norm_mix <- Histogram(
