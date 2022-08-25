@@ -56,6 +56,11 @@ fit_distributions = function(
     res
   }
 
+  # Correcting for Jaccard/Intersection
+  .correct_fitted_value <- function(met, value){
+    if (met %in% c("jaccard", "intersection")) (1 - value) else value
+  }
+
   # Initializing Todo & Results
   todo <- expand.grid(metric, distributions, stringsAsFactors = F)
   rtn <- list()
@@ -77,7 +82,7 @@ fit_distributions = function(
         "par" = NULL,
         "dist" = "unif",
         "metric" = met,
-        "value" = metric_func(histogram_data, rep(unif_dens * N, L)),
+        "value" = .correct_fitted_value(met, metric_func(histogram_data, rep(unif_dens * N, L))),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -109,7 +114,7 @@ fit_distributions = function(
         "par" = norm_par,
         "dist" = "norm",
         "metric" = met,
-        "value" = norm_optim$optim$bestval,
+        "value" = .correct_fitted_value(met, norm_optim$optim$bestval),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -143,7 +148,7 @@ fit_distributions = function(
         "par" = gamma_par,
         "dist" = "gamma",
         "metric" = met,
-        "value" = gamma_optim$optim$bestval,
+        "value" = .correct_fitted_value(met, gamma_optim$optim$bestval),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
