@@ -55,12 +55,16 @@ find_consensus_model <- function(
   if(length(tag) > length(unique(tag))){
     stop("Models cannot contain repeated fits using the same metric and distribution.")
   }
+  
+  # Correcting for Jaccard and Intersection
+  val = ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
 
   # Base case: if there is only 1 metric
   if(length(metric) == 1){
     best_models <- models[which.min(val)]
     names(best_models) <- met[1]
     best_models[['consensus']] <- models[[which.min(val)]]
+    best_models[['consensus']]$metric <- "consensus"
     return(
       best_models
     )
@@ -70,6 +74,7 @@ find_consensus_model <- function(
   if(length(unique(distr)) == 1){
     names(models) <- sapply(models, `[[`, "metric")
     models[['consensus']] <- models[[which(met == metric[1])]]
+    models[['consensus']]$metric <- "consensus"
     return(
       models
     )
@@ -120,7 +125,8 @@ find_consensus_model <- function(
   best_models <- models[tag %in% best_model_tags]
   names(best_models) <- sapply(best_models, `[[`, "metric")
   best_models[['consensus']] <- models[[which(tag == paste0(metric[1], ".", consensus_dist))]]
-
+  best_models[['consensus']]$metric <- "consensus"
+  
   return(
     best_models
   )

@@ -174,11 +174,6 @@ segment_and_fit <- function(
       metric = histogram_metric,
       weights = metric_weights
     )
-    best_models <- lapply(best_models, function(mod){
-      if(mod$metric %in% c("jaccard", "intersection")){ mod$value = 1 - mod$value }
-      mod
-    })
-    best_models[['consensus']]$metric <- "consensus"
 
     models[[i]] <- best_models
   }
