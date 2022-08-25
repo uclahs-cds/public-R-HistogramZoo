@@ -91,10 +91,10 @@ test_that("majority voting - weights", {
   
   # NOTE: FIX THIS IF INVERT METRIC VALUES FOR JACCARD AND INTERSECTION
   models_test <- list(
-    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.1),
-    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.05),
-    "C" = list("metric" = "intersection", "dist" = "norm", "value" = 0.05),
-    "D" = list("metric" = "intersection", "dist" = "unif", "value" = 0.1)
+    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.9),
+    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.95),
+    "C" = list("metric" = "intersection", "dist" = "norm", "value" = 0.95),
+    "D" = list("metric" = "intersection", "dist" = "unif", "value" = 0.9)
   )
   
   results <- find_consensus_model(
@@ -122,10 +122,10 @@ test_that("rra aggregation", {
   # figure out why and document
   
   models_test <- list(
-    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.1),
-    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.05),
-    "C" = list("metric" = "intersection", "dist" = "norm", "value" = 0.05),
-    "D" = list("metric" = "intersection", "dist" = "unif", "value" = 0.1)
+    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.9),
+    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.95),
+    "C" = list("metric" = "intersection", "dist" = "norm", "value" = 0.95),
+    "D" = list("metric" = "intersection", "dist" = "unif", "value" = 0.9)
   )
   
   expect_error(
@@ -135,9 +135,9 @@ test_that("rra aggregation", {
   
   
   models_test <- list(
-    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.1),
-    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.01),
-    "C" = list("metric" = "jaccard", "dist" = "gamma", "value" = 0.001),
+    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.9),
+    "B" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.99),
+    "C" = list("metric" = "jaccard", "dist" = "gamma", "value" = 0.999),
     "D" = list("metric" = "mse", "dist" = "unif", "value" = 0.1),
     "E" = list("metric" = "mse", "dist" = "norm", "value" = 0.01),
     "F" = list("metric" = "mse", "dist" = "gamma", "value" = 0.01)
