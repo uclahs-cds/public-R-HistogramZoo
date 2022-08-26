@@ -16,6 +16,20 @@ results_columns <- c(
   "params"
 )
 
+#' Extract stats from models
+#'
+#' @param model_list A list of models represented as a nested list, like the output of `fit_distributions`
+#' @param model_name The name of the model from which the stats are to be extracted
+#'
+#' @return A list of the following data representing a single segment
+#' \describe{
+#'     \item{histogram_start}{The start index of the segment in the Histogram representation}
+#'     \item{histogram_end}{The end index of the segment in the Histogram representation}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{dist}{The distribution name}
+#'     \item{params}{The parameters of the distribution}
+#'}
 extract_stats_from_models <- function(model_list, model_name = "consensus"){
   mod <- model_list[[model_name]]
   list(
@@ -28,6 +42,18 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
   )
 }
 
+#' Represent a single segment as a set of intervals
+#'
+#' @param iranges An IRanges object with intervals representing intervals of a single segment
+#'
+#' @return A list with the following data representing a single segment
+#' \describe{
+#'     \item{start}{the interval start of the segment}
+#'     \item{end}{the interval end of the segment}
+#'     \item{interval_count}{The number of intervals in the segment - used for collapsing disjoint intervals}
+#'     \item{interval_sizes}{The width of each interval}
+#'     \item{interval_starts}{The start index of each interval}
+#'}
 extract_peak_segments <- function(iranges){
   iranges_range <- range(iranges)
   list(
@@ -47,20 +73,20 @@ extract_peak_segments <- function(iranges){
 #' @return A data.frame with the following columns summarizing the results of the fit
 #' \describe{
 #'     \item{region_id}{character string denoting the region_id of the Histogram}
-#'     \item{peak_id}{an integer id identifiying the ordinal segment of the Histogram segmentation}
+#'     \item{peak_id}{an integer id identifying the ordinal segment of the Histogram segmentation}
 #'     \item{chr}{an optional column denoting the chromosome of a GenomicHistogram object}
 #'     \item{start}{the interval start of the segment}
 #'     \item{end}{the interval end of the segment}
 #'     \item{strand}{an optional column denoting the strand of a GenomicHistogram object}
-#'     \item{interval_count}{}
-#'     \item{interval_sizes}{}
-#'     \item{interval_starts}{}
-#'     \item{histogram_start}{}
-#'     \item{histogram_end}{}
-#'     \item{value}{}
-#'     \item{metric}{}
-#'     \item{dist}{}
-#'     \item{params}{}
+#'     \item{interval_count}{The number of intervals in the segment - used for collapsing disjoint intervals}
+#'     \item{interval_sizes}{The width of each interval}
+#'     \item{interval_starts}{The start index of each interval}
+#'     \item{histogram_start}{The start index of the segment in the Histogram representation}
+#'     \item{histogram_end}{The end index of the segment in the Histogram representation}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{dist}{The distribution name}
+#'     \item{params}{The parameters of the distribution}
 #' }
 #'
 #' @export
