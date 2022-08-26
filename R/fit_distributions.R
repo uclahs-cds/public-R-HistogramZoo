@@ -1,3 +1,44 @@
+#' Fit a uniform distribution to a histogram
+#'
+#' @param x numeric vector representing the density of a histogram
+#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' 
+#' @return A list with the following data
+#' \describe{
+#'     \item{par}{A character string denoting the region_id of the Histogram}
+#'     \item{dist}{The distribution name}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{dens}{A function that returns the density of the fitted distribution}
+#' }
+fit_uniform <- function(x, metric){
+  
+  N <- sum(x)
+  bin <- 1:length(x)
+  p_unif <- generate_uniform_distribution(x)
+  h_unif <- x / sum(x)
+  metric_func <- get(paste('histogram', metric, sep = "."))
+  
+  m <- metric_func(h_unif, p_unif)
+
+  return(
+    list(
+      "par" = NULL,
+      "dist" = "unif",
+      "metric" = metric,
+      "value" = correct_fitted_value(metric, m),
+      "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
+        if(missing(x)) {
+          x <- bin
+        }
+        res <- ifelse(x >= min(bin) & x <= max(bin), p_unif[1], 0)
+        if(scale) res * N
+        else res
+      }
+    )
+  )
+
+}
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
@@ -10,8 +51,17 @@
 #'
 #' @export
 #'
+#' @return A nested list where each sublist represents a model with the following data
+#' \describe{
+#'     \item{par}{A character string denoting the region_id of the Histogram}
+#'     \item{dist}{The distribution name}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{dens}{A function that returns the density of the fitted distribution}
+#' }
+#'
 #' @importFrom DEoptim DEoptim
-fit_distributions = function(
+fit_distributions <- function(
   histogram_data,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   truncated = FALSE,
@@ -56,10 +106,6 @@ fit_distributions = function(
     res
   }
 
-  # Correcting for Jaccard/Intersection
-  .correct_fitted_value <- function(met, value){
-    if (met %in% c("jaccard", "intersection")) (1 - value) else value
-  }
 
   # Initializing Todo & Results
   todo <- expand.grid(metric, distributions, stringsAsFactors = F)
@@ -82,7 +128,7 @@ fit_distributions = function(
         "par" = NULL,
         "dist" = "unif",
         "metric" = met,
-        "value" = .correct_fitted_value(met, metric_func(histogram_data, rep(unif_dens * N, L))),
+        "value" = correct_fitted_value(met, metric_func(histogram_data, rep(unif_dens * N, L))),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -114,7 +160,7 @@ fit_distributions = function(
         "par" = norm_par,
         "dist" = "norm",
         "metric" = met,
-        "value" = .correct_fitted_value(met, norm_optim$optim$bestval),
+        "value" = correct_fitted_value(met, norm_optim$optim$bestval),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
@@ -148,7 +194,7 @@ fit_distributions = function(
         "par" = gamma_par,
         "dist" = "gamma",
         "metric" = met,
-        "value" = .correct_fitted_value(met, gamma_optim$optim$bestval),
+        "value" = correct_fitted_value(met, gamma_optim$optim$bestval),
         "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
           if(missing(x)) {
             x <- bin
