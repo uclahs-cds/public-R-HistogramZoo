@@ -123,7 +123,7 @@ fit_distributions <- function(
     # Uniform Distribution
     if(dist == "unif") {
       # Add uniform distribution
-      unif_dens <- 1 / (max(bin) - min(bin))
+      unif_dens <- 1 / (max(bin) - min(bin)+1)
       rtn[[tag]] <- list(
         "par" = NULL,
         "dist" = "unif",
