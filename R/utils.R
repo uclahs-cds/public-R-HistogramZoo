@@ -6,6 +6,17 @@ dput_str <- function(x) {
   )
 }
 
+
+#' Correcting for Jaccard/Intersection
+#' @param met metric
+#' @param value metric fitted value
+#' @return if metric is `jaccard` or `intersection`, return 1 - value
+correct_fitted_value <- function(met, value){
+  return(
+    if (met %in% c("jaccard", "intersection")) (1 - value) else value
+  )
+}
+
 #' Convert a vector of points into a data.frame of start/end points representing
 #' disjoint intervals
 #'
