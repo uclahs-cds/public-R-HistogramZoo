@@ -9,13 +9,13 @@
 #'
 #' @return A list representing a uniform model with the following data
 #' \describe{
-#'     \item{start}{start index of the interval}
-#'     \item{end}{end index of the interval}
 #'     \item{par}{A character string denoting the region_id of the Histogram}
 #'     \item{dist}{The distribution name}
 #'     \item{metric}{The metric used to fit the distribution}
 #'     \item{value}{The fitted value of the metric function}
 #'     \item{dens}{A function that returns the density of the fitted distribution}
+#'     \item{seg_start}{start index of the interval}
+#'     \item{seg_end}{end index of the interval}
 #' }
 #'
 #' @export
@@ -54,18 +54,18 @@ identify_uniform_segment <- function(
     lapply(seq(from = min_seg_size + a, to = num_bins, by = stepsize), function(b) {
       x_sub <- x[a:b]
       return(
-        c(list('start' = a, 'end' = b), fit_uniform(x_sub, metric))
+        c(fit_uniform(x_sub, metric), list('seg_start' = a, 'seg_end' = b))
       )
     })
   })
 
   # Extracting stats
   res <- unlist(res, recursive = F)
-  res_df <- do.call(rbind.data.frame, lapply(res, `[`, c('start', 'end', 'value')))
+  res_df <- do.call(rbind.data.frame, lapply(res, `[`, c('seg_start', 'seg_end', 'value')))
   res_df$index <- 1:nrow(res_df)
 
   # Calculating length
-  res_df$length <- res_df$end - res_df$start + 1
+  res_df$length <- res_df$seg_end - res_df$seg_start + 1
 
   # Correct for Jaccard/Intersection
   res_df$value <- if (metric %in% c("jaccard", "intersection")) (1 - res_df$value) else res_df$value

@@ -13,11 +13,11 @@ test_that("identify_uniform_segment works ", {
     max_sd_size = 0
   )
 
-  expect_named(res, c("start", "end", "par", "dist", "metric", "value", "dens"))
+  expect_named(res, c("par", "dist", "metric", "value", "dens", "seg_start", "seg_end"))
 
   # Basic reproducibility
-  expect_equal(res[["start"]], 2)
-  expect_equal(res[["end"]], 12)
+  expect_equal(res[["seg_start"]], 2)
+  expect_equal(res[["seg_end"]], 12)
   expect_true(is.null(res[["par"]]))
   expect_equal(res[['dist']], "unif")
   expect_equal(res[['metric']], "jaccard")
@@ -34,7 +34,7 @@ test_that("identify_uniform_segment works ", {
     max_sd_size = 0
   )
 
-  expect_equal(res[["start"]], 1)
-  expect_equal(res[["end"]], 10)
+  expect_equal(res[["seg_start"]], 1)
+  expect_equal(res[["seg_end"]], 10)
 
 })
