@@ -154,13 +154,13 @@ segment_and_fit <- function(
     if(max_uniform & seg_len > uniform_peak_stepsize & seg_len > ceiling(uniform_peak_threshold*seg_len)){
       unif_segment <- identify_uniform_segment(bin_data, metric = histogram_metric, threshold = uniform_peak_threshold, stepsize = uniform_peak_stepsize, max_sd_size = 0)
       # Use the maximum segment
-      bin_data_subset <- bin_data[unif_segment[1, "start"]:unif_segment[1, "end"]]
+      bin_data_subset <- bin_data[unif_segment[["start"]]:unif_segment[["end"]]]
       # Fit uniform distribution on maximum uniform segment
       dist_optim_subset <- fit_distributions(bin_data_subset, metric = histogram_metric, truncated = FALSE, distributions = "unif")
       # Adjust the segment starts from the shifted max uniform segment
       dist_optim_subset <- lapply(dist_optim_subset, function(y) {
-        y$seg_start <- unif_segment[1, "start"] + seg_start - 1
-        y$seg_end <- unif_segment[1, "end"] + seg_start - 1
+        y$seg_start <- unif_segment[["start"]] + seg_start - 1
+        y$seg_end <- unif_segment[["end"]] + seg_start - 1
         y$dist <- "unif"
         y
       })
