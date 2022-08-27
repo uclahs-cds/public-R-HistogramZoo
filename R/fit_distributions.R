@@ -20,7 +20,7 @@ fit_uniform <- function(x, metric){
   metric_func <- get(paste('histogram', metric, sep = "."))
   
   # m <- metric_func(h_unif, p_unif)
-  m <-- metric_func(x, p_unif*N)
+  m <- metric_func(x, p_unif*N)
 
   return(
     list(
@@ -62,7 +62,7 @@ fit_uniform <- function(x, metric){
 #' }
 #'
 #' @importFrom DEoptim DEoptim
-fit_distributions2 <- function(
+fit_distributions <- function(
     histogram_data,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
