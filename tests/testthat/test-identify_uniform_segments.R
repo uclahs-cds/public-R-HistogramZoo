@@ -13,13 +13,15 @@ test_that("identify_uniform_segment works ", {
     max_sd_size = 0
   )
 
-  expect_named(res, c("start", "end", "metric", "length"))
-  expect_equal(nrow(res), 1)
-  expect_true(res[1, "end"] - res[1, "start"] + 1 == res[1, "length"])
+  expect_named(res, c("start", "end", "par", "dist", "metric", "value", "dens"))
 
   # Basic reproducibility
-  expect_equal(res[1, "start"], 2)
-  expect_equal(res[1, "end"], 12)
+  expect_equal(res[["start"]], 2)
+  expect_equal(res[["end"]], 12)
+  expect_true(is.null(res[["par"]]))
+  expect_equal(res[['dist']], "unif")
+  expect_equal(res[['metric']], "jaccard")
+  expect_equal(res[['dens']](3, scale = F), 1/11)
 
   # Sanity check - can this function return the original segment if it's uniform?
   x <- rep(2L, 10)
@@ -32,7 +34,7 @@ test_that("identify_uniform_segment works ", {
     max_sd_size = 0
   )
 
-  expect_equal(res[1, "start"], 1)
-  expect_equal(res[1, "end"], 10)
+  expect_equal(res[["start"]], 1)
+  expect_equal(res[["end"]], 10)
 
 })
