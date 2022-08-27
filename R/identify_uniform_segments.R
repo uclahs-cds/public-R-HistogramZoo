@@ -7,13 +7,16 @@
 #' @param max_sd_size numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which
 #' has maximum length
 #'
-#' @return A data.frame with the following columns
+#' @return A list representing a uniform model with the following data
 #' \describe{
-#'     \item{a}{start index of the maximum uniform segment}
-#'     \item{b}{end index of the maximum uniform segment}
-#'     \item{metric}{value of the fitted metric on the segment}
-#'     \item{length}{length of the segment}
-#'}
+#'     \item{start}{start index of the interval}
+#'     \item{end}{end index of the interval}
+#'     \item{par}{A character string denoting the region_id of the Histogram}
+#'     \item{dist}{The distribution name}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{dens}{A function that returns the density of the fitted distribution}
+#' }
 #'
 #' @export
 identify_uniform_segment <- function(
@@ -44,36 +47,38 @@ identify_uniform_segment <- function(
   # Set-up
   num_bins <- length(x)
   min_seg_size <- ceiling(num_bins * threshold)
-  metric_func <- get(paste('histogram', metric, sep = "."))
+  # metric_func <- get(paste('histogram', metric, sep = "."))
+  # TODO: pass in metric_func rather than metric as a param for fit_uniform?
 
-  p_unif <- generate_uniform_distribution(x)
   res <- lapply(seq(from = 1, to = num_bins - min_seg_size, by = stepsize), function(a) {
     lapply(seq(from = min_seg_size + a, to = num_bins, by = stepsize), function(b) {
       x_sub <- x[a:b]
-      p_unif_sub <- generate_uniform_distribution(x_sub)
-      h_sub <- x_sub / sum(x_sub)
-
-      m <- metric_func(h_sub, p_unif_sub)
-
       return(
-        list('start' = a, 'end' = b, 'metric' = m)
+        c(list('start' = a, 'end' = b), fit_uniform(x_sub, metric))
       )
     })
   })
 
-  res_df <- do.call(rbind.data.frame, unlist(res, recursive = F))
+  # Extracting stats
+  res <- unlist(res, recursive = F)
+  res_df <- do.call(rbind.data.frame, lapply(res, `[`, c('start', 'end', 'value')))
+  res_df$index <- 1:nrow(res_df)
+
+  # Calculating length
   res_df$length <- res_df$end - res_df$start + 1
 
-  # Select the longest interval that is within 1 sd of the maximum
-  min_metric <- min(res_df$metric, na.rm = T)
-  sd_metric <- stats::sd(res_df$metric, na.rm = T)
-  sd_metric <- ifelse(is.na(sd_metric), 0, sd_metric) # If there's only 1 case
-  # The range in which we are looking for the minimum
-  res_sd_range <- res_df[res_df$metric <= min_metric + sd_metric * max_sd_size, ]
-  max_interval_index <- which.max(res_sd_range$length)
+  # Correct for Jaccard/Intersection
+  res_df$value <- if (metric %in% c("jaccard", "intersection")) (1 - res_df$value) else res_df$value
+
+  # Select the longest interval that is within XX sd of the maximum
+  min_metric <- min(res_df$value, na.rm = T)
+  sd_metric <- stats::sd(res_df$value, na.rm = T)
+  sd_metric <- ifelse(is.na(sd_metric), 0, sd_metric) # If there's only 1 case, set it to 0
+  res_sd_range <- res_df[res_df$value <= min_metric + sd_metric * max_sd_size, ]
+  max_interval_index <- res_sd_range$index[which.max(res_sd_range$length)]
 
   return(
-    res_sd_range[max_interval_index,]
+    res[[max_interval_index]]
   )
 
 }
