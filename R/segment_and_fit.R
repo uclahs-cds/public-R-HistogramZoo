@@ -103,25 +103,31 @@ segment_and_fit <- function(
   # Extracting data
   x <- histogram_obj$histogram_data
   
-  # Change points
+  # Finding local optima
   chgpts <- find_local_optima(x, threshold = 0, flat_endpoints = T)
   chgpts <- sort(c(chgpts$min_ind, chgpts$max_ind))
+  
   # Looking for regions that surpass a hard count threshold
   x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
   
+  if(nrow(x_segs) == 0){
+    stop("no segments of greater than length 1 remain after filtering for histogram_count_threshold")
+  }
+  
+  # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
     p_init <- sort(unique(p_init)) # meaningful gaps local also needs p_init to be sorted so temporarily adding this back
     p <- ftc(x, p_init, eps)
     
-    # Max Gap
+    # Max gap
     if(remove_low_entropy) {
       mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = p_init, min_gap = min_gap_size)
-      p <- p[(abs(p - segs['start']) > min_peak_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
+      p <- p[((p - segs['start'] + 1) >= min_peak_size & (segs['end'] - p + 1) >= min_peak_size) | p %in% segs]
       p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_peak_size)
     } else {
-      p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
+      p <- p[((p - segs['start'] + 1) >= min_peak_size & (segs['end'] - p + 1) >= min_peak_size) | p %in% segs]
       p_pairs <- index_to_start_end(p)
     }
     
@@ -130,8 +136,12 @@ segment_and_fit <- function(
   
   # Combine the results from each segment
   all_points <- do.call('rbind.data.frame', all_points)
-  all_points <- all_points[(all_points$end - all_points$start + 1) > min_peak_size,, drop = FALSE] # Current solution for min_peak_size, open to alternatives
+  all_points <- all_points[(all_points$end - all_points$start + 1) >= min_peak_size,, drop = FALSE] # Current solution for min_peak_size, open to alternatives
   rownames(all_points) <- NULL
+  
+  if(nrow(all_points) == 0){
+    stop("no segments of greater than min_peak_size remain after segmentation")
+  }
   
   # Fitting different models
   set.seed(seed)
