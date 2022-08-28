@@ -34,7 +34,7 @@ find_consecutive_threshold <- function(
 #' @param remove_low_entropy logical, indicating whether to filter out low entropy regions
 #' @param min_gap_size integer, indicating the minimum gap size to be filtered
 #' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param min_peak_size integer, indication the minimum segment size
+#' @param min_peak_size integer, indication the minimum segment size, default 3, warning: min_peak_size should be at least 3 to avoid triggering warnings from `fit_distributions`
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
@@ -55,7 +55,7 @@ segment_and_fit <- function(
     uniform_peak_stepsize = 5,
     remove_low_entropy = T,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_peak_size = 3,
     max_uniform = T,
     histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     consensus_method = c("weighted_majority_vote", "rra"),
