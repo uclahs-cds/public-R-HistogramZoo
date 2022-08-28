@@ -185,6 +185,9 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
     stop("min_gap must be a numeric integer of length 1")
   }
 
+  seg_points <- sort(unique(seg_points))
+  change_points <- sort(unique(change_points))
+
   # Identifying max gaps
   max_gaps_list <- lapply(seq(2, length(seg_points)), function(i) {
     x_sub <- x[seg_points[i-1]:seg_points[i]]

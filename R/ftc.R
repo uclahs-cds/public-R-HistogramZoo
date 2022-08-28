@@ -123,8 +123,7 @@ ftc <- function(x, s = NULL, eps = 1) {
     minmax <- find_local_optima(x)
     lmin <- minmax$max_ind
     lmax <- minmax$min_ind
-    s <- c(1, lmin, lmax, length(x) )
-    s <- sort(unique(s))
+    s <- c(1, lmin, lmax, length(x))
   }
 
   # Initializing
