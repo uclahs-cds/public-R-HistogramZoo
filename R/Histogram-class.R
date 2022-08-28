@@ -1,6 +1,23 @@
 
 # constructor
-new_Histogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, class = character(), ...){
+#' Constructs a new Histogram object
+#'
+#' @param histogram_data vector of counts/density
+#' @param interval_start integer vector representing the starts of intervals
+#' @param interval_end integer vector representing the ends of intervals
+#' @param region_id character identifier for the region of interest
+#' @param class child class names, in addition to Histogram
+#' @param ... additional parameters, allowing child classes to be built
+#'
+#' @return a Histogram object
+new_Histogram <- function(
+    histogram_data = NULL, 
+    interval_start = NULL, 
+    interval_end = NULL, 
+    region_id = NULL, 
+    class = character(), 
+    ...
+  ){
 
   # Checking types
   stopifnot(is.double(histogram_data))
@@ -22,6 +39,10 @@ new_Histogram <- function(histogram_data = NULL, interval_start = NULL, interval
 }
 
 # validator
+#' Validates Histogram objects
+#'
+#' @param x a candidate Histogram object
+#' @return a validated Histogram object
 validate_Histogram <- function(x){
 
   # Attributes

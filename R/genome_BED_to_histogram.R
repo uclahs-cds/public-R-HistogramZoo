@@ -18,7 +18,7 @@
 #' histogram_bin_size = 1)
 #' }
 #'
-#' @return A list of GenomicHistogram objects
+#' @return a list of GenomicHistogram objects
 #' @export
 genome_BED_to_histogram <- function(
   filenames,

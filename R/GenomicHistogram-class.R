@@ -1,6 +1,23 @@
 
 # constructor
-new_GenomicHistogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
+#' GenomicHistogram constructor
+#'
+#' @param histogram_data vector of counts/density
+#' @param interval_start integer vector representing the starts of intervals
+#' @param interval_end integer vector representing the ends of intervals
+#' @param region_id character identifier for the region of interest
+#' @param chr chromosome name
+#' @param strand strand
+#'
+#' @return A GenomicHistogram object
+new_GenomicHistogram <- function(
+    histogram_data = NULL,
+    interval_start = NULL,
+    interval_end = NULL,
+    region_id = NULL,
+    chr = NULL,
+    strand = NULL
+  ){
 
   # Checking types
   stopifnot(is.character(chr))
@@ -21,6 +38,10 @@ new_GenomicHistogram <- function(histogram_data = NULL, interval_start = NULL, i
 }
 
 # validator
+#' Validates GenomicHistogram objects
+#'
+#' @param x a GenomicHistogram object candidate
+#' @return a validated GenomicHistogram object
 validate_GenomicHistogram <- function(x){
 
   # Attributes
@@ -48,7 +69,7 @@ validate_GenomicHistogram <- function(x){
 #' @param chr chromosome name
 #' @param strand strand
 #'
-#' @return A GenomicHistogram object
+#' @return a GenomicHistogram object
 #' @export
 #'
 #' @examples

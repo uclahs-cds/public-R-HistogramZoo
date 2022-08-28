@@ -25,7 +25,7 @@ find_consecutive_threshold <- function(
 #'
 #' @param histogram_obj a Histogram or HistogramList object
 #' @param histogram_count_threshold a hard threshold to filter histogram density
-#' @param eps numeric hyperparameter to finetune segmentation. See `Delon et al, 2005`
+#' @param eps numeric (epsilon) hyperparameter to finetune segmentation. See `Delon et al, 2005`
 #' @param seed numeric seed
 #' @param truncated_models logical, whether to fit truncated distributions
 #' @param max_uniform logical, whether to find a subsegment maximizing the fit of a uniform distribution
