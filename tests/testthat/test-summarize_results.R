@@ -18,7 +18,7 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
     distributions = c("norm", "gamma", "unif")
   )
 
-  results = summarize_results(result = sf_results)
+  results <- summarize_results(result = sf_results)
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
@@ -69,7 +69,7 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
     distributions = c("norm", "gamma", "unif")
   )
 
-  results = summarize_results(result = sf_results)
+  results <- summarize_results(result = sf_results)
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
@@ -105,22 +105,22 @@ test_that("summarize_results is capable returning results for different metrics"
     distributions = c("norm", "gamma", "unif")
   )
 
-  results_all = summarize_results(result = sf_results, model_name = "consensus")
+  results_all <- summarize_results(result = sf_results, model_name = "consensus")
   expect_equal(results_all[1, "metric"], "consensus")
 
-  results_jaccard = summarize_results(result = sf_results, model_name = "jaccard")
+  results_jaccard <- summarize_results(result = sf_results, model_name = "jaccard")
   expect_equal(results_jaccard[1, "metric"], "jaccard")
 
-  results_intersection = summarize_results(result = sf_results, model_name = "intersection")
+  results_intersection <- summarize_results(result = sf_results, model_name = "intersection")
   expect_equal(results_intersection[1, "metric"], "intersection")
 
-  results_ks = summarize_results(result = sf_results, model_name = "ks")
+  results_ks <- summarize_results(result = sf_results, model_name = "ks")
   expect_equal(results_ks[1, "metric"], "ks")
 
-  results_mse = summarize_results(result = sf_results, model_name = "mse")
+  results_mse <- summarize_results(result = sf_results, model_name = "mse")
   expect_equal(results_mse[1, "metric"], "mse")
 
-  results_chisq = summarize_results(result = sf_results, model_name = "chisq")
+  results_chisq <- summarize_results(result = sf_results, model_name = "chisq")
   expect_equal(results_chisq[1, "metric"], "chisq")
 
 })
