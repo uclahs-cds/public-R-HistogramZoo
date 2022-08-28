@@ -34,7 +34,7 @@ find_consecutive_threshold <- function(
 #' @param remove_low_entropy logical, indicating whether to filter out low entropy regions
 #' @param min_gap_size integer, indicating the minimum gap size to be filtered
 #' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param min_peak_size integer, indication the minimum segment size, default 3, warning: min_peak_size should be at least 3 to avoid triggering warnings from `fit_distributions`
+#' @param min_peak_size integer, indication the minimum segment size, default 3
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
@@ -118,7 +118,6 @@ segment_and_fit <- function(
   # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
-    p_init <- sort(unique(p_init)) # meaningful gaps local also needs p_init to be sorted so temporarily adding this back
     p <- ftc(x, p_init, eps)
     
     # Max gap
@@ -136,7 +135,7 @@ segment_and_fit <- function(
   
   # Combine the results from each segment
   all_points <- do.call('rbind.data.frame', all_points)
-  all_points <- all_points[(all_points$end - all_points$start + 1) >= min_peak_size,, drop = FALSE] # Current solution for min_peak_size, open to alternatives
+  all_points <- all_points[(all_points$end - all_points$start + 1) >= min_peak_size,, drop = FALSE]
   rownames(all_points) <- NULL
   
   if(nrow(all_points) == 0){
