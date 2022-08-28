@@ -8,11 +8,11 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
     histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
@@ -22,12 +22,12 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
-  expect_equal(colnames(results), c("region_id", "peak_id", "start", "end",
+  expect_equal(colnames(results), c("region_id", "segment_id", "start", "end",
     "interval_count", "interval_sizes", "interval_starts", "histogram_start",
     "histogram_end", "value", "metric", "dist", "params"))
 
   expect_is(results[,"region_id"], "character")
-  expect_is(results[,"peak_id"], "integer")
+  expect_is(results[,"segment_id"], "integer")
   expect_is(results[,"histogram_start"], "numeric")
   expect_is(results[,"histogram_end"], "numeric")
 
@@ -59,11 +59,11 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
     histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
@@ -73,7 +73,7 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
-  expect_equal(colnames(results), c("region_id", "peak_id", "chr", "start",
+  expect_equal(colnames(results), c("region_id", "segment_id", "chr", "start",
     "end", "strand", "interval_count", "interval_sizes", "interval_starts",
     "histogram_start", "histogram_end", "value", "metric", "dist", "params"))
 
@@ -95,11 +95,11 @@ test_that("summarize_results is capable returning results for different metrics"
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
     histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
@@ -122,5 +122,5 @@ test_that("summarize_results is capable returning results for different metrics"
 
   results_chisq = summarize_results(result = sf_results, model_name = "chisq")
   expect_equal(results_chisq[1, "metric"], "chisq")
-  
+
 })

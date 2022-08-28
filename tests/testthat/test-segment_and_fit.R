@@ -14,9 +14,9 @@ test_that("segment_and_fit works without removing low entropy regions", {
   res <- segment_and_fit(x_norm_mix, remove_low_entropy = F)
   res_trunc <- segment_and_fit(x_norm_mix, truncated_models = TRUE, remove_low_entropy = F)
 
-  # Expect 2 peaks
-  # Peak one should be [3,8]
-  # Peak two should be [30, 39]
+  # Expect 2 segments
+  # segment one should be [3,8]
+  # segment two should be [30, 39]
 
   p_expect <- matrix(c(3,8, 30, 39), nrow = 2, ncol = 2, byrow = TRUE)
   segment_points_matrix <- as.matrix(res$p[, c('start', 'end')])

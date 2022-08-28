@@ -149,7 +149,7 @@ test_that("create_trackplot works ", {
   expect_error(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
+      row_id = "segment_id",
       metric_id = "value"
     ),
     NA
@@ -159,8 +159,8 @@ test_that("create_trackplot works ", {
   expect_error(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
-      metric_id = "peak_id"
+      row_id = "segment_id",
+      metric_id = "segment_id"
     ),
     NA
   )
@@ -201,7 +201,7 @@ test_that("create_trackplot works ", {
   expect_warning(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
+      row_id = "segment_id",
       metric_id = "value",
       xlimits = c(5, 13)
     ),
