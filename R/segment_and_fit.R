@@ -134,10 +134,8 @@ segment_and_fit <- function(
   rownames(all_points) <- NULL
   
   # Fitting different models
-  models <- list()
   set.seed(seed)
-  for(i in seq_len(nrow(all_points))) {
-    seg <- all_points[i, ]
+  models <- apply(all_points, 1, function(seg){
     seg_start <- seg[['start']]
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
@@ -190,9 +188,9 @@ segment_and_fit <- function(
       weights = metric_weights
     )
     
-    models[[i]] <- best_models
-  }
-  
+    return( best_models )
+  })
+
   # Creating a HistogramFit object
   res <- list("models" = models, "p" = all_points,  "histogram_count_threshold" = histogram_count_threshold,
               "eps" =  eps, "seed" = seed, "truncated_models" = truncated_models, "uniform_peak_threshold" = uniform_peak_threshold,
