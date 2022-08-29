@@ -23,6 +23,12 @@ find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
   # Error checking
   x <- as.numeric(x)
   stopifnot(length(x) > 1)
+  if(!is_equal_integer(threshold) | !(threshold >= 0) | length(threshold) != 1){
+    stop("optima_threshold must be functional as a integer greater than or equal to 0 and of length 1")
+  }
+  if(!is.logical(flat_endpoints) | length(flat_endpoints) != 1){
+    stop("flat_endpoints has to be a logical of length 1")
+  }
 
   # Extracting the changing values in x
   unflat_x <- rle(x)
