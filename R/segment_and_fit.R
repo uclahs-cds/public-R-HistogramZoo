@@ -25,6 +25,8 @@ find_consecutive_threshold <- function(
 #'
 #' @param histogram_obj a Histogram or HistogramList object
 #' @param histogram_count_threshold a hard threshold to filter histogram density
+#' @param optima_threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbour optima by greater than the permitted threshold, default 0
+#' @param optima_flat_endpoints in regions of flat density, whether to return the endpoints or the midpoints
 #' @param eps numeric (epsilon) hyperparameter to finetune segmentation. See `Delon et al, 2005`
 #' @param seed numeric seed
 #' @param truncated_models logical, whether to fit truncated distributions
@@ -48,6 +50,8 @@ find_consecutive_threshold <- function(
 segment_and_fit <- function(
     histogram_obj,
     histogram_count_threshold = 0,
+    optima_threshold = 0,
+    optima_flat_endpoints = T,
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
@@ -104,7 +108,7 @@ segment_and_fit <- function(
   x <- histogram_obj$histogram_data
 
   # Finding local optima
-  chgpts <- find_local_optima(x, threshold = 0, flat_endpoints = T)
+  chgpts <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
   chgpts <- sort(c(chgpts$min_ind, chgpts$max_ind))
 
   # Looking for regions that surpass a hard count threshold
@@ -202,6 +206,7 @@ segment_and_fit <- function(
 
   # Creating a HistogramFit object
   res <- list("models" = models, "p" = all_points,  "histogram_count_threshold" = histogram_count_threshold,
+              "optima_threshold" = optima_threshold, "optima_flat_endpoints" = optima_flat_endpoints,
               "eps" =  eps, "seed" = seed, "truncated_models" = truncated_models, "uniform_threshold" = uniform_threshold,
               "uniform_stepsize" = uniform_stepsize, "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size,
               "min_segment_size" = min_segment_size, "max_uniform" = max_uniform, "histogram_metric" = histogram_metric,
