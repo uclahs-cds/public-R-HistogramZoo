@@ -245,7 +245,7 @@ return_y_points <- function(histogram_obj){
 #' @export
 create_coverageplot.HistogramFit <- function(
   histogram_obj,
-  model_name = c("consensus", histogram_obj$histogram_metric),
+  model_name = c("consensus", histogram_obj$metric),
   col = 'black',
   lwd = 1,
   lty = 1,
@@ -307,7 +307,7 @@ create_coverageplot.HistogramFit <- function(
   if(length(histogram_obj$distributions) != length(col_distributions)){
     warning("Number of distributions fit does not equal the number of elements in col_distributions.")
   }
-  model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
+  model_name <- match.arg(model_name, c("consensus", histogram_obj$metric))
 
   # Extracting histogram_data
   histogram_data <- histogram_obj$histogram_data

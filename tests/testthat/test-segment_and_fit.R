@@ -47,7 +47,7 @@ test_that("base case: segment_and_fit returns expected output", {
       "uniform_stepsize",
       "uniform_max_sd",
       "truncated_models",
-      "histogram_metric",
+      "metric",
       "distributions",
       "consensus_method",
       "metric_weights"
@@ -78,7 +78,7 @@ test_that("base case: segment_and_fit returns expected output", {
       "uniform_stepsize",
       "uniform_max_sd",
       "truncated_models",
-      "histogram_metric",
+      "metric",
       "distributions",
       "consensus_method",
       "metric_weights"
@@ -184,7 +184,7 @@ test_that("subfunction: find_consensus_model", {
   expect_equal(res$consensus_method, "rra")
   expect_equal(res_summary[2, "dist"], "unif")
 
-  res <- segment_and_fit(x_histogram, distributions = c("norm", "gamma"), histogram_metric = c("intersection", "jaccard"), metric_weights = c(5, 1))
+  res <- segment_and_fit(x_histogram, distributions = c("norm", "gamma"), metric = c("intersection", "jaccard"), metric_weights = c(5, 1))
   res_summary <- summarize_results(res)
 
   expect_equal(res$consensus_method, "weighted_majority_vote")

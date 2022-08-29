@@ -49,7 +49,7 @@ create_residualplot <- function(
 #' @export
 create_residualplot.HistogramFit = function(
   histogram_obj,
-  model_name = c("consensus", histogram_obj$histogram_metric),
+  model_name = c("consensus", histogram_obj$metric),
   add_changepoint_lines = F,
   abline.h = 0,
   abline.v = NULL,
@@ -81,7 +81,7 @@ create_residualplot.HistogramFit = function(
 
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
-  model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
+  model_name <- match.arg(model_name, c("consensus", histogram_obj$metric))
   stopifnot(is.logical(add_changepoint_lines))
 
   # Extracting histogram_data

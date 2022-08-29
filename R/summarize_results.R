@@ -104,7 +104,7 @@ summarize_results.Histogram <- function(
   # Error checking
   stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "Histogram"))
-  model_name <- match.arg(model_name, c("consensus", result$histogram_metric))
+  model_name <- match.arg(model_name, c("consensus", result$metric))
 
   # Attributes of the result
   models <- result$models

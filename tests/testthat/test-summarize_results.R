@@ -14,7 +14,7 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
     min_gap_size = 2,
     min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 
@@ -65,7 +65,7 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
     min_gap_size = 2,
     min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 
@@ -101,7 +101,7 @@ test_that("summarize_results is capable returning results for different metrics"
     min_gap_size = 2,
     min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 

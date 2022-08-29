@@ -37,7 +37,7 @@ find_consecutive_threshold <- function(
 #' @param uniform_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
-#' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
 #' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
@@ -63,7 +63,7 @@ segment_and_fit <- function(
     uniform_stepsize = 5,
     uniform_max_sd = 0,
     truncated_models = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif"),
     consensus_method = c("weighted_majority_vote", "rra"),
     metric_weights = rev(seq(1, 1.8, 0.2))
@@ -110,7 +110,7 @@ segment_and_fit <- function(
   if(!is.logical(max_uniform) | length(max_uniform) != 1){
     stop("max_uniform has to be a logical of length 1")
   }
-  histogram_metric <- match.arg(histogram_metric, several.ok = T)
+  metric <- match.arg(metric, several.ok = T)
   consensus_method <- match.arg(consensus_method)
   # Potential todo: add error checking for weights for majority voting
   distributions <- match.arg(distributions, several.ok = T)
@@ -173,7 +173,7 @@ segment_and_fit <- function(
        seg_len > ceiling(uniform_threshold*seg_len)
     ){
 
-      unif_segment <- lapply(histogram_metric, function(met) {
+      unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
           x = bin_data,
           metric = met,
@@ -192,7 +192,7 @@ segment_and_fit <- function(
     if( length(distributions) > 0 ){
       dist_optim <- fit_distributions(
         x = bin_data, 
-        metric = histogram_metric,
+        metric = metric,
         truncated = truncated_models,
         distributions = distributions
       )
@@ -208,7 +208,7 @@ segment_and_fit <- function(
     best_models <- find_consensus_model(
       models = dist_optim,
       method = consensus_method,
-      metric = histogram_metric,
+      metric = metric,
       weights = metric_weights
     )
 
@@ -223,7 +223,7 @@ segment_and_fit <- function(
               "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size, "min_segment_size" = min_segment_size,
               "seed" = seed,
               "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd, 
-              "truncated_models" = truncated_models, "histogram_metric" = histogram_metric, "distributions" = distributions,
+              "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
               "consensus_method" = consensus_method, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
