@@ -35,6 +35,8 @@ test_that("base case: segment_and_fit returns expected output", {
       "models", "p",
       # Parameters
       "histogram_count_threshold",
+      "optima_threshold",
+      "optima_flat_endpoints",
       "eps",                      
       "seed",
       "truncated_models",
@@ -63,6 +65,8 @@ test_that("base case: segment_and_fit returns expected output", {
       "models", "p",
       # Parameters
       "histogram_count_threshold",
+      "optima_threshold",
+      "optima_flat_endpoints",
       "eps",                      
       "seed",
       "truncated_models",
@@ -85,10 +89,27 @@ test_that("base case: segment_and_fit returns expected output", {
   
 })
 
-# test_that("subfunction: find_local_optima", {
-#   
-#   
-# })
+test_that("subfunction: find_local_optima", {
+
+  x_uniform <- Histogram(c(1, rep(2, 10)))
+  
+  # Thankfully, this doesn't throw an error
+  expect_error(
+    segment_and_fit(x_uniform, optima_flat_endpoints = F),
+    NA
+  )
+  
+  # This doesn't change anything except make things faster
+  res <- segment_and_fit(x_histogram, optima_threshold = 5, optima_flat_endpoints = F)
+  
+  expect_equal(res$optima_threshold, 5)
+  expect_true(!res$optima_flat_endpoints)
+  
+  p_expect <- matrix(c(3,8, 30, 39), nrow = 2, ncol = 2, byrow = TRUE)
+  segment_points_matrix <- as.matrix(res$p[, c('start', 'end')])
+  expect_equivalent(segment_points_matrix, p_expect)
+ 
+})
 
 test_that("subfunction: find_consecutive_threshold", {
   
