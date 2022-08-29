@@ -43,7 +43,7 @@ fit_uniform <- function(x, metric){
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
-#' @param histogram_data numeric vector, representing data to be fit
+#' @param x numeric vector, representing data to be fit
 #' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
@@ -63,16 +63,16 @@ fit_uniform <- function(x, metric){
 #'
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
-    histogram_data,
+    x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "unif")) {
 
   # Matching arguments
-  # TODO: consider checking minimum length of histogram_data or
+  # TODO: consider checking minimum length of x or
   # check if Histogram object
-  if(!is.numeric(histogram_data)){
-    stop('histogram_data has to be a numeric vector')
+  if(!is.numeric(x)){
+    stop('x has to be a numeric vector')
   }
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
@@ -81,8 +81,8 @@ fit_distributions <- function(
   distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Initializing Data
-  L <- length(histogram_data)
-  N <- sum(histogram_data)
+  L <- length(x)
+  N <- sum(x)
   bin <- 1:L
 
   # Optimization Function
@@ -100,7 +100,7 @@ fit_distributions <- function(
       rep(0, length(bin))
     })
     dens[is.na(dens)] <- 0
-    res <- .metric_func(histogram_data, dens)
+    res <- .metric_func(x, dens)
     if(is.na(res) || res == -Inf || res == Inf) {
       res <- Inf
     }
@@ -111,7 +111,7 @@ fit_distributions <- function(
   unif_fit <- list()
   if("unif" %in% distributions){
     distributions <- setdiff(distributions, "unif")
-    unif_fit <- lapply(metric, function(met) fit_uniform(histogram_data, met))
+    unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
   }
 
   rtn <- lapply(distributions, function(distr) {
