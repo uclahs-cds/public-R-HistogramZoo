@@ -204,7 +204,8 @@ segment_and_fit <- function(
   res <- list("models" = models, "p" = all_points,  "histogram_count_threshold" = histogram_count_threshold,
               "eps" =  eps, "seed" = seed, "truncated_models" = truncated_models, "uniform_threshold" = uniform_threshold,
               "uniform_stepsize" = uniform_stepsize, "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size,
-              "min_segment_size" = min_segment_size, "max_uniform" = max_uniform, "histogram_metric" = histogram_metric, "distributions" = distributions)
+              "min_segment_size" = min_segment_size, "max_uniform" = max_uniform, "histogram_metric" = histogram_metric,
+              "consensus_method" = consensus_method, "metric_weights" = metric_weights, "distributions" = distributions)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
   
