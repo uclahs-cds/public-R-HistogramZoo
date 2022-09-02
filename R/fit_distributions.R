@@ -181,10 +181,6 @@ fit_distributions <- function(
   })
 
   return(
-<<<<<<< HEAD
-    c( unlist(rtn, recursive = F), unif_fit )
-=======
     c(unlist(rtn, recursive = F), unif_fit)
->>>>>>> origin/main
   )
 }
