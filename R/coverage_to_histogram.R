@@ -4,26 +4,28 @@
 #' @param region a GRanges object representing the region to be binned for 1 GenomicHistogram
 #' @param region_id character, region_id of the resulting histogram
 #' @param histogram_bin_size An integer representing the width of Histogram bins
+#'
+#' @return A GenomicHistogram object
 coverage_to_histogram = function(
   region,
   region_id,
   coverage,
   histogram_bin_size
 ){
-  
+
   # Generating bins
   bins <- unlist(
     GenomicRanges::tile(x = region, width = histogram_bin_size)
   )
   GenomeInfoDb::seqlevels(bins) <- GenomeInfoDb::seqlevels(coverage)
-  
+
   # Computing coverage
   cvg <- GenomicRanges::binnedAverage(
     bins = bins,
     numvar = coverage,
     varname = "cvg"
   )
-  
+
   # Generating new histogram
   return(
     new_GenomicHistogram(
