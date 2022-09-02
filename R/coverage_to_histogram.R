@@ -5,7 +5,7 @@
 #' @param region_id character, region_id of the resulting histogram
 #' @param histogram_bin_size An integer representing the width of Histogram bins
 #'
-#' @return A GenomicHistogram object
+#' @return a GenomicHistogram object
 coverage_to_histogram = function(
   region,
   region_id,

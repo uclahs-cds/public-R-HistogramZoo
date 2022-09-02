@@ -24,20 +24,23 @@ find_consecutive_threshold <- function(
 #' Segmentation of histograms and distribution fitting
 #'
 #' @param histogram_obj a Histogram or HistogramList object
+#' @param optima_threshold threshold for local optima, i.e. a point can only be considered a local optima if it differs from its neighbour optima by greater than the permitted threshold, default 0
+#' @param optima_flat_endpoints in regions of flat density, whether to return the endpoints or the midpoints
 #' @param histogram_count_threshold a hard threshold to filter histogram density
-#' @param eps numeric hyperparameter to finetune segmentation. See `Delon et al, 2005`
-#' @param seed numeric seed
-#' @param truncated_models logical, whether to fit truncated distributions
-#' @param max_uniform logical, whether to find a subsegment maximizing the fit of a uniform distribution
-#' @param uniform_peak_threshold numeric, indicating the minimum proportion of the subsegment
-#' @param uniform_peak_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
+#' @param eps numeric (epsilon) hyperparameter to finetune segmentation. See `Delon et al, 2005`
 #' @param remove_low_entropy logical, indicating whether to filter out low entropy regions
 #' @param min_gap_size integer, indicating the minimum gap size to be filtered
-#' @param histogram_metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param min_peak_size integer, indication the minimum segment size
+#' @param min_segment_size integer, indication the minimum segment size, default 3
+#' @param seed numeric seed
+#' @param max_uniform logical, whether to find a subsegment maximizing the fit of a uniform distribution
+#' @param uniform_threshold numeric, indicating the minimum proportion of the subsegment
+#' @param uniform_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
+#' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
+#' @param truncated_models logical, whether to fit truncated distributions
+#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
-#' @param distributions a subset of `norm`, `gamma` and `unif` indicating distributions to fit
 #'
 #' @return a HistogramFit object representing the Histogram and results of the fit
 #' @export
@@ -47,20 +50,23 @@ find_consecutive_threshold <- function(
 #' }
 segment_and_fit <- function(
     histogram_obj,
+    optima_threshold = 0,
+    optima_flat_endpoints = T,
     histogram_count_threshold = 0,
     eps = 1,
-    seed = NULL,
-    truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
     remove_low_entropy = T,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 3,
+    seed = NULL,
     max_uniform = T,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
+    uniform_max_sd = 0,
+    truncated_models = FALSE,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    distributions = c("norm", "gamma", "unif"),
     consensus_method = c("weighted_majority_vote", "rra"),
-    metric_weights = rev(seq(1, 1.8, 0.2)),
-    distributions = c("norm", "gamma", "unif")
+    metric_weights = rev(seq(1, 1.8, 0.2))
 ) {
 
   # Error checking
@@ -68,20 +74,29 @@ segment_and_fit <- function(
   if(!is.numeric(histogram_count_threshold) | !(histogram_count_threshold >= 0)){
     stop("histogram_count_threshold should be a numeric greater than or equal to 0")
   }
+  if(!is_equal_integer(optima_threshold) | !(optima_threshold >= 0) | length(optima_threshold) != 1){
+    stop("optima_threshold must be functional as a integer greater than or equal to 0 and of length 1")
+  }
+  if(!is.logical(optima_flat_endpoints) | length(optima_flat_endpoints) != 1){
+    stop("optima_flat_endpoints has to be a logical of length 1")
+  }
   if(!is.numeric(eps) | !(eps > 0)){
     stop("eps must be a positive numeric")
   }
   if(!is.logical(truncated_models) | length(truncated_models) != 1){
     stop("truncated_models has to be a logical of length 1")
   }
-  if(!is.numeric(uniform_peak_threshold) | length(uniform_peak_threshold) != 1 ){
-    stop("uniform_peak_threshold must be a numeric of length 1")
+  if(!is.numeric(uniform_threshold) | length(uniform_threshold) != 1 ){
+    stop("uniform_threshold must be a numeric of length 1")
   }
-  if(!(uniform_peak_threshold >= 0 & uniform_peak_threshold <= 1)) {
-    stop("uniform_peak_threshold must be between 0 and 1")
+  if(!(uniform_threshold >= 0 & uniform_threshold <= 1)) {
+    stop("uniform_threshold must be between 0 and 1")
   }
-  if(!is_equal_integer(uniform_peak_stepsize) | !(uniform_peak_stepsize > 0) | length(uniform_peak_stepsize) != 1){
-    stop("uniform_peak_stepsize must be functional as a positive integer of length 1")
+  if(!is_equal_integer(uniform_stepsize) | !(uniform_stepsize > 0) | length(uniform_stepsize) != 1){
+    stop("uniform_stepsize must be functional as a positive integer of length 1")
+  }
+  if(!is.numeric(uniform_max_sd) | !(uniform_max_sd >= 0) | length(uniform_max_sd) != 1){
+    stop("uniform_max_sd must be a positive or zero numeric of length 1")
   }
   if(!is.logical(remove_low_entropy) | length(remove_low_entropy) != 1){
     stop("remove_low_entropy has to be a logical of length 1")
@@ -89,13 +104,13 @@ segment_and_fit <- function(
   if(!is_equal_integer(min_gap_size) | length(min_gap_size) != 1){
     stop("min_gap_size must be a numeric integer of length 1")
   }
-  if(!is_equal_integer(min_peak_size) | length(min_peak_size) != 1){
-    stop("min_peak_size must be a numeric integer of length 1")
+  if(!is_equal_integer(min_segment_size) | length(min_segment_size) != 1){
+    stop("min_segment_size must be a numeric integer of length 1")
   }
   if(!is.logical(max_uniform) | length(max_uniform) != 1){
     stop("max_uniform has to be a logical of length 1")
   }
-  histogram_metric <- match.arg(histogram_metric, several.ok = T)
+  metric <- match.arg(metric, several.ok = T)
   consensus_method <- match.arg(consensus_method)
   # Potential todo: add error checking for weights for majority voting
   distributions <- match.arg(distributions, several.ok = T)
@@ -103,25 +118,30 @@ segment_and_fit <- function(
   # Extracting data
   x <- histogram_obj$histogram_data
 
-  # Change points
-  chgpts <- find_local_optima(x, threshold = 0, flat_endpoints = T)
+  # Finding local optima
+  chgpts <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
   chgpts <- sort(c(chgpts$min_ind, chgpts$max_ind))
+
   # Looking for regions that surpass a hard count threshold
   x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
 
+  if(nrow(x_segs) == 0){
+    stop("no segments of greater than length 1 remain after filtering for histogram_count_threshold")
+  }
+
+  # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
-    p_init <- sort(unique(p_init)) # meaningful gaps local also needs p_init to be sorted so temporarily adding this back
     p <- ftc(x, p_init, eps)
 
-    # Max Gap
+    # Max gap
     if(remove_low_entropy) {
       mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = p_init, min_gap = min_gap_size)
-      p <- p[(abs(p - segs['start']) > min_peak_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
-      p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_peak_size)
+      p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
+      p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_segment_size)
     } else {
-      p <- p[(abs(p - segs['start']) > min_gap_size & abs(p - segs['end']) > min_peak_size) | p %in% segs]
+      p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
       p_pairs <- index_to_start_end(p)
     }
 
@@ -130,9 +150,16 @@ segment_and_fit <- function(
 
   # Combine the results from each segment
   all_points <- do.call('rbind.data.frame', all_points)
-  all_points <- all_points[(all_points$end - all_points$start + 1) > min_peak_size,, drop = FALSE] # Current solution for min_peak_size, open to alternatives
+  all_points <- all_points[(all_points$end - all_points$start + 1) >= min_segment_size,, drop = FALSE]
   rownames(all_points) <- NULL
 
+<<<<<<< HEAD
+  if(nrow(all_points) == 0){
+    stop("no segments of greater than min_segment_size remain after segmentation")
+  }
+
+=======
+>>>>>>> origin/main
   # Fitting different models
   set.seed(seed)
   models <- apply(all_points, 1, function(seg){
@@ -145,6 +172,19 @@ segment_and_fit <- function(
     dist_optim <- unif_segment <- list()
     if("unif" %in% distributions &
        max_uniform &
+<<<<<<< HEAD
+       seg_len > uniform_stepsize &
+       seg_len > ceiling(uniform_threshold*seg_len)
+    ){
+
+      unif_segment <- lapply(metric, function(met) {
+        res <- identify_uniform_segment(
+          x = bin_data,
+          metric = met,
+          threshold = uniform_threshold,
+          stepsize = uniform_stepsize,
+          max_sd_size = uniform_max_sd
+=======
        seg_len > uniform_peak_stepsize &
        seg_len > ceiling(uniform_peak_threshold*seg_len)
     ){
@@ -156,6 +196,7 @@ segment_and_fit <- function(
           threshold = uniform_peak_threshold,
           stepsize = uniform_peak_stepsize,
           max_sd_size = 0
+>>>>>>> origin/main
         )
         res[['seg_start']] <- res[['seg_start']] + seg_start -1
         res[['seg_end']] <- res[['seg_end']] + seg_start -1
@@ -165,10 +206,17 @@ segment_and_fit <- function(
       distributions <- setdiff(distributions, "unif")
     }
 
+<<<<<<< HEAD
+    if( length(distributions) > 0 ){
+      dist_optim <- fit_distributions(
+        x = bin_data,
+        metric = metric,
+=======
     if(length(distributions) > 0){
       dist_optim <- fit_distributions(
         histogram_data = bin_data,
         metric = histogram_metric,
+>>>>>>> origin/main
         truncated = truncated_models,
         distributions = distributions
       )
@@ -184,18 +232,27 @@ segment_and_fit <- function(
     best_models <- find_consensus_model(
       models = dist_optim,
       method = consensus_method,
-      metric = histogram_metric,
+      metric = metric,
       weights = metric_weights
     )
 
+<<<<<<< HEAD
+    return( best_models )
+=======
     return(best_models)
+>>>>>>> origin/main
   })
 
   # Creating a HistogramFit object
-  res <- list("models" = models, "p" = all_points,  "histogram_count_threshold" = histogram_count_threshold,
-              "eps" =  eps, "seed" = seed, "truncated_models" = truncated_models, "uniform_peak_threshold" = uniform_peak_threshold,
-              "uniform_peak_stepsize" = uniform_peak_stepsize, "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size,
-              "min_peak_size" = min_peak_size, "max_uniform" = max_uniform, "histogram_metric" = histogram_metric, "distributions" = distributions)
+  res <- list("models" = models, "p" = all_points,
+              "optima_threshold" = optima_threshold, "optima_flat_endpoints" = optima_flat_endpoints,
+              "histogram_count_threshold" = histogram_count_threshold,
+              "eps" =  eps,
+              "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size, "min_segment_size" = min_segment_size,
+              "seed" = seed,
+              "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd,
+              "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
+              "consensus_method" = consensus_method, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 

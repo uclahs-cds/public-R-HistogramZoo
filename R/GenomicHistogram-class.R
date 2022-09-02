@@ -1,6 +1,23 @@
 
 # constructor
-new_GenomicHistogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, chr = NULL, strand = NULL){
+#' GenomicHistogram constructor
+#'
+#' @param histogram_data vector of counts/density
+#' @param interval_start integer vector representing the starts of intervals
+#' @param interval_end integer vector representing the ends of intervals
+#' @param region_id character identifier for the region of interest
+#' @param chr chromosome name
+#' @param strand strand
+#'
+#' @return A GenomicHistogram object
+new_GenomicHistogram <- function(
+    histogram_data = NULL,
+    interval_start = NULL,
+    interval_end = NULL,
+    region_id = NULL,
+    chr = NULL,
+    strand = NULL
+  ){
 
   # Checking types
   stopifnot(is.character(chr))
@@ -21,6 +38,10 @@ new_GenomicHistogram <- function(histogram_data = NULL, interval_start = NULL, i
 }
 
 # validator
+#' Validates GenomicHistogram objects
+#'
+#' @param x a GenomicHistogram object candidate
+#' @return a validated GenomicHistogram object
 validate_GenomicHistogram <- function(x){
 
   # Attributes
@@ -48,7 +69,7 @@ validate_GenomicHistogram <- function(x){
 #' @param chr chromosome name
 #' @param strand strand
 #'
-#' @return A GenomicHistogram object
+#' @return a GenomicHistogram object
 #' @export
 #'
 #' @examples
@@ -130,19 +151,19 @@ GenomicHistogram <- function(
 
 
 #' @export
-reassign_region_id.GenomicHistogram = function(x, region_id){
+reassign_region_id.GenomicHistogram = function(histogram_obj, region_id){
 
-  stopifnot(inherits(x, "Histogram"))
+  stopifnot(inherits(histogram_obj, "Histogram"))
 
   # Creating a region id
-  if(missing(region_id) & length(x$histogram_data) > 0){
-    region_id <- paste0(x$chr, ":", x$interval_start[1], "-", x$interval_end[length(x$histogramm_data)], ":", x$strand)
+  if(missing(region_id) & length(histogram_obj$histogram_data) > 0){
+    region_id <- paste0(histogram_obj$chr, ":", histogram_obj$interval_start[1], "-", histogram_obj$interval_end[length(histogram_obj$histogramm_data)], ":", histogram_obj$strand)
   }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
   }
 
-  x$region_id <- region_id
+  histogram_obj$region_id <- region_id
 
-  return(x)
+  return(histogram_obj)
 }

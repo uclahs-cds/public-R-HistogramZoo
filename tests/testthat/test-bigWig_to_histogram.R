@@ -1,24 +1,24 @@
 context("Testing input and parameter variations to bigWig_to_histogram")
 
-filename = system.file("extdata", "bigwigs", "test.bw", package = "HistogramZoo")
-gtf = system.file("extdata", "genes.gtf",  package = "HistogramZoo")
+filename <- system.file("extdata", "bigwigs", "test.bw", package = "HistogramZoo")
+gtf <- system.file("extdata", "genes.gtf",  package = "HistogramZoo")
 
-strand = "*"
-score_threshold = 0
-histogram_bin_size = 5
+strand <- "*"
+score_threshold <- 0
+histogram_bin_size <- 5
 
 
 test_that("Pre-specified regions yield the correct result", {
 
   # Gene ENSG00000178951.9
-  regions = GenomicRanges::GRanges(
+  regions <- GenomicRanges::GRanges(
     seqnames = "chr19",
     IRanges::IRanges(start = c(4043303),
                      end = c(4048244)),
     strand = "-")
 
   # With pre-specified regions
-  histograms_gr_regions = bigWig_to_histogram(
+  histograms_gr_regions <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = score_threshold,
@@ -44,7 +44,7 @@ test_that("Pre-specified regions yield the correct result", {
 test_that("Testing that unspecified regions yield correct results", {
 
   # With no specified regions
-  histograms_no_regions = bigWig_to_histogram(
+  histograms_no_regions <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = score_threshold,
@@ -66,7 +66,7 @@ test_that("Testing that unspecified regions yield correct results", {
 test_that("Testing that importing a GTF file yields correct results", {
 
   # With a GTF file
-  histograms_gtf = bigWig_to_histogram(
+  histograms_gtf <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = score_threshold,
@@ -84,13 +84,13 @@ test_that("Testing that importing a GTF file yields correct results", {
 
 test_that("Testing that varying bin size yields correct results", {
 
-  regions = GenomicRanges::GRanges(
+  regions <- GenomicRanges::GRanges(
     seqnames = "chr19",
     IRanges::IRanges(start = c(4043303),
                      end = c(4048244)),
     strand = "-")
 
-  histograms_5 = bigWig_to_histogram(
+  histograms_5 <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = score_threshold,
@@ -102,7 +102,7 @@ test_that("Testing that varying bin size yields correct results", {
     length(histograms_5[[1]]$histogram_data),
     ceiling(GenomicRanges::width(regions)[1]/5))
 
-  histograms_10 = bigWig_to_histogram(
+  histograms_10 <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = score_threshold,
@@ -115,8 +115,8 @@ test_that("Testing that varying bin size yields correct results", {
     ceiling(GenomicRanges::width(regions)[1]/10))
 
   # Creating bins
-  bins_5 = histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
-  bins_10 = histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
+  bins_5 <- histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
+  bins_10 <- histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
 
   # Checking that the binnedAverage add up to the same thing
   expect_equal(
@@ -127,7 +127,7 @@ test_that("Testing that varying bin size yields correct results", {
 
 test_that("Testing that selecting for strand yields correct results", {
 
-  histograms_pos = bigWig_to_histogram(
+  histograms_pos <- bigWig_to_histogram(
     filename = filename,
     strand = "+",
     score_threshold = score_threshold,
@@ -139,7 +139,7 @@ test_that("Testing that selecting for strand yields correct results", {
     histograms_pos,
     "ENSG00000185129.7")
 
-  histograms_neg = bigWig_to_histogram(
+  histograms_neg <- bigWig_to_histogram(
     filename = filename,
     strand = "-",
     score_threshold = score_threshold,
@@ -152,7 +152,7 @@ test_that("Testing that selecting for strand yields correct results", {
     "ENSG00000178951.9"
   )
 
-  histograms_neutral = bigWig_to_histogram(
+  histograms_neutral <- bigWig_to_histogram(
     filename = filename,
     strand = ".",
     score_threshold = score_threshold,
@@ -169,7 +169,7 @@ test_that("Testing that selecting for strand yields correct results", {
 
 test_that("Testing that varying the score threshold yields correct results", {
 
-  histograms_score_1 = bigWig_to_histogram(
+  histograms_score_1 <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = 1,
@@ -179,7 +179,7 @@ test_that("Testing that varying the score threshold yields correct results", {
 
   expect_true(all(histograms_score_1[[1]]$histogram_data > 1))
 
-  histograms_score_2 = bigWig_to_histogram(
+  histograms_score_2 <- bigWig_to_histogram(
     filename = filename,
     strand = strand,
     score_threshold = 2,

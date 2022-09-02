@@ -1,9 +1,9 @@
 #' Take a vector of values and get the histogram for integer breaks
 #'
-#' @param x A vector of observations
+#' @param x a vector of observations
 #' @param histogram_bin_width Size of histogram bin, assuming a base 1 system
 #'
-#' @return A Histogram object representing counts of the data
+#' @return a Histogram object representing counts of the data
 #'
 #' @export
 #'

@@ -2,36 +2,36 @@ context("plotting")
 
 
 # Basic example
-x = Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
-results = segment_and_fit(x, eps = 0.005)
-results_table = summarize_results(results)
+x <- Histogram(c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0))
+results <- segment_and_fit(x, eps = 0.005)
+results_table <- summarize_results(results)
 
 # Long histogram
 set.seed(314)
-long_x = observations_to_histogram(
+long_x <- observations_to_histogram(
   round(
     rnorm(1000, mean = 100, sd = 50)
   ),
   histogram_bin_width = 5
 )
-results_long = segment_and_fit(long_x, eps = 1)
+results_long <- segment_and_fit(long_x, eps = 1)
 
 # Genomic histogram
-genomic_hist = GenomicHistogram(
+genomic_hist <- GenomicHistogram(
   c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0),
   chr = "chr1",
   strand = c("-"))
-genomic_results = segment_and_fit(genomic_hist, eps = 0.005)
+genomic_results <- segment_and_fit(genomic_hist, eps = 0.005)
 
 # Interval start != interval end
-interval_test_data = Histogram(
+interval_test_data <- Histogram(
   histogram_data = c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0),
   interval_start = seq(0, 26, 2),
   interval_end = seq(1, 27, 2))
-interval_test_results = segment_and_fit(interval_test_data, eps = 0.005)
+interval_test_results <- segment_and_fit(interval_test_data, eps = 0.005)
 
 # Not all distributions are used
-results_dist_subset = segment_and_fit(x, eps = 0.005, distributions = c("unif"))
+results_dist_subset <- segment_and_fit(x, eps = 0.005, distributions = c("unif"))
 
 test_that("create_coverageplot works ", {
 
@@ -149,7 +149,7 @@ test_that("create_trackplot works ", {
   expect_error(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
+      row_id = "segment_id",
       metric_id = "value"
     ),
     NA
@@ -159,8 +159,8 @@ test_that("create_trackplot works ", {
   expect_error(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
-      metric_id = "peak_id"
+      row_id = "segment_id",
+      metric_id = "segment_id"
     ),
     NA
   )
@@ -201,7 +201,7 @@ test_that("create_trackplot works ", {
   expect_warning(
     create_trackplot(
       track_data = results_table,
-      row_id = "peak_id",
+      row_id = "segment_id",
       metric_id = "value",
       xlimits = c(5, 13)
     ),
@@ -213,8 +213,8 @@ test_that("create_trackplot works ", {
 
 test_that("create_layerplot works ", {
 
-  cvg_plt = create_coverageplot(results_long, legend = NULL)
-  resid_plt = create_residualplot(results_long)
+  cvg_plt <- create_coverageplot(results_long, legend = NULL)
+  resid_plt <- create_residualplot(results_long)
 
   # 1. Testing that this works
   expect_error(

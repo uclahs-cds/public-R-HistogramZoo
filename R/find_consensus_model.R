@@ -6,7 +6,16 @@
 #' @param metric metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
 #' @param weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
-#' @return a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric.
+#' @return a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric. Each model is a list of the following data:
+#' \describe{
+#'     \item{par}{A character string denoting the region_id of the Histogram}
+#'     \item{dist}{The distribution name}
+#'     \item{metric}{The metric used to fit the distribution}
+#'     \item{value}{The fitted value of the metric function}
+#'     \item{dens}{A function that returns the density of the fitted distribution}
+#'     \item{seg_start}{start index of the interval}
+#'     \item{seg_end}{end index of the interval}
+#' }
 #'
 #' @export
 #'
@@ -55,7 +64,7 @@ find_consensus_model <- function(
   if(length(tag) > length(unique(tag))){
     stop("Models cannot contain repeated fits using the same metric and distribution.")
   }
-  
+
   # Correcting for Jaccard and Intersection
   val = ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
 
@@ -126,7 +135,7 @@ find_consensus_model <- function(
   names(best_models) <- sapply(best_models, `[[`, "metric")
   best_models[['consensus']] <- models[[which(tag == paste0(metric[1], ".", consensus_dist))]]
   best_models[['consensus']]$metric <- "consensus"
-  
+
   return(
     best_models
   )
