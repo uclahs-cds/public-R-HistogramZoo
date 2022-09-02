@@ -1,7 +1,7 @@
 #' Fit a uniform distribution to a histogram
 #'
 #' @param x numeric vector representing the density of a histogram
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric one of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #'
 #' @return a list with the following data
 #' \describe{
@@ -11,7 +11,10 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-fit_uniform <- function(x, metric){
+fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chisq')){
+
+  # Error checking
+  metric <- match.arg(metric)
 
   N <- sum(x)
   bin <- 1:length(x)
@@ -151,7 +154,7 @@ fit_distributions <- function(
 
       # Adjusting for truncated distributions
       if(truncated) {
-        dist_par$a <-  min(bin) - 1e-10
+        dist_par$a <- min(bin) - 1e-10
         dist_par$b <- max(bin) + 1e-10
       }
 
@@ -178,6 +181,10 @@ fit_distributions <- function(
   })
 
   return(
+<<<<<<< HEAD
     c( unlist(rtn, recursive = F), unif_fit )
+=======
+    c(unlist(rtn, recursive = F), unif_fit)
+>>>>>>> origin/main
   )
 }

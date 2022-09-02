@@ -153,10 +153,13 @@ segment_and_fit <- function(
   all_points <- all_points[(all_points$end - all_points$start + 1) >= min_segment_size,, drop = FALSE]
   rownames(all_points) <- NULL
 
+<<<<<<< HEAD
   if(nrow(all_points) == 0){
     stop("no segments of greater than min_segment_size remain after segmentation")
   }
 
+=======
+>>>>>>> origin/main
   # Fitting different models
   set.seed(seed)
   models <- apply(all_points, 1, function(seg){
@@ -169,6 +172,7 @@ segment_and_fit <- function(
     dist_optim <- unif_segment <- list()
     if("unif" %in% distributions &
        max_uniform &
+<<<<<<< HEAD
        seg_len > uniform_stepsize &
        seg_len > ceiling(uniform_threshold*seg_len)
     ){
@@ -180,6 +184,19 @@ segment_and_fit <- function(
           threshold = uniform_threshold,
           stepsize = uniform_stepsize,
           max_sd_size = uniform_max_sd
+=======
+       seg_len > uniform_peak_stepsize &
+       seg_len > ceiling(uniform_peak_threshold*seg_len)
+    ){
+
+      unif_segment <- lapply(histogram_metric, function(met) {
+        res <- identify_uniform_segment(
+          x = bin_data,
+          metric = met,
+          threshold = uniform_peak_threshold,
+          stepsize = uniform_peak_stepsize,
+          max_sd_size = 0
+>>>>>>> origin/main
         )
         res[['seg_start']] <- res[['seg_start']] + seg_start -1
         res[['seg_end']] <- res[['seg_end']] + seg_start -1
@@ -189,10 +206,17 @@ segment_and_fit <- function(
       distributions <- setdiff(distributions, "unif")
     }
 
+<<<<<<< HEAD
     if( length(distributions) > 0 ){
       dist_optim <- fit_distributions(
-        x = bin_data, 
+        x = bin_data,
         metric = metric,
+=======
+    if(length(distributions) > 0){
+      dist_optim <- fit_distributions(
+        histogram_data = bin_data,
+        metric = histogram_metric,
+>>>>>>> origin/main
         truncated = truncated_models,
         distributions = distributions
       )
@@ -212,17 +236,21 @@ segment_and_fit <- function(
       weights = metric_weights
     )
 
+<<<<<<< HEAD
     return( best_models )
+=======
+    return(best_models)
+>>>>>>> origin/main
   })
 
   # Creating a HistogramFit object
-  res <- list("models" = models, "p" = all_points,  
+  res <- list("models" = models, "p" = all_points,
               "optima_threshold" = optima_threshold, "optima_flat_endpoints" = optima_flat_endpoints,
               "histogram_count_threshold" = histogram_count_threshold,
-              "eps" =  eps, 
+              "eps" =  eps,
               "remove_low_entropy" = remove_low_entropy, "min_gap_size" = min_gap_size, "min_segment_size" = min_segment_size,
               "seed" = seed,
-              "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd, 
+              "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd,
               "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
               "consensus_method" = consensus_method, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
