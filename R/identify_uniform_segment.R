@@ -7,7 +7,7 @@
 #' @param max_sd_size numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which
 #' has maximum length
 #'
-#' @return A list representing a uniform model with the following data
+#' @return a list representing a uniform model with the following data
 #' \describe{
 #'     \item{par}{A character string denoting the region_id of the Histogram}
 #'     \item{dist}{The distribution name}

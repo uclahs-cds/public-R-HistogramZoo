@@ -8,26 +8,26 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 
-  results = summarize_results(result = sf_results)
+  results <- summarize_results(result = sf_results)
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
-  expect_equal(colnames(results), c("region_id", "peak_id", "start", "end",
+  expect_equal(colnames(results), c("region_id", "segment_id", "start", "end",
     "interval_count", "interval_sizes", "interval_starts", "histogram_start",
     "histogram_end", "value", "metric", "dist", "params"))
 
   expect_is(results[,"region_id"], "character")
-  expect_is(results[,"peak_id"], "integer")
+  expect_is(results[,"segment_id"], "integer")
   expect_is(results[,"histogram_start"], "numeric")
   expect_is(results[,"histogram_end"], "numeric")
 
@@ -59,21 +59,21 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 
-  results = summarize_results(result = sf_results)
+  results <- summarize_results(result = sf_results)
 
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
-  expect_equal(colnames(results), c("region_id", "peak_id", "chr", "start",
+  expect_equal(colnames(results), c("region_id", "segment_id", "chr", "start",
     "end", "strand", "interval_count", "interval_sizes", "interval_starts",
     "histogram_start", "histogram_end", "value", "metric", "dist", "params"))
 
@@ -95,32 +95,32 @@ test_that("summarize_results is capable returning results for different metrics"
     eps = 1,
     seed = NULL,
     truncated_models = FALSE,
-    uniform_peak_threshold = 0.75,
-    uniform_peak_stepsize = 5,
+    uniform_threshold = 0.75,
+    uniform_stepsize = 5,
     remove_low_entropy = FALSE,
     min_gap_size = 2,
-    min_peak_size = 2,
+    min_segment_size = 2,
     max_uniform = FALSE,
-    histogram_metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "unif")
   )
 
-  results_all = summarize_results(result = sf_results, model_name = "consensus")
+  results_all <- summarize_results(result = sf_results, model_name = "consensus")
   expect_equal(results_all[1, "metric"], "consensus")
 
-  results_jaccard = summarize_results(result = sf_results, model_name = "jaccard")
+  results_jaccard <- summarize_results(result = sf_results, model_name = "jaccard")
   expect_equal(results_jaccard[1, "metric"], "jaccard")
 
-  results_intersection = summarize_results(result = sf_results, model_name = "intersection")
+  results_intersection <- summarize_results(result = sf_results, model_name = "intersection")
   expect_equal(results_intersection[1, "metric"], "intersection")
 
-  results_ks = summarize_results(result = sf_results, model_name = "ks")
+  results_ks <- summarize_results(result = sf_results, model_name = "ks")
   expect_equal(results_ks[1, "metric"], "ks")
 
-  results_mse = summarize_results(result = sf_results, model_name = "mse")
+  results_mse <- summarize_results(result = sf_results, model_name = "mse")
   expect_equal(results_mse[1, "metric"], "mse")
 
-  results_chisq = summarize_results(result = sf_results, model_name = "chisq")
+  results_chisq <- summarize_results(result = sf_results, model_name = "chisq")
   expect_equal(results_chisq[1, "metric"], "chisq")
-  
+
 })

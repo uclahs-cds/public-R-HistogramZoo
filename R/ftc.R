@@ -5,6 +5,8 @@
 #' @param p density of the reference distribution
 #' @param a start index to subset density
 #' @param b end index to subset density
+#'
+#' @return numeric, relative entropy of the distributions `h` and `p` between `a` and `b`
 relative_entropy <- function(h, p, a, b) {
   interval <- a:b
   # Round to prevent floating point issues
@@ -45,6 +47,9 @@ grenader <- function(x, increasing = T){
 #' @param s  numeric vector representing initial segmentation indices
 #' @param increasing logical, whether the Grenander estimator should assume
 #' x is increasing or decreasing
+#'
+#' @return numeric vector, representing maximum relative entropy of all subsegments of `h`
+#' (the distribution of normalizing `x`) and `p` (the Grenander estimator of x)
 maximum_entropy <- function(x, s = NULL, increasing = TRUE) {
   N <- ifelse(sum(x) == 0, 1, sum(x))
   if(is.null(s)){s <- 1:length(x)}
@@ -90,7 +95,7 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 #' @param s numeric vector representing initial segmentation indices
 #' @param eps numeric hyperparameter epsilon used to scale the resolution of segmentation
 #'
-#' @return A vector of points representing the boundaries between histograms
+#' @return a vector of points representing the boundaries between histograms
 #'
 #' @examples \dontrun{
 #' x = c(0, 1, 2, 3, 4, 3, 2, 1, 0, 0, 0, 1, 2, 1, 0)
@@ -118,8 +123,7 @@ ftc <- function(x, s = NULL, eps = 1) {
     minmax <- find_local_optima(x)
     lmin <- minmax$max_ind
     lmax <- minmax$min_ind
-    s <- c(1, lmin, lmax, length(x) )
-    s <- sort(unique(s))
+    s <- c(1, lmin, lmax, length(x))
   }
 
   # Initializing

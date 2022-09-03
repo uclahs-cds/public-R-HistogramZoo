@@ -1,12 +1,12 @@
 #' Produces a GRangesList out of a GTF file, each element represents the exons of a gene or transcript
 #'
-#' @param gtf Path to GTF file
+#' @param gtf path to GTF file
 #' @param gene_or_transcript Whether histograms should be computed on gene annotations or transcript annotations. Default gene
 #' @param select_strand Select elements belonging to a specific strand. Default *
 #' @param select_chrs Select elements on specific chromosomes. Default NULL
 #' @param select_ids Select elements by matching ids to genes or transcripts (depending on gene_or_transcript). Default NULL
 #'
-#' @return A GRangesList object where each element is a GRanges object containing the exons of a gene or transcript
+#' @return a GRangesList object where each element is a GRanges object containing the exons of a gene or transcript
 #'
 #' @examples \dontrun{
 #' gtf = system.file("extdata", "genes.gtf", package = "HistogramZoo")

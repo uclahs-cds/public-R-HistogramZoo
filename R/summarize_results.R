@@ -1,6 +1,6 @@
 results_columns <- c(
   "region_id",
-  "peak_id",
+  "segment_id",
   "chr",
   "start",
   "end",
@@ -18,8 +18,8 @@ results_columns <- c(
 
 #' Extract stats from models
 #'
-#' @param model_list A list of models represented as a nested list, like the output of `fit_distributions`
-#' @param model_name The name of the model from which the stats are to be extracted
+#' @param model_list a list of models represented as a nested list, like the output of `fit_distributions`
+#' @param model_name character, the name of the model from which the stats are to be extracted
 #'
 #' @return A list of the following data representing a single segment
 #' \describe{
@@ -44,9 +44,9 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
 
 #' Represent a single segment as a set of intervals
 #'
-#' @param iranges An IRanges object with intervals representing intervals of a single segment
+#' @param iranges an IRanges object with intervals representing intervals of a single segment
 #'
-#' @return A list with the following data representing a single segment
+#' @return a list with the following data representing a single segment
 #' \describe{
 #'     \item{start}{the interval start of the segment}
 #'     \item{end}{the interval end of the segment}
@@ -54,7 +54,7 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
 #'     \item{interval_sizes}{The width of each interval}
 #'     \item{interval_starts}{The start index of each interval}
 #'}
-extract_peak_segments <- function(iranges){
+extract_segments <- function(iranges){
   iranges_range <- range(iranges)
   list(
     "start" = IRanges::start(iranges_range),
@@ -67,13 +67,13 @@ extract_peak_segments <- function(iranges){
 
 #' Formats results of segment_and_fit
 #'
-#' @param result A Histogram object which have attributes 'models' and 'p' (i.e. the return object of running segment_and_fit on a Histogram)
+#' @param result a Histogram object which have attributes 'models' and 'p' (i.e. the return object of running segment_and_fit on a Histogram)
 #' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "consensus" if more than one metric was used to specify which model params to extract
 #'
-#' @return A data.frame with the following columns summarizing the results of the fit
+#' @return a data.frame with all or a subset of the following columns summarizing the results of the fit
 #' \describe{
 #'     \item{region_id}{character string denoting the region_id of the Histogram}
-#'     \item{peak_id}{an integer id identifying the ordinal segment of the Histogram segmentation}
+#'     \item{segment_id}{an integer id identifying the ordinal segment of the Histogram segmentation}
 #'     \item{chr}{an optional column denoting the chromosome of a GenomicHistogram object}
 #'     \item{start}{the interval start of the segment}
 #'     \item{end}{the interval end of the segment}
@@ -104,7 +104,7 @@ summarize_results.Histogram <- function(
   # Error checking
   stopifnot(inherits(result, "HistogramFit"))
   stopifnot(inherits(result, "Histogram"))
-  model_name <- match.arg(model_name, c("consensus", result$histogram_metric))
+  model_name <- match.arg(model_name, c("consensus", result$metric))
 
   # Attributes of the result
   models <- result$models
@@ -117,8 +117,8 @@ summarize_results.Histogram <- function(
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
-    coords <- extract_peak_segments(coords)
-    c(stats, coords, list('peak_id' = i))
+    coords <- extract_segments(coords)
+    c(stats, coords, list('segment_id' = i))
   })
   results_table <- do.call('rbind.data.frame', results_table)
   results_table['region_id'] <- region_id
