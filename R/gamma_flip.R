@@ -4,7 +4,6 @@
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param offset offset of the right end of the distribution
-#' @inheritParams stats::dgamma
 #' @param ... additional parameters to be passed to stats::dgamma
 #'
 #' @return density of distribution
@@ -34,7 +33,6 @@ pgamma_flip <- function(q, shape, rate = 1, offset = 0, lower.tail = TRUE, ...) 
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param offset offset of the right end of the distribution
-#' @inheritParams stats::rgamma
 #' @param ... additional parameters to be passed to stats::rgamma
 #'
 #' @return random deviates
