@@ -188,6 +188,6 @@ test_that("subfunction: find_consensus_model", {
   res_summary <- summarize_results(res)
 
   expect_equal(res$consensus_method, "weighted_majority_vote")
-  expect_equal(res_summary[2, "dist"], "gamma")
+  expect_equal(res_summary[2, "dist"], "norm")
 
 })
