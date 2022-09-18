@@ -8,6 +8,7 @@ fit_names <- c("par", "dist", "metric", "value", "dens")
 
 test_that("fit_distributions works ", {
 
+  set.seed(314)
   histogram_data <- round(rnorm(100, mean = 0, sd = 5))
   histogram_data <- table(histogram_data)
 
