@@ -51,7 +51,8 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
-#' subset of `norm`, `gamma`, `gamma_flip`, `unif`
+#' subset of `norm`, `gamma`, and `unif`. If the skew of the distribution is negative,
+#' a `gamma_flip` (reversed gamma) distribution is fit instead of `gamma`.
 #'
 #' @export
 #'
@@ -69,7 +70,7 @@ fit_distributions <- function(
     x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "gamma_flip", "unif")) {
+    distributions = c("norm", "gamma", "unif")) {
 
   # Matching arguments
   # TODO: consider checking minimum length of x or
@@ -118,6 +119,18 @@ fit_distributions <- function(
   if("unif" %in% distributions){
     distributions <- setdiff(distributions, "unif")
     unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
+  }
+
+  # Using skew to determine gamma or gamma_flip
+  if( "gamma" %in% distributions){
+    skew <- moments::skewness(
+      histogram_to_approximate_observations(
+        x
+      )
+    )
+    if (skew < 0){
+      distributions[distributions == "gamma"] <- "gamma_flip"
+    }
   }
 
   rtn <- lapply(distributions, function(distr) {
