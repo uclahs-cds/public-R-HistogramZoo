@@ -38,8 +38,8 @@ find_consecutive_threshold <- function(
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
 #' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.  If the skew of the distribution is negative,
-#' a `gamma_flip` (reversed gamma) distribution is fit instead of `gamma`.
+#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.  If both `gamma` and `gamma_flip`
+#' are indicated, only one will be fit depending on the skew of the data.
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
@@ -65,7 +65,7 @@ segment_and_fit <- function(
     uniform_max_sd = 0,
     truncated_models = FALSE,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    distributions = c("norm", "gamma", "unif"),
+    distributions = c("norm", "gamma", "gamma_flip", "unif"),
     consensus_method = c("weighted_majority_vote", "rra"),
     metric_weights = rev(seq(1, 1.8, 0.2))
 ) {
