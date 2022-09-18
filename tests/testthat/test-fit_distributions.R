@@ -3,7 +3,7 @@ context("fit_distributions")
 
 # Initializing
 metric <- c("jaccard", "intersection", "ks", "mse", "chisq")
-distributions <- c("norm", "gamma", "unif")
+distributions <- c("norm", "gamma", "gamma_flip", "unif")
 fit_names <- c("par", "dist", "metric", "value", "dens")
 
 test_that("fit_distributions works ", {
@@ -20,7 +20,7 @@ test_that("fit_distributions works ", {
 
   expect_length(res, 15)
   expect_true(
-    all(distributions %in% unlist(lapply(res, `[`, "dist")))
+    all(c("norm", "unif", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))
   )
   expect_true(
     all(metric %in% unlist(lapply(res, `[`, "metric")))
