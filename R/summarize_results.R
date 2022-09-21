@@ -38,7 +38,7 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
     "value" = mod$value,
     "metric" = mod$metric,
     "dist" = mod$dist,
-    "params" = dput_str(mod$par)
+    "params" = mod$par
   )
 }
 
@@ -116,6 +116,17 @@ summarize_results.Histogram <- function(
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
+    # Rescale distribution parameters
+    if(result$bin_width > 1) {
+      if(stats$dist == 'norm') {
+        stats$params$mean <- stats$params$mean * result$bin_width
+        stats$params$sd <- stats$params$sd * result$bin_width
+      } else if(stats$dist == 'gamma') {
+        stats$params$rate <- stats$params$rate * result$bin_width
+      }# TODO: gamma_flip when implemented
+    }
+
+    stats$params <- dput_str(stats$params)
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
     c(stats, coords, list('segment_id' = i))
