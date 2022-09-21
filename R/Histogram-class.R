@@ -14,6 +14,7 @@ new_Histogram <- function(
     histogram_data = NULL,
     interval_start = NULL,
     interval_end = NULL,
+    bin_width = 1L,
     region_id = NULL,
     class = character(),
     ...
@@ -23,6 +24,7 @@ new_Histogram <- function(
   stopifnot(is.double(histogram_data))
   stopifnot(is.integer(interval_start))
   stopifnot(is.integer(interval_end))
+  stopifnot(is.integer(bin_width))
   stopifnot(is.character(region_id))
 
   # Creating object
@@ -30,6 +32,7 @@ new_Histogram <- function(
     histogram_data = histogram_data,
     interval_start = interval_start,
     interval_end = interval_end,
+    bin_width = bin_width,
     region_id = region_id,
     ...
   )
@@ -50,6 +53,7 @@ validate_Histogram <- function(x){
   histogram_length <- length(histogram_data)
   interval_start <- x$interval_start
   interval_end <- x$interval_end
+  bin_width <- x$bin_width
   region_id <- x$region_id
 
   # Validate
@@ -84,6 +88,9 @@ validate_Histogram <- function(x){
   if(length(region_id) != 1){
     stop("region_id must have length 1.", call. = FALSE)
   }
+
+  # 6. bin_width is positive integer
+  stopifnot(is.integer(bin_width) && bin_width > 0)
 
   return(x)
 }
@@ -161,12 +168,19 @@ print.Histogram = function(x, ...){
   # Base case
   cat("Region: ", region_id, "\n")
 
+  if(!("GenomicHistogram" %in% class(x))) {
+    interval_start_type <- c('[', rep('(', length(interval_start) - 1))
+
+    interval_start <- paste0(interval_start_type, interval_start)
+    interval_end <- paste0(interval_end, ']')
+  }
+
   # Indices
   if(length(histogram_data) > 10){
 
     # Intervals
     intervals_begin <- ifelse(
-      interval_start[1:5] == interval_end[1:5],
+      x$interval_start[1:5] == x$interval_start[1:5],
       interval_start[1:5],
       paste0(interval_start[1:5], "-", interval_end[1:5]))
 
@@ -190,7 +204,6 @@ print.Histogram = function(x, ...){
     cat(x_start, "...", x_end, "\n")
 
   } else {
-
     # Intervals
     intervals <- ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
     intervals <- as.character(intervals)

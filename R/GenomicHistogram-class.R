@@ -15,6 +15,7 @@ new_GenomicHistogram <- function(
     interval_start = NULL,
     interval_end = NULL,
     region_id = NULL,
+    bin_width = 1L,
     chr = NULL,
     strand = NULL
   ){
@@ -30,6 +31,7 @@ new_GenomicHistogram <- function(
       interval_start = interval_start,
       interval_end = interval_end,
       region_id = region_id,
+      bin_width = bin_width,
       chr = chr,
       strand = strand,
       class = "GenomicHistogram"

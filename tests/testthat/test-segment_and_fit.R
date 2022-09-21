@@ -30,6 +30,7 @@ test_that("base case: segment_and_fit returns expected output", {
     c("histogram_data",
       "interval_start",
       "interval_end",
+      "bin_width",
       "region_id",
       # Results
       "models", "p",
@@ -59,6 +60,7 @@ test_that("base case: segment_and_fit returns expected output", {
     c("histogram_data",
       "interval_start",
       "interval_end",
+      "bin_width",
       "region_id",
       "chr",
       "strand",
