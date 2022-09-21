@@ -2,7 +2,7 @@
 
 #' create_trackplot creates a horizontal plot with rows representing separate tracks
 #'
-#' @param track_data A dataframe detailing segments
+#' @param track_data a dataframe detailing segments
 #' \describe{
 #'     \item{start}{the start position of the segment, based on histogram vector index}
 #'     \item{end}{the end position of the segment, based on histogram vector index}

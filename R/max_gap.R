@@ -1,8 +1,9 @@
 
 #' Uniform density generation
-#' @param x A numeric vector representing the density of a histogram
 #'
-#' @return A vector of uniform density with length of x
+#' @param x a numeric vector representing the density of a histogram
+#'
+#' @return a vector of uniform density with length of x
 generate_uniform_distribution <- function(x){
   return(
     rep(1/length(x), length(x))
@@ -10,12 +11,13 @@ generate_uniform_distribution <- function(x){
 }
 
 #' Calculate whether h[a,b] > p[a,b]
+#'
 #' @param h density of a distribution
 #' @param p density of the reference distribution
 #' @param a start index to subset density
 #' @param b end index to subset density
 #'
-#' @return logical
+#' @return logical, if h[a,b] > p[a,b]
 calculate_probability_difference <- function(h, p, a, b){
   interval <- a:b
   # Round to prevent floating point issues
@@ -25,6 +27,7 @@ calculate_probability_difference <- function(h, p, a, b){
 }
 
 #' Determines whether h[a,b] is a meaningful interval
+#'
 #' @param h density of a distribution
 #' @param p density of the reference distribution
 #' @param a start index to subset density
@@ -44,6 +47,7 @@ meaningful_interval <- function(h, p, a, b, N, L){
 }
 
 #' Determines whether h[a,b] is a meaningful gap
+#'
 #' @param h density of a distribution
 #' @param p density of the reference distribution
 #' @param a start index to subset density
@@ -102,7 +106,7 @@ maximal_meaningful_interval <- function(x) {
 
 #' Find all meaningful gaps
 #'
-#' @param x histogram (vector of counts)
+#' @param x a numeric vector representing the density of a histogram
 #' @param change_points the change points (e.g. local min/max) in the vector x
 #'
 #' @return A data.frame with columns
@@ -152,12 +156,12 @@ find_all_meaningful_gap <- function(x, change_points) {
 
 #' Finds the meaningful gaps between the points in s
 #'
-#' @param x The histogram data
+#' @param x a numeric vector representing the density of a histogram
 #' @param seg_points the segment points in the vector x
 #' @param change_points the change points (e.g. local min/max) in the vector x
 #' @param min_gap The minimum gap to be considered a meaningful gap
 #'
-#' @return A data.frame with columns
+#' @return a data.frame with columns
 #' \describe{
 #'     \item{start}{start index of the histogram count vector}
 #'     \item{end}{end index of the histogram count vector}
@@ -180,6 +184,9 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
   if(!is_equal_integer(min_gap) | length(min_gap) != 1){
     stop("min_gap must be a numeric integer of length 1")
   }
+
+  seg_points <- sort(unique(seg_points))
+  change_points <- sort(unique(change_points))
 
   # Identifying max gaps
   max_gaps_list <- lapply(seq(2, length(seg_points)), function(i) {

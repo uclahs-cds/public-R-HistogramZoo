@@ -1,8 +1,24 @@
 #' Return a string representation of an object
+#'
 #' @param x an object
+#' 
+#' @return a character representation of `x`
 dput_str <- function(x) {
   return(
     paste0(utils::capture.output(dput(x)), collapse = " ")
+  )
+}
+
+
+#' Correcting for Jaccard/Intersection
+#' 
+#' @param met metric
+#' @param value metric fitted value
+#' 
+#' @return if metric is `jaccard` or `intersection`, return 1 - value
+correct_fitted_value <- function(met, value){
+  return(
+    if (met %in% c("jaccard", "intersection")) (1 - value) else value
   )
 }
 
@@ -53,7 +69,10 @@ index_to_start_end <- function(p, right = TRUE) {
 }
 
 #' Checks if a numeric vector can be used as an integer vector
+#' 
 #' @param x A numeric vector
+#' 
+#' @return logical, whether `x` is an integer or integer vector
 is_equal_integer <- function(x){
   all(x%%1 == 0)
 }

@@ -3,16 +3,16 @@
 #' create_residualplot creates a residual plot between fitted and observed data
 #'
 #' @param histogram_obj a `Histogram` or `HistogramFit` object
-#' @param model_name One of the metrics used to fit models (e.g. Jaccard) and "consensus", default consensus
+#' @param model_name one of the metrics used to fit models (e.g. Jaccard) and "consensus", default consensus
 #' @param add_changepoint_lines logical, whether vertical lines should be drawn where residuals change from positive to negative and vice versa, default FALSE
-#' @param abline.h Allow horizontal line to be drawn, default to 0
-#' @param abline.v Allow vertical line to be drawn, default to NULL
+#' @param abline.h allow horizontal line to be drawn, default to 0
+#' @param abline.v allow vertical line to be drawn, default to NULL
 #' @param abline.col line colour, defaults to lightgrey
 #' @param abline.lwd line width, defaults to 0.01
 #' @param abline.lty line style, defaults to dotted
 #' @inheritParams BoutrosLab.plotting.general::create.scatterplot
 #'
-#' @return Residual scatterplot, a Trellis object. For further details, see the 'Lattice' R package.
+#' @return residual scatterplot, a Trellis object. For further details, see the 'Lattice' R package.
 #' @export
 #'
 #' @examples \dontrun{
@@ -49,7 +49,7 @@ create_residualplot <- function(
 #' @export
 create_residualplot.HistogramFit = function(
   histogram_obj,
-  model_name = c("consensus", histogram_obj$histogram_metric),
+  model_name = c("consensus", histogram_obj$metric),
   add_changepoint_lines = F,
   abline.h = 0,
   abline.v = NULL,
@@ -70,7 +70,7 @@ create_residualplot.HistogramFit = function(
   legend = NULL,
   top.padding = 0.1, bottom.padding = 0.7, right.padding = 0.1, left.padding = 0.5,
   key.top = 0.1, key.left.padding = 0, ylab.axis.padding = 1, axis.key.padding = 1,
-  x.spacing = 0, y.spacing = 0, 
+  x.spacing = 0, y.spacing = 0,
   add.rectangle = FALSE, xleft.rectangle = NULL, ybottom.rectangle = NULL, xright.rectangle = NULL, ytop.rectangle = NULL, col.rectangle = 'transparent', alpha.rectangle = 1,
   add.points = FALSE, points.x = NULL, points.y = NULL, points.pch = 19, points.col = 'black', points.col.border = 'black', points.cex = 1,
   add.line.segments = FALSE, line.start = NULL, line.end = NULL, line.col = 'black', line.lwd = 1,
@@ -81,7 +81,7 @@ create_residualplot.HistogramFit = function(
 
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
-  model_name <- match.arg(model_name, c("consensus", histogram_obj$histogram_metric))
+  model_name <- match.arg(model_name, c("consensus", histogram_obj$metric))
   stopifnot(is.logical(add_changepoint_lines))
 
   # Extracting histogram_data
@@ -114,7 +114,7 @@ create_residualplot.HistogramFit = function(
       c(abline.h, 0)
     )
   }
-  
+
   # Plotting
   plt <-  BoutrosLab.plotting.general::create.scatterplot(
     Residuals ~ labels_x,
@@ -127,90 +127,90 @@ create_residualplot.HistogramFit = function(
     abline.col = abline.col,
     abline.lwd = abline.lwd,
     # Titles and labels
-    main = main, 
-    main.just = main.just, 
-    main.x = main.x, 
-    main.y = main.y, 
+    main = main,
+    main.just = main.just,
+    main.x = main.x,
+    main.y = main.y,
     main.cex = main.cex,
-    xlab.label = xlab.label, 
-    ylab.label = ylab.label, 
-    xlab.cex = xlab.cex, 
-    ylab.cex = ylab.cex, 
-    xlab.col = xlab.col, 
+    xlab.label = xlab.label,
+    ylab.label = ylab.label,
+    xlab.cex = xlab.cex,
+    ylab.cex = ylab.cex,
+    xlab.col = xlab.col,
     ylab.col = ylab.col,
-    xlab.top.label = xlab.top.label, 
-    xlab.top.cex = xlab.top.cex, 
+    xlab.top.label = xlab.top.label,
+    xlab.top.cex = xlab.top.cex,
     xlab.top.col = xlab.top.col,
-    xlab.top.just = xlab.top.just, 
-    xlab.top.x = xlab.top.x, 
+    xlab.top.just = xlab.top.just,
+    xlab.top.x = xlab.top.x,
     xlab.top.y = xlab.top.y,
-    xlimits = xlimits, 
-    ylimits = ylimits, 
-    xat = xat, 
-    yat = yat, 
-    xaxis.lab = xaxis.lab, 
-    yaxis.lab = yaxis.lab, 
-    xaxis.cex = xaxis.cex, 
+    xlimits = xlimits,
+    ylimits = ylimits,
+    xat = xat,
+    yat = yat,
+    xaxis.lab = xaxis.lab,
+    yaxis.lab = yaxis.lab,
+    xaxis.cex = xaxis.cex,
     yaxis.cex = yaxis.cex,
-    xaxis.rot = xaxis.rot, 
-    yaxis.rot = yaxis.rot, 
-    xaxis.fontface = xaxis.fontface, 
-    yaxis.fontface = yaxis.fontface, 
-    xaxis.col = xaxis.col, 
-    yaxis.col = yaxis.col, 
-    xaxis.tck = xaxis.tck, 
+    xaxis.rot = xaxis.rot,
+    yaxis.rot = yaxis.rot,
+    xaxis.fontface = xaxis.fontface,
+    yaxis.fontface = yaxis.fontface,
+    xaxis.col = xaxis.col,
+    yaxis.col = yaxis.col,
+    xaxis.tck = xaxis.tck,
     yaxis.tck = yaxis.tck,
-    type = type, 
-    cex = cex, 
-    pch = pch, 
-    col = col, 
-    col.border = col.border, 
-    lty = lty, 
-    lwd = lwd, 
+    type = type,
+    cex = cex,
+    pch = pch,
+    col = col,
+    col.border = col.border,
+    lty = lty,
+    lwd = lwd,
     alpha = alpha,
     axes.lwd = axes.lwd,
-    key = key, 
+    key = key,
     legend = legend,
-    top.padding = top.padding, 
-    bottom.padding = bottom.padding, 
-    right.padding = right.padding, 
+    top.padding = top.padding,
+    bottom.padding = bottom.padding,
+    right.padding = right.padding,
     left.padding = left.padding,
     key.top = key.top,
     key.left.padding = key.left.padding,
-    ylab.axis.padding = ylab.axis.padding, 
+    ylab.axis.padding = ylab.axis.padding,
     axis.key.padding = axis.key.padding,
     x.spacing = x.spacing,
     y.spacing = y.spacing,
     add.rectangle = add.rectangle,
-    xleft.rectangle = xleft.rectangle, 
-    ybottom.rectangle = ybottom.rectangle, 
-    xright.rectangle = xright.rectangle, 
-    ytop.rectangle = ytop.rectangle, 
-    col.rectangle = col.rectangle, 
+    xleft.rectangle = xleft.rectangle,
+    ybottom.rectangle = ybottom.rectangle,
+    xright.rectangle = xright.rectangle,
+    ytop.rectangle = ytop.rectangle,
+    col.rectangle = col.rectangle,
     alpha.rectangle = alpha.rectangle,
     add.points = add.points,
-    points.x = points.x, 
-    points.y = points.y, 
-    points.pch = points.pch, 
-    points.col = points.col, 
-    points.col.border = points.col.border, 
+    points.x = points.x,
+    points.y = points.y,
+    points.pch = points.pch,
+    points.col = points.col,
+    points.col.border = points.col.border,
     points.cex = points.cex,
-    add.line.segments = add.line.segments, 
-    line.start = line.start, 
-    line.end = line.end, 
-    line.col = line.col, 
+    add.line.segments = add.line.segments,
+    line.start = line.start,
+    line.end = line.end,
+    line.col = line.col,
     line.lwd = line.lwd,
-    add.text = add.text, 
-    text.labels = text.labels, 
-    text.x = text.x, 
-    text.y = text.y, 
-    text.col = text.col, 
-    text.cex = text.cex, 
+    add.text = add.text,
+    text.labels = text.labels,
+    text.x = text.x,
+    text.y = text.y,
+    text.col = text.col,
+    text.cex = text.cex,
     text.fontface = text.fontface,
-    height = height, 
-    width = width, 
-    size.units = size.units, 
-    resolution = resolution, 
+    height = height,
+    width = width,
+    size.units = size.units,
+    resolution = resolution,
     enable.warnings = enable.warnings,
     ...
   )

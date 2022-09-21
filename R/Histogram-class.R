@@ -1,6 +1,23 @@
 
 # constructor
-new_Histogram <- function(histogram_data = NULL, interval_start = NULL, interval_end = NULL, region_id = NULL, class = character(), ...){
+#' Constructs a new Histogram object
+#'
+#' @param histogram_data vector of counts/density
+#' @param interval_start integer vector representing the starts of intervals
+#' @param interval_end integer vector representing the ends of intervals
+#' @param region_id character identifier for the region of interest
+#' @param class child class names, in addition to Histogram
+#' @param ... additional parameters, allowing child classes to be built
+#'
+#' @return a Histogram object
+new_Histogram <- function(
+    histogram_data = NULL,
+    interval_start = NULL,
+    interval_end = NULL,
+    region_id = NULL,
+    class = character(),
+    ...
+  ){
 
   # Checking types
   stopifnot(is.double(histogram_data))
@@ -22,6 +39,10 @@ new_Histogram <- function(histogram_data = NULL, interval_start = NULL, interval
 }
 
 # validator
+#' Validates Histogram objects
+#'
+#' @param x a candidate Histogram object
+#' @return a validated Histogram object
 validate_Histogram <- function(x){
 
   # Attributes
@@ -200,7 +221,7 @@ print.Histogram = function(x, ...){
 
 #' reassign_region_id for Histogram objects
 #'
-#' @param x A Histogram object
+#' @param histogram_obj A Histogram object
 #' @param region_id A character region_id for the Histogram object
 #'
 #' @return A Histogram object with the right region_id
@@ -210,26 +231,26 @@ print.Histogram = function(x, ...){
 #' @examples
 #' x = Histogram(sample(1:5, 20, replace = TRUE), region_id = "TEST")
 #' y = reassign_region_id(x, "TEST2")
-reassign_region_id = function(x, region_id){
-  UseMethod('reassign_region_id', x)
+reassign_region_id = function(histogram_obj, region_id){
+  UseMethod('reassign_region_id')
 }
 
 #' @export
-reassign_region_id.Histogram = function(x, region_id){
+reassign_region_id.Histogram = function(histogram_obj, region_id){
 
-  stopifnot(inherits(x, "Histogram"))
+  stopifnot(inherits(histogram_obj, "Histogram"))
 
   # Creating a region id
-  if(missing(region_id) & length(x$histogram_data) > 0){
-    region_id <- paste0(x$interval_start[1], "-", x$interval_end[length(x)])
+  if(missing(region_id) & length(histogram_obj$histogram_data) > 0){
+    region_id <- paste0(histogram_obj$interval_start[1], "-", histogram_obj$interval_end[length(histogram_obj)])
   }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
   }
 
-  x$region_id <- region_id
+  histogram_obj$region_id <- region_id
 
-  return(x)
+  return(histogram_obj)
 }
 
 

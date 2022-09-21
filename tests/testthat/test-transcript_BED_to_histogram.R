@@ -1,14 +1,14 @@
 context("Testing input and parameter variations to transcript_BED_to_histogram")
 
 # Input Data
-datadir = system.file("extdata", "rna_bedfiles",  package = "HistogramZoo")
-filenames = file.path(datadir, paste0("Sample.", 1:20, ".bed"))
-gtf = system.file("extdata", "genes.gtf",  package = "HistogramZoo")
+datadir <- system.file("extdata", "rna_bedfiles",  package = "HistogramZoo")
+filenames <- file.path(datadir, paste0("Sample.", 1:20, ".bed"))
+gtf <- system.file("extdata", "genes.gtf",  package = "HistogramZoo")
 
 
 test_that("Standard input yields the correct result format", {
 
-  histograms = transcript_BED_to_histogram(
+  histograms <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -28,7 +28,7 @@ test_that("Standard input yields the correct result format", {
 
 test_that("Testing that selecting strand/transcript/chrs/ids return the correct results", {
 
-  histograms_pos = transcript_BED_to_histogram(
+  histograms_pos <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -42,7 +42,7 @@ test_that("Testing that selecting strand/transcript/chrs/ids return the correct 
     "ENSG00000185129.7")
 
 
-  histograms_chr = transcript_BED_to_histogram(
+  histograms_chr <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -55,7 +55,7 @@ test_that("Testing that selecting strand/transcript/chrs/ids return the correct 
     histograms_chr,
     "ENSG00000185129.7")
 
-  histograms_gene = transcript_BED_to_histogram(
+  histograms_gene <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -129,7 +129,7 @@ test_that("Testing that varying n_fields returns the correct results", {
 
 test_that("Testing that varying bin size yields correct results", {
 
-  histograms_5 = transcript_BED_to_histogram(
+  histograms_5 <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -137,7 +137,7 @@ test_that("Testing that varying bin size yields correct results", {
     histogram_bin_size = 5
   )
 
-  histograms_10 = transcript_BED_to_histogram(
+  histograms_10 <- transcript_BED_to_histogram(
     filenames = filenames,
     n_fields = 12,
     gtf = gtf,
@@ -146,8 +146,8 @@ test_that("Testing that varying bin size yields correct results", {
   )
 
   # Creating bins
-  bins_5 = histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
-  bins_10 = histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
+  bins_5 <- histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
+  bins_10 <- histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
 
   # Checking that the binnedAverage add up to the same thing
   expect_equal(

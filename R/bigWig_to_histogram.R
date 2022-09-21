@@ -1,4 +1,4 @@
-#' Generates GenomicHistogram objects from the coverage of a bigWig file 
+#' Generates GenomicHistogram objects from the coverage of a bigWig file
 #'
 #' @param filename Name of bigwig file for import
 #' @param strand The strand of bigwig file from which the data originates. Default "*". If strand is "+" or "-", the strand will also be used to select regions of matching strand.
@@ -11,7 +11,7 @@
 #' @param select_chrs Select elements on specific chromosomes. Default NULL
 #' @param select_ids Select elements by matching ids to genes or transcripts (depending on gene_or_transcript). Default NULL
 #'
-#' @return A list of GenomicHistogram objects
+#' @return a list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
 #' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "HistogramZoo")
@@ -40,7 +40,7 @@ bigWig_to_histogram = function(
   select_chrs = NULL,
   select_ids = NULL
 ){
-  
+
   # Error checking
   if(!file.exists(filename) | length(filename) > 1){
     stop(filename, " doesn't exist")
@@ -103,7 +103,7 @@ bigWig_to_histogram = function(
 
   # Sort regions
   regions <- sort(regions)
-  
+
   # Generating Histogram objects
   return(
     structure(

@@ -30,12 +30,14 @@ Imports:
     IRanges,
     GenomicRanges,
     valr,
-    GenomeInfoDb
+    GenomeInfoDb,
+    reshape2
 Suggests:
     knitr,
     rmarkdown,
     testthat,
-    scales
+    scales,
+    RobustRankAggreg
 VignetteBuilder: knitr
 RoxygenNote: 7.2.0
 URL: https://friendly-invention-3cb82740.pages.github.io/

@@ -11,7 +11,7 @@
 #' @param allow_overlapping_segments_per_sample logical, if FALSE, overlapping segments in the same region in the same file will be de-duplicated in the coverage calculation, default NULL
 #' NOTE: regions are determined by GTF gene/transcript IDs and the name column of BED files. If TRUE, they will be taken as separate input, default FALSE
 #'
-#' @return A list of GenomicHistogram objects
+#' @return a list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
 #' file.directory = system.file("extdata", "rna_bedfiles", package = "HistogramZoo")
@@ -50,19 +50,19 @@ transcript_BED_to_histogram = function(
   if(!is.logical(allow_overlapping_segments_per_sample)){
     stop("allow_overlapping_segments_per_sample must be logical")
   }
-  
+
   # Reading in peak files
   peaks <- lapply(filenames, function(filename){
     segs <- valr::read_bed( filename, n_fields = n_fields, comment = "#")
     if(n_fields == 12){ segs <- valr::bed12_to_exons( segs ) }
     segs_gr <- GenomicRanges::makeGRangesFromDataFrame( segs, keep.extra.columns = T )
     segs_gr <- base0_to_base1(segs_gr)
-    if(!allow_overlapping_segments_per_sample){ 
+    if(!allow_overlapping_segments_per_sample){
       segs_gr <- S4Vectors::split(segs_gr, f = segs_gr$name)
-      segs_gr <- GenomicRanges::reduce(segs_gr) 
+      segs_gr <- GenomicRanges::reduce(segs_gr)
       segs_gr <- unlist(segs_gr)
     }
-    segs_gr  
+    segs_gr
   })
   peaks <- do.call(c, peaks)
   peaks <- split(peaks, f = names(peaks))
