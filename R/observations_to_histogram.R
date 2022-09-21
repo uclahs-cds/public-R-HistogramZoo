@@ -17,11 +17,6 @@ observations_to_histogram <- function(x, histogram_bin_width = 1) {
   # Creating intervals
   a <- floor(min(x))
   b <- ceiling(max(x))
-  bin_range <- b - a + 1
-  num_middle_bins <- floor(bin_range / histogram_bin_width)
-  remaining_indices <- bin_range %% histogram_bin_width
-  left_bin <- ceiling(remaining_indices / 2)
-#  right_bin <- ceiling(remaining_indices / )
 
   breaks <- seq(a, b, by = histogram_bin_width)
   breaks <- unique(c(breaks, b))
@@ -47,7 +42,7 @@ observations_to_histogram <- function(x, histogram_bin_width = 1) {
       histogram_data = as.numeric(hist_data),
       interval_start = as.integer(break_start),
       interval_end = as.integer(break_end),
-      bin_width = as.integer(bin_width),
+      bin_width = as.integer(histogram_bin_width),
       region_id = paste0(break_start[1], "-", break_end[length(break_end)])
     )
   )
