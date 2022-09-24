@@ -79,7 +79,7 @@ validate_Histogram <- function(x){
     }
 
     # 4. Intervals need to be non-overlapping
-    if(any(interval_start[2:(histogram_length)] <= interval_end[1:(histogram_length-1)])){
+    if(any(interval_start[2:(histogram_length)] < interval_end[1:(histogram_length-1)])){
       stop("intervals must be ordered and nonoverlapping.", call. = FALSE)
     }
   }
@@ -118,11 +118,12 @@ Histogram <- function(
   # Coercing values to the right thing
   if(length(histogram_data) > 0){
     if( missing(interval_start) & missing(interval_end)){
-      interval_start <- interval_end <- seq(1, length(histogram_data), 1)
+      interval_start <- seq(1, length(histogram_data), 1)
+      interval_end <- interval_start + 1
     } else if (missing(interval_start)){
-      interval_start <- interval_end
+      interval_start <- interval_end - 1
     } else if (missing(interval_end)){
-      interval_end <- interval_start
+      interval_end <- interval_start + 1
     }
     if( missing(region_id) ){
       region_id <- paste0(interval_start[1], "-", interval_end[length(histogram_data)])
@@ -180,13 +181,13 @@ print.Histogram = function(x, ...){
 
     # Intervals
     intervals_begin <- ifelse(
-      x$interval_start[1:5] == x$interval_start[1:5],
-      interval_start[1:5],
+      x$interval_start[1:5] == x$interval_end[1:5],
+      x$interval_start[1:5],
       paste0(interval_start[1:5], "-", interval_end[1:5]))
 
     intervals_finish <- ifelse(
-      utils::tail(interval_start, 5) == utils::tail(interval_end, 5),
-      utils::tail(interval_start, 5),
+      utils::tail(x$interval_start, 5) == utils::tail(x$interval_end, 5),
+      utils::tail(x$interval_start, 5),
       paste0(utils::tail(interval_start, 5), "-", utils::tail(interval_end, 5))
     )
     x_start <- as.character(formatC(histogram_data[1:5], digits = 2))
@@ -205,7 +206,11 @@ print.Histogram = function(x, ...){
 
   } else {
     # Intervals
-    intervals <- ifelse(interval_start == interval_end, interval_start, paste0(interval_start, "-", interval_end))
+    intervals <- ifelse(
+      x$interval_start == x$interval_end,
+      x$interval_start,
+      paste0(interval_start, "-", interval_end))
+
     intervals <- as.character(intervals)
 
     # Spacing
