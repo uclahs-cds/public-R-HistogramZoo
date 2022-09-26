@@ -32,7 +32,8 @@ Imports:
     valr,
     GenomeInfoDb,
     reshape2,
-    moments
+    moments,
+    grDevices
 Suggests:
     knitr,
     rmarkdown,
