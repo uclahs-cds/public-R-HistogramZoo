@@ -176,7 +176,7 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
     stop("x must be a numeric vector")
   }
   if(!is_equal_integer(seg_points) | !all(seg_points <= length(x) & seg_points >= 0)){
-    stop("change_points must be functional indices")
+    stop("seg_points must be functional indices")
   }
   if(!is_equal_integer(change_points) | !all(change_points <= length(x) & change_points >= 0)){
     stop("change_points must be functional indices")
