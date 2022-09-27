@@ -1,3 +1,5 @@
+context("summarize_results")
+
 test_that("summarize_results returns an appropriate table for a Histogram", {
 
   x <- Histogram(c(0,0,0,1,1,2,2,3,4,3,2,2,1,0,0,0,1,1,1,0,0))

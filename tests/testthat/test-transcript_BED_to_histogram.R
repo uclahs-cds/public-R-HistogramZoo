@@ -1,4 +1,4 @@
-context("Testing input and parameter variations to transcript_BED_to_histogram")
+context("transcript_BED_to_histogram")
 
 # Input Data
 datadir <- system.file("extdata", "rna_bedfiles",  package = "HistogramZoo")
