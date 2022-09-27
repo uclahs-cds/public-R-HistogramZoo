@@ -1,3 +1,13 @@
+#' Find changepoints in a vector with uniform stretches of values
+#' @param x A numeric vector
+find_change_points <- function(x){
+  change_points <- which(diff(x) != 0)
+  change_points_plus <- change_points+1
+  keep <- (x[change_points] < x[change_points_plus])
+  return( c(change_points[keep], change_points_plus[!keep]) )
+}
+
+
 #' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
 #'
 #' @param x numeric vector
@@ -120,8 +130,13 @@ segment_and_fit <- function(
   x <- histogram_obj$histogram_data
 
   # Finding local optima
-  chgpts <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
-  chgpts <- sort(c(chgpts$min_ind, chgpts$max_ind))
+  optima <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
+  optima <- sort(c(optima$min_ind, optima$max_ind))
+
+  # Finding change points for remove_low_entropy
+  if(remove_low_entropy){
+    changepoints <- find_change_points(x)
+  }
 
   # Looking for regions that surpass a hard count threshold
   x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
@@ -133,12 +148,13 @@ segment_and_fit <- function(
 
   # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
-    p_init <- unname(c(segs['start'], chgpts[chgpts > segs['start'] & chgpts < segs['end']], segs['end']))
+    p_init <- unname(c(segs['start'], optima[optima > segs['start'] & optima < segs['end']], segs['end']))
     p <- ftc(x, p_init, eps)
 
     # Max gap
     if(remove_low_entropy) {
-      mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = p_init, min_gap = min_gap_size)
+      changepoints_subset <- unname(c(segs['start'], changepoints[changepoints > segs['start'] & changepoints < segs['end']], segs['end']))
+      mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
       p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
       p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_segment_size)
     } else {
