@@ -190,8 +190,10 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
 
   # Identifying max gaps
   max_gaps_list <- lapply(seq(2, length(seg_points)), function(i) {
+
     x_sub <- x[seg_points[i-1]:seg_points[i]]
     chg_pts <- change_points[change_points >= seg_points[i-1] & change_points <= seg_points[i]] - seg_points[i-1] + 1
+    chg_pts <- unique(c(1, chg_pts, length(x_sub)))
 
     max_gaps <- find_all_meaningful_gap(x_sub, chg_pts)
 
