@@ -4,7 +4,7 @@
 #' @return logical vector indicating which elements are colours
 are_colours <- function(x) {
   sapply(x, function(X) {
-    tryCatch(is.matrix(grDevices::col2rgb(X)), 
+    tryCatch(is.matrix(grDevices::col2rgb(X)),
              error = function(e) FALSE)
   })
 }
@@ -137,7 +137,7 @@ create_trackplot <- function(
     enable.warnings = FALSE,
     ...
 ){
-  
+
   # Error checking
   stopifnot(is.data.frame(track_data))
   if(!row_id %in% colnames(track_data)){
@@ -168,7 +168,7 @@ create_trackplot <- function(
   if(!is.null(colour_id) & !all(are_colours(track_data[,colour_id]))){
     stop("all values in `colour_id` must represent real colours")
   }
-  
+
   # Row
   row_names <- generate_row_ids(track_data[,row_id])
   if(is.factor(track_data[,row_id])){
@@ -180,17 +180,20 @@ create_trackplot <- function(
     rows <- rank(track_data[,row_id], ties.method = "min")
   }
   nrows <- length(unique(rows))
-  
+
   # Colour scheme
   if(!is.null(colour_id)){
     colour_vec <- track_data[,colour_id]
+  } else if (length(unique(track_data[,metric_id])) == 1) {
+    # If there is only one value, select the colour equal to 1
+    colour_vec <- rep(colour_scheme[length(colour_scheme)], nrow(track_data))
   } else {
-    # TODO: potentially make this more complicated to involve better scaling, etc. 
+    # TODO: potentially make this more complicated to involve better scaling, etc.
     scaled_metric <- (track_data[,metric_id] - min(track_data[,metric_id]))/(max(track_data[,metric_id]) - min(track_data[,metric_id]))
     colour_ramp <- grDevices::colorRamp(colour_scheme)
     colour_vec <- grDevices::rgb(colour_ramp(scaled_metric), maxColorValue = 255)
   }
-  
+
   # Generating plot
   plt <- BoutrosLab.plotting.general::create.scatterplot(
     # Dummy data
@@ -283,7 +286,7 @@ create_trackplot <- function(
     enable.warnings = enable.warnings,
     ...
   )
-  
+
   # Return plt
   return(plt)
 }
