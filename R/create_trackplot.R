@@ -27,14 +27,16 @@ generate_row_ids <- function(row_data){
 #'
 #' @param track_data a dataframe detailing segments
 #' \describe{
-#'     \item{start}{the start position of the segment, based on histogram vector index}
-#'     \item{end}{the end position of the segment, based on histogram vector index}
+#'     \item{`start_id`}{the start position of the segment, based on histogram vector index}
+#'     \item{`end_id`}{the end position of the segment, based on histogram vector index}
 #'     \item{`metric_id`}{values; numeric data for plotting}
 #'     \item{`row_id`}{character or factor; identifier for the row}
 #'     \item{`colour_id`}{colour for the row}
 #' }
 #' @param row_id character, column name used to indicate the track row
 #' @param metric_id character, column name of metric column
+#' @param start_id character, column name used to indicate start of intervals, default "start"
+#' @param end_id character, column name used to indicate end of intervals, default "end"
 #' @param colour_id character, optional, column name for the colour of the track
 #' @param colour_scheme a two colour scheme to scale numeric data in the `metric_id` column, default white, black
 #' @param alpha alpha (transparency) of tracks, default 1
@@ -60,10 +62,12 @@ create_trackplot <- function(
     track_data,
     row_id,
     metric_id,
+    start_id = "start",
+    end_id = "end",
     colour_id = NULL,
     colour_scheme = c("red", "blue"),
     alpha = 1,
-    xlimits = c(min(track_data$start), max(track_data$end)),
+    xlimits = c(min(track_data[,start_id]), max(track_data[,end_id])),
     # BPG defaults
     filename = NULL,
     main = NULL,
@@ -146,6 +150,12 @@ create_trackplot <- function(
   if(!metric_id %in% colnames(track_data)){
     stop("metric_id not found in track_data columns")
   }
+  if(!start_id %in% colnames(track_data)){
+    stop("start_id not found in track_data columns")
+  }
+  if(!end_id %in% colnames(track_data)){
+    stop("end_id not found in track_data columns")
+  }
   if(!is.numeric(track_data[,metric_id])){
     stop("metric_id column needs to be numeric")
   }
@@ -155,13 +165,13 @@ create_trackplot <- function(
   if(!is_equal_integer(xlimits)){
     stop("xlimits must be integer")
   }
-  if(!is_equal_integer(track_data[,"start"]) | ! is_equal_integer(track_data[,"end"]) ){
+  if(!is_equal_integer(track_data[,start_id]) | ! is_equal_integer(track_data[,end_id]) ){
     stop("start and end must be integer")
   }
-  if(!all(track_data[,"start"] <= track_data[,"end"])){
+  if(!all(track_data[,start_id] <= track_data[,end_id])){
     stop("start and end must represent valid intervals")
   }
-  if(!all(track_data[,"start"] >= xlimits[1]) | !all(track_data[,"end"] <= xlimits[2])){
+  if(!all(track_data[,start_id] >= xlimits[1]) | !all(track_data[,end_id] <= xlimits[2])){
     warning("some intervals are truncated by xlimits")
   }
   # Colour scheme
@@ -197,8 +207,8 @@ create_trackplot <- function(
   # Generating plot
   plt <- BoutrosLab.plotting.general::create.scatterplot(
     # Dummy data
-    formula = start ~ end,
-    data = track_data,
+    formula = 1 ~ 1,
+    data = data.frame(),
     col = "transparent",
     # Limits
     xlimits = xlimits,
@@ -206,9 +216,9 @@ create_trackplot <- function(
     yat = seq(1, nrows, 1),
     # Bread and butter
     add.rectangle = T,
-    xleft.rectangle = track_data$start,
+    xleft.rectangle = track_data[,start_id],
     ybottom.rectangle = rows - 0.5,
-    xright.rectangle = track_data$end,
+    xright.rectangle = track_data[,end_id],
     ytop.rectangle = rows + 0.5,
     # Colour scheme
     col.rectangle = colour_vec,
