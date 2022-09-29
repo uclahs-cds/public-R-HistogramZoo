@@ -122,14 +122,23 @@ summarize_results.Histogram <- function(
         stats$params$mean <- stats$params$mean * result$bin_width
         stats$params$sd <- stats$params$sd * result$bin_width
       } else if(stats$dist == 'gamma') {
-        stats$params$rate <- stats$params$rate * result$bin_width
+        stats$params$rate <- stats$params$rate / result$bin_width
       }# TODO: gamma_flip when implemented
     }
 
-    stats$params <- dput_str(stats$params)
+    params <- stats$params
+    stats$params <- NULL
+    if(length(params) >= 1) {
+      param_names <- paste0('dist_param', seq_along(params))
+      params <- c(params, names(params))
+      names(params) <- c(param_names, paste0(param_names, '_name'))
+    }
+
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
-    c(stats, coords, list('segment_id' = i))
+
+    # stats$params <- unname(stats$params)
+    data.frame(stats, params, coords, segment_id = i)
   })
   results_table <- do.call('rbind.data.frame', results_table)
   results_table['region_id'] <- region_id
