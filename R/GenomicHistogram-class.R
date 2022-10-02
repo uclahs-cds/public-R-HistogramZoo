@@ -102,8 +102,8 @@ validate_GenomicHistogram <- function(x){
 
   # 6. All histogram bins are length bin_width
   bin_width_vec <- interval_end - interval_start + 1
-  if(!all(bin_width_vec[1:(histogram_length-1)] == bin_width)){
-    stop("Incorrect bin_width: If Histogram is of greater than length 1, all intervals with the exception of the last interval must be equal in length to bin_width. For a Histogram of length 1, the interval length must be equal to bin_width", call. = FALSE)
+  if(!all(bin_width_vec <= bin_width)){
+    stop("Incorrect bin_width: All interval lengths must be less than or equal to bin_width", call. = FALSE)
   }
 
   # 7. region_id is of length 1
