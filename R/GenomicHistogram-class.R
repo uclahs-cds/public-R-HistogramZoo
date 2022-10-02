@@ -18,33 +18,26 @@ new_GenomicHistogram <- function(
     region_id = NULL,
     bin_width = NULL,
     chr = NULL,
-    strand = NULL,
-    ...
+    strand = NULL
   ){
 
   # Checking types
-  stopifnot(is.double(histogram_data))
-  stopifnot(is.integer(interval_start))
-  stopifnot(is.integer(interval_end))
-  stopifnot(is.character(region_id))
-  stopifnot(is.integer(bin_width))
   stopifnot(is.character(chr))
   stopifnot(is.character(strand))
 
   # Creating object
-  x <- list(
-    histogram_data = histogram_data,
-    interval_start = interval_start,
-    interval_end = interval_end,
-    bin_width = bin_width,
-    region_id = region_id,
-    chr = chr,
-    strand = strand,
-    ...
+  return(
+    new_Histogram(
+      histogram_data = histogram_data,
+      interval_start = interval_start,
+      interval_end = interval_end,
+      bin_width = bin_width,
+      region_id = region_id,
+      chr = chr,
+      strand = strand,
+      class = "GenomicHistogram"
+    )
   )
-  class(x) <- c(class, "GenomicHistogram")
-
-  return(x)
 }
 
 # validator
@@ -278,6 +271,7 @@ print.GenomicHistogram = function(x, ...){
     interval_start = x$interval_start[i],
     interval_end = x$interval_end[i],
     region_id = x$region_id,
+    bin_width = x$bin_width,
     chr = x$chr,
     strand = x$strand)
 }

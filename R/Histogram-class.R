@@ -72,7 +72,7 @@ validate_Histogram <- function(x){
     stop("histogram_data must be non-missing and nonnegative", call. = FALSE)
   }
 
-  # 2. Start always has to be be less than or equal to end
+  # 2. Start always has to be be less than end
   if(!all(interval_start < interval_end)){
     stop("interval_start must be less than interval_end for a valid interval", call. = FALSE)
   }
@@ -247,7 +247,9 @@ print.Histogram = function(x, ...){
     histogram_data = x$histogram_data[i],
     interval_start = x$interval_start[i],
     interval_end = x$interval_end[i],
-    region_id = x$region_id)
+    region_id = x$region_id,
+    bin_width = x$bin_width
+    )
 }
 
 #' reassign_region_id for Histogram objects
