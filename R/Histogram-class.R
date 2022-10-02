@@ -5,6 +5,7 @@
 #' @param histogram_data vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
+#' @param bin_width integer width of histogram bins
 #' @param region_id character identifier for the region of interest
 #' @param class child class names, in addition to Histogram
 #' @param ... additional parameters, allowing child classes to be built
@@ -14,7 +15,7 @@ new_Histogram <- function(
     histogram_data = NULL,
     interval_start = NULL,
     interval_end = NULL,
-    bin_width = 1L,
+    bin_width = NULL,
     region_id = NULL,
     class = character(),
     ...
@@ -57,7 +58,11 @@ validate_Histogram <- function(x){
   region_id <- x$region_id
 
   # Validate
-  # 0. Everything has to be the same length
+  # 0. Everything has to be the same length, Histogram has to be at least length 1
+  if(histogram_length == 0){
+    stop("Histogram must be at least length 1", call. = FALSE)
+  }
+
   if(length(interval_start) != histogram_length | length(interval_end) != histogram_length) {
     stop("interval_start/end have to be the same length as histogram_data", call. = FALSE)
   }
@@ -68,8 +73,8 @@ validate_Histogram <- function(x){
   }
 
   # 2. Start always has to be be less than or equal to end
-  if(!all(interval_start <= interval_end)){
-    stop("interval_start must be less than or equal to interval_end for a valid interval", call. = FALSE)
+  if(!all(interval_start < interval_end)){
+    stop("interval_start must be less than interval_end for a valid interval", call. = FALSE)
   }
 
   if(histogram_length > 1){
@@ -84,13 +89,21 @@ validate_Histogram <- function(x){
     }
   }
 
-  # 5. region_id is of length 1
+  # 5. bin_width is positive integer
+  if(!(is.integer(bin_width) && bin_width > 0)){
+    stop("bin_width must be a positive integer", call. = FALSE)
+  }
+
+  # 6. All histogram bins are length bin_width
+  bin_width_vec <- interval_end - interval_start
+  if(!all(bin_width_vec[1:(histogram_length-1)] == bin_width)){
+    stop("Incorrect bin_width: If Histogram is of greater than length 1, all intervals with the exception of the last interval must be equal in length to bin_width. For a Histogram of length 1, the interval length must be equal to bin_width", call. = FALSE)
+  }
+
+  # 7. region_id is of length 1
   if(length(region_id) != 1){
     stop("region_id must have length 1.", call. = FALSE)
   }
-
-  # 6. bin_width is positive integer
-  stopifnot(is.integer(bin_width) && bin_width > 0)
 
   return(x)
 }
@@ -101,6 +114,7 @@ validate_Histogram <- function(x){
 #' @param histogram_data vector of counts/density
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
+#' @param bin_width integer width of histogram bins, if missing, estimated from `interval_start` and `interval_end`
 #' @param region_id character identifier for the region of interest
 #'
 #' @return A Histogram object
@@ -112,12 +126,13 @@ Histogram <- function(
     histogram_data = double(),
     interval_start = integer(),
     interval_end = integer(),
+    bin_width = integer(),
     region_id = character()
   ){
 
   # Coercing values to the right thing
   if(length(histogram_data) > 0){
-    if( missing(interval_start) & missing(interval_end)){
+    if(missing(interval_start) & missing(interval_end)){
       interval_start <- seq(1, length(histogram_data), 1)
       interval_end <- interval_start + 1
     } else if (missing(interval_start)){
@@ -125,7 +140,12 @@ Histogram <- function(
     } else if (missing(interval_end)){
       interval_end <- interval_start + 1
     }
-    if( missing(region_id) ){
+    if(missing(bin_width)){
+      bin_width <- as.integer(
+        ceiling(max(interval_end - interval_start))
+      )
+    }
+    if(missing(region_id) ){
       region_id <- paste0(interval_start[1], "-", interval_end[length(histogram_data)])
     }
   }
@@ -139,6 +159,9 @@ Histogram <- function(
   if (!is.integer(interval_end)){
     interval_end <- as.integer(interval_end)
   }
+  if (!is.integer(bin_width)){
+    bin_width <- as.integer(bin_width)
+  }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
   }
@@ -150,6 +173,7 @@ Histogram <- function(
         histogram_data = histogram_data,
         interval_start = interval_start,
         interval_end = interval_end,
+        bin_width = bin_width,
         region_id = region_id
       )
     )
@@ -169,27 +193,19 @@ print.Histogram = function(x, ...){
   # Base case
   cat("Region: ", region_id, "\n")
 
-  if(!("GenomicHistogram" %in% class(x))) {
-    interval_start_type <- c('[', rep('(', length(interval_start) - 1))
-
-    interval_start <- paste0(interval_start_type, interval_start)
-    interval_end <- paste0(interval_end, ']')
-  }
+  # Adding brackets
+  interval_start_type <- c('[', rep('(', length(interval_start) - 1))
+  interval_start <- paste0(interval_start_type, interval_start)
+  interval_end <- paste0(interval_end, ']')
 
   # Indices
   if(length(histogram_data) > 10){
 
     # Intervals
-    intervals_begin <- ifelse(
-      x$interval_start[1:5] == x$interval_end[1:5],
-      x$interval_start[1:5],
-      paste0(interval_start[1:5], "-", interval_end[1:5]))
+    intervals_begin <- paste0(interval_start[1:5], "-", interval_end[1:5])
+    intervals_finish <- paste0(utils::tail(interval_start, 5), "-", utils::tail(interval_end, 5))
 
-    intervals_finish <- ifelse(
-      utils::tail(x$interval_start, 5) == utils::tail(x$interval_end, 5),
-      utils::tail(x$interval_start, 5),
-      paste0(utils::tail(interval_start, 5), "-", utils::tail(interval_end, 5))
-    )
+    # Histogram data
     x_start <- as.character(formatC(histogram_data[1:5], digits = 2))
     x_end <- as.character(formatC(utils::tail(histogram_data, 5), digits = 2))
 
@@ -206,15 +222,12 @@ print.Histogram = function(x, ...){
 
   } else {
     # Intervals
-    intervals <- ifelse(
-      x$interval_start == x$interval_end,
-      x$interval_start,
-      paste0(interval_start, "-", interval_end))
+    intervals <- paste0(interval_start, "-", interval_end)
 
-    intervals <- as.character(intervals)
+    # Histogram Data
+    x_full <- as.character(formatC(histogram_data, digits = 2))
 
     # Spacing
-    x_full <- as.character(formatC(histogram_data, digits = 2))
     spacing <- max(nchar(c(intervals, x_full)))
     intervals <- stringr::str_pad(intervals, width = spacing)
     x_full <- stringr::str_pad(x_full, width = spacing)
