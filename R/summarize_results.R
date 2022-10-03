@@ -113,6 +113,15 @@ summarize_results.Histogram <- function(
   region_id <- result$region_id
 
   # Summarizing results
+  max_param_length <- max(unlist(lapply(models, function(m) {
+    length(m[[model_name]]$par)
+  })))
+  if(max_param_length > 0) {
+    param_names <- paste0('dist_param', seq_len(max_param_length))
+    params <- rep(NA, max_param_length)
+    names(params) <- param_names
+  }
+
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
@@ -126,19 +135,32 @@ summarize_results.Histogram <- function(
       }# TODO: gamma_flip when implemented
     }
 
-    params <- stats$params
-    stats$params <- NULL
-    if(length(params) >= 1) {
-      param_names <- paste0('dist_param', seq_along(params))
-      params <- c(params, names(params))
-      names(params) <- c(param_names, paste0(param_names, '_name'))
-    }
-
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
 
-    # stats$params <- unname(stats$params)
-    data.frame(stats, params, coords, segment_id = i)
+    if (max_param_length > 0) {
+      # Convert parameters into common naming scheme rather than
+      # actual parameter names like mean, sd, rate, shape, etc
+      new_params <- params
+      new_param_names <- rep(NA, max_param_length)
+      n_params <- length(stats$params)
+      if(n_params > 1) {
+        old_params <- stats$params
+        names(old_params) <- param_names
+        new_params[1:n_params] <- old_params
+        new_param_names[1:n_params] <- names(stats$params)
+      }
+      new_params <- c(new_params, new_param_names)
+      names(new_params) <- c(param_names, paste0(param_names, '_name'))
+
+      stats$params <- NULL
+
+      data.frame(stats[lengths(stats) > 0], as.list(new_params), coords, segment_id = i)
+    } else {
+      data.frame(stats[lengths(stats) > 0], coords, segment_id = i)
+    }
+
+
   })
   results_table <- do.call('rbind.data.frame', results_table)
   results_table['region_id'] <- region_id

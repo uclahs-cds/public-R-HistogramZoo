@@ -144,7 +144,7 @@ test_that("subfunction: meaningful_gaps_local and remove_max_gaps", {
   res_summary <- summarize_results(res)
 
   expect_true(!res$remove_low_entropy)
-  expect_equal(res_summary$end[2], 38)
+  expect_equal(res_summary$end[2], 39)
 
 })
 
