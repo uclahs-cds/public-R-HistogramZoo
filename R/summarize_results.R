@@ -146,7 +146,6 @@ summarize_results.Histogram <- function(
       n_params <- length(stats$params)
       if(n_params > 1) {
         old_params <- stats$params
-        names(old_params) <- param_names
         new_params[1:n_params] <- old_params
         new_param_names[1:n_params] <- names(stats$params)
       }
