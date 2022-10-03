@@ -6,6 +6,7 @@
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
 #' @param region_id character identifier for the region of interest
+#' @param bin_width integer defining bin width
 #' @param chr chromosome name
 #' @param strand strand
 #'

@@ -6,6 +6,7 @@
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
 #' @param region_id character identifier for the region of interest
+#' @param bin_width numeric bin width of the histogram intervals
 #' @param class child class names, in addition to Histogram
 #' @param ... additional parameters, allowing child classes to be built
 #'
@@ -14,17 +15,17 @@ new_Histogram <- function(
     histogram_data = NULL,
     interval_start = NULL,
     interval_end = NULL,
-    bin_width = 1L,
+    bin_width = 1,
     region_id = NULL,
     class = character(),
     ...
   ){
 
   # Checking types
-  stopifnot(is.double(histogram_data))
+  stopifnot(is.numeric(histogram_data))
   stopifnot(is.integer(interval_start))
   stopifnot(is.integer(interval_end))
-  stopifnot(is.integer(bin_width))
+  stopifnot(is.numeric(bin_width))
   stopifnot(is.character(region_id))
 
   # Creating object
@@ -89,8 +90,8 @@ validate_Histogram <- function(x){
     stop("region_id must have length 1.", call. = FALSE)
   }
 
-  # 6. bin_width is positive integer
-  stopifnot(is.integer(bin_width) && bin_width == 1)
+  # 6. bin_width is positive numeric
+  stopifnot(is.numeric(bin_width) && length(bin_width) == 1)
 
   return(x)
 }
