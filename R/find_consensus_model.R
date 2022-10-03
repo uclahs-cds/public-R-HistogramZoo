@@ -30,7 +30,7 @@ find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    weights = rev(seq(1, 2, 0.25))[1:length(metric)]
+    weights = rev(sqrt(seq(1, 5))[1:length(metric)])
 ){
 
   # Initialization
@@ -104,7 +104,7 @@ find_consensus_model <- function(
     model_metrics[] <- model_metrics %*% diag(weights)
     score <- rowSums(model_metrics)
     if(sum(score == max(score)) > 1){
-      stop("Ties exist between distributions chosen by metric.")
+      warning("Ties exist between distributions chosen by metric.")
     }
     model_metrics <- model_metrics[order(score, decreasing = T),]
     consensus_dist <- rownames(model_metrics)[1]
@@ -120,7 +120,7 @@ find_consensus_model <- function(
         N = nrow(model_metrics)
       )
       if(sum(rra$Score == min(rra$Score)) > 1){
-        stop("Ties exist between distributions chosen by metric.")
+        warning("Ties exist between distributions chosen by metric.")
       }
       consensus_dist <- rra[1, "Name"]
       metric_best_model <- apply(model_metrics, 2, which.min)
