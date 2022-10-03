@@ -42,6 +42,24 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
   )
 }
 
+#' Rescale parameter statistics based on original fit bin width
+#'
+#' @param stats a list of model statistics. Output from `extract_stats_from_models`
+#' @param bin_width numeric, the size of the bin_width fit on the data
+#'
+#' @return A list of the following data representing a single segment
+#' @export
+scale_model_params <- function(stats, bin_width = 1){
+  stopifnot(bin_width >= 1)
+  if(stats$dist == 'norm') {
+      stats$params$mean <- stats$params$mean * bin_width
+      stats$params$sd <- stats$params$sd * bin_width
+  } else if(stats$dist == 'gamma' || stats$dist == 'gamma_flip') {
+    stats$params$rate <- stats$params$rate / bin_width
+  }
+  return(stats)
+}
+
 #' Represent a single segment as a set of intervals
 #'
 #' @param iranges an IRanges object with intervals representing intervals of a single segment
@@ -125,14 +143,8 @@ summarize_results.Histogram <- function(
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
-    # Rescale distribution parameters
     if(result$bin_width > 1) {
-      if(stats$dist == 'norm') {
-        stats$params$mean <- stats$params$mean * result$bin_width
-        stats$params$sd <- stats$params$sd * result$bin_width
-      } else if(stats$dist == 'gamma') {
-        stats$params$rate <- stats$params$rate / result$bin_width
-      }# TODO: gamma_flip when implemented
+      stats <- scale_model_params(stats, bin_width = results$bin_width)
     }
 
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
@@ -158,8 +170,6 @@ summarize_results.Histogram <- function(
     } else {
       data.frame(stats[lengths(stats) > 0], coords, segment_id = i)
     }
-
-
   })
   results_table <- do.call('rbind.data.frame', results_table)
   results_table['region_id'] <- region_id
