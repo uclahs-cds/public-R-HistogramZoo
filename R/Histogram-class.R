@@ -90,7 +90,7 @@ validate_Histogram <- function(x){
   }
 
   # 6. bin_width is positive integer
-  stopifnot(is.integer(bin_width) && bin_width > 0)
+  stopifnot(is.integer(bin_width) && bin_width == 1)
 
   return(x)
 }
@@ -143,6 +143,29 @@ Histogram <- function(
     region_id <- as.character(region_id)
   }
 
+  # Compute bin_width
+  interval_diff <- interval_end - interval_start
+  unique_int_diff <- unique(interval_diff)
+
+  # Enforce that bin_widths are equal size
+  if(length(unique_int_diff) > 1) {
+    error_msg <- paste0(
+      'Need equal width:\n',
+      paste0(
+        sprintf(
+          '%d - %d = %d',
+          interval_end,
+          interval_start,
+          interval_end - interval_start
+          ),
+        collapse = '\n'
+        )
+      )
+    stop(error_msg)
+  }
+
+  bin_width <- unique_int_diff
+
   # Validate and return object
   return(
     validate_Histogram(
@@ -150,7 +173,8 @@ Histogram <- function(
         histogram_data = histogram_data,
         interval_start = interval_start,
         interval_end = interval_end,
-        region_id = region_id
+        region_id = region_id,
+        bin_width = bin_width
       )
     )
   )
