@@ -31,8 +31,6 @@ observations_to_histogram <- function(x, histogram_bin_width = 1) {
   )
 
   # Generating endpoints
-  # breaks <- c(a, breaks[breaks != (a-1)])
-  # endpoints <- index_to_start_end(breaks, right = TRUE)
   break_start <- breaks[1:(length(breaks) - 1)]
   break_end <- breaks[2:length(breaks)]
 
@@ -40,9 +38,9 @@ observations_to_histogram <- function(x, histogram_bin_width = 1) {
   return(
     new_Histogram(
       histogram_data = as.numeric(hist_data),
-      interval_start = as.integer(break_start),
-      interval_end = as.integer(break_end),
-      bin_width = as.integer(histogram_bin_width),
+      interval_start = break_start,
+      interval_end = break_end,
+      bin_width = histogram_bin_width,
       region_id = paste0(break_start[1], "-", break_end[length(break_end)])
     )
   )

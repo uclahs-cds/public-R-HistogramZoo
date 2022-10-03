@@ -23,8 +23,8 @@ new_Histogram <- function(
 
   # Checking types
   stopifnot(is.numeric(histogram_data))
-  stopifnot(is.integer(interval_start))
-  stopifnot(is.integer(interval_end))
+  stopifnot(is.numeric(interval_start))
+  stopifnot(is.numeric(interval_end))
   stopifnot(is.numeric(bin_width))
   stopifnot(is.character(region_id))
 
