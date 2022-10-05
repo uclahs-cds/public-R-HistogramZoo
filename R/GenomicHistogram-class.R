@@ -6,6 +6,7 @@
 #' @param interval_start integer vector representing the starts of intervals
 #' @param interval_end integer vector representing the ends of intervals
 #' @param region_id character identifier for the region of interest
+#' @param bin_width integer defining bin width
 #' @param chr chromosome name
 #' @param strand strand
 #'
@@ -15,6 +16,7 @@ new_GenomicHistogram <- function(
     interval_start = NULL,
     interval_end = NULL,
     region_id = NULL,
+    bin_width = 1L,
     chr = NULL,
     strand = NULL
   ){
@@ -30,6 +32,7 @@ new_GenomicHistogram <- function(
       interval_start = interval_start,
       interval_end = interval_end,
       region_id = region_id,
+      bin_width = bin_width,
       chr = chr,
       strand = strand,
       class = "GenomicHistogram"
