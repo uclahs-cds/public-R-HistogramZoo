@@ -122,7 +122,7 @@ validate_Histogram <- function(x){
 #' @export
 #'
 #' @examples
-#' x = Histogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 1:10)
+#' x = Histogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 2:11)
 Histogram <- function(
     histogram_data = double(),
     interval_start = integer(),
