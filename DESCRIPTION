@@ -31,7 +31,8 @@ Imports:
     GenomicRanges,
     valr,
     GenomeInfoDb,
-    reshape2
+    reshape2,
+    moments
 Suggests:
     knitr,
     rmarkdown,

@@ -51,7 +51,8 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
-#' subset of `norm`, `gamma`, `unif`
+#' subset of `norm`, `gamma`, `gamma_flip` and `unif`. If both `gamma` and `gamma_flip`
+#' are indicated, only one will be fit depending on the skew of the data.
 #'
 #' @export
 #'
@@ -69,7 +70,7 @@ fit_distributions <- function(
     x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "unif")) {
+    distributions = c("norm", "gamma", "gamma_flip", "unif")) {
 
   # Matching arguments
   # TODO: consider checking minimum length of x or
@@ -89,12 +90,15 @@ fit_distributions <- function(
   bin <- 1:L
 
   # Optimization Function
-  .hist.optim <- function(params, .dist = c("norm", "gamma"), .metric_func) {
+  .hist.optim <- function(params, .dist = c("norm", "gamma", "gamma_flip"), .metric_func) {
     # Compute the expected counts for the given parameters
     args <- c(list(x = bin), params)
     if(truncated) {
-      args$a <-  min(bin) - 1e-10
+      args$a <- min(bin) - 1e-10
       args$b <- max(bin) + 1e-10
+    }
+    if(!truncated & .dist == "gamma_flip"){
+      args$offset <- length(bin)
     }
     trunc.letter <- if(truncated) "t" else ""
     dens <- tryCatch({
@@ -117,6 +121,20 @@ fit_distributions <- function(
     unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
   }
 
+  # Using skew to determine gamma or gamma_flip
+  if( "gamma" %in% distributions & "gamma_flip" %in% distributions){
+    skew <- moments::skewness(
+      histogram_to_approximate_observations(
+        x
+      )
+    )
+    if (skew < 0){
+      distributions <- setdiff(distributions, "gamma")
+    } else {
+      distributions <- setdiff(distributions, "gamma_flip")
+    }
+  }
+
   rtn <- lapply(distributions, function(distr) {
     lapply(metric, function(met){
 
@@ -128,7 +146,7 @@ fit_distributions <- function(
         lower <- c(min(bin), 0.001)
         upper <- c(max(bin), (max(bin) - min(bin)) * 0.5)
         names_par <- c("mean", "sd")
-      } else if (distr == "gamma"){
+      } else if (distr %in% c("gamma", "gamma_flip")){
         lower <- c(0.001, 0.001)
         upper <- c(L, L)
         names_par <- c("shape", "rate")
@@ -153,11 +171,16 @@ fit_distributions <- function(
       dist_par <- as.list(dist_optim$optim$bestmem)
 
       # Adjusting for truncated distributions
+      trunc.letter = if(truncated) "t" else ""
       if(truncated) {
         dist_par$a <- min(bin) - 1e-10
         dist_par$b <- max(bin) + 1e-10
       }
-
+      # Adjusting for offset
+      if(!truncated & distr == "gamma_flip"){
+        dist_par$offset <- length(bin)
+      }
+      
       # Return model
       return(
         list(
@@ -170,7 +193,7 @@ fit_distributions <- function(
               x <- bin
             }
             args <- c(list(x = x), as.list(mpar))
-            res <- do.call(paste0("dt", distr), args)
+            res <- do.call(paste0("d", trunc.letter, distr), args)
             if(scale) res * N
             else res
           }

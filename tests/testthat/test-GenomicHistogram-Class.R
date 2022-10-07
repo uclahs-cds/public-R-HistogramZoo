@@ -21,7 +21,7 @@ test_that("Generating a valid Histogram object", {
 test_that("Generating an invalid GenomicHistogram object", {
 
   expect_error(
-    Histogram(
+    GenomicHistogram(
       runif(10),
       interval_start = 1:10,
       interval_end = 1:10 + 1
