@@ -22,6 +22,7 @@ dtgamma_flip <- function(x, shape, rate = 1, a = 0, b = NULL, ...) {
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param a distribution start
 #' @param b distribution end
+#' @inheritParams truncdist::dtrunc
 #' @param ... additional parameters to be passed to truncdist::dtrunc
 #'
 #' @return distribution function
@@ -54,6 +55,7 @@ rtgamma_flip <- function(n, shape, rate = 1, a = 0, b = NULL, ...) {
 #' @param rate rate parameter of gamma distribution, default 1
 #' @param a distribution start
 #' @param b distribution end
+#' @inheritParams truncdist::dtrunc
 #' @param ... additional parameters to be passed to truncdist::dtrunc
 #'
 #' @return quantile function

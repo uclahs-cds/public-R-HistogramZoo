@@ -9,10 +9,10 @@ test_that("Varying inputs to obervations_to_histogram", {
   expect_true(inherits(x, "Histogram"))
 
   # Correct length of bins
-  expect_length(x, 4)
+  expect_length(x, 3)
 
   # Correct counts in bins
-  expect_equal(x$histogram_data, c(3, 2, 5, 1))
+  expect_equal(x$histogram_data, c(5,5,1))
 
   # Testing appropriate binning
   set.seed(314)

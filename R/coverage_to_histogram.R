@@ -32,6 +32,7 @@ coverage_to_histogram = function(
       histogram_data = cvg$cvg,
       interval_start = GenomicRanges::start(cvg),
       interval_end = GenomicRanges::end(cvg),
+      bin_width = as.integer(histogram_bin_size),
       region_id = region_id,
       chr = as.character(GenomicRanges::seqnames(cvg))[1],
       strand = as.character(GenomicRanges::strand(cvg))[1]

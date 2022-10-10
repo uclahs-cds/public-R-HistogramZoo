@@ -38,8 +38,26 @@ extract_stats_from_models <- function(model_list, model_name = "consensus"){
     "value" = mod$value,
     "metric" = mod$metric,
     "dist" = mod$dist,
-    "params" = dput_str(mod$par)
+    "params" = mod$par
   )
+}
+
+#' Rescale parameter statistics based on original fit bin width
+#'
+#' @param stats a list of model statistics. Output from `extract_stats_from_models`
+#' @param bin_width numeric, the size of the bin_width fit on the data
+#'
+#' @return A list of the following data representing a single segment
+#' @export
+scale_model_params <- function(stats, bin_width = 1){
+  stopifnot(bin_width >= 1)
+  if(stats$dist == 'norm') {
+      stats$params$mean <- stats$params$mean * bin_width
+      stats$params$sd <- stats$params$sd * bin_width
+  } else if(stats$dist == 'gamma' || stats$dist == 'gamma_flip') {
+    stats$params$rate <- stats$params$rate / bin_width
+  }
+  return(stats)
 }
 
 #' Represent a single segment as a set of intervals
@@ -113,12 +131,45 @@ summarize_results.Histogram <- function(
   region_id <- result$region_id
 
   # Summarizing results
+  max_param_length <- max(unlist(lapply(models, function(m) {
+    length(m[[model_name]]$par)
+  })))
+  if(max_param_length > 0) {
+    param_names <- paste0('dist_param', seq_len(max_param_length))
+    params <- rep(NA, max_param_length)
+    names(params) <- param_names
+  }
+
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
+    if(result$bin_width > 1) {
+      stats <- scale_model_params(stats, bin_width = result$bin_width)
+    }
+
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
-    c(stats, coords, list('segment_id' = i))
+
+    if (max_param_length > 0) {
+      # Convert parameters into common naming scheme rather than
+      # actual parameter names like mean, sd, rate, shape, etc
+      new_params <- params
+      new_param_names <- rep(NA, max_param_length)
+      n_params <- length(stats$params)
+      if(n_params > 1) {
+        old_params <- stats$params
+        new_params[1:n_params] <- old_params
+        new_param_names[1:n_params] <- names(stats$params)
+      }
+      new_params <- c(new_params, new_param_names)
+      names(new_params) <- c(param_names, paste0(param_names, '_name'))
+
+      stats$params <- NULL
+
+      data.frame(stats[lengths(stats) > 0], as.list(new_params), coords, segment_id = i)
+    } else {
+      data.frame(stats[lengths(stats) > 0], coords, segment_id = i)
+    }
   })
   results_table <- do.call('rbind.data.frame', results_table)
   results_table['region_id'] <- region_id
