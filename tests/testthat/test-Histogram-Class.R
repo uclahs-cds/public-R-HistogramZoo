@@ -35,6 +35,14 @@ test_that("Generating an invalid Histogram object", {
     )
   )
 
+  expect_error(
+    Histogram(
+      runif(10),
+      interval_start = 1:10,
+      interval_end = 1:10
+    )
+  )
+
   # Non ordered intervals
   expect_error(
     Histogram(
