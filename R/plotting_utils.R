@@ -5,20 +5,20 @@
 #'
 #' @return labels at `xat` coordinates
 labels_helper <- function(
-    histogram_obj, 
+    histogram_obj,
     xat
 ){
-  
+
   interval_start_type <- c('[', rep('(', length(histogram_obj$interval_start) - 1))
   interval_start <- paste0(interval_start_type, histogram_obj$interval_start)
   interval_end <- paste0(histogram_obj$interval_end, ']')
-  
+
   labels <- ifelse(
     histogram_obj$interval_start == histogram_obj$interval_end,
     as.character(histogram_obj$interval_start),
     paste0(interval_start, "-", interval_end)
   )
-  
+
   return(labels[xat])
 }
 
@@ -40,14 +40,13 @@ labels_helper <- function(
 generate_xlabels <- function(
     histogram_obj,
     n_labels = 5,
-    return_xat = F, 
+    return_xat = F,
     disjoint = T
 ){
-  
+
   xat = c()
   if(disjoint){
-    # TODO: Remove this once we've merged in pull request about bin_width
-    bin_width <- if(is.null(histogram_obj$bin_width)) mean(diff(histogram_obj$interval_start)) else histogram_obj$bin_width
+    bin_width <- histogram_obj$bin_width
     xat <- which(diff(histogram_obj$interval_start) > bin_width) # This chooses the left coordinate
     if(length(xat) > 0){
       x_labels <- paste0(
@@ -69,11 +68,11 @@ generate_xlabels <- function(
     xat <- round(xat)
     x_labels <- labels_helper(histogram_obj, xat)
   }
-  
+
   if(return_xat){
     return(xat)
   } else {
     return(x_labels)
   }
-  
+
 }
