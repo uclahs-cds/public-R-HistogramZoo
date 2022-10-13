@@ -15,7 +15,7 @@ xhist = Histogram(histogram_data = data)
 create_coverageplot(xhist)
 
 # changepts - this finds the lower of the points
-chgpts = HistogramZoo:::find_stepfunction_chgpts(data)
+chgpts = HistogramZoo:::find_change_points(data)
 create_coverageplot(xhist, add.points = T, points.x = chgpts, points.y = data[chgpts], points.col = "red")
 
 # find_local_optima
@@ -33,13 +33,13 @@ data = xhist$histogram_data
 create_coverageplot(xhist)
 
 # changepts - this finds the lower of the points
-chgpts = HistogramZoo:::find_stepfunction_chgpts(data)
-create_coverageplot(xhist, add.points = T, points.x = interval_start[chgpts], points.y = data[chgpts], points.col = "red")
+chgpts = HistogramZoo:::find_change_points(data)
+create_coverageplot(xhist, add.points = T, points.x = chgpts, points.y = data[chgpts], points.col = "red")
 
 # find_local_optima
 optima = find_local_optima(data)
 optima = sort(unlist(optima))
-create_coverageplot(xhist, add.points = T, points.x = interval_start[optima], points.y = data[optima], points.col = "red")
+create_coverageplot(xhist, add.points = T, points.x = optima, points.y = data[optima], points.col = "red")
 
 
 # Testing for Particularly Noisy Data -------------------------------------
@@ -53,16 +53,15 @@ data = xhist$histogram_data
 create_coverageplot(xhist, type = "h")
 
 # changepts - this finds the lower of the points
-chgpts = HistogramZoo:::find_stepfunction_chgpts(data)
-create_coverageplot(xhist, add.points = T, points.x = interval_start[chgpts], points.y = data[chgpts], points.col = "red", type = "h")
+chgpts = HistogramZoo:::find_change_points(data)
+create_coverageplot(xhist, add.points = T, points.x = chgpts, points.y = data[chgpts], points.col = "red", type = "h")
 
 # find_local_optima
 optima = find_local_optima(data, threshold = 0)
 optima = sort(unlist(optima))
-create_coverageplot(xhist, add.points = T, points.x = interval_start[optima], points.y = data[optima], points.col = "red", type = "h")
+create_coverageplot(xhist, add.points = T, points.x = optima, points.y = data[optima], points.col = "red", type = "h")
 
 # find_local_optima with a threshold
 optima = find_local_optima(data, threshold = 2)
 optima = sort(unlist(optima))
-create_coverageplot(xhist, add.points = T, points.x = interval_start[optima], points.y = data[optima], points.col = "red", type = "h")
-
+create_coverageplot(xhist, add.points = T, points.x = optima, points.y = data[optima], points.col = "red", type = "h")

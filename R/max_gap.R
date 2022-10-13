@@ -176,7 +176,7 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
     stop("x must be a numeric vector")
   }
   if(!is_equal_integer(seg_points) | !all(seg_points <= length(x) & seg_points >= 0)){
-    stop("change_points must be functional indices")
+    stop("seg_points must be functional indices")
   }
   if(!is_equal_integer(change_points) | !all(change_points <= length(x) & change_points >= 0)){
     stop("change_points must be functional indices")
@@ -190,8 +190,10 @@ meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
 
   # Identifying max gaps
   max_gaps_list <- lapply(seq(2, length(seg_points)), function(i) {
+
     x_sub <- x[seg_points[i-1]:seg_points[i]]
     chg_pts <- change_points[change_points >= seg_points[i-1] & change_points <= seg_points[i]] - seg_points[i-1] + 1
+    chg_pts <- unique(c(1, chg_pts, length(x_sub)))
 
     max_gaps <- find_all_meaningful_gap(x_sub, chg_pts)
 

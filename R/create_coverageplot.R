@@ -89,7 +89,12 @@ create_coverageplot.Histogram <- function(
     ylab.label = "Histogram Data",
     xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
     xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
-    xlimits = NULL, ylimits = NULL, xat = TRUE, yat = TRUE, xaxis.lab = NA, yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
+    xlimits = c(1, length(histogram_obj)),
+    ylimits = NULL, 
+    xat = generate_xlabels(histogram_obj, return_xat = T), 
+    yat = TRUE, 
+    xaxis.lab = generate_xlabels(histogram_obj), 
+    yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
     xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
     cex = 0.75, col.border = 'black', pch = 19, alpha = 1,
     axes.lwd = 1,
@@ -111,8 +116,7 @@ create_coverageplot.Histogram <- function(
   # Extracting histogram_data
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
-  labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x)
+  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = seq(1, length(histogram_data), 1))
 
   # Plotting
   plt <- BoutrosLab.plotting.general::create.scatterplot(
@@ -226,11 +230,8 @@ create_coverageplot.Histogram <- function(
 #' @param histogram_obj a HistogramFit object
 #' @return numeric vector, representing segmentation points
 return_x_points <- function(histogram_obj){
-  labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
   return(
-    labels_x[
       c(histogram_obj$p[,'start'], histogram_obj$p[,'end'])
-      ]
   )
 }
 
@@ -269,7 +270,12 @@ create_coverageplot.HistogramFit <- function(
   ylab.label = "Histogram Data",
   xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
   xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
-  xlimits = NULL, ylimits = NULL, xat = TRUE, yat = TRUE, xaxis.lab = NA, yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
+  xlimits = c(1, length(histogram_obj)),  
+  ylimits = NULL,
+  xat = generate_xlabels(histogram_obj, return_xat = T), 
+  yat = TRUE, 
+  xaxis.lab = generate_xlabels(histogram_obj),
+  yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
   xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
   cex = 0.75, col.border = 'black', pch = 19, alpha = 1,
   axes.lwd = 1,
@@ -315,8 +321,11 @@ create_coverageplot.HistogramFit <- function(
   # Extracting histogram_data
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
-  labels_x <- rowMeans(cbind(histogram_obj$interval_start, histogram_obj$interval_end))
-  plotting_data <- data.frame("dens" = histogram_data, "labels_x" = labels_x, "dist" = "coverage")
+  plotting_data <- data.frame(
+    "dens" = histogram_data, 
+    "labels_x" = seq(1, length(histogram_data), 1), 
+    "dist" = "coverage"
+  )
   segment_dists <- unlist(lapply(histogram_obj$models, function(x) x$consensus$dist))
   dist_colors <- col_distributions[segment_dists]
   # Distribution fit data
@@ -326,7 +335,7 @@ create_coverageplot.HistogramFit <- function(
     x <- seq(m$seg_start, m$seg_end, by = 1)
     dens <- m$dens(x = seq_along(x), mpar = m$par)
     return(
-      data.frame("dens" = dens, "labels_x" = labels_x[x], "dist" = m$dist, "segment" = i)
+      data.frame("dens" = dens, "labels_x" = x, "dist" = m$dist, "segment" = i)
     )
   })
   distribution_plotting_data <- do.call('rbind.data.frame', distribution_plotting_data)

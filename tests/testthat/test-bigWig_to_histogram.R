@@ -1,4 +1,4 @@
-context("Testing input and parameter variations to bigWig_to_histogram")
+context("bigWig_to_histogram")
 
 filename <- system.file("extdata", "bigwigs", "test.bw", package = "HistogramZoo")
 gtf <- system.file("extdata", "genes.gtf",  package = "HistogramZoo")
