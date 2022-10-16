@@ -5,5 +5,4 @@
 man/
 *.Rproj
 inst/setup.R
-vignettes/*
 docs
