@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 man/
+vignettes/HistogramZoo.html
 *.Rproj
 inst/setup.R
 docs
