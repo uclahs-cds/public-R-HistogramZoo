@@ -23,75 +23,152 @@ library(HistogramZoo)
 # Introduction
 The HistogramZoo R package is a collection of functions which aim to identify and characterize patterns from histogram data.
 
-# Quick Start
+# The Histogram and GenomicHistogram class
 
-Begin with the generation of a `Histogram` object as a representation of the data.
+A **Histogram** object contains 1 piece of essential data and 4 pieces of optional data:
 
-The `segment_and_fit` function is a wrapper for a set of functions used for histogram characterization. Briefly, it identifies regions of increased density and summarizes it using statistical distributions. More details are provided below.
+* **histogram_data** is a numeric vector representing the histogram density
 
-Finally, `summarize_results` returns a data.frame of segments and summary statistics and `create_coverageplot` returns a graphical representation of the results.
+* **interval_start** and **histogram_end** are numeric vectors representing the start and end coordinates of each bin
 
-```{r basic_histogram_segmentation, include=FALSE}
+* **bin_width** is a numeric indicator of the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`
 
-library(HistogramZoo)
+* **region_id** is a character id for the histogram
 
-x = Histogram(
-  histogram_data = c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0),
-  interval_start = 1:14,
-  interval_end = 2:15,
-  region_id = "my_histogram"
-)
+A **GenomicHistogram** object contains 2 additional pieces of optional data: **chr** for chromosome and **strand** for strand which is restricted to one of `+`, `-` and `*`. A Histogram and a GenomicHistogram differ in one of several key ways:
 
-results = segment_and_fit(x, eps = 0.005)
-
-results_table = summarize_results(results)
-
-```
-
-# Overview
-
-## The `Histogram` and `GenomicHistogram` class
-
-### Class-structure
-
-A `Histogram` object contains 1 piece of essential data and 4 pieces of optional data:
-
-* `histogram_data` is a numeric vector representing the histogram density
-
-* `interval_start` and `histogram_end` are numeric vectors representing the start and end coordinates of each bin
-
-* `bin_width` is a numeric indicator of the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`
-
-* `region_id` is a character id for the histogram
-
-A `GenomicHistogram` object contains 2 additional pieces of optional data: `chr` for chromosome and `strand` for strand which is restricted to one of `+`, `-` and `*`. A `Histogram` and a `GenomicHistogram` differ in one of several key ways:
-
-1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale. Starts are closed while ends are open with the exception of the last bin where both start and end are closed. `GenomicHistogram` objects were designed to represent a [Base 1](https://www.biostars.org/p/84686/) system which represent a set of indices on which observations are collected.
+1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale. Starts are closed while ends are open with the exception of the last bin where both start and end are closed. `GenomicHistogram` objects were designed to represent a discrete [base 1](https://www.biostars.org/p/84686/) system where each histogram bin represents a set of indices on which observations are collected.
 
 2. Restrictions on `bin_width`: `Histogram` objects require that the length of each bin is equal with the exception of the last bin which can be shorter than the rest. `GenomicHistogram` objects allow the lengths of each bin to vary as long as they are shorter or equal to the the designated `bin_width` and leaves the equal distribution of bin lengths up to user discretion. This allows users to construct `GenomicHistogram` objects using the `tile` and `binnedAverage` functions of `GenomicRanges`.
 
 3. Disjoint intervals: Both `Histogram` and `GenomicHistogram` objects support the use of disjoint intervals but this feature was designed with `GenomicHistogram` objects in mind to support the representation of transcripts and genes as a set of exons which might not be consecutive intervals on the genomic coordinate system.
 
-### Data loaders
+```{r Histogram_example, include=TRUE, out.width="50%"}
 
-Data loaders for `Histogram` objects:
+# TODO: Add an example for GenomicHistogram
 
-* `observations_to_histogram` bins a set of observations at a designated `histogram_bin_width` to generate a `Histogram`
+my_histogram <- Histogram(
+  histogram_data = c(1,2,3,1,5,6),
+  interval_start = c(0,1,2,3,4,5),
+  interval_end = c(1,2,3,4,5,6),
+  bin_width = 1,
+  region_id = "my_histogram"
+)
 
-Data loaders for `GenomicHistogram` objects:
+create_coverageplot(
+  my_histogram,
+  main.cex = 1,
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8,
+  xat = generate_xlabels(my_histogram, n_labels = length(my_histogram), return_xat = T), 
+  xaxis.lab = generate_xlabels(my_histogram, n_labels = length(my_histogram)), 
+)
 
-* `bigWig_to_histogram`
+```
 
-* `genome_BED_to_histogram`
+# Data loaders
 
-* `transcript_BED_to_histogram`
+## Data loaders for `Histogram` objects
 
-## Segmentation and fitting distributions
+**observations_to_histogram** bins a set of observations at a designated `histogram_bin_width` to generate a `Histogram`
 
-### Finding local optima
+```{r observations_to_histogram, include=TRUE, out.width="50%"}
+
+set.seed(314)
+my_data <- rnorm(10000, mean = 10, sd = 5)
+my_histogram <- observations_to_histogram(my_data, histogram_bin_width = 1)
+
+create_coverageplot(
+  my_histogram, 
+  main.cex = 0, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+```
+
+## Data loaders for `GenomicHistogram` objects
+
+**bigWig_to_histogram** bins the coverage from a single bigWig file on a set of user-defined regions (provided as a GRanges object, a GRangesList* object or a GTF file) and returns a list of GenomicHistogram objects. 
+
+```{r bigWig_to_histogram, include=TRUE, out.width="50%"}
+
+library(GenomicRanges)
+
+filename <- system.file("extdata", "bigwigs",  "S1.bw", package = "HistogramZoo")
+
+regions <- GenomicRanges::GRanges(
+  seqnames = "chr1",
+  IRanges::IRanges(
+    start = c(17950, 19350),
+    end = c(18000, 19600)),
+  strand = "*"
+)
+
+bigwig_histograms <- bigWig_to_histogram(
+  filename = filename,
+  regions = regions,
+  histogram_bin_size = 10
+)
+
+```
+
+**genome_BED_to_histogram** bins the coverage from a set of genomic BED files and returns a list of GenomicHistogram objects. Users have the option of providing a set of regions as a GRanges or GRangesList* object.
+
+```{r genome_BED_to_histogram, include=TRUE, out.width="50%"}
+
+datadir <- system.file("extdata", "dna_bedfiles",  package = "HistogramZoo")
+genome_bed_files <- list.files(datadir, pattern = ".bed$")
+genome_bed_files <- file.path(datadir, genome_bed_files)
+
+genome_bed_histograms <- genome_BED_to_histogram(
+  filenames = genome_bed_files,
+  n_fields = 6,
+  histogram_bin_size = 1
+)
+
+```
+
+**transcript_BED_to_histogram**, to account for overlapping transcript annotations, bins the coverage on a set of BED files where each element can be pre-assigned to a region using the 4th column (name) of the BED file. 
+
+```{r transcript_BED_to_histogram, include=TRUE, out.width="50%"}
+
+datadir <- system.file("extdata", "rna_bedfiles", package = "HistogramZoo")
+transcript_bed_files <- file.path(datadir, paste0("Sample.", 1:20, ".bed"))
+gtf <- system.file("extdata", "genes.gtf", package = "HistogramZoo")
+
+histograms <- transcript_BED_to_histogram(
+  filenames = transcript_bed_files,
+  n_fields = 12,
+  gtf = gtf,
+  gene_or_transcript = "gene",
+  histogram_bin_size = 10
+)
+
+```
+
+### Notes on common parameters
+
+* **regions** `[bigWig, genomic BED]`: Using a GRangesList object allows the assignment of disjoint intervals to a GenomicHistogram (e.g. representing a set of exons that can be joined to form a mature transcript) where each GRanges object in the GRangesList represents the elements of a single Histogram. Using a GRanges object creates a separate GenomicHistogram for each element in the GRanges object.
+
+* **histogram_bin_size** `[bigWig, genomic and transcriptomic BED]`: Bins are generated using `GenomicRanges::tile` and coverage is calculated using `GenomicRanges::binnedAverage`. This strategy strives to create bins of equal size less than or equal to the designated `histogram_bin_size` (see above for discussion of the difference in `bin_width` restriction.)
+
+* **allow_overlapping_segments_per_sample** `[transcriptomic and genomic BED]`: Each BED file is assumed to contain the elements of a single experimental sample. Thus, overlapping elements in each BED file can be eliminated by setting the parameter to `FALSE`.
+
+# Segmentation and Distribution Fitting
+
+## Finding local optima
 * Discuss the three types of data properties we want to address
 
-### The Fine-to-Coarse segmentation algorithm
+## The Fine-to-Coarse segmentation algorithm
 
 The Fine-to-Coarse segmentation algorithm was described in @delon2005color.
 
@@ -105,10 +182,29 @@ The Fine-to-Coarse segmentation algorithm was described in @delon2005color.
 
 3. Metrics & Voting
 
-## Exporting Results
+# Exporting Results
 
-1. Summarize results into a data.frame
+## Summary statistics
 
-2. Plotting
+*  `summarize_results` can be applied to a `HistogramFit` object to extract the indices and summary statistics of the analysis.
+
+A data frame will be returned with the following columns.
+
+## Plotting
+
+Several plotting functions are available to aid with the visualization of results. Plotting functions can be combined with plotting capabilities from `BoutrosLab.plotting.general` [@p2019bpg] based on the `lattice` R package [@sarkar2015package].
+
+* `create_coverageplot` can be used to visualize the `Histogram`, `GenomicHistogram` or `HistogramFit` object with annotated segmentation points and distributions.
+
+* `create_residualplot` can be used to visualize the residuals between the fitted and observed distributions of a `HistogramFit` object
+
+* `create_trackplot` can be used to add complementary tracks to a histogram visualization when combined with `create_layerplot`
+
+* `create_layerplot` can be used to create a multipanel plot with combinations of coverage, residual and track plots.
+
+```{r plotting, include=FALSE}
+
+
+```
 
 # References
