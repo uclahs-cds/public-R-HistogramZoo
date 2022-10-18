@@ -14,11 +14,11 @@
 #' @return a list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
-#' file.directory = system.file("extdata", "rna_bedfiles", package = "HistogramZoo")
-#' filenames = file.path(file.directory, paste0("Sample.", 1:20, ".bed"))
-#' gtf = system.file("extdata", "genes.gtf", package = "HistogramZoo")
+#' datadir <- system.file("extdata", "rna_bedfiles", package = "HistogramZoo")
+#' filenames <- file.path(datadir, paste0("Sample.", 1:20, ".bed"))
+#' gtf <- system.file("extdata", "genes.gtf", package = "HistogramZoo")
 #'
-#' histograms = transcript_BED_to_histogram(
+#' histograms <- transcript_BED_to_histogram(
 #' filenames = filenames,
 #' n_fields = 12,
 #' gtf = gtf,

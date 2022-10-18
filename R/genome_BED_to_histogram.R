@@ -9,12 +9,12 @@
 #' if TRUE, they will be taken as separate input, default FALSE
 #'
 #' @examples \dontrun{
-#' datadir = system.file("extdata", "dna_bedfiles",  package = "HistogramZoo")
-#' filenames = list.files(datadir, pattern = ".bed$")
-#' filenames = file.path(datadir, filenames)
-#' histograms = genome_BED_to_histogram(
+#' datadir <- system.file("extdata", "dna_bedfiles",  package = "HistogramZoo")
+#' filenames <- list.files(datadir, pattern = ".bed$")
+#' filenames <- file.path(datadir, filenames)
+#' histograms <- genome_BED_to_histogram(
 #' filenames = filenames,
-#' n_fields = n_fields,
+#' n_fields = 6,
 #' histogram_bin_size = 1)
 #' }
 #'
