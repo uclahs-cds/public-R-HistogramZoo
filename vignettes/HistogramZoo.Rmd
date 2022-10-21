@@ -165,8 +165,147 @@ histograms <- transcript_BED_to_histogram(
 
 # Segmentation and Distribution Fitting
 
+The function **segment_and_fit** is designed to be a pipeline constructed from the following sub-functions which enables the segmentation, denoising and fitting of statistical distributions on Histogram and GenomicHistogram objects. Each of the parameters in `segment_and_fit` have counterparts in the sub-functions which is explored in further detail below.
+
 ## Finding local optima
-* Discuss the three types of data properties we want to address
+
+**find_local_optima** identifies the local minima and maxima on a vector of counts (histogram data).
+
+```{r find_local_optima_basic, include=TRUE, out.width="50%"}
+
+# Generating a Histogram 
+set.seed(314)
+dt = rnorm(10000, mean = 20, sd = 10)
+xhist = observations_to_histogram(dt, histogram_bin_width = 2)
+data = xhist$histogram_data
+
+# basic use
+optima = find_local_optima(data)
+optima = sort(unlist(optima))
+
+create_coverageplot(
+  xhist, 
+  add.points = T, 
+  points.x = optima, 
+  points.y = data[optima], 
+  points.col = "red",
+  main = "basic optima",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+```
+
+The parameter `threshold` allows the user to tune the sparsity of local optima to histograms with potentially noisy counts, i.e. by thresholding the difference between neighbouring optima.
+
+```{r find_local_optima_threshold, include=TRUE, out.width="50%"}
+
+# Generating a Histogram with noisy counts
+set.seed(314)
+dt = rnorm(1000, mean = 20, sd = 10)
+xhist = observations_to_histogram(dt, histogram_bin_width = 1)
+data = xhist$histogram_data
+
+# find_local_optima with threshold 0
+zero_threshold_optima = find_local_optima(data, threshold = 0)
+zero_threshold_optima = sort(unlist(zero_threshold_optima))
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = zero_threshold_optima,
+  points.y = data[zero_threshold_optima],
+  points.col = "red", 
+  type = "h",
+  main = "threshold = 0",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+# find_local_optima with threshold 2
+threshold_optima = find_local_optima(data, threshold = 2)
+threshold_optima = sort(unlist(threshold_optima))
+
+create_coverageplot(
+  xhist, 
+  add.points = T, 
+  points.x = threshold_optima, 
+  points.y = data[threshold_optima], 
+  points.col = "red", 
+  type = "h",
+  main = "threshold = 2",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+
+```
+
+
+The parameter `flat_endpoints` allows the user to better fit histograms with stretches of equal values (e.g. pile-ups of BED files in a GenomicHistogram). Setting the parameter to `TRUE` will allow the user to return both endpoints of a flat region while setting the parameter to `FALSE` will return the estimated midpoint of a flat region.
+
+```{r find_local_optima_stepfunction, include=TRUE, out.width="50%"}
+
+# Generating a Histogram with consecutive equal values
+data = c(rep(1, 3), rep(2, 4), rep(3, 3), rep(2, 1), rep(1, 5))
+xhist = Histogram(histogram_data = data)
+
+# flat_endpoints
+optima_flat = find_local_optima(data, flat_endpoints = TRUE)
+optima_flat = sort(unlist(optima_flat))
+
+create_coverageplot(
+  xhist, 
+  add.points = T, 
+  points.x = optima_flat, 
+  points.y = data[optima_flat], 
+  points.col = "red",
+  main = "flat endpoints",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+# midpoints
+optima_midpoints = find_local_optima(data, flat_endpoints = FALSE)
+optima_midpoints = sort(unlist(optima_midpoints))
+
+create_coverageplot(
+  xhist, 
+  add.points = T, 
+  points.x = optima_midpoints, 
+  points.y = data[optima_midpoints], 
+  points.col = "red",
+  main = "midpoints",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+```
 
 ## The Fine-to-Coarse segmentation algorithm
 
