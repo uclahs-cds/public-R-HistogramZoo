@@ -4,6 +4,7 @@ author: "Helen Zhu & Stefan Eng"
 output:
   rmarkdown:::html_vignette:
     toc: true
+    code_folding: hide
 bibliography: >
   references.bib  
 vignette: >
@@ -203,7 +204,7 @@ create_coverageplot(
 
 The parameter `threshold` allows the user to tune the sparsity of local optima to histograms with potentially noisy counts, i.e. by thresholding the difference between neighbouring optima.
 
-```{r find_local_optima_threshold, include=TRUE, out.width="50%"}
+```{r find_local_optima_threshold, include=TRUE, fig.show="hold", out.width="40%"}
 
 # Generating a Histogram with noisy counts
 set.seed(314)
@@ -259,7 +260,7 @@ create_coverageplot(
 
 The parameter `flat_endpoints` allows the user to better fit histograms with stretches of equal values (e.g. pile-ups of BED files in a GenomicHistogram). Setting the parameter to `TRUE` will allow the user to return both endpoints of a flat region while setting the parameter to `FALSE` will return the estimated midpoint of a flat region.
 
-```{r find_local_optima_stepfunction, include=TRUE, out.width="50%"}
+```{r find_local_optima_stepfunction, include=TRUE, fig.show="hold", out.width="40%"}
 
 # Generating a Histogram with consecutive equal values
 data = c(rep(1, 3), rep(2, 4), rep(3, 3), rep(2, 1), rep(1, 5))
