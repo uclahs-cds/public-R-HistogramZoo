@@ -320,31 +320,120 @@ The Fine-to-Coarse segmentation algorithm was described in @delon2005color.
 
 2. Maximizing Uniform Elements
 
-3. Metrics & Voting
+## Metrics & Voting
 
 # Exporting Results
 
 ## Summary statistics
 
-*  `summarize_results` can be applied to a `HistogramFit` object to extract the indices and summary statistics of the analysis.
+**summarize_results** can be applied to a `HistogramFit` object to extract the indices and summary statistics of the analysis.
 
 A data frame will be returned with the following columns.
+
 
 ## Plotting
 
 Several plotting functions are available to aid with the visualization of results. Plotting functions can be combined with plotting capabilities from `BoutrosLab.plotting.general` [@p2019bpg] based on the `lattice` R package [@sarkar2015package].
 
-* `create_coverageplot` can be used to visualize the `Histogram`, `GenomicHistogram` or `HistogramFit` object with annotated segmentation points and distributions.
+* **create_coverageplot** can be used to visualize the `Histogram`, `GenomicHistogram` or `HistogramFit` object with annotated segmentation points and distributions.
 
-* `create_residualplot` can be used to visualize the residuals between the fitted and observed distributions of a `HistogramFit` object
+* **create_residualplot** can be used to visualize the residuals between the fitted and observed distributions of a `HistogramFit` object
 
-* `create_trackplot` can be used to add complementary tracks to a histogram visualization when combined with `create_layerplot`
+* **create_trackplot** can be used to add complementary tracks to a histogram visualization when combined with `create_layerplot`
 
-* `create_layerplot` can be used to create a multipanel plot with combinations of coverage, residual and track plots.
+* **create_layerplot** can be used to create a multipanel plot with combinations of coverage, residual and track plots.
 
-```{r plotting, include=FALSE}
+These functions are illustrated below by example.
+
+```{r plotting_example_p1, include=TRUE, fig.show="hold", out.width="50%"}
+
+set.seed(314)
+my_data <- c(
+  rnorm(8000, mean = 50, sd = 2),
+  rgamma(10000, shape = 2, rate = 0.4),
+  rgamma_flip(9000, shape = 2, rate = 0.4) + 80
+)
+
+my_histogram <- observations_to_histogram(my_data)
+
+# A basic coverageplot to visualize the data
+create_coverageplot(
+  my_histogram,
+  main = "Histogram",
+  main.cex = 1, 
+  xaxis.tck = 0.5, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+```
+
+```{r plotting_example_p2, include=TRUE, fig.show="hold", out.width="80%"}
+
+# Conducting analysis
+histogram_fit <- segment_and_fit(
+  histogram_obj = my_histogram,
+  eps = 1,
+  seed = 314,
+  truncated_models = TRUE
+)
+
+# summarize_results to generate
+res <- summarize_results(
+  histogram_fit
+)
+
+# Histogram Fit
+coverage_plt <- create_coverageplot(
+  histogram_fit,
+  main = "HistogramFit",
+  main.cex = 1, 
+  xaxis.tck = 0.5, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+residual_plt <- create_residualplot(
+  histogram_fit,
+  main.cex = 0, 
+  xaxis.tck = 0.5, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+track_plt <- create_trackplot(
+  res,
+  row_id = "region_id",
+  metric_id = "value",
+  start_id = "histogram_start",
+  end_id = "histogram_end",
+  xat = generate_xlabels(histogram_fit, return_xat = T),
+  xaxis.lab = generate_xlabels(histogram_fit),
+  main.cex = 0, 
+  xaxis.tck = 0.5, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+create_layerplot(
+  plot.objects = list(coverage_plt, residual_plt, track_plt)
+)
 
 
 ```
+
 
 # References
