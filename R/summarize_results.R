@@ -12,8 +12,7 @@ results_columns <- c(
   "histogram_end",
   "value",
   "metric",
-  "dist",
-  "params"
+  "dist"
 )
 
 #' Extract stats from models
@@ -96,15 +95,16 @@ extract_segments <- function(iranges){
 #'     \item{start}{the interval start of the segment}
 #'     \item{end}{the interval end of the segment}
 #'     \item{strand}{an optional column denoting the strand of a GenomicHistogram object}
-#'     \item{interval_count}{The number of intervals in the segment - used for collapsing disjoint intervals}
-#'     \item{interval_sizes}{The width of each interval}
-#'     \item{interval_starts}{The start index of each interval}
-#'     \item{histogram_start}{The start index of the segment in the Histogram representation}
-#'     \item{histogram_end}{The end index of the segment in the Histogram representation}
-#'     \item{value}{The fitted value of the metric function}
-#'     \item{metric}{The metric used to fit the distribution}
-#'     \item{dist}{The distribution name}
-#'     \item{params}{The parameters of the distribution}
+#'     \item{interval_count}{the number of intervals in the segment - used for collapsing disjoint intervals}
+#'     \item{interval_sizes}{the width of each interval}
+#'     \item{interval_starts}{the start index of each interval}
+#'     \item{histogram_start}{the start index of the segment in the Histogram representation}
+#'     \item{histogram_end}{the end index of the segment in the Histogram representation}
+#'     \item{value}{the fitted value of the metric function}
+#'     \item{metric}{the metric used to fit the distribution}
+#'     \item{dist}{the distribution name}
+#'     \item{dist_param[0-9]}{the values of distribution parameters}
+#'     \item{dist_param_name[0-9]}{the matching names of distribution parameters}
 #' }
 #'
 #' @export
