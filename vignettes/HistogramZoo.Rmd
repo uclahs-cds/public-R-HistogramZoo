@@ -28,15 +28,15 @@ The HistogramZoo R package is a collection of functions which aim to identify an
 
 A **Histogram** object contains 1 piece of essential data and 4 pieces of optional data:
 
-* **histogram_data** is a numeric vector representing the histogram density
+* **histogram_data** is a numeric vector representing the histogram density or counts
 
 * **interval_start** and **histogram_end** are numeric vectors representing the start and end coordinates of each bin
 
-* **bin_width** is a numeric indicator of the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`
+* **bin_width** is the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`
 
 * **region_id** is a character id for the histogram
 
-A **GenomicHistogram** object contains 2 additional pieces of optional data: **chr** for chromosome and **strand** for strand which is restricted to one of `+`, `-` and `*`. A Histogram and a GenomicHistogram differ in one of several key ways:
+A **GenomicHistogram** object contains 2 additional pieces of optional data: **chr** for chromosome and **strand** for strand which is restricted to one of `+`, `-` and `*`. A Histogram and a GenomicHistogram differ in one of several ways:
 
 1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale. Starts are closed while ends are open with the exception of the last bin where both start and end are closed. `GenomicHistogram` objects were designed to represent a discrete [base 1](https://www.biostars.org/p/84686/) system where each histogram bin represents a set of indices on which observations are collected.
 
@@ -44,9 +44,7 @@ A **GenomicHistogram** object contains 2 additional pieces of optional data: **c
 
 3. Disjoint intervals: Both `Histogram` and `GenomicHistogram` objects support the use of disjoint intervals but this feature was designed with `GenomicHistogram` objects in mind to support the representation of transcripts and genes as a set of exons which might not be consecutive intervals on the genomic coordinate system.
 
-```{r Histogram_example, include=TRUE, out.width="50%"}
-
-# TODO: Add an example for GenomicHistogram
+```{r Histogram_example, include=TRUE, fig.show="hold", out.width="40%"}
 
 my_histogram <- Histogram(
   histogram_data = c(1,2,3,1,5,6),
@@ -68,6 +66,30 @@ create_coverageplot(
   xat = generate_xlabels(my_histogram, n_labels = length(my_histogram), return_xat = T), 
   xaxis.lab = generate_xlabels(my_histogram, n_labels = length(my_histogram)), 
 )
+
+my_genomic_histogram <- GenomicHistogram(
+  histogram_data = c(4,5,2,3,6,8),
+  interval_start = seq(6),
+  interval_end = seq(6),
+  bin_width = 1,
+  region_id = "my_genomic_histogram",
+  chr = "chr1",
+  strand = "*"
+)
+
+create_coverageplot(
+  my_genomic_histogram,
+  main.cex = 1,
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8,
+  xat = generate_xlabels(my_genomic_histogram, n_labels = length(my_genomic_histogram), return_xat = T), 
+  xaxis.lab = generate_xlabels(my_genomic_histogram, n_labels = length(my_genomic_histogram)), 
+)
+
 
 ```
 
@@ -330,6 +352,23 @@ The Fine-to-Coarse segmentation algorithm was described in @delon2005color.
 
 A data frame will be returned with the following columns.
 
+* **region_id** character string denoting the region_id of the Histogram
+* **segment_id** an integer id identifying the ordinal segment of the Histogram segmentation
+* **chr** an optional column denoting the chromosome of a GenomicHistogram object
+* **start** the interval start of the segment
+* **end** the interval end of the segment
+* **strand** an optional column denoting the strand of a GenomicHistogram object
+* **interval_count** the number of intervals in the segment - used for collapsing disjoint intervals
+* **interval_sizes** the width of each interval
+* **interval_starts** the start index of each interval
+* **histogram_start** The start index of the segment in the Histogram representation
+* **histogram_end** The end index of the segment in the Histogram representation
+* **value** the fitted value of the metric function
+* **metric** the metric used to fit the distribution
+* **dist** the distribution name
+* **dist_param[0-9]** the values of distribution parameters
+* **dist_param_name[0-9]** the matching names of distribution parameters
+
 
 ## Plotting
 
@@ -341,9 +380,11 @@ Several plotting functions are available to aid with the visualization of result
 
 * **create_trackplot** can be used to add complementary tracks to a histogram visualization when combined with `create_layerplot`
 
-* **create_layerplot** can be used to create a multipanel plot with combinations of coverage, residual and track plots.
+* **create_layerplot** can be used to create a multi-panel plot with combinations of coverage, residual and track plots.
 
-These functions are illustrated below by example.
+### Example
+
+A histogram is simulated from 3 statistical distributions.
 
 ```{r plotting_example_p1, include=TRUE, fig.show="hold", out.width="50%"}
 
@@ -371,7 +412,9 @@ create_coverageplot(
 
 ```
 
-```{r plotting_example_p2, include=TRUE, fig.show="hold", out.width="80%"}
+HistogramZoo is applied to segment the histogram and fit distributions. Results are reported in a table. 
+
+```{r plotting_example_p2, include=TRUE, fig.show="hold", out.width="100%"}
 
 # Conducting analysis
 histogram_fit <- segment_and_fit(
@@ -385,17 +428,42 @@ histogram_fit <- segment_and_fit(
 res <- summarize_results(
   histogram_fit
 )
+```
+
+The `summarize_results` table returns a data frame with columns describing the `region_id` of the original histogram and a separate for each identified segment (`segment_id`). The `start` and `end` columns indicate the segment indices relative to the `interval_start` and `interval_end` indices of the original histogram. The `interval_count`, `interval_sizes` and `interval_starts` columns aid in describing histograms with disjoint intervals following a [BED file format](https://genome.ucsc.edu/FAQ/FAQformat.html).
+```{r plotting_example_p3, include=TRUE, fig.show="hold", out.width="100%"}
+knitr::kable(res[,c("region_id", "segment_id", "start", "end", "interval_count", "interval_sizes", "interval_starts")])
+```
+
+The `histogram_start` and `histogram_end` columns indicate the start and end indices relative to the histogram itself (i.e. assuming that each bin is ordinal). The `value` refers to the GOF of the selected `metric` and the `dist` column indicates the distribution fitted. 
+```{r plotting_example_p4, include=TRUE, fig.show="hold", out.width="100%"}
+knitr::kable(res[,c("histogram_start", "histogram_end", "value", "metric", "dist")])
+```
+
+The `dist_param` columns hold the values of the distribution parameters
+```{r plotting_example_p5, include=TRUE, fig.show="hold", out.width="100%"}
+knitr::kable(res[,c("dist_param1", "dist_param2", "dist_param3", "dist_param4")])
+```
+
+while the `dist_param_name` columns hold the names of the parameters corresponding to each distribution
+```{r plotting_example_p6, include=TRUE, fig.show="hold", out.width="100%"}
+knitr::kable(res[,c("dist_param1_name", "dist_param2_name", "dist_param3_name", "dist_param4_name")])
+```
+
+A plot of the result is generated.
+
+```{r plotting_example_p7, include=TRUE, fig.show="hold", out.width="100%"}
 
 # Histogram Fit
 coverage_plt <- create_coverageplot(
   histogram_fit,
   main = "HistogramFit",
   main.cex = 1, 
-  xaxis.tck = 0.5, 
+  xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 1, 
+  xlab.cex = 0, 
   ylab.cex = 1, 
-  xaxis.cex = 0.8, 
+  xaxis.cex = 0, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -403,11 +471,12 @@ coverage_plt <- create_coverageplot(
 residual_plt <- create_residualplot(
   histogram_fit,
   main.cex = 0, 
-  xaxis.tck = 0.5, 
+  xaxis.tck = 0, 
   yaxis.tck = 0.5, 
   xlab.cex = 0, 
   ylab.cex = 1, 
-  xaxis.cex = 0.8, 
+  ylab.label = "Residuals",
+  xaxis.cex = 0, 
   yaxis.cex = 0.8
 )
 
@@ -420,20 +489,32 @@ track_plt <- create_trackplot(
   xat = generate_xlabels(histogram_fit, return_xat = T),
   xaxis.lab = generate_xlabels(histogram_fit),
   main.cex = 0, 
-  xaxis.tck = 0.5, 
-  yaxis.tck = 0.5, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
   xlab.cex = 1, 
-  ylab.cex = 1, 
+  ylab.cex = 1,
+  ylab.label = "GOF",
   xaxis.cex = 0.8, 
-  yaxis.cex = 0.8
+  yaxis.cex = 0
 )
 
-create_layerplot(
-  plot.objects = list(coverage_plt, residual_plt, track_plt)
+summary_figure <- create_layerplot(
+  plot.objects = list(coverage_plt, residual_plt, track_plt),
+  plot.objects.heights = c(4,1.5,1.5),
+  y.spacing = -3.5,
+  ylab.axis.padding = -13
 )
 
+# For exporting the plot
+# filename = "SummaryFigure.pdf"
+# pdf(filename, width = 6, height = 7)
+# print(summary_figure)
+# dev.off()
 
 ```
 
+```{r, echo=FALSE, out.width="80%", fig.cap="Summary Figure"}
+knitr::include_graphics("SummaryFigure.jpg")
+```
 
 # References
