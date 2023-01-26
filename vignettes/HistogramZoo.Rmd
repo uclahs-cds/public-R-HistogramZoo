@@ -330,19 +330,304 @@ create_coverageplot(
 
 ```
 
-## The Fine-to-Coarse segmentation algorithm
+## The Fine-to-Coarse Segmentation Algorithm
 
-The Fine-to-Coarse segmentation algorithm was described in @delon2005color.
+The Fine-to-Coarse segmentation algorithm was described in @delon2005color. Briefly, for each set of o
+
+* talk about epsilon
+
+* show an example of different epsilons
 
 ## Filtering Low Entropy Regions
 
+In the presence of noisy data, it can be helpful to filter regions with low entropy to extract high density regions. Algorithmically, filtering is conducted as follows:
+
+* 
+
 ## Fitting Statistical Distributions
 
-1. Truncated Distributions
+### Distributions
 
-2. Maximizing Uniform Elements
+Three distributions are provided: the normal (Gaussian) distribution, the uniform distribution and the gamma distribution. The gamma distribution can be flipped to account for skew in the negative direction. Normal and gamma distributions can be fit in their full form or in a truncated form. 
 
-## Metrics & Voting
+```{r distributions_normal, include=TRUE, fig.show="hold", out.width="40%"}
+
+set.seed(314)
+gaussian_data <- rnorm(10000, mean = 50, sd = 5)
+gaussian_histogram <- observations_to_histogram(gaussian_data)
+
+# Keeping all data and fitting a full model
+gaussian_full <- segment_and_fit(
+  histogram_obj = gaussian_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = FALSE,
+  truncated_models = FALSE
+)
+
+# Removing noisy data and fitting a truncated model
+gaussian_truncated <- segment_and_fit(
+  histogram_obj = gaussian_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = TRUE,
+  truncated_models = TRUE
+)
+
+gaussian_full_plt <- create_coverageplot(
+  gaussian_full,
+  main = "Normal (Full)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+gaussian_truncated_plt <- create_coverageplot(
+  gaussian_truncated,
+  main = "Normal (Truncated)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(gaussian_full_plt)
+print(gaussian_truncated_plt)
+
+```
+
+```{r distributions_gamma, include=TRUE, fig.show="hold", out.width="40%"}
+
+set.seed(314)
+gamma_data <- rgamma(10000, shape = 2, rate = 0.4)
+  # rgamma_flip(9000, shape = 2, rate = 0.4) + 80
+gamma_histogram <- observations_to_histogram(gamma_data)
+
+# Keeping all data and fitting a full model
+gamma_full <- segment_and_fit(
+  histogram_obj = gamma_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = FALSE,
+  truncated_models = FALSE
+)
+
+# Removing noisy data and fitting a truncated model
+gamma_truncated <- segment_and_fit(
+  histogram_obj = gamma_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = TRUE,
+  truncated_models = TRUE
+)
+
+gamma_full_plt <- create_coverageplot(
+  gamma_full,
+  main = "Gamma (Full)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+gamma_truncated_plt <- create_coverageplot(
+  gamma_truncated,
+  main = "Gamma (Truncated)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(gamma_full_plt)
+print(gamma_truncated_plt)
+
+```
+
+```{r distributions_gamma_flip, include=TRUE, fig.show="hold", out.width="40%"}
+
+set.seed(314)
+gamma_flip_data <- rgamma_flip(9000, shape = 4, rate = 0.4) + 80
+gamma_flip_histogram <- observations_to_histogram(gamma_flip_data)
+
+# Keeping all data and fitting a full model
+gamma_flip_full <- segment_and_fit(
+  histogram_obj = gamma_flip_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = FALSE,
+  truncated_models = FALSE
+)
+
+# Removing noisy data and fitting a truncated model
+gamma_flip_truncated <- segment_and_fit(
+  histogram_obj = gamma_flip_histogram,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = TRUE,
+  truncated_models = TRUE
+)
+
+gamma_flip_full_plt <- create_coverageplot(
+  gamma_flip_full,
+  main = "Gamma Flipped (Full)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+gamma_flip_truncated_plt <- create_coverageplot(
+  gamma_flip_truncated,
+  main = "Gamma Flipped (Truncated)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(gamma_flip_full_plt)
+print(gamma_flip_truncated_plt)
+
+```
+
+```{r distributions_uniform, include=TRUE, fig.show="hold", out.width="40%"}
+
+set.seed(314)
+uniform_data <- runif(10000, min = 0, max = 10)
+uniform_histogram <- observations_to_histogram(uniform_data)
+
+# Fitting a uniform segment
+uniform_fit <- segment_and_fit(
+  histogram_obj = uniform_histogram,
+  eps = 1,
+  seed = 314,
+  max_uniform = FALSE
+)
+
+uniform_plt <- create_coverageplot(
+  uniform_fit,
+  main = "Uniform",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(uniform_plt)
+```
+
+### Metrics
+
+Five metrics are provided to optimize for the best fitting statistical distribution.
+
+* **Jaccard index** is the ratio between the intersection of the fitted and observed distributions and the union of the two distributions.
+* **Intersection** is the intersection between the fitted and observed distributions.
+* **Kolmogorov-Smirnov statistic** is the maximum divergence between the fitted and observed distributions.
+* **Mean squared error** is the mean squared difference between the fitted and observed distributions.
+* **$\chi$-squared statistic** is the $\chi$-squared distance between the two distributions i.e. $\sum{\frac{(x-y)^2}{(x+y)}}$
+
+### Finding a Consensus Model
+
+The function `find_consensus_model` is used to determine the best fitting model for each segment and provides two methods of doing so: `weighted_majority_vote` (weighted majority voting) and `rra` (robust rank aggregation, @kolde2012robust). Weighted majority voting requires the users to provide a ranking of metrics in descending order of importance and their associated weights and used the weighted sum of ranks to determine the best fitting distribution. In the event of a tie, the highest ranked metric is used to break the tie.  
+
+### Maximizing Uniform Segments
+
+The function `identify_uniform_segment` optimizes the identification of uniform segments by iteratively trimming the ends of the region and refitting a uniform distribution to the shortened region. This is controlled by the `threshold` parameter which is the proportion of the original region which must be preserved and the `stepsize` which indicates the stepsize taken for each search. One of the metrics must be selected to determine the best fit while the parameter `max_sd_size` indicates the maximum tolerable standard deviation of the goodness-of-fit from the best fitting uniform distribution where the function can select the longest uniform distribution. 
+
+
+```{r identify_uniform_segment, include=TRUE, fig.show="hold", out.width="40%"}
+
+set.seed(314)
+
+# Simulating uniform data that can benefit from trimming
+uniform_data <- c(
+  runif(10000, min = 0, max = 50),
+  runif(10000, min = 2, max = 48),
+  runif(10000, min = 4, max = 46),
+  runif(10000, min = 6, max = 44),
+  runif(10000, min = 8, max = 42)
+)
+uniform_histogram <- observations_to_histogram(uniform_data)
+
+# Fitting a uniform segment
+uniform_untrimmed <- segment_and_fit(
+  histogram_obj = uniform_histogram,
+  eps = 1,
+  seed = 314,
+  max_uniform = FALSE,
+  remove_low_entropy = FALSE
+)
+
+uniform_trimmed <- segment_and_fit(
+  histogram_obj = uniform_histogram,
+  eps = 1,
+  seed = 314,
+  max_uniform = TRUE,
+  uniform_threshold = 0.75,
+  uniform_stepsize = 5,
+  uniform_max_sd = 1,
+  remove_low_entropy = FALSE
+)
+
+uniform_untrimmed_plt <- create_coverageplot(
+  uniform_untrimmed,
+  main = "Uniform (Untrimmed)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+uniform_trimmed_plt <- create_coverageplot(
+  uniform_trimmed,
+  main = "Uniform (Max Uniform)",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(uniform_untrimmed_plt)
+print(uniform_trimmed_plt)
+```
 
 # Exporting Results
 
@@ -382,7 +667,7 @@ Several plotting functions are available to aid with the visualization of result
 
 * **create_layerplot** can be used to create a multi-panel plot with combinations of coverage, residual and track plots.
 
-### Example
+## Example
 
 A histogram is simulated from 3 statistical distributions.
 
