@@ -333,11 +333,131 @@ create_coverageplot(
 
 ## The Fine-to-Coarse Segmentation Algorithm
 
-The Fine-to-Coarse segmentation algorithm was described in @delon2005color. Briefly, for each set of o
+The Fine-to-Coarse segmentation algorithm was described in @delon2005color. Briefly, for a given histogram and a set of local optima, the FTC algorithm iterates through consecutive segments identifying _peaks_, segments of increasing counts followed by segments of decreasing counts. Consecutive segments are merged based on the prioritization derived from a monotone cost function, until an optimal set of peaks are acquired. Granularity of the optimal peak set can be tuned via the hyperparamter $\epsilon$. 
 
-* talk about epsilon
+```{r ftc_epsilon, include=TRUE, fig.show="hold", out.width="40%"}
 
-* show an example of different epsilons
+# Generating a Histogram with noisy counts
+set.seed(314)
+dt = rnorm(1000, mean = 20, sd = 10)
+xhist = observations_to_histogram(dt, histogram_bin_width = 1)
+
+# Extracting the histogram data
+data = xhist$histogram_data
+
+# local optima
+zero_threshold_optima = find_local_optima(data, threshold = 0)
+zero_threshold_optima = sort(unlist(zero_threshold_optima))
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = zero_threshold_optima,
+  points.y = data[zero_threshold_optima],
+  points.col = "red", 
+  type = "h",
+  main = "Local Optima",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+# Using different epsilons on FTC
+ftc_eps_0.05 <- ftc(data, s = zero_threshold_optima, eps = 0.05)
+ftc_eps_0.09 <- ftc(data, s = zero_threshold_optima, eps = 0.09)
+ftc_eps_0.15 <- ftc(data, s = zero_threshold_optima, eps = 0.15)
+ftc_eps_0.25 <- ftc(data, s = zero_threshold_optima, eps = 0.25)
+ftc_eps_0.5 <- ftc(data, s = zero_threshold_optima, eps = 0.5)
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = ftc_eps_0.05,
+  points.y = data[ftc_eps_0.05],
+  points.col = "red", 
+  type = "h",
+  main = expression(bold(paste("FTC: ", epsilon, "=0.05"))),
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = ftc_eps_0.09,
+  points.y = data[ftc_eps_0.09],
+  points.col = "red", 
+  type = "h",
+  main = expression(bold(paste("FTC: ", epsilon, "=0.09"))),
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = ftc_eps_0.15,
+  points.y = data[ftc_eps_0.15],
+  points.col = "red", 
+  type = "h",
+  main = expression(bold(paste("FTC: ", epsilon, "=0.15"))),
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = ftc_eps_0.25,
+  points.y = data[ftc_eps_0.25],
+  points.col = "red", 
+  type = "h",
+  main = expression(bold(paste("FTC: ", epsilon, "=0.25"))),
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+
+create_coverageplot(
+  xhist,
+  add.points = T, 
+  points.x = ftc_eps_0.5,
+  points.y = data[ftc_eps_0.5],
+  points.col = "red", 
+  type = "h",
+  main = expression(bold(paste("FTC: ", epsilon, "=0.5"))),
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8
+)
+```
 
 ## Filtering Low Entropy Regions
 
@@ -410,7 +530,6 @@ print(gaussian_truncated_plt)
 
 set.seed(314)
 gamma_data <- rgamma(10000, shape = 2, rate = 0.4)
-  # rgamma_flip(9000, shape = 2, rate = 0.4) + 80
 gamma_histogram <- observations_to_histogram(gamma_data)
 
 # Keeping all data and fitting a full model
