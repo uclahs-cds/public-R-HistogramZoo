@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, width=500)
 options(max.print=35)
 
 library(HistogramZoo)
+library(BoutrosLab.plotting.general)
 
 ```
 
@@ -783,16 +784,72 @@ track_plt <- create_trackplot(
   yaxis.cex = 0
 )
 
+covariate.legend <- list(
+  legend = list(
+    colours = c(
+      "orange",
+      "chartreuse4",
+      "chartreuse3"
+    ),
+    labels = c(
+      "Normal",
+      "Gamma",
+      "Gamma Flipped"
+    ),
+    title = expression(bold(underline('Fitted Distributions'))),
+    lwd = 0.5
+  ),
+  legend = list(
+    colours = c("red"),
+    labels = c("FTC Segmentation"),
+    title = expression(bold(underline('Points'))),
+    lwd = 0.5
+  ),
+  legend = list(
+    colours = c('blue', 'red'),
+    labels = c(
+      formatC(min(res[,"value"]), digits = 2),
+      formatC(max(res[,"value"]), digits = 2)
+    ),
+    title = expression(bold(underline('Fit'))),
+    continuous = TRUE,
+    width = 3,
+    tck = 1,
+    tck.number = 3,
+    at = c(0,100),
+    angle = -90,
+    just = c("center","bottom")
+  )
+)
+
+side.legend <- legend.grob(
+  legends = covariate.legend,
+  label.cex = 0.8,
+  title.cex = 0.8,
+  title.just = 'left',
+  title.fontface = 'bold',
+  size = 2
+)
+
 summary_figure <- create_layerplot(
   plot.objects = list(coverage_plt, residual_plt, track_plt),
   plot.objects.heights = c(4,1.5,1.5),
   y.spacing = -3.5,
-  ylab.axis.padding = -13
+  ylab.axis.padding = -13,
+  legend = list(
+    right = list(
+      x = 0.8,
+      y = 1,
+      fun = side.legend
+    )
+  ),
+  right.legend.padding = 0.5,
+  right.padding = 1
 )
 
 # For exporting the plot
 # filename = "SummaryFigure.pdf"
-# pdf(filename, width = 6, height = 7)
+# pdf(filename, width = 7, height = 7)
 # print(summary_figure)
 # dev.off()
 
