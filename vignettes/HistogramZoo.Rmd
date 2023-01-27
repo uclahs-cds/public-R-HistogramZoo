@@ -333,7 +333,7 @@ create_coverageplot(
 
 ## The Fine-to-Coarse Segmentation Algorithm
 
-The Fine-to-Coarse segmentation algorithm was described in @delon2005color. Briefly, for a given histogram and a set of local optima, the FTC algorithm iterates through consecutive segments identifying _peaks_, segments of increasing counts followed by segments of decreasing counts. Consecutive segments are merged based on the prioritization derived from a monotone cost function, until an optimal set of peaks are acquired. Granularity of the optimal peak set can be tuned via the hyperparamter $\epsilon$. 
+The Fine-to-Coarse segmentation algorithm was described in @delon2005color, @lisani2021automatic and @delon2006nonparametric. Briefly, for a given histogram and a set of local optima, the FTC algorithm iterates through consecutive segments identifying _peaks_, segments of increasing counts followed by segments of decreasing counts. Consecutive segments are merged based on the prioritization derived from a monotone cost function, until an optimal set of peaks are acquired. Granularity of the optimal peak set can be tuned via the hyperparamter $\epsilon$. 
 
 ```{r ftc_epsilon, include=TRUE, fig.show="hold", out.width="40%"}
 
@@ -461,9 +461,64 @@ create_coverageplot(
 
 ## Filtering Low Entropy Regions
 
-In the presence of noisy data, it can be helpful to filter regions with low entropy to extract high density regions. Algorithmically, filtering is conducted as follows:
+In the presence of noisy data, it can be helpful to filter regions with low entropy to extract high density regions. Low entropy regions or `max_gaps` can be identified using the algorithm described in @delon2005color. Briefly, a region is defined as a gap if it has high entropy and low density relative to its adjacent peak. Identification of max gaps is conducted on each segment post-segmentation.
 
-* 
+```{r low_entropy, include=TRUE, fig.show="hold", out.width="40%"}
+
+# Generating a Histogram with noisy counts
+set.seed(314)
+dt = c(
+  rnorm(1000, mean = 20, sd = 5),
+  runif(1000, min = 0, max = 40)
+)
+xhist = observations_to_histogram(dt, histogram_bin_width = 1)
+
+# Segment and Fit with and without filtering for max gaps
+filtered_fit <- segment_and_fit(
+  histogram_obj = xhist,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = TRUE
+)
+
+unfiltered_fit <- segment_and_fit(
+  histogram_obj = xhist,
+  eps = 1,
+  seed = 314,
+  remove_low_entropy = FALSE
+)
+
+unfiltered_plt <- create_coverageplot(
+  unfiltered_fit,
+  main = "Unfiltered",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+# Plotting
+filtered_plt <- create_coverageplot(
+  filtered_fit,
+  main = "Remove max gaps",
+  main.cex = 1, 
+  xaxis.tck = 0, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 0, 
+  ylab.cex = 1, 
+  xaxis.cex = 0, 
+  yaxis.cex = 0.8,
+  legend = NULL
+)
+
+print(unfiltered_plt)
+print(filtered_plt)
+
+``` 
 
 ## Fitting Statistical Distributions
 
