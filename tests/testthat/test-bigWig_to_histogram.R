@@ -154,7 +154,7 @@ test_that("Testing that selecting for strand yields correct results", {
 
   histograms_neutral <- bigWig_to_histogram(
     filename = filename,
-    strand = ".",
+    strand = "*",
     score_threshold = score_threshold,
     regions = NULL,
     gtf = gtf,

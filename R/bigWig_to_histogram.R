@@ -14,14 +14,14 @@
 #' @return a list of GenomicHistogram objects
 #'
 #' @examples \dontrun{
-#' filename = system.file("extdata", "bigwigs",  "S1.bw", package = "HistogramZoo")
-#' regions = GenomicRanges::GRanges(
+#' filename <- system.file("extdata", "bigwigs",  "S1.bw", package = "HistogramZoo")
+#' regions <- GenomicRanges::GRanges(
 #' seqnames = "chr1",
 #' IRanges::IRanges(start = c(17950, 19350),
 #'                  end = c(18000, 19600)),
 #' strand = "*")
 #'
-#' histograms = bigWig_to_histogram(
+#' histograms <- bigWig_to_histogram(
 #' filename = filename,
 #' regions = regions,
 #' histogram_bin_size = 10)
@@ -42,6 +42,7 @@ bigWig_to_histogram = function(
 ){
 
   # Error checking
+  strand <- match.arg(strand)
   if(!file.exists(filename) | length(filename) > 1){
     stop(filename, " doesn't exist")
   }
