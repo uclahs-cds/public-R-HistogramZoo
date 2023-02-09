@@ -53,6 +53,8 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #' @param distributions character vector indicating distributions,
 #' subset of `norm`, `gamma`, `gamma_flip` and `unif`. If both `gamma` and `gamma_flip`
 #' are indicated, only one will be fit depending on the skew of the data.
+#' @param rescale_fractional_precision numeric, to aid in rescaling fractional densities
+#' for skew estimation (i.e. counts from fractional vectors will by multiplied by `rescale_fractional_precision`), used for fitting `gamma` and `gamma_flip` only, default 1
 #'
 #' @export
 #'
@@ -70,7 +72,9 @@ fit_distributions <- function(
     x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "gamma_flip", "unif")) {
+    distributions = c("norm", "gamma", "gamma_flip", "unif"),
+    rescale_fractional_precision = 1
+  ) {
 
   # Matching arguments
   # TODO: consider checking minimum length of x or
@@ -80,6 +84,9 @@ fit_distributions <- function(
   }
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
+  }
+  if(!is.numeric(rescale_fractional_precision) | !(rescale_fractional_precision > 0)){
+    stop("rescale_fractional_precision must be a positive numeric")
   }
   metric <- match.arg(metric, several.ok = TRUE)
   distributions <- match.arg(distributions, several.ok = TRUE)
@@ -125,7 +132,7 @@ fit_distributions <- function(
   if( "gamma" %in% distributions & "gamma_flip" %in% distributions){
     skew <- moments::skewness(
       histogram_to_approximate_observations(
-        x
+        x, rescale_precision = rescale_fractional_precision
       )
     )
     if (skew < 0){
@@ -180,7 +187,7 @@ fit_distributions <- function(
       if(!truncated & distr == "gamma_flip"){
         dist_par$offset <- length(bin)
       }
-      
+
       # Return model
       return(
         list(
