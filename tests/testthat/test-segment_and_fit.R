@@ -51,7 +51,8 @@ test_that("base case: segment_and_fit returns expected output", {
       "metric",
       "distributions",
       "consensus_method",
-      "metric_weights"
+      "metric_weights",
+      "rescale_fractional_precision"
     )
   )
 
@@ -83,7 +84,8 @@ test_that("base case: segment_and_fit returns expected output", {
       "metric",
       "distributions",
       "consensus_method",
-      "metric_weights"
+      "metric_weights",
+      "rescale_fractional_precision"
     )
   )
 
