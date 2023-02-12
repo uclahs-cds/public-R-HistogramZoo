@@ -135,7 +135,10 @@ fit_distributions <- function(
         x, rescale_precision = rescale_fractional_precision
       )
     )
-    if (skew < 0){
+    if(is.na(skew)){
+      warning("Skew cannot be computed for gamma/flipped gamma distributions. Try increasing rescale precision if using fractional density or thresholding peak length.")
+      distributions <- setdiff(distributions, c("gamma", "gamma_flip"))
+    } else if (skew < 0){
       distributions <- setdiff(distributions, "gamma")
     } else {
       distributions <- setdiff(distributions, "gamma_flip")
