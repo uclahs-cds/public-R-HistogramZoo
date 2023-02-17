@@ -3,7 +3,7 @@ general_sim <- function(
     param1,
     param2,
     seed = 131313,
-    rfunc = c('rnorm', 'rgamma', 'runif'),
+    rfunc = c('rnorm', 'rgamma', 'runif', 'rlnorm'),
     quiet = TRUE, ...) {
   if (!quiet) {
     cat(sprintf('N = %s\tparam1 = %.3f\tparam2 = %.3f\tseed=%d\n', N, param1, param2, seed))

@@ -90,3 +90,30 @@ unif_results <- do.call(
   )
 
 saveRDS(norm_results, file = file.path(output_path, 'unif_sim_unimodal.rds'))
+
+cat('Running unimodal log-normal simulation:\n')
+
+lognorm_params <- do.call('expand.grid', c(
+    common_params,
+    list(
+        param1 = 0,
+        param2 = seq(0.1, 3, length.out = 15)
+      )
+    )
+  )
+
+lognorm_args <- list(
+    eps = 1,
+    remove_low_entropy = FALSE,
+    truncated_models = FALSE
+  )
+
+cat('Running log-normal simulation:\n')
+unif_results <- do.call(
+  'mapply',
+  c(list(FUN = HistogramZoo:::general_sim, SIMPLIFY = FALSE, quiet = F, rfunc = 'rlnorm'),
+    lognorm_args,
+    lognorm_params)
+  )
+
+saveRDS(norm_results, file = file.path(output_path, 'lognormal_sim_unimodal.rds'))
