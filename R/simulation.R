@@ -3,7 +3,8 @@ random_unimodal_sim <- function(
     unif_length = c(6, 25),
     norm_sd = c(1, 4),
     gamma_shape = c(1, 4),
-    eps = c(0.05, 0.5)
+    eps = c(0.05, 0.5),
+    noise = c(.05, .95)
   ) {
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
   # .runif1 <- function(...) runif(n = 1, ...)
@@ -13,6 +14,8 @@ random_unimodal_sim <- function(
 
   N_sim <- .sample_unif(N)
   eps_sample <- .sample_unif(eps)
+  noise_sim <- .sample_unif(noise)
+  N_noise_sim <- round(N_sim * noise_sim)
 
   if (sim_dist == 'norm') {
     param <- .sample_unif(norm_sd)
@@ -25,6 +28,21 @@ random_unimodal_sim <- function(
     param <- .sample_unif(unif_length)
     peak <- runif(N_sim, min = 0, max = param)
   }
+
+  data_sd <- sd(peak)
+  noise_min <- min(peak) - 2 * data_sd
+  noise_max <- max(peak) + 2 * data_sd
+
+  noise_data <- runif(
+    N_noise_sim,
+    min = noise_min,
+    max = noise_max
+    )
+
+  peak_noise <- c(
+    peak,
+    noise_data
+    )
 
   histogram_data <- observations_to_histogram(
     x = peak,
@@ -47,7 +65,9 @@ random_unimodal_sim <- function(
   list(
     N = N_sim,
     param = param,
-    data = peak,
+    noise_min = noise_min,
+    noise_max = noise_max,
+    noise = noise_sim,
     dist = sim_dist,
     eps = eps_sample,
     timing = timing,
