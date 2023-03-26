@@ -30,8 +30,8 @@ random_unimodal_sim <- function(
   }
 
   data_sd <- sd(peak)
-  noise_min <- min(peak) - 2 * data_sd
-  noise_max <- max(peak) + 2 * data_sd
+  noise_min <- min(peak) - data_sd
+  noise_max <- max(peak) + data_sd
 
   noise_data <- runif(
     N_noise_sim,
