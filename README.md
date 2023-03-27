@@ -15,7 +15,7 @@ The characteristic function provided by HistogramZoo is `segment_and_fit` which 
 
 Finally, HistogramZoo provides several convenient functions to summarize fits and visualize data.
 
-![overview plot](readme_imports/HistogramZoo-Overview.png)
+![overview plot](readme_imports/Overview.png)
 
 ## Installation
 
@@ -61,7 +61,7 @@ create_coverageplot(results);
 **Results table**
 
 |   region_id  |   segment_id  |   start  |   end  |   interval_count  |   interval_sizes  |   interval_starts  |   histogram_start  |   histogram_end  |   value  |   metric  |   dist               |   dist_param1  |   dist_param2  |   dist_param1_name  |   dist_param2_name  |         |       |
-|--------------|---------------|----------|--------|-------------------|-------------------|--------------------|--------------------|------------------|----------|-----------|----------------------|----------------|----------------|---------------------|---------------------|---------|-------|
+|--------------|---------------|----------|--------|-------------------|-------------------|--------------------|--------------------|------------------|----------|-----------|----------------------|----------------|----------------|---------------------|---------------------|
 |   -21-102    |   1           |   19     |   79   |   1               |   61              |  1                |  9      |   20      |   0.955492468663381  |   consensus    |   norm         |   33.032410958755   |   14.881052093018   |   mean  |   sd  |
 
 **Coverage plot**
