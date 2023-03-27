@@ -9,7 +9,13 @@
 7. [License](#license)
 
 ## Description
-HistogramZoo is a generalized framework for histogram segmentation and statistical characterization written in R.
+HistogramZoo is a generalized framework for histogram segmentation and statistical characterization written in R. Histograms are represented as S3 Histogram or GenomicHistogram objects. For the characterization of genomic data on a linear coordinate system, such as the human reference genome, HistogramZoo provides several convenient data loaders to compute coverage of BED files and load bigWig files, and support both genomic and transcriptomic coordinate systems.
+
+The characteristic function provided by HistogramZoo is `segment_and_fit` which is a wrapper for a sequence of operations which aim to segment complicated histograms and identify regions of enriched density and fit known statistical distributions to these regions. Using the Fine-to-Coarse segmentation algorithm described in Delon **et al.,** 2006, segmentation occurs iteratively on a set of local optima. The user is provided with the option of filtering low entropy regions, fitting truncated distributions, fine-tuning the endpoints of uniformly-distributed regions and using several goodness-of-fit metrics to improve reported results.
+
+Finally, HistogramZoo provides several convenient functions to summarize fits and visualize data.
+
+![overview plot](readme_imports/HistogramZoo-Overview.png)
 
 ## Installation
 
@@ -29,7 +35,7 @@ From CRAN (coming soon!)
 
 ## Quick start
 
-HistogramZoo supports common genomic data types including bigWig files and BED files. HistogramZoo supports both genomic and transcriptomic coordinate systems.
+A basic example of applying HistogramZoo to a histogram of Gaussian data is provided below:
 
 ```R
 
@@ -55,7 +61,7 @@ create_coverageplot(results);
 |--------------|---------------|----------|--------|-------------------|-------------------|--------------------|--------------------|------------------|----------|-----------|----------------------|----------------|----------------|---------------------|---------------------|---------|-------|
 |   -21-102    |   1           |   19     |   79   |   1               |   61              |                    |   1                |                  |   9      |   20      |   0.955492468663381  |   consensus    |   norm         |   33.032410958755   |   14.881052093018   |   mean  |   sd  |
 
-![coverage plot](readme_imports/hz_output.pdf)
+![coverage plot](readme_imports/hz_output.png)
 
 ## Resources
 
