@@ -1,6 +1,6 @@
 library(HistogramZoo)
 
-output_path <- '/hot/users/stefaneng/public-R-HistogramZoo/results'
+output_path <- '/hot/users/stefaneng/public-R-HistogramZoo/results/unimodal_sim_noise'
 set.seed(314)
 
 opts <- commandArgs(trailingOnly = TRUE)

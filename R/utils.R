@@ -1,7 +1,7 @@
 #' Return a string representation of an object
 #'
 #' @param x an object
-#' 
+#'
 #' @return a character representation of `x`
 dput_str <- function(x) {
   return(
@@ -11,10 +11,10 @@ dput_str <- function(x) {
 
 
 #' Correcting for Jaccard/Intersection
-#' 
+#'
 #' @param met metric
 #' @param value metric fitted value
-#' 
+#'
 #' @return if metric is `jaccard` or `intersection`, return 1 - value
 correct_fitted_value <- function(met, value){
   return(
@@ -69,9 +69,9 @@ index_to_start_end <- function(p, right = TRUE) {
 }
 
 #' Checks if a numeric vector can be used as an integer vector
-#' 
+#'
 #' @param x A numeric vector
-#' 
+#'
 #' @return logical, whether `x` is an integer or integer vector
 is_equal_integer <- function(x){
   all(x%%1 == 0)
@@ -89,3 +89,19 @@ histogram_to_approximate_observations <- function(x){
     rep(1:length(x), x)
   )
 }
+
+#' Loads base config file and overwrites with an optional additional file
+#'
+#' @param file optional file path to user config script
+#'
+#' @return list of yaml config
+load.config <- function(file = NULL) {
+  config.path <- fs::path_package('HistogramZoo', 'config.yaml');
+  base.yaml <- yaml::read_yaml(file = config.path);
+  if (!is.null(file)) {
+    user.yaml <- yaml::read_yaml(file = file);
+    base.yaml <- modifyList(base.yaml, user.yaml);
+    }
+
+  return(base.yaml);
+  }

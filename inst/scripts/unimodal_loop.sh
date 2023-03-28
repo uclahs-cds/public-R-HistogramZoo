@@ -2,10 +2,10 @@
 
 while true
 do
-  for i in {1..20}
+  for i in {1..15}
   do
-    sbatch sbatch_unimodal.sh 300
-  done 
-  sleep 900
+    sbatch sbatch_unimodal.sh 100
+  done
+  sleep 1000
   echo "New loop"
 done
