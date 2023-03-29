@@ -68,7 +68,7 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")) {
 
@@ -137,10 +137,6 @@ fit_distributions <- function(
 
   rtn <- lapply(distributions, function(distr) {
     lapply(metric, function(met){
-
-      # Get one of the metrics from histogram.distances
-      metric_func <- get(paste('histogram', met, sep = "."))
-
       # Setting boundaries & parameter names
       if(distr == "norm"){
         lower <- c(min(bin), 0.001)
@@ -152,19 +148,37 @@ fit_distributions <- function(
         names_par <- c("shape", "rate")
       }
 
-      # Fitting Data
-      dist_optim <- DEoptim::DEoptim(
-        fn = .hist.optim,
-        .dist = distr,
-        .metric_func = metric_func,
-        lower = lower,
-        upper = upper,
-        control = list(
-          trace = FALSE, # Do not print results
-          itermax = 500, # Iterations
-          VTR = 10^-2 # At 1 %, stop optimizing
+      control_args <- list(
+        trace = TRUE,
+        itermax = 500,
+        steptol = 50
         )
-      )
+
+      if (met == 'mle') {
+        dist_optim <- DEoptim::DEoptim(
+          fn = bin_log_likelihood,
+          cdf = get(paste0('p', distr)),
+          counts = bin.x$histogram_data,
+          bin_lower = bin.x$interval_start,
+          bin_upper = bin.x$interval_end,
+          lower = lower,
+          upper = upper,
+          control = control_args
+          )
+      } else {
+        # Get one of the metrics from histogram.distances
+        metric_func <- get(paste('histogram', met, sep = "."))
+
+        # Fitting Data
+        dist_optim <- DEoptim::DEoptim(
+          fn = .hist.optim,
+          .dist = distr,
+          .metric_func = metric_func,
+          lower = lower,
+          upper = upper,
+          control = control_args
+        )
+      }
 
       # Extracting parameters
       names(dist_optim$optim$bestmem) <- names_par
@@ -180,7 +194,7 @@ fit_distributions <- function(
       if(!truncated & distr == "gamma_flip"){
         dist_par$offset <- length(bin)
       }
-      
+
       # Return model
       return(
         list(

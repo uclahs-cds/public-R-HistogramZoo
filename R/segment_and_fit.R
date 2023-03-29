@@ -74,8 +74,8 @@ segment_and_fit <- function(
     uniform_stepsize = 5,
     uniform_max_sd = 0,
     truncated_models = FALSE,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    distributions = c("norm", "gamma", "gamma_flip", "unif"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    distributions = c( "norm", "gamma", "gamma_flip", "unif"),
     consensus_method = c("weighted_majority_vote", "rra"),
     metric_weights = rev(seq(1, 1.8, 0.2))
 ) {

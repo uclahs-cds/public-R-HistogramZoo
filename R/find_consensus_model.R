@@ -29,8 +29,8 @@
 find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    weights = rev(sqrt(seq(1, 5))[1:length(metric)])
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    weights = rev(sqrt(seq(1, 6))[1:length(metric)])
 ){
 
   # Initialization
