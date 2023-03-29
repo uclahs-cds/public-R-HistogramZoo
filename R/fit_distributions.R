@@ -51,10 +51,7 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
-#' subset of `norm`, `gamma`, `gamma_flip` and `unif`. If both `gamma` and `gamma_flip`
-#' are indicated, only one will be fit depending on the skew of the data.
-#' @param rescale_fractional_precision numeric, to aid in rescaling fractional densities
-#' for skew estimation (i.e. counts from fractional vectors will by multiplied by `rescale_fractional_precision`), used for fitting `gamma` and `gamma_flip` only, default 1
+#' subset of `norm`, `gamma`, `gamma_flip` and `unif`.
 #'
 #' @export
 #'
@@ -72,8 +69,7 @@ fit_distributions <- function(
     x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "gamma_flip", "unif"),
-    rescale_fractional_precision = 1
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
   ) {
 
   # Matching arguments
@@ -84,9 +80,6 @@ fit_distributions <- function(
   }
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
-  }
-  if(!is.numeric(rescale_fractional_precision) | !(rescale_fractional_precision > 0)){
-    stop("rescale_fractional_precision must be a positive numeric")
   }
   metric <- match.arg(metric, several.ok = TRUE)
   distributions <- match.arg(distributions, several.ok = TRUE)
@@ -126,23 +119,6 @@ fit_distributions <- function(
   if("unif" %in% distributions){
     distributions <- setdiff(distributions, "unif")
     unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
-  }
-
-  # Using skew to determine gamma or gamma_flip
-  if( "gamma" %in% distributions & "gamma_flip" %in% distributions){
-    skew <- moments::skewness(
-      histogram_to_approximate_observations(
-        x, rescale_precision = rescale_fractional_precision
-      )
-    )
-    if(is.na(skew)){
-      warning("Skew cannot be computed for gamma/flipped gamma distributions. Try increasing rescale precision if using fractional density or thresholding peak length.")
-      # distributions <- setdiff(distributions, c("gamma", "gamma_flip"))
-    } else if (skew < 0){
-      distributions <- setdiff(distributions, "gamma")
-    } else {
-      distributions <- setdiff(distributions, "gamma_flip")
-    }
   }
 
   rtn <- lapply(distributions, function(distr) {

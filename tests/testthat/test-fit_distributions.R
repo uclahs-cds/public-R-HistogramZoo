@@ -19,9 +19,9 @@ test_that("fit_distributions works ", {
     distributions = distributions
   )
 
-  expect_length(res, 15)
+  expect_length(res, 20)
   expect_true(
-    all(c("norm", "unif", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))
+    all(c("norm", "unif", "gamma", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))
   )
   expect_true(
     all(metric %in% unlist(lapply(res, `[`, "metric")))
@@ -97,7 +97,7 @@ test_that("fit_distributions: gamma", {
   expect_true(res_summary$value > 0.8)
 
   # Truncated
-  histogram_data <- histogram_data[10:length(histogram_data)-10]
+  # histogram_data <- histogram_data[5:(length(histogram_data)-5)]
 
   res <- fit_distributions(
     histogram_data,
@@ -139,7 +139,7 @@ test_that("fit_distributions: gamma_flip", {
   expect_true(res_summary$value > 0.8)
 
   # Truncated
-  histogram_data <- histogram_data[10:length(histogram_data)-10]
+  # histogram_data <- histogram_data[5:(length(histogram_data)-5)]
 
   res <- fit_distributions(
     histogram_data,

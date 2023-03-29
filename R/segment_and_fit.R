@@ -48,11 +48,9 @@ find_consecutive_threshold <- function(
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
 #' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.  If both `gamma` and `gamma_flip`
-#' are indicated, only one will be fit depending on the skew of the data.
+#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
-#' @param rescale_fractional_precision numeric, to aid in rescaling fractional densities for skew estimation (i.e. counts from fractional vectors will by multiplied by `rescale_fractional_precision`), used for fitting `gamma` and `gamma_flip` only, default 1
 #'
 #' @return a HistogramFit object representing the Histogram and results of the fit
 #' @export
@@ -78,8 +76,7 @@ segment_and_fit <- function(
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "gamma", "gamma_flip", "unif"),
     consensus_method = c("weighted_majority_vote", "rra"),
-    metric_weights = rev(seq(1, 1.8, 0.2)),
-    rescale_fractional_precision = 1
+    metric_weights = rev(seq(1, 1.8, 0.2))
 ) {
 
   # Error checking
@@ -122,9 +119,6 @@ segment_and_fit <- function(
   }
   if(!is.logical(max_uniform) | length(max_uniform) != 1){
     stop("max_uniform has to be a logical of length 1")
-  }
-  if(!is.numeric(rescale_fractional_precision) | !(rescale_fractional_precision > 0)){
-    stop("rescale_fractional_precision must be a positive numeric")
   }
   metric <- match.arg(metric, several.ok = T)
   consensus_method <- match.arg(consensus_method)
@@ -216,8 +210,7 @@ segment_and_fit <- function(
         x = bin_data,
         metric = metric,
         truncated = truncated_models,
-        distributions = distributions,
-        rescale_fractional_precision = rescale_fractional_precision
+        distributions = distributions
       )
       dist_optim <- lapply(dist_optim, function(obj){
         obj[['seg_start']] <- seg_start
@@ -247,7 +240,7 @@ segment_and_fit <- function(
               "seed" = seed,
               "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd,
               "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
-              "consensus_method" = consensus_method, "metric_weights" = metric_weights, "rescale_fractional_precision" = rescale_fractional_precision)
+              "consensus_method" = consensus_method, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 
