@@ -48,10 +48,10 @@ find_consecutive_threshold <- function(
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
 #' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.  If both `gamma` and `gamma_flip`
-#' are indicated, only one will be fit depending on the skew of the data.
+#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
+#' @param distribution_prioritization if `method` is `weighted_majority_voting`, a list of ranked distributions, to break ties
 #'
 #' @return a HistogramFit object representing the Histogram and results of the fit
 #' @export
@@ -75,9 +75,10 @@ segment_and_fit <- function(
     uniform_max_sd = 0,
     truncated_models = FALSE,
     metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
-    distributions = c( "norm", "gamma", "gamma_flip", "unif"),
+    distributions = c("norm", "unif", "gamma", "gamma_flip"),
     consensus_method = c("weighted_majority_vote", "rra"),
-    metric_weights = rev(seq(1, 1.8, 0.2))
+    metric_weights = rev(seq(1, 1.8, 0.2)),
+    distribution_prioritization = distributions
 ) {
 
   # Error checking
@@ -121,10 +122,23 @@ segment_and_fit <- function(
   if(!is.logical(max_uniform) | length(max_uniform) != 1){
     stop("max_uniform has to be a logical of length 1")
   }
+
   metric <- match.arg(metric, several.ok = T)
   consensus_method <- match.arg(consensus_method)
-  # Potential todo: add error checking for weights for majority voting
   distributions <- match.arg(distributions, several.ok = T)
+
+  # Pre-error checking for weighted_majority_vote
+  if(consensus_method == "weighted_majority_vote"){
+    if(!all(sort(distributions) == sort(distribution_prioritization))){
+      stop("distribution_prioritization needs be an ordering of distributions")
+    }
+    if(!is.numeric(metric_weights) | length(metric_weights) != length(metric)){
+      stop("Numeric weights must be provided for all metrics.")
+    }
+    if(!all(sort(metric_weights, decreasing = T) == metric_weights)){
+      warning("Weights should be in decreasing order.")
+    }
+  }
 
   # Extracting data
   x <- histogram_obj$histogram_data
@@ -226,6 +240,7 @@ segment_and_fit <- function(
       models = dist_optim,
       method = consensus_method,
       metric = metric,
+      distribution_prioritization = distribution_prioritization,
       weights = metric_weights
     )
 
@@ -241,7 +256,7 @@ segment_and_fit <- function(
               "seed" = seed,
               "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd,
               "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
-              "consensus_method" = consensus_method, "metric_weights" = metric_weights)
+              "consensus_method" = consensus_method, "distribution_prioritization" = distribution_prioritization, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 

@@ -51,6 +51,7 @@ test_that("base case: segment_and_fit returns expected output", {
       "metric",
       "distributions",
       "consensus_method",
+      "distribution_prioritization",
       "metric_weights"
     )
   )
@@ -83,6 +84,7 @@ test_that("base case: segment_and_fit returns expected output", {
       "metric",
       "distributions",
       "consensus_method",
+      "distribution_prioritization",
       "metric_weights"
     )
   )
