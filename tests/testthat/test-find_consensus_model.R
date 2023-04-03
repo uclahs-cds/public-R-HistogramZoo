@@ -9,7 +9,7 @@ models <- fit_distributions(data)
 
 test_that("basic use", {
 
-  results <- find_consensus_model(models)
+  results <- find_consensus_model(models, metric =  c("jaccard", "intersection", "ks", "mse", "chisq"))
 
   # Formatting
   expect_named(
@@ -56,8 +56,16 @@ test_that("edge case: one metric", {
 
 test_that("edge case: one distribution", {
 
-  models_norm <- fit_distributions(data, distributions = "norm")
-  results <- find_consensus_model(models_norm, distribution_prioritization = "norm")
+  models_norm <- fit_distributions(
+    data,
+    distributions = "norm",
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+    )
+  results <- find_consensus_model(
+    models_norm,
+    distribution_prioritization = "norm",
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+    )
 
   expect_named(
     results,
