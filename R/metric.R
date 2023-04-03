@@ -56,14 +56,8 @@ uniform.mle <- function(x, a, b, inclusive = TRUE, log = TRUE) {
   UseMethod('uniform.mle')
 }
 
-# x numeric
-# Assumes bins are (0, 1], (1, 2], ... (N - 1, N]
-#' @exportS3Method uniform.mle numeric
-uniform.mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+uniform.mle.helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = TRUE) {
   N <- sum(x)
-  L <- length(x)
-  x.end <- 1:L
-  x.start <- x.end - 1
   if (inclusive && any(x.start < a | x.end > b)) {
     return(-Inf)
   } else if (! inclusive && any(x.start <= a & x.end >= b)) {
@@ -75,4 +69,25 @@ uniform.mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
   } else {
     return((1 / (b - a))^N)
   }
+}
+
+# x numeric
+# Assumes bins are (0, 1], (1, 2], ... (N - 1, N]
+#' @exportS3Method uniform.mle numeric
+uniform.mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+  N <- sum(x)
+  L <- length(x)
+  x.end <- 1:L
+  x.start <- x.end - 1
+
+  return(uniform.mle.helper(x, x.start, x.end, a, b, inclusive, log))
+}
+
+# x Histogram
+#' @exportS3Method uniform.mle Histogram
+uniform.mle.Histogram <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+  x.start <- head(x$interval_start, n = 1)
+  x.end <- tail(x$interval_end, n = 1)
+
+  return(uniform.mle.helper(x$histogram_data, x.start, x.end, a, b, inclusive, log))
 }
