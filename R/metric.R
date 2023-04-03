@@ -56,6 +56,7 @@ uniform.mle <- function(x, a, b, inclusive = TRUE, log = TRUE) {
   UseMethod('uniform.mle')
 }
 
+# Internal, generalizes functionality between uniform.mle methods
 uniform.mle.helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = TRUE) {
   N <- sum(x)
   if (inclusive && any(x.start < a | x.end > b)) {

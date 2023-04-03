@@ -1,3 +1,7 @@
+fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
+  UseMethod('fit_uniform')
+}
+
 #' Fit a uniform distribution to a histogram
 #'
 #' @param x numeric vector representing the density of a histogram
@@ -11,26 +15,31 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chisq')){
-
+#' @exportS3Method fit_uniform numeric
+fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
   # Error checking
   metric <- match.arg(metric)
 
+  L <- length(x)
   N <- sum(x)
-  bin <- 1:length(x)
+  bin <- 1:L
   p_unif <- generate_uniform_distribution(x)
-  # h_unif <- x / sum(x)
-  metric_func <- get(paste('histogram', metric, sep = "."))
 
-  # m <- metric_func(h_unif, p_unif)
-  m <- metric_func(x, p_unif*N)
+  if(metric == 'mle') {
+    # Negative log-likelihood
+    value <- - uniform.mle(x, a = 0, b = L, log = TRUE)
+  } else {
+    metric_func <- get(paste('histogram', metric, sep = "."))
+    m <- metric_func(x, p_unif*N)
+    value <- correct_fitted_value(metric, m)
+  }
 
   return(
     list(
       "par" = NULL,
       "dist" = "unif",
       "metric" = metric,
-      "value" = correct_fitted_value(metric, m),
+      "value" = value,
       "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
         if(missing(x)) {
           x <- bin
@@ -41,7 +50,6 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
       }
     )
   )
-
 }
 
 #' Fit the model parameters by optimizing a histogram metric
@@ -135,22 +143,32 @@ fit_distributions <- function(
       }
 
       control_args <- list(
-        trace = TRUE,
+        trace = FALSE,
         itermax = 500,
         steptol = 50
         )
 
       if (met == 'mle') {
-        dist_optim <- DEoptim::DEoptim(
+        tdistr <- distr
+        mle.options.args <- list(
           fn = bin_log_likelihood,
-          cdf = get(paste0('p', distr)),
-          counts = bin.x$histogram_data,
-          bin_lower = bin.x$interval_start,
-          bin_upper = bin.x$interval_end,
+          counts = x,
+          bin_lower = bin - 1,
+          bin_upper = bin,
           lower = lower,
           upper = upper,
           control = control_args
           )
+
+        if (truncated) {
+          tdistr <- paste0('t', tdistr)
+          mle.options.args$a <- min(bin) - 1e-10
+          mle.options.args$b <- max(bin) + 1e-10
+        }
+
+        mle.options.args$cdf = get(paste0('p', tdistr))
+
+        dist_optim <- do.call(DEoptim::DEoptim, mle.options.args)
       } else {
         # Get one of the metrics from histogram.distances
         metric_func <- get(paste('histogram', met, sep = "."))
