@@ -57,7 +57,7 @@ fit_uniform.table <- fit_uniform.numeric
 #' Fit the model parameters by optimizing a histogram metric
 #'
 #' @param x numeric vector, representing data to be fit
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
@@ -77,7 +77,7 @@ fit_uniform.table <- fit_uniform.numeric
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
-    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
   ) {
@@ -91,7 +91,11 @@ fit_distributions <- function(
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
   }
-  metric <- match.arg(metric, several.ok = TRUE)
+  metric <- match.arg(
+    metric,
+    several.ok = TRUE,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Initializing Data

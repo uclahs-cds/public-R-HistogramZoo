@@ -30,7 +30,7 @@
 find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
-    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distribution_prioritization = c("norm", "unif", "gamma", "gamma_flip"),
     weights = rev(sqrt(seq(1, 6))[1:length(metric)])
 ){
@@ -42,7 +42,11 @@ find_consensus_model <- function(
   tag <- paste0(met, ".", distr)
 
   # Error checking
-  metric <- match.arg(metric, several.ok = T)
+  metric <- match.arg(
+    metric,
+    several.ok = T,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   method <- match.arg(method)
   stopifnot(is.numeric(weights))
   if(!all(sort(weights, decreasing = T) == weights)){
