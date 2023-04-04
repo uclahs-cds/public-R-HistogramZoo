@@ -597,7 +597,8 @@ gamma_full <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = FALSE,
-  truncated_models = FALSE
+  truncated_models = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 # Removing noisy data and fitting a truncated model
@@ -606,7 +607,8 @@ gamma_truncated <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = TRUE,
-  truncated_models = TRUE
+  truncated_models = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 gamma_full_plt <- create_coverageplot(
