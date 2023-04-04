@@ -49,6 +49,7 @@ identify_uniform_segment <- function(
   min_seg_size <- ceiling(num_bins * threshold)
   # metric_func <- get(paste('histogram', metric, sep = "."))
   # TODO: pass in metric_func rather than metric as a param for fit_uniform?
+
   res <- lapply(seq(from = 1, to = num_bins - min_seg_size, by = stepsize), function(a) {
     lapply(seq(from = min_seg_size + a, to = num_bins, by = stepsize), function(b) {
       x_sub <- x[a:b]
@@ -81,26 +82,3 @@ identify_uniform_segment <- function(
   )
 
 }
-
-
-# identify_mle_segment <- function(x) {
-#   UseMethod('identify_mle_segment')
-# }
-#
-
-# identify_mle_segment <- function(x) {
-#   list(
-#     "par" = NULL,
-#     "dist" = "unif",
-#     "metric" = "mle",
-#     "value" = uniform.mle(metric, m),
-#     "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
-#       if(missing(x)) {
-#         x <- bin
-#       }
-#       res <- ifelse(x >= min(bin) & x <= max(bin), p_unif[1], 0)
-#       if(scale) res * N
-#       else res
-#     }
-#   )
-# }
