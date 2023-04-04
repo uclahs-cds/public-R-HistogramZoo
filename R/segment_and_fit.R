@@ -195,15 +195,16 @@ segment_and_fit <- function(
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
     bin_data <- x[seg_start:seg_end]
+    # sub_hist <- histogram_obj[seg_start:seg_end]
 
     # Find the maximum uniform segment
     dist_optim <- unif_segment <- list()
-    if("unif" %in% distributions &
-       max_uniform &
-       seg_len > uniform_stepsize &
-       seg_len > ceiling(uniform_threshold*seg_len)
+    if("unif" %in% distributions &&
+       max_uniform &&
+       seg_len > uniform_stepsize &&
+       seg_len > ceiling(uniform_threshold*seg_len) &&
+       ! 'mle' %in% metric
     ){
-
       unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
           x = bin_data,
@@ -212,12 +213,16 @@ segment_and_fit <- function(
           stepsize = uniform_stepsize,
           max_sd_size = uniform_max_sd
         )
-        res[['seg_start']] <- res[['seg_start']] + seg_start -1
-        res[['seg_end']] <- res[['seg_end']] + seg_start -1
+        res[['seg_start']] <- res[['seg_start']] + seg_start - 1
+        res[['seg_end']] <- res[['seg_end']] + seg_start - 1
         return(res)
       })
       # Removing unif from the vector of distributions
       distributions <- setdiff(distributions, "unif")
+    }
+
+    if (max_uniform && 'mle' %in% metric) {
+      warning("Cannot fit max_uniform with 'mle' in metrics. Setting max_uniform = FALSE.")
     }
 
     if( length(distributions) > 0 ){
