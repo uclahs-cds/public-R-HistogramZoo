@@ -71,7 +71,7 @@ find_consensus_model <- function(
   }
 
   # Correcting for Jaccard and Intersection
-  val = ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
+  val <- ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
 
   # Base case: if there is only 1 metric
   if(length(metric) == 1){

@@ -27,7 +27,7 @@ fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'k
 
   if(metric == 'mle') {
     # Negative log-likelihood
-    value <- - uniform.mle(x, a = 0, b = L, log = TRUE)
+    value <- (- uniform.mle(x, a = 0, b = L, log = TRUE))
   } else {
     metric_func <- get(paste('histogram', metric, sep = "."))
     m <- metric_func(x, p_unif*N)
@@ -51,6 +51,8 @@ fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'k
     )
   )
 }
+
+fit_uniform.table <- fit_uniform.numeric
 
 #' Fit the model parameters by optimizing a histogram metric
 #'

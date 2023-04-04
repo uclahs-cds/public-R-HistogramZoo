@@ -17,9 +17,13 @@ dput_str <- function(x) {
 #'
 #' @return if metric is `jaccard` or `intersection`, return 1 - value
 correct_fitted_value <- function(met, value){
-  return(
-    if (met %in% c("jaccard", "intersection")) (1 - value) else value
-  )
+  if (! is.finite(value)) {
+    value <- NA
+  } else if (met %in% c("jaccard", "intersection")) {
+    return(1 - value)
+  } else {
+    return(value)
+  }
 }
 
 #' Convert a vector of points into a data.frame of start/end points representing
