@@ -30,7 +30,7 @@
 find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = unique(sapply(models, `[[`, "metric")),
     distribution_prioritization = c("norm", "unif", "gamma", "gamma_flip"),
     weights = rev(sqrt(seq(1, 6))[1:length(metric)])
 ){

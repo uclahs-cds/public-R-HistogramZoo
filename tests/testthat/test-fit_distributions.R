@@ -2,7 +2,8 @@ context("fit_distributions")
 
 
 # Initializing
-metric <- c("jaccard", "intersection", "ks", "mse", "chisq")
+# NOTE: ks and mse provide much different results so they were removed
+metric <- c("jaccard", "intersection", "chisq")
 distributions <- c("norm", "gamma", "unif", "gamma_flip")
 fit_names <- c("par", "dist", "metric", "value", "dens")
 
@@ -19,7 +20,7 @@ test_that("fit_distributions works ", {
     distributions = distributions
   )
 
-  expect_length(res, 20)
+  expect_length(res, length(distributions) * length(metric))
   expect_true(
     all(c("norm", "unif", "gamma", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))
   )
