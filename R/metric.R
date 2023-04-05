@@ -76,7 +76,6 @@ uniform.mle.helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = 
 # Assumes bins are (0, 1], (1, 2], ... (N - 1, N]
 #' @exportS3Method uniform.mle numeric
 uniform.mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
-  N <- sum(x)
   L <- length(x)
   x.end <- 1:L
   x.start <- x.end - 1
