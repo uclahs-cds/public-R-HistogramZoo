@@ -478,14 +478,16 @@ filtered_fit <- segment_and_fit(
   histogram_obj = xhist,
   eps = 1,
   seed = 314,
-  remove_low_entropy = TRUE
+  remove_low_entropy = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 unfiltered_fit <- segment_and_fit(
   histogram_obj = xhist,
   eps = 1,
   seed = 314,
-  remove_low_entropy = FALSE
+  remove_low_entropy = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 unfiltered_plt <- create_coverageplot(
@@ -538,7 +540,8 @@ gaussian_full <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = FALSE,
-  truncated_models = FALSE
+  truncated_models = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 # Removing noisy data and fitting a truncated model
@@ -547,7 +550,8 @@ gaussian_truncated <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = TRUE,
-  truncated_models = TRUE
+  truncated_models = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 gaussian_full_plt <- create_coverageplot(
@@ -593,7 +597,8 @@ gamma_full <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = FALSE,
-  truncated_models = FALSE
+  truncated_models = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 # Removing noisy data and fitting a truncated model
@@ -602,7 +607,8 @@ gamma_truncated <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = TRUE,
-  truncated_models = TRUE
+  truncated_models = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 gamma_full_plt <- create_coverageplot(
@@ -648,7 +654,8 @@ gamma_flip_full <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = FALSE,
-  truncated_models = FALSE
+  truncated_models = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 # Removing noisy data and fitting a truncated model
@@ -657,7 +664,8 @@ gamma_flip_truncated <- segment_and_fit(
   eps = 1,
   seed = 314,
   remove_low_entropy = TRUE,
-  truncated_models = TRUE
+  truncated_models = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 gamma_flip_full_plt <- create_coverageplot(
@@ -702,7 +710,8 @@ uniform_fit <- segment_and_fit(
   histogram_obj = uniform_histogram,
   eps = 1,
   seed = 314,
-  max_uniform = FALSE
+  max_uniform = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 uniform_plt <- create_coverageplot(
@@ -760,7 +769,8 @@ uniform_untrimmed <- segment_and_fit(
   eps = 1,
   seed = 314,
   max_uniform = FALSE,
-  remove_low_entropy = FALSE
+  remove_low_entropy = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 uniform_trimmed <- segment_and_fit(
@@ -771,7 +781,8 @@ uniform_trimmed <- segment_and_fit(
   uniform_threshold = 0.75,
   uniform_stepsize = 5,
   uniform_max_sd = 1,
-  remove_low_entropy = FALSE
+  remove_low_entropy = FALSE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 uniform_untrimmed_plt <- create_coverageplot(
@@ -881,7 +892,8 @@ histogram_fit <- segment_and_fit(
   histogram_obj = my_histogram,
   eps = 1,
   seed = 314,
-  truncated_models = TRUE
+  truncated_models = TRUE,
+  metric = c("jaccard", "intersection", "ks", "mse", "chisq")
 )
 
 # summarize_results to generate

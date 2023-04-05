@@ -1,3 +1,7 @@
+fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
+  UseMethod('fit_uniform')
+}
+
 #' Fit a uniform distribution to a histogram
 #'
 #' @param x numeric vector representing the density of a histogram
@@ -11,26 +15,31 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chisq')){
-
+#' @exportS3Method fit_uniform numeric
+fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
   # Error checking
   metric <- match.arg(metric)
 
+  L <- length(x)
   N <- sum(x)
-  bin <- 1:length(x)
+  bin <- 1:L
   p_unif <- generate_uniform_distribution(x)
-  # h_unif <- x / sum(x)
-  metric_func <- get(paste('histogram', metric, sep = "."))
 
-  # m <- metric_func(h_unif, p_unif)
-  m <- metric_func(x, p_unif*N)
+  if(metric == 'mle') {
+    # Negative log-likelihood
+    value <- (- uniform_mle(x, a = 0, b = L, log = TRUE))
+  } else {
+    metric_func <- get(paste('histogram', metric, sep = "."))
+    m <- metric_func(x, p_unif*N)
+    value <- correct_fitted_value(metric, m)
+  }
 
   return(
     list(
       "par" = NULL,
       "dist" = "unif",
       "metric" = metric,
-      "value" = correct_fitted_value(metric, m),
+      "value" = value,
       "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
         if(missing(x)) {
           x <- bin
@@ -41,13 +50,14 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
       }
     )
   )
-
 }
+
+fit_uniform.table <- fit_uniform.numeric
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
 #' @param x numeric vector, representing data to be fit
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
@@ -81,7 +91,11 @@ fit_distributions <- function(
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
   }
-  metric <- match.arg(metric, several.ok = TRUE)
+  metric <- match.arg(
+    metric,
+    several.ok = TRUE,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Initializing Data
@@ -123,10 +137,6 @@ fit_distributions <- function(
 
   rtn <- lapply(distributions, function(distr) {
     lapply(metric, function(met){
-
-      # Get one of the metrics from histogram.distances
-      metric_func <- get(paste('histogram', met, sep = "."))
-
       # Setting boundaries & parameter names
       if(distr == "norm"){
         lower <- c(min(bin), 0.001)
@@ -138,19 +148,47 @@ fit_distributions <- function(
         names_par <- c("shape", "rate")
       }
 
-      # Fitting Data
-      dist_optim <- DEoptim::DEoptim(
-        fn = .hist.optim,
-        .dist = distr,
-        .metric_func = metric_func,
-        lower = lower,
-        upper = upper,
-        control = list(
-          trace = FALSE, # Do not print results
-          itermax = 500, # Iterations
-          VTR = 10^-2 # At 1 %, stop optimizing
+      control_args <- list(
+        trace = FALSE,
+        itermax = 500,
+        steptol = 50
         )
-      )
+
+      if (met == 'mle') {
+        tdistr <- distr
+        mle.options.args <- list(
+          fn = bin_log_likelihood,
+          counts = x,
+          bin_lower = bin - 1,
+          bin_upper = bin,
+          lower = lower,
+          upper = upper,
+          control = control_args
+          )
+
+        if (truncated) {
+          tdistr <- paste0('t', tdistr)
+          mle.options.args$a <- min(bin) - 1e-10
+          mle.options.args$b <- max(bin) + 1e-10
+        }
+
+        mle.options.args$cdf = get(paste0('p', tdistr))
+
+        dist_optim <- do.call(DEoptim::DEoptim, mle.options.args)
+      } else {
+        # Get one of the metrics from histogram.distances
+        metric_func <- get(paste('histogram', met, sep = "."))
+
+        # Fitting Data
+        dist_optim <- DEoptim::DEoptim(
+          fn = .hist.optim,
+          .dist = distr,
+          .metric_func = metric_func,
+          lower = lower,
+          upper = upper,
+          control = control_args
+        )
+      }
 
       # Extracting parameters
       names(dist_optim$optim$bestmem) <- names_par

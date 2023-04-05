@@ -30,9 +30,9 @@
 find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = unique(sapply(models, `[[`, "metric")),
     distribution_prioritization = c("norm", "unif", "gamma", "gamma_flip"),
-    weights = rev(sqrt(seq(1, 5))[1:length(metric)])
+    weights = rev(sqrt(seq(1, 6))[1:length(metric)])
 ){
 
   # Initialization
@@ -42,7 +42,11 @@ find_consensus_model <- function(
   tag <- paste0(met, ".", distr)
 
   # Error checking
-  metric <- match.arg(metric, several.ok = T)
+  metric <- match.arg(
+    metric,
+    several.ok = T,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   method <- match.arg(method)
   stopifnot(is.numeric(weights))
   if(!all(sort(weights, decreasing = T) == weights)){
@@ -71,7 +75,7 @@ find_consensus_model <- function(
   }
 
   # Correcting for Jaccard and Intersection
-  val = ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
+  val <- ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
 
   # Base case: if there is only 1 metric
   if(length(metric) == 1){

@@ -47,7 +47,7 @@ find_consecutive_threshold <- function(
 #' @param uniform_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
 #' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
@@ -69,7 +69,7 @@ segment_and_fit <- function(
     min_gap_size = 2,
     min_segment_size = 3,
     seed = NULL,
-    max_uniform = T,
+    max_uniform = FALSE,
     uniform_threshold = 0.75,
     uniform_stepsize = 5,
     uniform_max_sd = 0,
@@ -77,7 +77,7 @@ segment_and_fit <- function(
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     distributions = c("norm", "unif", "gamma", "gamma_flip"),
     consensus_method = c("weighted_majority_vote", "rra"),
-    metric_weights = rev(seq(1, 1.8, 0.2)),
+    metric_weights = rev(seq(1, 2, length.out = length(metric))),
     distribution_prioritization = distributions
 ) {
 
@@ -123,7 +123,11 @@ segment_and_fit <- function(
     stop("max_uniform has to be a logical of length 1")
   }
 
-  metric <- match.arg(metric, several.ok = T)
+  metric <- match.arg(
+    metric,
+    several.ok = T,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   consensus_method <- match.arg(consensus_method)
   distributions <- match.arg(distributions, several.ok = T)
 
@@ -195,15 +199,16 @@ segment_and_fit <- function(
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
     bin_data <- x[seg_start:seg_end]
+    # sub_hist <- histogram_obj[seg_start:seg_end]
 
     # Find the maximum uniform segment
     dist_optim <- unif_segment <- list()
-    if("unif" %in% distributions &
-       max_uniform &
-       seg_len > uniform_stepsize &
-       seg_len > ceiling(uniform_threshold*seg_len)
+    if("unif" %in% distributions &&
+       max_uniform &&
+       seg_len > uniform_stepsize &&
+       seg_len > ceiling(uniform_threshold*seg_len) &&
+       ! 'mle' %in% metric
     ){
-
       unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
           x = bin_data,
@@ -212,12 +217,16 @@ segment_and_fit <- function(
           stepsize = uniform_stepsize,
           max_sd_size = uniform_max_sd
         )
-        res[['seg_start']] <- res[['seg_start']] + seg_start -1
-        res[['seg_end']] <- res[['seg_end']] + seg_start -1
+        res[['seg_start']] <- res[['seg_start']] + seg_start - 1
+        res[['seg_end']] <- res[['seg_end']] + seg_start - 1
         return(res)
       })
       # Removing unif from the vector of distributions
       distributions <- setdiff(distributions, "unif")
+    }
+
+    if (max_uniform && 'mle' %in% metric) {
+      warning("Cannot fit max_uniform with 'mle' in metrics. Setting max_uniform = FALSE.")
     }
 
     if( length(distributions) > 0 ){
