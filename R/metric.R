@@ -52,12 +52,12 @@ histogram.chisq <- function(x, y) {
   sum((x - y)^2 / (x + y))
 }
 
-uniform.mle <- function(x, a, b, inclusive = TRUE, log = TRUE) {
-  UseMethod('uniform.mle')
+uniform_mle <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+  UseMethod('uniform_mle')
 }
 
-# Internal, generalizes functionality between uniform.mle methods
-uniform.mle.helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = TRUE) {
+# Internal, generalizes functionality between uniform_mle methods
+uniform_mle_helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = TRUE) {
   N <- sum(x)
   if (inclusive && any(x.start < a | x.end > b)) {
     return(-Inf)
@@ -74,20 +74,20 @@ uniform.mle.helper <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = 
 
 # x numeric
 # Assumes bins are (0, 1], (1, 2], ... (N - 1, N]
-#' @exportS3Method uniform.mle numeric
-uniform.mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+#' @exportS3Method uniform_mle numeric
+uniform_mle.numeric <- function(x, a, b, inclusive = TRUE, log = TRUE) {
   L <- length(x)
   x.end <- 1:L
   x.start <- x.end - 1
 
-  return(uniform.mle.helper(x, x.start, x.end, a, b, inclusive, log))
+  return(uniform_mle_helper(x, x.start, x.end, a, b, inclusive, log))
 }
 
 # x Histogram
-#' @exportS3Method uniform.mle Histogram
-uniform.mle.Histogram <- function(x, a, b, inclusive = TRUE, log = TRUE) {
+#' @exportS3Method uniform_mle Histogram
+uniform_mle.Histogram <- function(x, a, b, inclusive = TRUE, log = TRUE) {
   x.start <- head(x$interval_start, n = 1)
   x.end <- tail(x$interval_end, n = 1)
 
-  return(uniform.mle.helper(x$histogram_data, x.start, x.end, a, b, inclusive, log))
+  return(uniform_mle_helper(x$histogram_data, x.start, x.end, a, b, inclusive, log))
 }
