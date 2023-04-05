@@ -41,9 +41,24 @@
 #'   )
 #' print(dist_optim$optim$bestmem)
 bin_log_likelihood <- function(theta, cdf, counts, bin_lower, bin_upper, ...) {
+  common.args <- c(
+    as.list(theta),
+    list(...)
+    )
+
   res <- unlist(lapply(seq_along(counts), function(i) {
-    bin_prob <- cdf(bin_upper[i], theta[1], theta[2], ...) - cdf(bin_lower[i], theta[1], theta[2], ...)
-    if (!is.na(bin_prob) && bin_prob > 0) counts[i] * log(bin_prob)
+    upper.prob <- do.call(cdf, c(
+      list(q = bin_upper[i]),
+        common.args
+        )
+      )
+    lower.prob <- do.call(cdf, c(
+      list(q = bin_lower[i]),
+        common.args
+        )
+      )
+    bin.prob <- upper.prob - lower.prob
+    if (!is.na(bin.prob) && bin.prob > 0) counts[i] * log(bin.prob)
     else - Inf
   }))
   - sum(res)
