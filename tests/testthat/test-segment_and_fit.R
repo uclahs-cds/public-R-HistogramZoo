@@ -65,6 +65,8 @@ test_that("base case: segment_and_fit returns expected output", {
       "region_id",
       "chr",
       "strand",
+      "intron_start",
+      "intron_end",
       # Results
       "models", "p",
       # Parameters
