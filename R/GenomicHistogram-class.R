@@ -205,6 +205,7 @@ GenomicHistogram <- function(
   strand <- match.arg(strand)
 
   if(length(histogram_data) > 0){
+    # Assigning interval start and end if missing
     if( missing(interval_start) & missing(interval_end)){
       interval_start <- interval_end <- seq(1, length(histogram_data), 1)
     } else if (missing(interval_start)){
@@ -212,10 +213,19 @@ GenomicHistogram <- function(
     } else if (missing(interval_end)){
       interval_end <- interval_start
     }
+    # Estimating bin width if missing
     if(missing(bin_width)){
       bin_width <- as.integer(
         (interval_end - interval_start + 1)[1]
       )
+    }
+    # Computing introns if missing
+    if(missing(intron_start) | missing(intron_end)){
+      bins <- IRanges::IRanges(start = interval_start, end = interval_end)
+      range_gr <- IRanges::range(bins)
+      introns <- IRanges::setdiff(range_gr, bins)
+      intron_start <- introns$start
+      intron_end <- introns$end
     }
   }
 
@@ -271,15 +281,21 @@ GenomicHistogram <- function(
 # TODO: Find a useful text representation for introns
 # If bin overlaps introns do start >[intron_start:end]< end rather than start-end
 #' @export
-print.GenomicHistogram = function(x, ...){
+print.GenomicHistogram <- function(x, ...){
 
   histogram_data <- x$histogram_data
   region_id <- x$region_id
   interval_start <- x$interval_start
   interval_end <- x$interval_end
+  intron_start <- x$intron_start
+  intron_end <- x$intron_end
 
   # Base case
   cat("Region: ", region_id, "\n")
+
+  # Identifying introns within bins
+  intron_bins <- (intron_start > interval_start) & (intron_end < interval_end)
+  bin_size_one <- interval_start == interval_end
 
   # Indices
   if(length(histogram_data) > 10){
@@ -333,7 +349,7 @@ print.GenomicHistogram = function(x, ...){
 }
 
 #' @export
-`[.GenomicHistogram` = function(x, i){
+`[.GenomicHistogram` <- function(x, i){
   keep_introns <- x$intron_start > x$interval_start[1] & x$intron_end < tail(x$interval_end, n=1)
   new_GenomicHistogram(
     histogram_data = x$histogram_data[i],
@@ -350,7 +366,7 @@ print.GenomicHistogram = function(x, ...){
 
 
 #' @export
-reassign_region_id.GenomicHistogram = function(histogram_obj, region_id){
+reassign_region_id.GenomicHistogram <- function(histogram_obj, region_id){
 
   stopifnot(inherits(histogram_obj, "Histogram"))
 
