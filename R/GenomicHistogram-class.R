@@ -9,6 +9,8 @@
 #' @param bin_width integer width of histogram bins, if missing, estimated from `interval_start` and `interval_end`
 #' @param chr chromosome name
 #' @param strand strand
+#' @param intron_start integer vector representing the starts of introns
+#' @param intron_end integer vector representing the ends of introns
 #'
 #' @return A GenomicHistogram object
 new_GenomicHistogram <- function(
@@ -18,12 +20,16 @@ new_GenomicHistogram <- function(
     region_id = NULL,
     bin_width = NULL,
     chr = NULL,
-    strand = NULL
+    strand = NULL,
+    intron_start = NULL,
+    intron_end = NULL
   ){
 
   # Checking types
   stopifnot(is.character(chr))
   stopifnot(is.character(strand))
+  stopifnot(is.numeric(intron_start))
+  stopifnot(is.numeric(intron_end))
 
   # Creating object
   return(
@@ -35,11 +41,14 @@ new_GenomicHistogram <- function(
       region_id = region_id,
       chr = chr,
       strand = strand,
+      intron_start = intron_start,
+      intron_end = intron_end,
       class = "GenomicHistogram"
     )
   )
 }
 
+# TODO: If we change this to base 0, then we can obliterate all of these tests in favour of Histogram validator
 # validator
 #' Validates GenomicHistogram objects
 #'
@@ -55,6 +64,12 @@ validate_GenomicHistogram <- function(x){
   bin_width <- x$bin_width
   region_id <- x$region_id
   chr <- x$chr
+
+  # Intron attributes
+  intron_start <- x$intron_start
+  intron_end <- x$intron_end
+  intron_length <- length(intron_start)
+  intron_gr <- IRanges::IRanges(start = intron_start, end = intron_end)
 
   # Validate
   # 0. Everything has to be the same length, Histogram has to be at least length 1
@@ -88,25 +103,64 @@ validate_GenomicHistogram <- function(x){
     }
   }
 
-  # 5. bin_width is positive integer
-  if(!(is.integer(bin_width) && bin_width > 0)){
-    stop("bin_width must be a positive integer", call. = FALSE)
-  }
-
-  # 6. All histogram bins are length bin_width
-  bin_width_vec <- interval_end - interval_start + 1
-  if(!all(bin_width_vec <= bin_width)){
-    stop("Incorrect bin_width: All interval lengths must be less than or equal to bin_width", call. = FALSE)
-  }
-
-  # 7. region_id is of length 1
+  # 5. region_id is of length 1
   if(length(region_id) != 1){
     stop("region_id must have length 1.", call. = FALSE)
   }
 
-  # 8. chr is of length 1
+  # 6. chr is of length 1
   if( length(chr) > 1 ) {
     stop("chr must have length 1", call. = FALSE)
+  }
+
+  # 7. Introns
+  if(length(intron_start) != length(intron_end)){
+    stop("intron start/end have to be the same length", call. = FALSE)
+  }
+
+  if(!all(intron_start <= intron_end)){
+    stop("intron_start must be less than or equal to intron_end for a valid intron", call. = FALSE)
+  }
+
+  if(intron_length > 1){
+    # 8. Start/End have to be in order
+    if(!all(diff(intron_start) > 0 & diff(intron_end) > 0)){
+      stop("introns must be ordered and nonoverlapping.", call. = FALSE)
+    }
+
+    # 9. Introns need to be non-overlapping
+    if(any(intron_start[2:(intron_length)] <= intron_end[1:(intron_length-1)])){
+      stop("introns must be ordered and nonoverlapping.", call. = FALSE)
+    }
+  }
+
+  # 10. Check that every intron is in the range
+  if(intron_length > 0){
+    range_gr <- IRanges::IRanges(start = interval_start[1], end = tail(interval_end, n = 1))
+    ovl <- IRanges::findOverlaps( intron_gr, range_gr, type = "within")
+    if(any(!seq(1, intron_length) %in% S4Vectors::queryHits(ovl))){
+      stop("introns must overlap histogram range", call. = FALSE)
+    }
+  }
+
+  # 11. bin_width is positive integer
+  if(!(is.integer(bin_width) && bin_width > 0)){
+    stop("bin_width must be a positive integer", call. = FALSE)
+  }
+
+  # 12. All histogram bins are length bin_width
+  bin_gr <- IRanges::IRanges(start = interval_start, end = interval_end)
+  bin_gr <- split(bin_gr, seq(1, histogram_length))
+  bin_width_vec <- sapply(bin_gr, function(gr) sum(IRanges::width(IRanges::setdiff(gr, intron_gr))))
+
+  if(!all(bin_width_vec[1:(histogram_length-1)] == bin_width)){
+    stop(
+      'Incorrect bin_width after intron correction:
+       If GenomicHistogram is of greater than length 1, all bins subtracting introns
+       with the exception of the last bin must be equal in length to bin_width.
+       For a GenomicHistogram of length 1, the bin length of the only bin must be equal to bin_width',
+      call. = FALSE
+    )
   }
 
   return(x)
@@ -122,6 +176,8 @@ validate_GenomicHistogram <- function(x){
 #' @param bin_width integer width of histogram bins, if missing, estimated from `interval_start` and `interval_end`
 #' @param chr chromosome name
 #' @param strand strand
+#' @param intron_start integer vector representing the starts of introns (optional: to represent intron-spanning histograms on transcripts)
+#' @param intron_end integer vector representing the ends of introns (optional: to represent intron-spanning histograms on transcripts)
 #'
 #' @return a GenomicHistogram object
 #' @export
@@ -140,7 +196,9 @@ GenomicHistogram <- function(
     region_id = character(),
     bin_width = integer(),
     chr = character(),
-    strand = c("*", "+", "-")
+    strand = c("*", "+", "-"),
+    intron_start = integer(),
+    intron_end = integer()
 ){
 
   # Coercing values to the right thing
@@ -156,7 +214,7 @@ GenomicHistogram <- function(
     }
     if(missing(bin_width)){
       bin_width <- as.integer(
-        ceiling(max(interval_end - interval_start + 1))
+        (interval_end - interval_start + 1)[1]
       )
     }
   }
@@ -175,6 +233,12 @@ GenomicHistogram <- function(
   }
   if(!is.character(chr)){
     chr <- as.character(chr)
+  }
+  if(!is.integer(intron_start)){
+    intron_start <- as.integer(intron_start)
+  }
+  if(!is.integer(intron_end)){
+    intron_end <- as.integer(intron_end)
   }
 
   # Region ID
@@ -195,13 +259,17 @@ GenomicHistogram <- function(
         bin_width = bin_width,
         region_id = region_id,
         chr = chr,
-        strand = strand
+        strand = strand,
+        intron_start = intron_start,
+        intron_end = intron_end
       )
     )
   )
 
 }
 
+# TODO: Find a useful text representation for introns
+# If bin overlaps introns do start >[intron_start:end]< end rather than start-end
 #' @export
 print.GenomicHistogram = function(x, ...){
 
@@ -266,6 +334,7 @@ print.GenomicHistogram = function(x, ...){
 
 #' @export
 `[.GenomicHistogram` = function(x, i){
+  keep_introns <- x$intron_start > x$interval_start[1] & x$intron_end < tail(x$interval_end, n=1)
   new_GenomicHistogram(
     histogram_data = x$histogram_data[i],
     interval_start = x$interval_start[i],
@@ -273,7 +342,10 @@ print.GenomicHistogram = function(x, ...){
     region_id = x$region_id,
     bin_width = x$bin_width,
     chr = x$chr,
-    strand = x$strand)
+    strand = x$strand,
+    intron_start = x$intron_start[keep_introns],
+    intron_end = x$intron_end[keep_introns]
+    )
 }
 
 
@@ -284,7 +356,7 @@ reassign_region_id.GenomicHistogram = function(histogram_obj, region_id){
 
   # Creating a region id
   if(missing(region_id) & length(histogram_obj$histogram_data) > 0){
-    region_id <- paste0(histogram_obj$chr, ":", histogram_obj$interval_start[1], "-", histogram_obj$interval_end[length(histogram_obj$histogramm_data)], ":", histogram_obj$strand)
+    region_id <- paste0(histogram_obj$chr, ":", histogram_obj$interval_start[1], "-", histogram_obj$interval_end[length(histogram_obj$histogram_data)], ":", histogram_obj$strand)
   }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
