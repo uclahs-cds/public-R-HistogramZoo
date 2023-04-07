@@ -84,9 +84,9 @@ validate_Histogram <- function(x){
       stop("intervals must be ordered and nonoverlapping.", call. = FALSE)
     }
 
-    # 4. Intervals need to be non-overlapping
-    if(any(interval_start[2:(histogram_length)] < interval_end[1:(histogram_length-1)])){
-      stop("intervals must be ordered and nonoverlapping.", call. = FALSE)
+    # 4. Intervals need to be continuous
+    if(any(interval_start[2:(histogram_length)] != interval_end[1:(histogram_length-1)])){
+      stop("intervals must be continuous.", call. = FALSE)
     }
   }
 
