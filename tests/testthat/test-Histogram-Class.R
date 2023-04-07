@@ -83,6 +83,16 @@ test_that("Histogram-class methods", {
     c(2, 3, 4, 3)
   )
 
+  # Testing last bin bin_width re-estimation
+  x <- Histogram(
+    histogram_data = rep(1, 2),
+    interval_start = c(1, 2),
+    interval_end = c(2, 4)
+  )
+
+  x_subset <- x[2]
+  expect_equal(x_subset$bin_width, 2)
+
   # reassign_ids
   x_reassign <- reassign_region_id(x, "TEST")
   expect_equal(x_reassign$region_id, "TEST")
