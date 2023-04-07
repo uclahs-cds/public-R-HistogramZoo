@@ -131,6 +131,22 @@ Histogram <- function(
     region_id = character()
   ){
 
+  if (!is.double(histogram_data)) {
+    histogram_data <- as.double(histogram_data)
+  }
+  if (!is.integer(interval_start)){
+    interval_start <- as.integer(interval_start)
+  }
+  if (!is.integer(interval_end)){
+    interval_end <- as.integer(interval_end)
+  }
+  if (!is.integer(bin_width)){
+    bin_width <- as.integer(bin_width)
+  }
+  if(!is.character(region_id)){
+    region_id <- as.character(region_id)
+  }
+
   # Coercing values to the right thing
   if(length(histogram_data) > 0){
     if(missing(interval_start) & missing(interval_end)){
@@ -149,22 +165,6 @@ Histogram <- function(
     if(missing(region_id) ){
       region_id <- paste0(interval_start[1], "-", interval_end[length(histogram_data)])
     }
-  }
-
-  if (!is.double(histogram_data)) {
-    histogram_data <- as.double(histogram_data)
-  }
-  if (!is.integer(interval_start)){
-    interval_start <- as.integer(interval_start)
-  }
-  if (!is.integer(interval_end)){
-    interval_end <- as.integer(interval_end)
-  }
-  if (!is.integer(bin_width)){
-    bin_width <- as.integer(bin_width)
-  }
-  if(!is.character(region_id)){
-    region_id <- as.character(region_id)
   }
 
   # Validate and return object
