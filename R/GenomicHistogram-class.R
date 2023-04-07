@@ -213,19 +213,21 @@ GenomicHistogram <- function(
     } else if (missing(interval_end)){
       interval_end <- interval_start
     }
-    # Estimating bin width if missing
-    if(missing(bin_width)){
-      bin_width <- as.integer(
-        (interval_end - interval_start + 1)[1]
-      )
-    }
+
+    bins <- IRanges::IRanges(start = interval_start, end = interval_end)
     # Computing introns if missing
     if(missing(intron_start) | missing(intron_end)){
-      bins <- IRanges::IRanges(start = interval_start, end = interval_end)
-      range_gr <- IRanges::range(bins)
+      range_gr <- base::range(bins)
       introns <- IRanges::setdiff(range_gr, bins)
-      intron_start <- introns$start
-      intron_end <- introns$end
+      intron_start <- BiocGenerics::start(introns)
+      intron_end <- BiocGenerics::end(introns)
+    }
+    # Estimating bin width if missing
+    if(missing(bin_width)){
+      intron_gr <- IRanges::IRanges(start = intron_start, end = intron_end)
+      bin_width <- as.integer(
+        sum(IRanges::width(IRanges::setdiff(bins[1], intron_gr)))
+      )
     }
   }
 
