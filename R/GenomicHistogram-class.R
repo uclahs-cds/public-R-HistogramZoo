@@ -64,6 +64,8 @@ validate_GenomicHistogram <- function(x){
   bin_width <- x$bin_width
   region_id <- x$region_id
   chr <- x$chr
+  bin_gr <- IRanges::IRanges(start = interval_start, end = interval_end)
+  range_gr <- base::range(bin_gr)
 
   # Intron attributes
   intron_start <- x$intron_start
@@ -134,24 +136,31 @@ validate_GenomicHistogram <- function(x){
     }
   }
 
-  # 10. Check that every intron is in the range
   if(intron_length > 0){
-    range_gr <- IRanges::IRanges(start = interval_start[1], end = tail(interval_end, n = 1))
+    # 10. All estimated introns are actually in the set of introns
+    intron_est <- IRanges::setdiff(range_gr, bin_gr)
+    if(length(intron_est) > 0){
+      ovl <- IRanges::findOverlaps(intron_est, intron_gr, type = "equal")
+      if(!all(seq(1, length(intron_est)) %in% S4Vectors::queryHits(ovl))){
+        stop("estimated introns not found in intron set", call. = FALSE)
+      }
+    }
+
+    # 11. Check that every intron is in the range
     ovl <- IRanges::findOverlaps( intron_gr, range_gr, type = "within")
     if(any(!seq(1, intron_length) %in% S4Vectors::queryHits(ovl))){
       stop("introns must overlap histogram range", call. = FALSE)
     }
   }
 
-  # 11. bin_width is positive integer
+  # 12. bin_width is positive integer
   if(!(is.integer(bin_width) && bin_width > 0)){
     stop("bin_width must be a positive integer", call. = FALSE)
   }
 
-  # 12. All histogram bins are length bin_width
-  bin_gr <- IRanges::IRanges(start = interval_start, end = interval_end)
-  bin_gr <- split(bin_gr, seq(1, histogram_length))
-  bin_width_vec <- sapply(bin_gr, function(gr) sum(IRanges::width(IRanges::setdiff(gr, intron_gr))))
+  # 13. All histogram bins are length bin_width
+  bin_split <- split(bin_gr, seq(1, histogram_length))
+  bin_width_vec <- sapply(bin_split, function(gr) sum(IRanges::width(IRanges::setdiff(gr, intron_gr))))
 
   if(!all(bin_width_vec[1:(histogram_length-1)] == bin_width)){
     stop(
@@ -204,33 +213,7 @@ GenomicHistogram <- function(
   # Coercing values to the right thing
   strand <- match.arg(strand)
 
-  if(length(histogram_data) > 0){
-    # Assigning interval start and end if missing
-    if( missing(interval_start) & missing(interval_end)){
-      interval_start <- interval_end <- seq(1, length(histogram_data), 1)
-    } else if (missing(interval_start)){
-      interval_start <- interval_end
-    } else if (missing(interval_end)){
-      interval_end <- interval_start
-    }
-
-    bins <- IRanges::IRanges(start = interval_start, end = interval_end)
-    # Computing introns if missing
-    if(missing(intron_start) | missing(intron_end)){
-      range_gr <- base::range(bins)
-      introns <- IRanges::setdiff(range_gr, bins)
-      intron_start <- BiocGenerics::start(introns)
-      intron_end <- BiocGenerics::end(introns)
-    }
-    # Estimating bin width if missing
-    if(missing(bin_width)){
-      intron_gr <- IRanges::IRanges(start = intron_start, end = intron_end)
-      bin_width <- as.integer(
-        sum(IRanges::width(IRanges::setdiff(bins[1], intron_gr)))
-      )
-    }
-  }
-
+  # Coercing to the right data type
   if (!is.double(histogram_data)) {
     histogram_data <- as.double(histogram_data)
   }
@@ -252,13 +235,53 @@ GenomicHistogram <- function(
   if(!is.integer(intron_end)){
     intron_end <- as.integer(intron_end)
   }
+  if(!is.character(region_id)){
+    region_id <- as.character(region_id)
+  }
+
+  # Estimating missing parameters
+  if(length(histogram_data) > 0){
+    # Assigning interval start and end if missing
+    if( missing(interval_start) & missing(interval_end)){
+      interval_start <- interval_end <- seq(1, length(histogram_data), 1)
+    } else if (missing(interval_start)){
+      interval_start <- interval_end
+    } else if (missing(interval_end)){
+      interval_end <- interval_start
+    }
+
+    bins <- IRanges::IRanges(start = interval_start, end = interval_end)
+
+    # Adding missing introns
+    range_gr <- base::range(bins)
+    introns <- IRanges::setdiff(range_gr, bins)
+    intron_start <- c( BiocGenerics::start(introns), intron_start)
+    intron_end <- c( BiocGenerics::end(introns), intron_end)
+    intron_dup <- !duplicated(cbind(intron_start, intron_end))
+    intron_start <- intron_start[intron_dup]
+    intron_end <- intron_end[intron_dup]
+
+    # Reordering
+    intron_start_order <- order(intron_start)
+    intron_end_order <- order(intron_end)
+    if(!all(intron_start_order == intron_end_order)){
+      stop("Something wrong with introns - likely overlap - revise GenomicHistogram")
+    }
+    intron_start <- intron_start[intron_start_order]
+    intron_end <- intron_end[intron_end_order]
+
+    # Estimating bin width if missing
+    if(missing(bin_width)){
+      intron_gr <- IRanges::IRanges(start = intron_start, end = intron_end)
+      bin_width <- as.integer(
+        sum(IRanges::width(IRanges::setdiff(bins[1], intron_gr)))
+      )
+    }
+  }
 
   # Region ID
   if( missing(region_id) & length(histogram_data) > 0 ){
     region_id <- paste0(chr, ":", interval_start[1], "-", interval_end[length(histogram_data)], ":", strand)
-  }
-  if(!is.character(region_id)){
-    region_id <- as.character(region_id)
   }
 
   # Validate and return object
@@ -316,7 +339,7 @@ print.GenomicHistogram <- function(x, ...){
   cat("Region: ", region_id, "\n")
 
   # Identifying introns within bins
-  intron_bins <- (intron_start > interval_start) & (intron_end < interval_end)
+  intron_bins <- (intron_start >= interval_start) & (intron_end <= interval_end)
   bin_size_one <- interval_start == interval_end
 
   # Indices
@@ -376,7 +399,19 @@ print.GenomicHistogram <- function(x, ...){
 
 #' @export
 `[.GenomicHistogram` <- function(x, i){
-  keep_introns <- x$intron_start > x$interval_start[1] & x$intron_end < tail(x$interval_end, n=1)
+
+  # Keep only introns in the subset
+  keep_introns <- x$intron_start > x$interval_start[i][1] & x$intron_end < tail(x$interval_end[i], n=1)
+
+  # Change bin width if necessary
+  if(length(i) == 1 && i == length(x)){
+    x$bin_width <- x$interval_end[i] - x$interval_start[i] + 1
+    if(any(keep_introns)){ # If introns need to be kept
+      x$bin_width <- x$bin_width - sum(x$intron_end[keep_introns] - x$intron_start[keep_introns] + 1)
+    }
+  }
+
+  # Generate new histogram
   new_GenomicHistogram(
     histogram_data = x$histogram_data[i],
     interval_start = x$interval_start[i],
