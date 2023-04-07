@@ -61,6 +61,15 @@ test_that("Generating an invalid Histogram object", {
     )
   )
 
+  # Noncontinuous intervals
+  expect_error(
+    Histogram(
+      runif(2),
+      interval_start = c(1, 4),
+      interval_end = c(2, 5)
+    )
+  )
+
 })
 
 test_that("Histogram-class methods", {
