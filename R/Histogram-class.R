@@ -143,7 +143,7 @@ Histogram <- function(
     }
     if(missing(bin_width)){
       bin_width <- as.integer(
-        ceiling(max(interval_end - interval_start))
+        (interval_end - interval_start)[1]
       )
     }
     if(missing(region_id) ){
@@ -244,6 +244,12 @@ print.Histogram = function(x, ...){
 
 #' @export
 `[.Histogram` = function(x, i){
+
+  # Bin width reestimation
+  if(length(i) == 1 && i == length(x)){
+    x$bin_width <- x$interval_end[i] - x$interval_start[i]
+  }
+
   new_Histogram(
     histogram_data = x$histogram_data[i],
     interval_start = x$interval_start[i],
