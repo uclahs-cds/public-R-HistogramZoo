@@ -280,8 +280,28 @@ GenomicHistogram <- function(
 
 }
 
-# TODO: Find a useful text representation for introns
-# If bin overlaps introns do start >[intron_start:end]< end rather than start-end
+#' Formats print intervals with introns and one-bp bins
+format_print_intervals <- function(
+  interval_start,
+  interval_end,
+  bin_size_one,
+  intron_bins
+){
+  x <- vector(mode="character", length=length(interval_start))
+  x[bin_size_one] <- interval_start[bin_size_one]
+  x[!bin_size_one & intron_bins] <- paste0(
+    interval_start[!bin_size_one & intron_bins],
+    "><",
+    interval_end[!bin_size_one & intron_bins]
+  )
+  x[!bin_size_one & !intron_bins] <- paste0(
+    interval_start[!bin_size_one & !intron_bins],
+    "-",
+    interval_end[!bin_size_one & !intron_bins]
+  )
+  return(x)
+}
+
 #' @export
 print.GenomicHistogram <- function(x, ...){
 
@@ -303,16 +323,20 @@ print.GenomicHistogram <- function(x, ...){
   if(length(histogram_data) > 10){
 
     # Intervals
-    intervals_begin <- ifelse(
-      interval_start[1:5] == interval_end[1:5],
+    intervals_begin <- format_print_intervals(
       interval_start[1:5],
-      paste0(interval_start[1:5], "-", interval_end[1:5]))
-
-    intervals_finish <- ifelse(
-      utils::tail(interval_start, 5) == utils::tail(interval_end, 5),
-      utils::tail(interval_start, 5),
-      paste0(utils::tail(interval_start, 5), "-", utils::tail(interval_end, 5))
+      interval_end[1:5],
+      bin_size_one[1:5],
+      intron_bins[1:5]
     )
+
+    intervals_finish <- format_print_intervals(
+      utils::tail(interval_start, 5),
+      utils::tail(interval_end, 5),
+      utils::tail(bin_size_one, 5),
+      utils::tail(intron_bins, 5)
+    )
+
     x_start <- as.character(formatC(histogram_data[1:5], digits = 2))
     x_end <- as.character(formatC(utils::tail(histogram_data, 5), digits = 2))
 
@@ -329,12 +353,12 @@ print.GenomicHistogram <- function(x, ...){
 
   } else {
     # Intervals
-    intervals <- ifelse(
-      interval_start == interval_end,
+    intervals <- format_print_intervals(
       interval_start,
-      paste0(interval_start, "-", interval_end))
-
-    intervals <- as.character(intervals)
+      interval_end,
+      bin_size_one,
+      intron_bins
+    )
 
     # Spacing
     x_full <- as.character(formatC(histogram_data, digits = 2))
