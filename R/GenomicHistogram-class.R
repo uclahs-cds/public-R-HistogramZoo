@@ -339,7 +339,12 @@ print.GenomicHistogram <- function(x, ...){
   cat("Region: ", region_id, "\n")
 
   # Identifying introns within bins
-  intron_bins <- (intron_start >= interval_start) & (intron_end <= interval_end)
+  intron_bins <- sapply(
+    seq_along(interval_start),
+    function(i) any(intron_start >= interval_start[i] & intron_end <= interval_end[i])
+  )
+
+  # Representation bin-size 1 - this doesn't mean functionally bin-size 1
   bin_size_one <- interval_start == interval_end
 
   # Indices
