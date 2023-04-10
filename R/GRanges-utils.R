@@ -21,19 +21,3 @@ generate_identifiers <- function(gr){
     )
   )
 }
-
-#' Generates region_ids for GRangesList objects
-#'
-#' @param gr a GRangesList object
-#' @return character identifiers for each GRanges object in a GRangesList
-generate_grangeslist_identifiers <- function(gr_list){
-  gr_ranges <- range(gr_list)
-  return(
-    paste0(
-      GenomicRanges::seqnames(gr_ranges), ":",
-      GenomicRanges::start(gr_ranges), "-",
-      GenomicRanges::end(gr_ranges), ":",
-      GenomicRanges::strand(gr_ranges)
-    )
-  )
-}
