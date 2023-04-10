@@ -208,15 +208,15 @@ coverage_to_histogram_v3 <- function(
     histogram_bin_size
 ){
   
+  # Initializing
+  region_range <- base::range(region)
+  introns <- GenomicRanges::setdiff(region_range, region)
+  
   if(histogram_bin_size == 1){
     bins <- unlist(GenomicRanges::tile(x = region, width = 1))
     cvg <- compute_coverage_on_bins(coverage, bins)
     
   } else {
-    
-    # Initializing
-    region_range <- base::range(region)
-    introns <- GenomicRanges::setdiff(region_range, region)
     
     # Identify start and end coordinates
     region_start <- GenomicRanges::start(region)
