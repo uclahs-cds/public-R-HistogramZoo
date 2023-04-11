@@ -19,12 +19,43 @@
 #' }
 #'
 #' @export
+#' @export
 identify_uniform_segment <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  UseMethod("identify_uniform_segment")
+}
+
+#' @exportS3Method identify_uniform_segment Histogram
+identify_uniform_segment.Histogram <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  
+  identify_uniform_segment.numeric(
+    x = x, 
+    metric = metric, 
+    threshold = threshold, 
+    stepsize = stepsize, 
+    max_sd_size = max_sd_size
+  )
+}
+
+#' @exportS3Method identify_uniform_segment numeric
+identify_uniform_segment.numeric <- function(
   x,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   threshold = 0.5,
   stepsize = 1,
-  max_sd_size = 1) {
+  max_sd_size = 1
+){
 
   # Error checking
   if(!is.numeric(x)){
