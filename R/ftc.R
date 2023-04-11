@@ -105,11 +105,18 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 #'
 #' @export
 ftc <- function(x, s = NULL, eps = 1) {
+  UseMethod("ftc")
+}
+
+#' @exportS3Method ftc Histogram
+ftc.Histogram <- function(x, s = NULL, eps = 1) {
+  ftc.numeric(x$histogram_data)
+}
+
+#' @exportS3Method ftc numeric
+ftc.numeric <- function(x, s = NULL, eps = 1) {
 
   # Error checking
-  if(!is.numeric(x)){
-    stop("x must be a numeric vector")
-  }
   if(!is_equal_integer(s) | !all(s <= length(x) & s >= 0)){
     stop("s must be functional indices")
   }
