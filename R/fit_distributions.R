@@ -5,7 +5,7 @@ fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse
 #' Fit a uniform distribution to a histogram
 #'
 #' @param x numeric vector representing the density of a histogram
-#' @param metric one of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric one of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #'
 #' @return a list with the following data
 #' \describe{
