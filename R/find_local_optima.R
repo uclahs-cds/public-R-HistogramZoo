@@ -24,7 +24,7 @@ find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
 
 #' @exportS3Method find_local_optima Histogram
 find_local_optima.Histogram <- function(x, threshold = 0, flat_endpoints = T){
-  find_local_optima.numeric(x$histogram_data)
+  find_local_optima.numeric(x$histogram_data, threshold = threshold, flat_endpoints = flat_endpoints)
 }
 
 #' @exportS3Method find_local_optima numeric

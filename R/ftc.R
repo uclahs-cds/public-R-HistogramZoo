@@ -110,7 +110,7 @@ ftc <- function(x, s = NULL, eps = 1) {
 
 #' @exportS3Method ftc Histogram
 ftc.Histogram <- function(x, s = NULL, eps = 1) {
-  ftc.numeric(x$histogram_data)
+  ftc.numeric(x$histogram_data, s = s, eps = eps)
 }
 
 #' @exportS3Method ftc numeric
