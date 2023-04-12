@@ -4,7 +4,7 @@ test_that("uniform_mle works", {
 
   for(x in expected_zero_mle){
     expect_equal(
-      uniform_mle(x, a = 0, b = 1, log = T),
+      uniform_mle(x, x.start = 0, x.end = 1, a = 0, b = 1, log = T),
       0
       )
     }
@@ -13,14 +13,14 @@ test_that("uniform_mle works", {
   x <- Histogram(c(2,2,3,3,4))
   a <- -2
   b <- 10
-  res <- uniform_mle(x, a = -2, b = 10)
+  res <- uniform_mle(x$histogram_data, x.start = 0, x.end = 5, a = -2, b = 10)
 
   shift <- 5
   x_shift <- x
   x_shift$interval_start <- x_shift$interval_start + shift
   x_shift$interval_end <- x_shift$interval_end + shift
   # Constant shift should not change results
-  expect_equal(res, uniform_mle(x_shift, a + shift, b + shift))
+  expect_equal(res, uniform_mle(x_shift$histogram_data, x.start = head(x_shift$interval_start, 1), x.end = tail(x_shift$interval_end, 1), a = a + shift, b = b + shift))
 
   # The maximum likelihood should be [min, max]
   expected_min <- head(x$interval_start, n = 1)
@@ -30,7 +30,7 @@ test_that("uniform_mle works", {
   b.range <- seq(expected_max - 5, expected_max + 5, by = 1)
   param.space <- expand.grid(a = a.range, b = b.range)
   neg.log.lik <- mapply(
-    FUN = function(a, b) - uniform_mle.Histogram(x, a, b),
+    FUN = function(a, b) - uniform_mle(x$histogram_data, x.start = head(x$interval_start, 1), x.end = tail(x$interval_end, 1), a, b),
     a = param.space$a,
     b = param.space$b
     )
