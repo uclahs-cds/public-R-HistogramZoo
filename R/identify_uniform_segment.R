@@ -19,7 +19,6 @@
 #' }
 #'
 #' @export
-#' @export
 identify_uniform_segment <- function(
     x,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
