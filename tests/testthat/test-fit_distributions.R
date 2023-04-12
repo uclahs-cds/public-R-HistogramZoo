@@ -11,10 +11,10 @@ test_that("fit_distributions works ", {
 
   set.seed(314)
   histogram_data <- round(rnorm(100, mean = 0, sd = 5))
-  histogram_data <- table(histogram_data)
+  histogram <- observations_to_histogram(histogram_data)
 
   res <- fit_distributions(
-    histogram_data,
+    histogram,
     metric = metric,
     truncated = F,
     distributions = distributions
@@ -81,10 +81,9 @@ test_that("fit_distributions: gamma", {
   rate <- 0.1
   histogram_data <- rgamma(10000, shape=shape, rate=rate)
   histogram <- observations_to_histogram(histogram_data)
-  histogram_data <- histogram$histogram_data
 
   res <- fit_distributions(
-    histogram_data,
+    histogram,
     metric = metric,
     truncated = F,
     distributions = distributions
@@ -101,7 +100,7 @@ test_that("fit_distributions: gamma", {
   # histogram_data <- histogram_data[5:(length(histogram_data)-5)]
 
   res <- fit_distributions(
-    histogram_data,
+    histogram,
     metric = metric,
     truncated = T,
     distributions = distributions
@@ -123,10 +122,9 @@ test_that("fit_distributions: gamma_flip", {
   rate <- 0.1
   histogram_data <- rgamma_flip(10000, shape=shape, rate=rate, offset = 136)
   histogram <- observations_to_histogram(histogram_data)
-  histogram_data <- histogram$histogram_data
 
   res <- fit_distributions(
-    histogram_data,
+    histogram,
     metric = metric,
     truncated = F,
     distributions = distributions
@@ -143,7 +141,7 @@ test_that("fit_distributions: gamma_flip", {
   # histogram_data <- histogram_data[5:(length(histogram_data)-5)]
 
   res <- fit_distributions(
-    histogram_data,
+    histogram,
     metric = metric,
     truncated = T,
     distributions = distributions
