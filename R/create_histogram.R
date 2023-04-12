@@ -1,3 +1,5 @@
+#' @export
+#' @rdname create_histogram
 create_histogram <- function(x, ...) {
   UseMethod('create_histogram')
 }
@@ -25,6 +27,7 @@ density.Histogram <- function(x) {
 #' @param ... additional arguments to be pass into lattice::xyplot
 #'
 #' @exportS3Method create_histogram Histogram
+#' @rdname create_histogram
 #' @examples
 #' # Equal length bin widths
 #' my_histogram <- Histogram(
