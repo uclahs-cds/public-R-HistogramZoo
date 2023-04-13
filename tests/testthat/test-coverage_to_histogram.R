@@ -1,6 +1,5 @@
 context("coverage_to_histogram")
 
-
 # Different types of regions
 one_segment_region <- GenomicRanges::GRanges(
   seqnames = "chr1",
@@ -81,6 +80,16 @@ test_that("Expected behavior of coverage_to_histogram", {
     integer(0)
   )
   
+  expect_equal(
+    base_case$consecutive_start,
+    seq(1, 10)
+  )
+  
+  expect_equal(
+    base_case$consecutive_end,
+    seq(1, 10)
+  )
+  
   # Checking that the last bin is indeed a different size if length of object is different
   non_divisible_bin_length <- coverage_to_histogram(
     region = one_segment_region,
@@ -107,6 +116,16 @@ test_that("Expected behavior of coverage_to_histogram", {
   expect_equal(
     non_divisible_bin_length$intron_start,
     integer(0)
+  )
+
+  expect_equal(
+    non_divisible_bin_length$consecutive_start,
+    c(1, 5, 9)
+  )
+  
+  expect_equal(
+    non_divisible_bin_length$consecutive_end,
+    c(4, 8, 10)
   )
   
   # Checking that bins span introns
@@ -142,6 +161,16 @@ test_that("Expected behavior of coverage_to_histogram", {
     20
   )
   
+  expect_equal(
+    base_intron_case$consecutive_start,
+    c(1, 5, 9, 13, 17)
+  )
+  
+  expect_equal(
+    base_intron_case$consecutive_end,
+    c(4, 8, 12, 16, 20)
+  )
+  
   # Multiple introns per bin
   multi_intron_case <- coverage_to_histogram(
     region = multi_intron_region,
@@ -174,6 +203,16 @@ test_that("Expected behavior of coverage_to_histogram", {
     multi_intron_case$intron_end,
     c(5, 8)
   ) 
+  
+  expect_equal(
+    multi_intron_case$consecutive_start,
+    c(1, 5, 9, 13, 17)
+  )
+  
+  expect_equal(
+    multi_intron_case$consecutive_end,
+    c(4, 8, 12, 16, 18)
+  )
   
   # Uneven coverage spanning bins
   uneven_coverage_case <- coverage_to_histogram(
