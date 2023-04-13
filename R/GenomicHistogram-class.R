@@ -510,7 +510,7 @@ reassign_region_id.GenomicHistogram <- function(histogram_obj, region_id){
 
 #' Reset consecutive intervals to starting at 1, bin_width
 #'
-#' @param histogram_obj a GenomicHistogram object
+#' @param x GenomicHistogram object
 #'
 #' @return a GenomicHistogram object where `consecutive_start` is reset to 1 and `consecutive_end` is reset to bin_width
 #' 
@@ -521,20 +521,20 @@ reassign_region_id.GenomicHistogram <- function(histogram_obj, region_id){
 #' x <- x[3:5]
 #' reset_consecutive_intervals(x)
 #' }
-reset_consecutive_intervals <- function(histogram_obj){
+reset_consecutive_intervals <- function(x){
   
-  stopifnot(inherits(histogram_obj, "GenomicHistogram"))
+  stopifnot(inherits(x, "GenomicHistogram"))
   
   new_GenomicHistogram(
-    histogram_data = x$histogram_data[i],
-    interval_start = x$interval_start[i],
-    interval_end = x$interval_end[i],
+    histogram_data = x$histogram_data,
+    interval_start = x$interval_start,
+    interval_end = x$interval_end,
     region_id = x$region_id,
     bin_width = x$bin_width,
     chr = x$chr,
     strand = x$strand,
-    intron_start = x$intron_start[keep_introns],
-    intron_end = x$intron_end[keep_introns],
+    intron_start = x$intron_start,
+    intron_end = x$intron_end,
     consecutive_start = x$consecutive_start - head(x$consecutive_start, 1) + 1,
     consecutive_end = x$consecutive_end - head(x$consecutive_start, 1) + 1
   )
