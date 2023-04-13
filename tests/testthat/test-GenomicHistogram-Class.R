@@ -6,6 +6,17 @@ test_that("Generating a valid Histogram object", {
     histogram_data = c(1, 2, 3, 4, 3, 3, 1),
     chr = "chr1"
   )
+  
+  # start and end
+  expect_equal(
+    x$interval_start,
+    seq(1, 7)
+  )
+  
+  expect_equal(
+    x$interval_end,
+    seq(1, 7)
+  )
 
   # strand
   expect_equal(x$strand, "*")
@@ -15,11 +26,23 @@ test_that("Generating a valid Histogram object", {
 
   # region_id
   expect_equal(x$region_id, "chr1:1-7:*")
+  
+  # consecutive bins
+  expect_equal(
+    x$consecutive_start,
+    seq(1, 7)
+  )
+  
+  expect_equal(
+    x$consecutive_end,
+    seq(1, 7)
+  )
 
 })
 
 test_that("Generating an invalid GenomicHistogram object", {
 
+  # overlapping intervals
   expect_error(
     GenomicHistogram(
       runif(10),
@@ -65,6 +88,87 @@ test_that("GenomicHistogram-class methods", {
 
 })
 
+test_that("GenomicHistogram-class consecutive bins", {
+  
+  x <- GenomicHistogram(
+    histogram_data = c(1, 2, 3, 4, 3, 3, 1),
+    chr = "chr1"
+  )
+  
+  # reset consecutive bins
+  x <- x[4:7]
+  
+  expect_equal(
+    x$consecutive_start,
+    seq(4, 7)
+  )
+  
+  x <- reset_consecutive_intervals(x)
+  
+  expect_equal(
+    x$consecutive_start,
+    seq(1, 4)
+  )
+  
+  # Correct consecutive bins in the presence of unequal last bin width
+  x <- GenomicHistogram(
+    histogram_data = rep(1, 3),
+    interval_start = c(1, 4, 7),
+    interval_end = c(3, 6, 8),
+    intron_start = c(7),
+    intron_end = c(7)
+  )
+  
+  expect_equal(
+    x$consecutive_start,
+    c(1, 4, 7)
+  )
+  
+  expect_equal(
+    x$consecutive_end,
+    c(3, 6, 7)
+  )
+  
+  # Presetting consecutive bins (non-zero start)
+  expect_error(
+    GenomicHistogram(
+      histogram_data = rep(1, 3),
+      interval_start = c(1, 2, 3),
+      interval_end = c(1, 2, 3),
+      consecutive_start = c(2, 3, 4),
+      consecutive_end = c(2, 3, 4)
+    ),
+    NA
+  )
+  
+  # non-matching width
+  expect_error(
+    GenomicHistogram(
+      histogram_data = rep(1, 3),
+      interval_start = c(1, 3, 5),
+      interval_end = c(2, 4, 6),
+      consecutive_start = c(1, 2, 3),
+      consecutive_end = c(1, 2, 3)
+    )
+  )
+  
+  # non-matching width caused by introns
+  expect_error(
+    GenomicHistogram(
+      histogram_data = rep(1, 3),
+      interval_start = c(1, 3, 5),
+      interval_end = c(2, 4, 6),
+      intron_start = c(6),
+      intron_end = c(6),
+      interval_start = c(1, 3, 5),
+      interval_end = c(2, 4, 6),
+    )
+  )
+  
+  #
+})
+
+# TODO: add consecutive bin validations
 test_that("GenomicHistogram-class introns", {
 
   # Valid introns - self-computing introns
