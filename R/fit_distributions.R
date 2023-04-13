@@ -1,58 +1,3 @@
-fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
-  UseMethod('fit_uniform')
-}
-
-#' Fit a uniform distribution to a histogram
-#'
-#' @param x numeric vector representing the density of a histogram
-#' @param metric one of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
-#'
-#' @return a list with the following data
-#' \describe{
-#'     \item{par}{a character string denoting the region_id of the Histogram}
-#'     \item{dist}{the distribution name}
-#'     \item{metric}{the metric used to fit the distribution}
-#'     \item{value}{the fitted value of the metric function}
-#'     \item{dens}{a function that returns the density of the fitted distribution}
-#' }
-#' @exportS3Method fit_uniform numeric
-fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
-  # Error checking
-  metric <- match.arg(metric)
-
-  L <- length(x)
-  N <- sum(x)
-  bin <- 1:L
-  p_unif <- generate_uniform_distribution(x)
-
-  if(metric == 'mle') {
-    # Negative log-likelihood
-    value <- (- uniform_mle(x, a = 0, b = L, log = TRUE))
-  } else {
-    metric_func <- get(paste('histogram', metric, sep = "."))
-    m <- metric_func(x, p_unif*N)
-    value <- correct_fitted_value(metric, m)
-  }
-
-  return(
-    list(
-      "par" = NULL,
-      "dist" = "unif",
-      "metric" = metric,
-      "value" = value,
-      "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
-        if(missing(x)) {
-          x <- bin
-        }
-        res <- ifelse(x >= min(bin) & x <= max(bin), p_unif[1], 0)
-        if(scale) res * N
-        else res
-      }
-    )
-  )
-}
-
-fit_uniform.table <- fit_uniform.numeric
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
@@ -80,14 +25,113 @@ fit_distributions <- function(
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
-  ) {
+) {
+  UseMethod("fit_distributions")
+}
+
+#' @exportS3Method fit_distributions numeric
+fit_distributions.numeric <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Assume a bin width of 1 for a numeric vector
+  L <- length(x)
+  interval_end <- seq(1, L, 1)
+  fit_distributions_helper(
+    x = x,
+    interval_start = interval_end - 1,
+    interval_end = interval_end,
+    interval_midpoint = interval_end - 0.5,
+    metric = metric,
+    truncated = FALSE,
+    distributions = distributions
+  )
+
+}
+
+#' @exportS3Method fit_distributions table
+fit_distributions.table <- fit_distributions.numeric
+
+#' @exportS3Method fit_distributions GenomicHistogram
+fit_distributions.GenomicHistogram <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Base 1 to a base 0 system for GenomicHistogram
+  fit_distributions_helper(
+    x = x$histogram_data,
+    interval_start = x$consecutive_start - 1,
+    interval_end = x$consecutive_end,
+    interval_midpoint = rowMeans(cbind(x$consecutive_start - 1, x$consecutive_end)),
+    metric = metric,
+    truncated = FALSE,
+    distributions = distributions
+  )
+
+}
+
+#' @exportS3Method fit_distributions Histogram
+fit_distributions.Histogram <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Interval start and end from Histogram
+  fit_distributions_helper(
+    x = x$histogram_data,
+    interval_start = x$interval_start,
+    interval_end = x$interval_end,
+    interval_midpoint = rowMeans(cbind(x$interval_start, x$interval_end)),
+    metric = metric,
+    truncated = FALSE,
+    distributions = distributions
+  )
+
+}
+
+#' A helper function for fit_distributions
+#'
+#' @param x numeric vector, representing data to be fit
+#' @param interval_start starting coordinates for the bins
+#' @param interval_end ending coordinates for the bins
+#' @param interval_midpoint bin midpoints
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' indicating metrics to use for fit optimization
+#' @param truncated logical, whether to fit truncated distributions
+#' @param distributions character vector indicating distributions,
+#' subset of `norm`, `gamma`, `gamma_flip` and `unif`.
+#'
+#' @return a nested list where each sublist represents a model with the following data
+#' \describe{
+#'     \item{par}{a character string denoting the region_id of the Histogram}
+#'     \item{dist}{the distribution name}
+#'     \item{metric}{the metric used to fit the distribution}
+#'     \item{value}{the fitted value of the metric function}
+#'     \item{dens}{a function that returns the density of the fitted distribution}
+#' }
+#'
+#' @importFrom DEoptim DEoptim
+fit_distributions_helper <- function(
+    x,
+    interval_start,
+    interval_end,
+    interval_midpoint,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
 
   # Matching arguments
-  # TODO: consider checking minimum length of x or
-  # check if Histogram object
-  if(!is.numeric(x)){
-    stop('x has to be a numeric vector')
-  }
+  # NOTE: not checking validity of interval start/end/midpoint
+  # because computed internally
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
   }
@@ -98,27 +142,26 @@ fit_distributions <- function(
     )
   distributions <- match.arg(distributions, several.ok = TRUE)
 
-  # Initializing Data
+  # Setting vars for parameter estimation
   L <- length(x)
   N <- sum(x)
-  bin <- 1:L
 
   # Optimization Function
   .hist.optim <- function(params, .dist = c("norm", "gamma", "gamma_flip"), .metric_func) {
     # Compute the expected counts for the given parameters
-    args <- c(list(x = bin), params)
+    args <- c(list(x = interval_midpoint), params)
     if(truncated) {
-      args$a <- min(bin) - 1e-10
-      args$b <- max(bin) + 1e-10
+      args$a <- min(interval_midpoint) - 1e-10
+      args$b <- max(interval_midpoint) + 1e-10
     }
     if(!truncated & .dist == "gamma_flip"){
-      args$offset <- length(bin)
+      args$offset <- tail(interval_end, 1) # length(x)
     }
     trunc.letter <- if(truncated) "t" else ""
     dens <- tryCatch({
       do.call(paste0("d", trunc.letter, .dist), args) * N
     }, error = function(err) {
-      rep(0, length(bin))
+      rep(0, L)
     })
     dens[is.na(dens)] <- 0
     res <- .metric_func(x, dens)
@@ -132,15 +175,21 @@ fit_distributions <- function(
   unif_fit <- list()
   if("unif" %in% distributions){
     distributions <- setdiff(distributions, "unif")
-    unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
+    unif_fit <- lapply(metric, function(met) fit_uniform_helper(
+      x,
+      interval_start,
+      interval_end,
+      interval_midpoint,
+      met
+    ))
   }
 
   rtn <- lapply(distributions, function(distr) {
     lapply(metric, function(met){
       # Setting boundaries & parameter names
       if(distr == "norm"){
-        lower <- c(min(bin), 0.001)
-        upper <- c(max(bin), (max(bin) - min(bin)) * 0.5)
+        lower <- c(head(interval_start, 1), 0.001)
+        upper <- c(tail(interval_end, 1), (tail(interval_end, 1) - head(interval_start, 1)) * 0.5)
         names_par <- c("mean", "sd")
       } else if (distr %in% c("gamma", "gamma_flip")){
         lower <- c(0.001, 0.001)
@@ -159,8 +208,8 @@ fit_distributions <- function(
         mle.options.args <- list(
           fn = bin_log_likelihood,
           counts = x,
-          bin_lower = bin - 1,
-          bin_upper = bin,
+          bin_lower = interval_start,
+          bin_upper = interval_end,
           lower = lower,
           upper = upper,
           control = control_args
@@ -168,8 +217,8 @@ fit_distributions <- function(
 
         if (truncated) {
           tdistr <- paste0('t', tdistr)
-          mle.options.args$a <- min(bin) - 1e-10
-          mle.options.args$b <- max(bin) + 1e-10
+          mle.options.args$a <- head(interval_start, 1) - 1e-10 # min(bin)
+          mle.options.args$b <- tail(interval_end, 1) + 1e-10 # max(bin)
         }
 
         mle.options.args$cdf = get(paste0('p', tdistr))
@@ -197,12 +246,12 @@ fit_distributions <- function(
       # Adjusting for truncated distributions
       trunc.letter = if(truncated) "t" else ""
       if(truncated) {
-        dist_par$a <- min(bin) - 1e-10
-        dist_par$b <- max(bin) + 1e-10
+        dist_par$a <- head(interval_start, 1) - 1e-10 # min(bin)
+        dist_par$b <- tail(interval_end, 1) + 1e-10 # max(bin)
       }
       # Adjusting for offset
       if(!truncated & distr == "gamma_flip"){
-        dist_par$offset <- length(bin)
+        dist_par$offset <- tail(interval_end, 1) # length(bin)
       }
 
       # Return model
@@ -214,7 +263,7 @@ fit_distributions <- function(
           "value" = correct_fitted_value(met, dist_optim$optim$bestval),
           "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
             if(missing(x)) {
-              x <- bin
+              x <- interval_midpoint
             }
             args <- c(list(x = x), as.list(mpar))
             res <- do.call(paste0("d", trunc.letter, distr), args)
