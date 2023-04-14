@@ -10,10 +10,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 ### Changed
-- Refactored HistogramZoo functions to take in `Histogram` objects as opposed to numeric vectors
-- Estimation of summary statistics of histogram data (mean, standard deviation and skew)
+- S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions
 
 ### Fixed
+
+## [1.3.0] - 2023-04-14
+
+### Added
+- Added summary statistics (mean, sd, var, skew) estimation from histogram objects [Pull #113](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/113)
+
+### Changed
+- Enforcing bin width and addition of intron-traversing bins in GenomicHistogram [Pull #108](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/108)
+
+## [1.2.0] - 2023-04-12
+
+### Added
+- Added a classic histogram plotting function [Pull #111](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/111)
 
 ## [1.1.0] - 2023-03-09
 
