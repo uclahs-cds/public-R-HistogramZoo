@@ -3,9 +3,9 @@
 #' Constructs a new Histogram object
 #'
 #' @param histogram_data vector of counts/density
-#' @param interval_start integer vector representing the starts of intervals
-#' @param interval_end integer vector representing the ends of intervals
-#' @param bin_width integer width of histogram bins
+#' @param interval_start numeric vector representing the starts of intervals
+#' @param interval_end numeric vector representing the ends of intervals
+#' @param bin_width numeric width of histogram bins
 #' @param region_id character identifier for the region of interest
 #' @param bin_width numeric bin width of the histogram intervals
 #' @param class child class names, in addition to Histogram
@@ -90,7 +90,7 @@ validate_Histogram <- function(x){
     }
   }
 
-  # 5. bin_width is positive integer
+  # 5. bin_width is positive numeric
   if(!(is.numeric(bin_width) && bin_width > 0)){
     stop("bin_width must be a positive numeric", call. = FALSE)
   }
@@ -113,9 +113,9 @@ validate_Histogram <- function(x){
 #' Generates an S3 `Histogram` object
 #'
 #' @param histogram_data vector of counts/density
-#' @param interval_start integer vector representing the starts of intervals
-#' @param interval_end integer vector representing the ends of intervals
-#' @param bin_width integer width of histogram bins, if missing, estimated from `interval_start` and `interval_end`
+#' @param interval_start numeric vector representing the starts of intervals
+#' @param interval_end numeric vector representing the ends of intervals
+#' @param bin_width numeric width of histogram bins, if missing, estimated from `interval_start` and `interval_end`
 #' @param region_id character identifier for the region of interest
 #'
 #' @return A Histogram object
@@ -125,23 +125,23 @@ validate_Histogram <- function(x){
 #' x = Histogram(histogram_data = runif(10), interval_start = 1:10, interval_end = 2:11)
 Histogram <- function(
     histogram_data = double(),
-    interval_start = integer(),
-    interval_end = integer(),
-    bin_width = integer(),
+    interval_start = numeric(),
+    interval_end = numeric(),
+    bin_width = numeric(),
     region_id = character()
   ){
 
   if (!is.double(histogram_data)) {
     histogram_data <- as.double(histogram_data)
   }
-  if (!is.integer(interval_start)){
-    interval_start <- as.integer(interval_start)
+  if (!is.numeric(interval_start)){
+    interval_start <- as.numeric(interval_start)
   }
-  if (!is.integer(interval_end)){
-    interval_end <- as.integer(interval_end)
+  if (!is.numeric(interval_end)){
+    interval_end <- as.numeric(interval_end)
   }
-  if (!is.integer(bin_width)){
-    bin_width <- as.integer(bin_width)
+  if (!is.numeric(bin_width)){
+    bin_width <- as.numeric(bin_width)
   }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
@@ -158,7 +158,7 @@ Histogram <- function(
       interval_end <- interval_start + 1
     }
     if(missing(bin_width)){
-      bin_width <- as.integer(
+      bin_width <- as.numeric(
         (interval_end - interval_start)[1]
       )
     }
