@@ -14,9 +14,11 @@ weighted.var <- function(x, ...) UseMethod('weighted.var')
 #' @rdname weighted.skewness
 weighted.skewness <- function(x, ...) UseMethod('weighted.skewness')
 
-#' Computes a the sample mean of a Histogram or GenomicHistogram
+#' Computes the sample moments of a Histogram or GenomicHistogram
 #'
-#' @param x
+#' weighted.mean.Histogram computes a the sample variance of a Histogram or GenomicHistogram
+#'
+#' @param x Histogram or GenomicHistogram
 #'
 #' @exportS3Method weighted.mean Histogram
 weighted.mean.Histogram <- function(x) {
@@ -24,7 +26,7 @@ weighted.mean.Histogram <- function(x) {
   return(weighted.mean(x = midpoints, w = x$histogram_data))
 }
 
-#' Computes a the sample mean of a Histogram or GenomicHistogram
+#' weighted.var.Histogram computes a the sample variance of a Histogram or GenomicHistogram, with option for Sheppard's correction.
 #'
 #' @param x Histogram or GenomicHistogram
 #' @param sheppard Should Sheppard's correction be applied? (subtract h^2/12 from the variance). Should only be applied when bin widths are all the same
@@ -44,7 +46,7 @@ weighted.var.Histogram <- function(x, sheppard = FALSE) {
   return(weighted.var(x = midpoints, w = x$histogram_data) + adj)
 }
 
-#' Computes a the sample mean of a Histogram or GenomicHistogram
+#' weighted.sd.Histogram computes a the sample variance of a Histogram or GenomicHistogram, with option for Sheppard's correction.
 #'
 #' @param x Histogram or GenomicHistogram
 #'
