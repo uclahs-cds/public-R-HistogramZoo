@@ -15,6 +15,12 @@ test_that("Generating a valid Histogram object", {
   # region_ids
   expect_equal(x$region_id, "1-8")
 
+  # non-integer bin width
+  expect_error(
+    Histogram(rep(1, 3), interval_start = c(0, 1.5, 3), interval_end = c(1.5, 3, 4.5)),
+    NA
+  )
+
 })
 
 test_that("Generating an invalid Histogram object", {
