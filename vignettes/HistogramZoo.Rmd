@@ -5,8 +5,7 @@ output:
   rmarkdown:::html_vignette:
     toc: true
     code_folding: hide
-bibliography: >
-  references.bib  
+bibliography: references.bib  
 vignette: >
   %\VignetteIndexEntry{HistogramZoo}
   %\VignetteEncoding{UTF-8}
@@ -101,14 +100,13 @@ create_coverageplot(
 **observations_to_histogram** bins a set of observations at a designated `histogram_bin_width` to generate a `Histogram`
 
 ```{r observations_to_histogram, include=TRUE, out.width="50%"}
-
 set.seed(314)
 my_data <- rnorm(10000, mean = 10, sd = 5)
 my_histogram <- observations_to_histogram(my_data, histogram_bin_width = 1)
 
 create_coverageplot(
   my_histogram, 
-  main.cex = 0, 
+  main.cex = NULL, 
   xaxis.tck = 0, 
   yaxis.tck = 0, 
   xlab.cex = 1, 
@@ -496,9 +494,9 @@ unfiltered_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.lab = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -510,9 +508,9 @@ filtered_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -560,9 +558,9 @@ gaussian_full_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -573,9 +571,9 @@ gaussian_truncated_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -617,9 +615,9 @@ gamma_full_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -630,9 +628,9 @@ gamma_truncated_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -674,9 +672,9 @@ gamma_flip_full_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -687,9 +685,9 @@ gamma_flip_truncated_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -720,9 +718,9 @@ uniform_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -791,9 +789,9 @@ uniform_untrimmed_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -804,9 +802,9 @@ uniform_trimmed_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -924,7 +922,7 @@ knitr::kable(res[,c("dist_param1_name", "dist_param2_name", "dist_param3_name", 
 
 A plot of the result is generated.
 
-```{r plotting_example_p7, include=TRUE, fig.show="hold", out.width="100%"}
+```{r plotting_example_p7, include=TRUE, fig.show="hold",out.height=7, out.width=7}
 
 # Histogram Fit
 coverage_plt <- create_coverageplot(
@@ -933,22 +931,22 @@ coverage_plt <- create_coverageplot(
   main.cex = 1, 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  x.label = '', 
   ylab.cex = 1, 
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8,
   legend = NULL
 )
 
 residual_plt <- create_residualplot(
   histogram_fit,
-  main.cex = 0, 
+  main = '', 
   xaxis.tck = 0, 
   yaxis.tck = 0.5, 
-  xlab.cex = 0, 
+  xlab.label = '', 
   ylab.cex = 1, 
   ylab.label = "Residuals",
-  xaxis.cex = 0, 
+  xaxis.label = NULL, 
   yaxis.cex = 0.8
 )
 
@@ -960,14 +958,14 @@ track_plt <- create_trackplot(
   end_id = "histogram_end",
   xat = generate_xlabels(histogram_fit, return_xat = T),
   xaxis.lab = generate_xlabels(histogram_fit),
-  main.cex = 0, 
+  main = '', 
   xaxis.tck = 0, 
   yaxis.tck = 0, 
   xlab.cex = 1, 
   ylab.cex = 1,
   ylab.label = "GOF",
   xaxis.cex = 0.8, 
-  yaxis.cex = 0
+  yaxis.lab = NULL
 )
 
 covariate.legend <- list(
