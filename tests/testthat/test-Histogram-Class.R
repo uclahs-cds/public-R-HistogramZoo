@@ -15,6 +15,12 @@ test_that("Generating a valid Histogram object", {
   # region_ids
   expect_equal(x$region_id, "1-8")
 
+  # non-integer bin width
+  expect_error(
+    Histogram(rep(1, 3), interval_start = c(0, 1.5, 3), interval_end = c(1.5, 3, 4.5)),
+    NA
+  )
+
 })
 
 test_that("Generating an invalid Histogram object", {
@@ -61,6 +67,15 @@ test_that("Generating an invalid Histogram object", {
     )
   )
 
+  # Noncontinuous intervals
+  expect_error(
+    Histogram(
+      runif(2),
+      interval_start = c(1, 4),
+      interval_end = c(2, 5)
+    )
+  )
+
 })
 
 test_that("Histogram-class methods", {
@@ -82,6 +97,16 @@ test_that("Histogram-class methods", {
     x_subset$histogram_data,
     c(2, 3, 4, 3)
   )
+
+  # Testing last bin bin_width re-estimation
+  x <- Histogram(
+    histogram_data = rep(1, 2),
+    interval_start = c(1, 2),
+    interval_end = c(2, 4)
+  )
+
+  x_subset <- x[2]
+  expect_equal(x_subset$bin_width, 2)
 
   # reassign_ids
   x_reassign <- reassign_region_id(x, "TEST")

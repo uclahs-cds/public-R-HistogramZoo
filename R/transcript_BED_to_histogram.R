@@ -7,7 +7,7 @@
 #' @param gene_or_transcript `gene` or `transcript` indicating whether histograms should be built on gene coordinates or transcript coordinates, default gene
 #' @param select_strand `*`, `+` or `-`  to filter regions by strand, default '*'
 #' @param select_chrs a vector of chromosomes to filter regions by chromosome, default NULL
-#' @param select_ids gene or transcript ids to filter regions by gene or transcript name, must correspond to GTF ids, defualt NULL
+#' @param select_ids gene or transcript ids to filter regions by gene or transcript name, must correspond to GTF ids, default NULL
 #' @param allow_overlapping_segments_per_sample logical, if FALSE, overlapping segments in the same region in the same file will be de-duplicated in the coverage calculation, default NULL
 #' NOTE: regions are determined by GTF gene/transcript IDs and the name column of BED files. If TRUE, they will be taken as separate input, default FALSE
 #'

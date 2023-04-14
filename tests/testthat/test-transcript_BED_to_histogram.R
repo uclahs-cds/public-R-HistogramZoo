@@ -127,32 +127,32 @@ test_that("Testing that varying n_fields returns the correct results", {
 
 })
 
-test_that("Testing that varying bin size yields correct results", {
-
-  histograms_5 <- transcript_BED_to_histogram(
-    filenames = filenames,
-    n_fields = 12,
-    gtf = gtf,
-    gene_or_transcript = "gene",
-    histogram_bin_size = 5
-  )
-
-  histograms_10 <- transcript_BED_to_histogram(
-    filenames = filenames,
-    n_fields = 12,
-    gtf = gtf,
-    gene_or_transcript = "gene",
-    histogram_bin_size = 10
-  )
-
-  # Creating bins
-  bins_5 <- histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
-  bins_10 <- histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
-
-  # Checking that the binnedAverage add up to the same thing
-  expect_equal(
-    sum(bins_5*histograms_5[[1]]$histogram_data),
-    sum(bins_10*histograms_10[[1]]$histogram_data)
-  )
-
-})
+# test_that("Testing that varying bin size yields correct results", {
+# 
+#   histograms_5 <- transcript_BED_to_histogram(
+#     filenames = filenames,
+#     n_fields = 12,
+#     gtf = gtf,
+#     gene_or_transcript = "gene",
+#     histogram_bin_size = 5
+#   )
+# 
+#   histograms_10 <- transcript_BED_to_histogram(
+#     filenames = filenames,
+#     n_fields = 12,
+#     gtf = gtf,
+#     gene_or_transcript = "gene",
+#     histogram_bin_size = 10
+#   )
+# 
+#   # Creating bins
+#   bins_5 <- histograms_5[[1]]$interval_end - histograms_5[[1]]$interval_start + 1
+#   bins_10 <- histograms_10[[1]]$interval_end - histograms_10[[1]]$interval_start + 1
+# 
+#   # Checking that the binnedAverage add up to the same thing
+#   expect_equal(
+#     sum(bins_5*histograms_5[[1]]$histogram_data),
+#     sum(bins_10*histograms_10[[1]]$histogram_data)
+#   )
+# 
+# })

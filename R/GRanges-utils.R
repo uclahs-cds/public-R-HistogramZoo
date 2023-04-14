@@ -1,5 +1,5 @@
 #' Converts a GRanges object from base 0 to base 1
-#' 
+#'
 #' @param gr a GRanges object in base 0
 #' @return a GRanges object in base 1
 base0_to_base1 <- function(gr){
