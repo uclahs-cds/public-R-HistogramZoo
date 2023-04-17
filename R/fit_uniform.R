@@ -20,11 +20,12 @@ fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse
 #' @exportS3Method fit_uniform numeric
 fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
 
+  interval_midpoint <- seq(1, length(x), 1)
   fit_uniform_helper(
     x = x,
-    interval_start = seq(1, length(x), 1) - 1,
-    interval_end = seq(1, length(x), 1),
-    interval_midpoint = seq(1, length(x), 1) - 0.5,
+    interval_start = interval_midpoint - 0.5,
+    interval_end = interval_midpoint + 0.5,
+    interval_midpoint = interval_midpoint,
     metric = metric
   )
 
@@ -40,7 +41,7 @@ fit_uniform.Histogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = rowMeans(cbind(x$interval_start, x$interval_end)),
+    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
     metric = metric
   )
 
@@ -51,9 +52,9 @@ fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersec
 
   fit_uniform_helper(
     x = x$histogram_data,
-    interval_start = x$consecutive_start - 1,
-    interval_end = x$consecutive_end,
-    interval_midpoint = rowMeans(cbind(x$consecutive_start - 1, x$consecutive_end)),
+    interval_start = x$consecutive_start - 0.5,
+    interval_end = x$consecutive_end + 0.5,
+    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
     metric = metric
   )
 

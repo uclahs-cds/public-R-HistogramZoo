@@ -39,12 +39,12 @@ fit_distributions.numeric <- function(
 
   # Assume a bin width of 1 for a numeric vector
   L <- length(x)
-  interval_end <- seq(1, L, 1)
+  interval_midpoint <- seq(1, L, 1)
   fit_distributions_helper(
     x = x,
-    interval_start = interval_end - 1,
-    interval_end = interval_end,
-    interval_midpoint = interval_end - 0.5,
+    interval_start = interval_midpoint - 0.5,
+    interval_end = interval_midpoint + 0.5,
+    interval_midpoint = interval_midpoint,
     metric = metric,
     truncated = FALSE,
     distributions = distributions
@@ -66,9 +66,9 @@ fit_distributions.GenomicHistogram <- function(
   # Base 1 to a base 0 system for GenomicHistogram
   fit_distributions_helper(
     x = x$histogram_data,
-    interval_start = x$consecutive_start - 1,
-    interval_end = x$consecutive_end,
-    interval_midpoint = rowMeans(cbind(x$consecutive_start - 1, x$consecutive_end)),
+    interval_start = x$consecutive_start - 0.5,
+    interval_end = x$consecutive_end + 0.5,
+    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
     metric = metric,
     truncated = FALSE,
     distributions = distributions
@@ -89,7 +89,7 @@ fit_distributions.Histogram <- function(
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = rowMeans(cbind(x$interval_start, x$interval_end)),
+    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
     metric = metric,
     truncated = FALSE,
     distributions = distributions
@@ -139,7 +139,7 @@ fit_distributions_helper <- function(
     metric,
     several.ok = TRUE,
     choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
-    )
+  )
   distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Setting vars for parameter estimation
