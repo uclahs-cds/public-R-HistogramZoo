@@ -37,15 +37,16 @@ identify_uniform_segment.numeric <- function(
     stepsize = 1,
     max_sd_size = 1
 ){
+  interval_midpoint <- seq(1, length(x), 1)
   identify_uniform_segment_helper(
     x = x,
-    interval_start = seq(1, length(x), 1) - 1,
-    interval_end = seq(1, length(x), 1),
-    interval_midpoint = seq(1, length(x), 1) - 0.5,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    threshold = 0.5,
-    stepsize = 1,
-    max_sd_size = 1
+    interval_start = interval_midpoint - 0.5,
+    interval_end = interval_midpoint + 0.5,
+    interval_midpoint = interval_midpoint,
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
   )
 }
 
@@ -61,11 +62,11 @@ identify_uniform_segment.Histogram <- function(
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = rowMeans(cbind(x$interval_start, x$interval_end)),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    threshold = 0.5,
-    stepsize = 1,
-    max_sd_size = 1
+    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
   )
 }
 
@@ -79,13 +80,13 @@ identify_uniform_segment.GenomicHistogram <- function(
 ){
   identify_uniform_segment_helper(
     x = x$histogram_data,
-    interval_start = x$consecutive_start - 1,
-    interval_end = x$consecutive_end,
-    interval_midpoint = rowMeans(cbind(x$consecutive_start - 1, x$consecutive_end)),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    threshold = 0.5,
-    stepsize = 1,
-    max_sd_size = 1
+    interval_start = x$consecutive_start - 0.5,
+    interval_end = x$consecutive_end + 0.5,
+    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
   )
 }
 
@@ -128,7 +129,8 @@ identify_uniform_segment_helper <- function(
             interval_end = interval_end[a:b],
             interval_midpoint = interval_midpoint[a:b],
             metric = metric
-          ), 
+          ),
+          # TODO: this is currently index-based, do we want this coordinate based?
           list('seg_start' = a, 'seg_end' = b)
         )
     })
@@ -140,6 +142,7 @@ identify_uniform_segment_helper <- function(
   res_df$index <- 1:nrow(res_df)
 
   # Calculating length
+  # Again, coordinate-based?
   res_df$length <- res_df$seg_end - res_df$seg_start + 1
 
   # Correct for Jaccard/Intersection
