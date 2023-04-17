@@ -8,10 +8,10 @@
 <meta name="description" content="A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.">
 <title>A Method for Peak Merging And Distribution Fitting Across Biological Replicates • HistogramZoo</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="A Method for Peak Merging And Distribution Fitting Across Biological Replicates">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="A Method for Peak Merging And Distribution Fitting Across Biological Replicates">
 <meta property="og:description" content="A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,13 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="nav-link" href="articles/HistogramZoo.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -53,7 +59,25 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="histogramzoo">HistogramZoo<a class="anchor" aria-label="anchor" href="#histogramzoo"></a>
 </h1></div>
-<p>HistogramZoo is a generalized framework for histogram segmentation and statistical characterization written in R.</p>
+<ol style="list-style-type: decimal">
+<li><a href="#description">Description</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#resources">Resources</a></li>
+<li><a href="#getting-help">Getting help</a></li>
+<li><a href="#citation-information">Citation information</a></li>
+<li><a href="#license">License</a></li>
+</ol>
+<div class="section level2">
+<h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
+</h2>
+<p>HistogramZoo is a generalized framework for histogram segmentation and statistical characterization written in R. Histograms are represented as S3 Histogram or GenomicHistogram objects. For the characterization of genomic data on a linear coordinate system, such as the human reference genome, HistogramZoo provides several convenient data loaders to compute coverage of BED files and load bigWig files, and support both genomic and transcriptomic coordinate systems.</p>
+<p>The characteristic function provided by HistogramZoo is <code>segment_and_fit</code> which is a wrapper for a sequence of operations which aim to segment complicated histograms and identify regions of enriched density and fit known statistical distributions to these regions. Using the Fine-to-Coarse segmentation algorithm described in <a href="https://link.springer.com/chapter/10.1007/11492542_30" class="external-link">Delon <em>et al.,</em> 2006</a>, segmentation occurs iteratively on a set of local optima. The user is provided with the option of filtering low entropy regions, fitting truncated distributions, fine-tuning the endpoints of uniformly-distributed regions and using several goodness-of-fit metrics to improve reported results.</p>
+<p>Finally, HistogramZoo provides several convenient functions to summarize fits and visualize data.</p>
+<div class="figure">
+<img src="reference/figures/Overview.png" alt=""><p class="caption">overview plot</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -62,33 +86,117 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'https://github.com/uclahs-cds/public-R-HistogramZoo'</span><span class="op">)</span></span></code></pre></div>
 <p>From source: <code>shell script git clone https://github.com/uclahs-cds/public-R-HistogramZoo.git R CMD INSTALL public-R-HistogramZoo</code></p>
+<p>From CRAN (coming soon!)</p>
 </div>
 <div class="section level2">
-<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
+<p>A basic example of applying HistogramZoo to a histogram of Gaussian data is provided below:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://friendly-invention-3cb82740.pages.github.io/">HistogramZoo</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://friendly-invention-3cb82740.pages.github.io/" class="external-link">HistogramZoo</a></span><span class="op">)</span>;</span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">271828</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">271828</span><span class="op">)</span>;</span>
 <span></span>
 <span><span class="co"># Generating Data</span></span>
-<span><span class="va">my_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10000</span>, mean <span class="op">=</span> <span class="fl">50</span>, sd <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">histogram_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">my_data</span>, histogram_bin_width<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">gaussian_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10000</span>, mean <span class="op">=</span> <span class="fl">50</span>, sd <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>;</span>
+<span><span class="va">histogram_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">gaussian_data</span>, histogram_bin_width<span class="op">=</span><span class="fl">5</span><span class="op">)</span>;</span>
 <span></span>
 <span><span class="co"># Segmentation and fitting distributions</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/segment_and_fit.html">segment_and_fit</a></span><span class="op">(</span><span class="va">histogram_data</span>, eps <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/segment_and_fit.html">segment_and_fit</a></span><span class="op">(</span><span class="va">histogram_data</span>, eps <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>;</span>
 <span></span>
 <span><span class="co"># Summarizing results</span></span>
-<span><span class="va">results_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_results.html">summarize_results</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="va">results_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_results.html">summarize_results</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>;</span>
 <span></span>
 <span><span class="co"># Plotting</span></span>
-<span><span class="fu"><a href="reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>;</span></code></pre></div>
+<p><strong>Results table</strong></p>
+<table class="table">
+<colgroup>
+<col width="5%">
+<col width="5%">
+<col width="3%">
+<col width="2%">
+<col width="7%">
+<col width="7%">
+<col width="8%">
+<col width="8%">
+<col width="7%">
+<col width="6%">
+<col width="5%">
+<col width="2%">
+<col width="6%">
+<col width="6%">
+<col width="8%">
+<col width="8%">
+</colgroup>
+<thead><tr class="header">
+<th>region_id</th>
+<th>segment_id</th>
+<th>start</th>
+<th>end</th>
+<th>interval_count</th>
+<th>interval_sizes</th>
+<th>interval_starts</th>
+<th>histogram_start</th>
+<th>histogram_end</th>
+<th>value</th>
+<th>metric</th>
+<th>dist</th>
+<th>dist_param1</th>
+<th>dist_param2</th>
+<th>dist_param1_name</th>
+<th>dist_param2_name</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td>-21-102</td>
+<td>1</td>
+<td>19</td>
+<td>79</td>
+<td>1</td>
+<td>61,</td>
+<td>1,</td>
+<td>9</td>
+<td>20</td>
+<td>0.9554924687</td>
+<td>consensus</td>
+<td>norm</td>
+<td>33.03241096</td>
+<td>14.88105209</td>
+<td>mean</td>
+<td>sd</td>
+</tr></tbody>
+</table>
+<p><strong>Coverage plot</strong> <img src="reference/figures/hz_output.png" alt="coverage plot"></p>
 </div>
 <div class="section level2">
-<h2 id="additional-features">Additional features<a class="anchor" aria-label="anchor" href="#additional-features"></a>
+<h2 id="resources">Resources<a class="anchor" aria-label="anchor" href="#resources"></a>
 </h2>
-<p>HistogramZoo supports common genomic data types including bigWig files and BED files. HistogramZoo supports both genomic and transcriptomic coordinate systems.</p>
+<p>The function reference and a detailed vignette are available <a href="https://uclahs-cds.github.io/public-R-HistogramZoo/">here</a>. A CRAN page is currently in progress.</p>
+</div>
+<div class="section level2">
+<h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h2>
+<p>Looking for guidance or support with HistogramZoo? Look no further.</p>
+<ul>
+<li>Check out our <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/discussions" class="external-link">Discussions</a> page!</li>
+<li>Submit bugs <span class="emoji" data-emoji="bug">🐛</span>, suggest new features <span class="emoji" data-emoji="cherry_blossom">🌸</span> or see current work <span class="emoji" data-emoji="mechanical_arm">🦾</span> at our <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues" class="external-link">Issues</a> page.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="citation-information">Citation information<a class="anchor" aria-label="anchor" href="#citation-information"></a>
+</h2>
+<p>You have stumbled upon an unpublished software <span class="emoji" data-emoji="shushing_face">🤫</span> <span class="emoji" data-emoji="shushing_face">🤫</span> <span class="emoji" data-emoji="shushing_face">🤫</span>. We are currently preparing the manuscript for HistogramZoo. Please befriend us to learn more or check back later for updated citation information.</p>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>Authors: Helen Zhu, Stefan Eng, Paul C. Boutros (<a href="mailto:PBoutros@mednet.ucla.edu" class="email">PBoutros@mednet.ucla.edu</a>)</p>
+<p>HistogramZoo is licensed under the GNU General Public License version 3.0. See the file LICENSE.md for the terms of the GNU GPL license.</p>
+<p>HistogramZoo is a generalized framework for histogram segmentation and statistical characterization written in R.</p>
+<p>Copyright (C) University of California Los Angeles (“Boutros Lab”) All rights reserved.</p>
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
@@ -127,7 +235,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer>

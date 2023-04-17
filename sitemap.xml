@@ -1,165 +1,261 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/404.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/404.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/LICENSE-text.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/authors.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/articles/HistogramZoo.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/index.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/GTF_to_GRangesList.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/authors.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/GenomicHistogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/index.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/Histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/news/index.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/base0_to_base1.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/GTF_to_GRangesList.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/bigWig_to_histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/GenomicHistogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/calculate_probability_difference.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/Histogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/coverage_to_histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/are_colours.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/create_coverageplot.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/base0_to_base1.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/create_layerplot.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/bigWig_to_histogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/create_residualplot.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/bin_log_likelihood.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/create_trackplot.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/calculate_probability_difference.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/dput_str.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/compute_coverage_on_bins.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/dtgamma.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/correct_fitted_value.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/find_all_meaningful_gap.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/coverage_to_histogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/find_consecutive_threshold.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_coverageplot.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/find_local_optima.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_histogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/find_stepfunction_chgpts.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_layerplot.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/fit_distributions.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_residualplot.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/ftc.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_trackplot.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/generate_identifiers.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dgamma_flip.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/generate_uniform_distribution.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dput_str.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/genome_BED_to_histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dtgamma.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/grenader.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dtgamma_flip.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/histogram.chisq.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/extract_segments.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/histogram.intersection.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/extract_stats_from_models.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/histogram.jaccard.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_all_meaningful_gap.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/histogram.ks.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_change_points.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/histogram.mse.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_consecutive_threshold.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/identify_uniform_segment.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_consensus_model.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/index.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_local_optima.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/index_to_start_end.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_distributions.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/is_equal_integer.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_uniform.numeric.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/maximal_meaningful_interval.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/format_print_intervals.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/maximum_entropy.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ftc.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/meaningful_gap.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_granges_from_parent_and_ranges.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/meaningful_gaps_local.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_identifiers.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/meaningful_interval.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_row_ids.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/monotone_cost.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_uniform_distribution.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/observations_to_histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_xlabels.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/ptgamma.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/genome_BED_to_histogram.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/qtgamma.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/grenader.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/reassign_region_id.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/histogram.chisq.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/relative_entropy.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/histogram.intersection.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/remove_max_gaps.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/histogram.jaccard.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/return_x_points.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/histogram.ks.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/return_y_points.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/histogram.mse.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/rtgamma.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/identify_uniform_segment.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/segment_and_fit.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/summarize_results.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/index_to_start_end.html</loc>
   </url>
   <url>
-    <loc>https://friendly-invention-3cb82740.pages.github.io/reference/transcript_BED_to_histogram.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/is_equal_integer.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/labels_helper.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/maximal_meaningful_interval.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/maximum_entropy.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/meaningful_gap.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/meaningful_gaps_local.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/meaningful_interval.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/monotone_cost.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/new_GenomicHistogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/new_Histogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/observations_to_histogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/pgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ptgamma.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ptgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qtgamma.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qtgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/reassign_region_id.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/relative_entropy.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/remove_max_gaps.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/return_x_points.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/return_y_points.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rtgamma.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rtgamma_flip.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/scale_model_params.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/segment_and_fit.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/summarize_results.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/transcript_BED_to_histogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/validate_GenomicHistogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/validate_Histogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/weighted.moments.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/weighted_coverage.html</loc>
   </url>
 </urlset>
