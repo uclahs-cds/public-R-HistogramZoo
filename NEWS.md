@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions
 
 ### Fixed
+- Minor fixes to vignette file path locations for successful pkgdown build
 
 ## [1.3.0] - 2023-04-14
 
