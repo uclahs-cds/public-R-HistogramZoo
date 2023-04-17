@@ -80,3 +80,14 @@ index_to_start_end <- function(p, right = TRUE) {
 is_equal_integer <- function(x){
   all(x%%1 == 0)
 }
+
+
+#' Finds the midpoint of histogram bins
+#'
+#' @param start bin start
+#' @param end bin end
+#'
+#' @return a numeric vector representing midpoints of each bin
+find_midpoint <- function(start, end){
+  (start + end)/2
+}
