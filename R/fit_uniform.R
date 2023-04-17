@@ -19,7 +19,7 @@ fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse
 
 #' @exportS3Method fit_uniform numeric
 fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
-  
+
   fit_uniform_helper(
     x = x,
     interval_start = seq(1, length(x), 1) - 1,
@@ -35,28 +35,28 @@ fit_uniform.table <- fit_uniform.numeric
 
 #' @exportS3Method fit_uniform Histogram
 fit_uniform.Histogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
-  
+
   fit_uniform_helper(
-    x = x,
+    x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
     interval_midpoint = rowMeans(cbind(x$interval_start, x$interval_end)),
     metric = metric
   )
-  
+
 }
 
 #' @exportS3Method fit_uniform GenomicHistogram
 fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
-  
+
   fit_uniform_helper(
-    x = x,
+    x = x$histogram_data,
     interval_start = x$consecutive_start - 1,
     interval_end = x$consecutive_end,
     interval_midpoint = rowMeans(cbind(x$consecutive_start - 1, x$consecutive_end)),
     metric = metric
   )
-  
+
 }
 
 #' A helper function for the S3 method fit_uniform
@@ -76,28 +76,28 @@ fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersec
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
 fit_uniform_helper <- function(
-    x, 
+    x,
     interval_start,
     interval_end,
     interval_midpoint,
     metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
 ){
-  
+
   metric <- match.arg(metric)
-  
+
   # Initializing
   L <- length(x)
   N <- sum(x)
-  
+
   if(metric == 'mle') {
     # Negative log-likelihood
     value <- (- uniform_mle(
-      x = x, 
-      x.start = interval_start, 
-      x.end = interval_end, 
-      a = head(interval_start, 1), 
-      b = tail(interval_end, 1), 
-      inclusive = TRUE, 
+      x = x,
+      x.start = interval_start,
+      x.end = interval_end,
+      a = head(interval_start, 1),
+      b = tail(interval_end, 1),
+      inclusive = TRUE,
       log = TRUE
     ))
   } else {
@@ -106,7 +106,7 @@ fit_uniform_helper <- function(
     m <- metric_func(x, p_unif*N)
     value <- correct_fitted_value(metric, m)
   }
-  
+
   return(
     list(
       "par" = NULL,
