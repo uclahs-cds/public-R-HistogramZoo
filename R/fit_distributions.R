@@ -144,7 +144,8 @@ fit_distributions_helper <- function(
 
   # Setting vars for parameter estimation
   L <- length(x)
-  N <- sum(x)
+  # Area = sum(density * bin_width)
+  area <- sum(x*(interval_end - interval_start))
 
   # Optimization Function
   .hist.optim <- function(params, .dist = c("norm", "gamma", "gamma_flip"), .metric_func) {
@@ -162,7 +163,7 @@ fit_distributions_helper <- function(
     }
     trunc.letter <- if(truncated) "t" else ""
     dens <- tryCatch({
-      do.call(paste0("d", trunc.letter, .dist), args) * N
+      do.call(paste0("d", trunc.letter, .dist), args) * area
     }, error = function(err) {
       rep(0, L)
     })
@@ -273,7 +274,7 @@ fit_distributions_helper <- function(
             }
             args <- c(list(x = x), as.list(mpar))
             res <- do.call(paste0("d", trunc.letter, distr), args)
-            if(scale) res * N
+            if(scale) res * area
             else res
           }
         )
