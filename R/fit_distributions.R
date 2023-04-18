@@ -46,7 +46,7 @@ fit_distributions.numeric <- function(
     interval_end = interval_midpoint + 0.5,
     interval_midpoint = interval_midpoint,
     metric = metric,
-    truncated = FALSE,
+    truncated = truncated,
     distributions = distributions
   )
 
@@ -70,7 +70,7 @@ fit_distributions.GenomicHistogram <- function(
     interval_end = x$consecutive_end + 0.5,
     interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
     metric = metric,
-    truncated = FALSE,
+    truncated = truncated,
     distributions = distributions
   )
 
@@ -91,7 +91,7 @@ fit_distributions.Histogram <- function(
     interval_end = x$interval_end,
     interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
     metric = metric,
-    truncated = FALSE,
+    truncated = truncated,
     distributions = distributions
   )
 
@@ -151,11 +151,14 @@ fit_distributions_helper <- function(
     # Compute the expected counts for the given parameters
     args <- c(list(x = interval_midpoint), params)
     if(truncated) {
-      args$a <- min(interval_midpoint) - 1e-10
-      args$b <- max(interval_midpoint) + 1e-10
+      args$a <- head(interval_start, 1) - 1e-10
+      args$b <- tail(interval_end, 1) + 1e-10
     }
     if(!truncated & .dist == "gamma_flip"){
-      args$offset <- tail(interval_end, 1) # length(x)
+      args$offset <- tail(interval_end, 1)
+    }
+    if(!truncated & .dist == "gamma"){
+      args$shift <- head(interval_start, 1)
     }
     trunc.letter <- if(truncated) "t" else ""
     dens <- tryCatch({
@@ -249,9 +252,12 @@ fit_distributions_helper <- function(
         dist_par$a <- head(interval_start, 1) - 1e-10 # min(bin)
         dist_par$b <- tail(interval_end, 1) + 1e-10 # max(bin)
       }
-      # Adjusting for offset
+      # Adjusting for shift & offset
       if(!truncated & distr == "gamma_flip"){
-        dist_par$offset <- tail(interval_end, 1) # length(bin)
+        dist_par$offset <- tail(interval_end, 1)
+      }
+      if(!truncated & distr == "gamma"){
+        dist_par$shift <- head(interval_start, 1)
       }
 
       # Return model
