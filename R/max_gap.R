@@ -118,11 +118,18 @@ maximal_meaningful_interval <- function(x) {
 #' }
 #' @export
 find_all_meaningful_gap <- function(x, change_points) {
+  UseMethod('find_all_meaningful_gap')
+}
 
+#' @exportS3Method find_all_meaningful_gap Histogram
+find_all_meaningful_gap.Histogram <- function(x, change_points){
+  find_all_meaningful_gap.numeric(x = x$histogram_data, change_points = change_points)
+}
+
+#' @exportS3Method find_all_meaningful_gap numeric
+find_all_meaningful_gap.numeric <- function(x, change_points){
+  
   # Error checking
-  if(!is.numeric(x)){
-    stop("x must be a numeric vector")
-  }
   if(!is_equal_integer(change_points) | !all(change_points <= length(x) & change_points >= 0)){
     stop("change_points must be functional indices")
   }
@@ -170,11 +177,18 @@ find_all_meaningful_gap <- function(x, change_points) {
 #' }
 #' @export
 meaningful_gaps_local <- function(x, seg_points, change_points, min_gap = 2) {
+  UseMethod('meaningful_gaps_local')
+}
+
+#' @exportS3Method meaningful_gaps_local Histogram
+meaningful_gaps_local.Histogram <- function(x, seg_points, change_points, min_gap = 2) {
+  meaningful_gaps_local.numeric(x = x$histogram_data, seg_points = seg_points, change_points = change_points, min_gap = min_gap)
+}
+
+#' @exportS3Method meaningful_gaps_local numeric
+meaningful_gaps_local.numeric <- function(x, seg_points, change_points, min_gap = 2) {
 
   # Error checking
-  if(!is.numeric(x)){
-    stop("x must be a numeric vector")
-  }
   if(!is_equal_integer(seg_points) | !all(seg_points <= length(x) & seg_points >= 0)){
     stop("seg_points must be functional indices")
   }
