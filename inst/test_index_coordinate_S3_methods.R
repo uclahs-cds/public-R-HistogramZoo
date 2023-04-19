@@ -7,12 +7,8 @@ library(BoutrosLab.plotting.general)
 # Writing a set of tests to test S3 methods for fitting histograms
 # Updated functions
 
-# Issue with shift on numeric data
-
 # Coordinate based functions
 # 1. fit_distributions
-# - The issue with gamma is obvious - we need an additional offset
-# - Unclear issue with bin_width
 # 2. fit_uniform
 # 3. identify_uniform_segment
 
@@ -51,7 +47,6 @@ plot_fit_distributions <- function(res, x, empirical_data){
     )
   }))
   
-  
   plt <- create.scatterplot(
     y ~ x,
     plotting_data,
@@ -82,153 +77,70 @@ find_midpoint <- function(start, end){
   (start + end)/2
 }
 
-# Fit distributions -------------------------------------------------------
+# Gamma testing -----------------------------------------------------------
 
-# Numeric
-x <- seq(1, 10)
-y <- c(1, 2, 3, 4, 5, 4, 3, 2, 1, 1)
-  
-num_res <- fit_distributions(y, metric = "jaccard", dist = "norm")
+# Gamma histogram
+gamma_data <- rgamma(100000, shape = 20, rate = 2, shift = 100)
+gamma_density <- dgamma(1:200, shape = 20, rate = 2, shift = 100)
+gamma_histogram <- observations_to_histogram(gamma_data)
+res <- fit_distributions(gamma_histogram, dist = "gamma", truncated = T)
+plot_fit_distributions(
+  res = res, 
+  x = 1:200, 
+  gamma_density
+)
+
+# Gamma test
+gamma_data <- dgamma(1:200, shape = 20, rate = 2, shift = 100)
+tgamma_data <- dtgamma(1:200, shape = 20, shift = 100, rate = 2, a = 10, b = 200)
+res <- HistogramZoo:::fit_distributions_helper(
+  gamma_data[100:200], 
+  dist = "gamma", 
+  metric = "jaccard", 
+  truncated = T,
+  interval_start = 100:200 - 0.5,
+  interval_end = 100:200 + 0.5,
+  interval_midpoint = 100:200
+)
 
 plot_fit_distributions(
-  res = num_res, 
-  x = x,
-  empirical_data = y
+  res = res, 
+  x = 100:200, 
+  gamma_data[100:200]
 )
 
-# Histogram (non-1 start)
-bins <- index_to_start_end(
-  # seq(10, 20, 1),
-  seq(10, 30, 2),
-  right = FALSE
+plot(x = 1:200, y = gamma_data, col = "red")
+points(x = 1:200, y = tgamma_data, col = "blue")
+
+# Gamma flip example
+gamma_flip_data <- rgamma_flip(100000, shape = 20, rate = 2, offset = 200)
+gamma_flip_density <- dgamma_flip(1:200, shape = 20, rate = 2, offset = 200)
+gamma_flip_histogram <- observations_to_histogram(gamma_flip_data)
+res <- fit_distributions(gamma_flip_histogram, dist = "gamma_flip", truncated = F)
+plot_fit_distributions(
+  res = res, 
+  x = 1:200,
+  gamma_flip_density
 )
 
-histogram_non_zero_start <- Histogram(
-  y, 
-  interval_start = bins$start - 1, 
-  interval_end = bins$end
+# Gamma flip test
+gamma_flip_data <- dgamma_flip(1:200, shape = 20, rate = 2, offset = 200)
+tgamma_flip_data <- dtgamma_flip(1:200, shape = 20, rate = 2, offset = 200, a = 0, b = Inf)
+res <- HistogramZoo:::fit_distributions_helper(
+  gamma_flip_data[100:200], 
+  dist = "gamma_flip", 
+  truncated = T,
+  interval_start = 100:200 - 0.5,
+  interval_end = 100:200 + 0.5,
+  interval_midpoint = 100:200
 )
-  
-histogram_res <- fit_distributions(histogram_non_zero_start) # , metric = "jaccard", dist = "norm")
 
 plot_fit_distributions(
-  res = histogram_res[1:5], 
-  x = find_midpoint(histogram_non_zero_start$interval_start, histogram_non_zero_start$interval_end),
-  empirical_data = y
+  res = res, 
+  x = 1:200,
+  gamma_data
 )
 
-# GenomicHistogram
-genomic_histogram_non_zero_start <- GenomicHistogram(
-  y,
-  interval_start = bins$start,
-  interval_end = bins$end
-)
-  
-genomic_histogram_res <- fit_distributions(genomic_histogram_non_zero_start, dist = "norm") # , metric = "jaccard", dist = "norm")
+plot(x = 1:200, y = gamma_flip_data, col = "red")
+points(x = 1:200, y = tgamma_flip_data, col = "blue")
 
-plot_fit_distributions(
-  res = genomic_histogram_res, 
-  x = find_midpoint(genomic_histogram_non_zero_start$consecutive_start, genomic_histogram_non_zero_start$consecutive_end),
-  empirical_data = y
-)
-
-
-# Fit uniform -------------------------------------------------------------
-
-# Numeric
-x <- seq(1, 10)
-y_unif <- rep(1, 10) + runif(10)
-
-num_res <- fit_uniform(y_unif)
-
-plot_fit_distributions(
-  res = list(num_res), 
-  x = x,
-  empirical_data = y_unif
-)
-
-# Histogram
-unif_bins <- index_to_start_end(
-  # seq(10, 20, 1),
-  seq(10, 30, 2),
-  right = FALSE
-)
-
-histogram_non_zero_start <- Histogram(
-  y_unif, 
-  interval_start = unif_bins$start - 1, 
-  interval_end = unif_bins$end
-)
-
-histogram_res <- fit_uniform(histogram_non_zero_start) 
-
-plot_fit_distributions(
-  res = list(histogram_res), 
-  x = find_midpoint(histogram_non_zero_start$interval_start, histogram_non_zero_start$interval_end),
-  empirical_data = y_unif
-)
-
-# GenomicHistogram
-genomic_histogram_non_zero_start <- GenomicHistogram(
-  y_unif,
-  interval_start = unif_bins$start,
-  interval_end = unif_bins$end
-)
-
-genomic_histogram_res <- fit_uniform(genomic_histogram_non_zero_start)
-
-plot_fit_distributions(
-  res = list(genomic_histogram_res), 
-  x = find_midpoint(genomic_histogram_non_zero_start$consecutive_start, genomic_histogram_non_zero_start$consecutive_end),
-  empirical_data = y_unif
-)
-
-# Identify uniform segment ------------------------------------------------
-
-# Numeric
-x <- seq(1, 10)
-y_unif_trim <- c(1, 1, rep(2, 7), 1)
-
-num_res <- identify_uniform_segment(y_unif_trim)
-
-plot_fit_distributions(
-  res = list(num_res), 
-  x = x,
-  empirical_data = y_unif_trim
-)
-
-# Histogram
-unif_bins <- index_to_start_end(
-  # seq(10, 20, 1),
-  seq(10, 30, 2),
-  right = FALSE
-)
-
-histogram_non_zero_start <- Histogram(
-  y_unif_trim, 
-  interval_start = unif_bins$start - 1, 
-  interval_end = unif_bins$end
-)
-
-histogram_res <- identify_uniform_segment(histogram_non_zero_start) 
-
-plot_fit_distributions(
-  res = list(histogram_res), 
-  x = find_midpoint(histogram_non_zero_start$interval_start, histogram_non_zero_start$interval_end),
-  empirical_data = y_unif_trim
-)
-
-# GenomicHistogram
-genomic_histogram_non_zero_start <- GenomicHistogram(
-  y_unif_trim,
-  interval_start = unif_bins$start,
-  interval_end = unif_bins$end
-)
-
-genomic_histogram_res <- identify_uniform_segment(genomic_histogram_non_zero_start)
-
-plot_fit_distributions(
-  res = list(genomic_histogram_res), 
-  x = find_midpoint(genomic_histogram_non_zero_start$consecutive_start, genomic_histogram_non_zero_start$consecutive_end),
-  empirical_data = y_unif_trim
-)
