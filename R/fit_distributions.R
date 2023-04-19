@@ -143,7 +143,7 @@ fit_distributions_helper <- function(
   distributions <- match.arg(distributions, several.ok = TRUE)
 
   # Setting vars for parameter estimation
-  L <- length(x)
+  L <- tail(interval_end, 1) - head(interval_start, 1)
   # Area = sum(density * bin_width)
   area <- sum(x*(interval_end - interval_start))
 
@@ -165,7 +165,7 @@ fit_distributions_helper <- function(
     dens <- tryCatch({
       do.call(paste0("d", trunc.letter, .dist), args) * area
     }, error = function(err) {
-      rep(0, L)
+      rep(0, length(x))
     })
     dens[is.na(dens)] <- 0
     res <- .metric_func(x, dens)

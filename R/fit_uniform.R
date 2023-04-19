@@ -87,8 +87,8 @@ fit_uniform_helper <- function(
   metric <- match.arg(metric)
 
   # Initializing
-  L <- length(x)
-  N <- sum(x)
+  L <- tail(interval_end, 1) - head(interval_start, 1)
+  area <- sum(x*(interval_end - interval_start))
 
   if(metric == 'mle') {
     # Negative log-likelihood
@@ -102,9 +102,9 @@ fit_uniform_helper <- function(
       log = TRUE
     ))
   } else {
-    p_unif <- generate_uniform_distribution(x)
+    p_unif <- rep(1/L, length(x))
     metric_func <- get(paste('histogram', metric, sep = "."))
-    m <- metric_func(x, p_unif*N)
+    m <- metric_func(x, p_unif*area)
     value <- correct_fitted_value(metric, m)
   }
 
@@ -119,7 +119,7 @@ fit_uniform_helper <- function(
           x <- interval_midpoint
         }
         res <- ifelse(x >= head(interval_start, 1) & x <= tail(interval_end, 1), 1/L, 0)
-        if(scale) res * N
+        if(scale) res * area
         else res
       }
     )
