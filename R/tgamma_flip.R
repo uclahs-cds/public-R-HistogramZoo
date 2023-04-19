@@ -4,15 +4,16 @@
 #' @param x numeric vector of quantiles
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
+#' @param offset offset of the right end of the distribution
 #' @param a distribution start
 #' @param b distribution end
 #' @param ... additional parameters to be passed to truncdist::dtrunc
 #'
 #' @return density of distribution
 #' @export
-dtgamma_flip <- function(x, shape, rate = 1, a = 0, b = NULL, ...) {
+dtgamma_flip <- function(x, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
   if(is.null(b)) stop("Need to supply upper bound.")
-  truncdist::dtrunc(a + b - x, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
+  truncdist::dtrunc(offset - x, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
 }
 
 #' truncated gamma flip
@@ -20,6 +21,7 @@ dtgamma_flip <- function(x, shape, rate = 1, a = 0, b = NULL, ...) {
 #' @param q numeric vector of quantiles
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
+#' @param offset offset of the right end of the distribution
 #' @param a distribution start
 #' @param b distribution end
 #' @param lower.tail logical; if TRUE (default), probabilities are P[X <= x], otherwise, P[X > x]
@@ -27,9 +29,9 @@ dtgamma_flip <- function(x, shape, rate = 1, a = 0, b = NULL, ...) {
 #'
 #' @return distribution function
 #' @export
-ptgamma_flip <- function(q, shape, rate = 1, a = 0, b = NULL, lower.tail = TRUE, ...) {
+ptgamma_flip <- function(q, shape, rate = 1, offset = 0, a = 0, b = NULL, lower.tail = TRUE, ...) {
   if(is.null(b)) stop("Need to supply upper bound.")
-  truncdist::ptrunc(a + b - q, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
+  truncdist::ptrunc(offset - q, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
 }
 
 #' truncated gamma flip
@@ -37,15 +39,16 @@ ptgamma_flip <- function(q, shape, rate = 1, a = 0, b = NULL, lower.tail = TRUE,
 #' @param n number of observations
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
+#' @param offset offset of the right end of the distribution
 #' @param a distribution start
 #' @param b distribution end
 #' @param ... additional parameters to be passed to truncdist::dtrunc
 #'
 #' @return random deviates
 #' @export
-rtgamma_flip <- function(n, shape, rate = 1, a = 0, b = NULL, ...) {
+rtgamma_flip <- function(n, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
   if(is.null(b)) stop("Need to supply upper bound.")
-  a + b - truncdist::rtrunc(n, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
+  offset - truncdist::rtrunc(n, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
 }
 
 #' truncated gamma
@@ -53,6 +56,7 @@ rtgamma_flip <- function(n, shape, rate = 1, a = 0, b = NULL, ...) {
 #' @param p vector of probabilities
 #' @param shape shape parameter of gamma distribution
 #' @param rate rate parameter of gamma distribution, default 1
+#' @param offset offset of the right end of the distribution
 #' @param a distribution start
 #' @param b distribution end
 #' @param lower.tail logical; if TRUE (default), probabilities are P[X <= x], otherwise, P[X > x]
@@ -60,7 +64,7 @@ rtgamma_flip <- function(n, shape, rate = 1, a = 0, b = NULL, ...) {
 #'
 #' @return quantile function
 #' @export
-qtgamma_flip <- function(p, shape, rate = 1, a = 0, b = NULL, lower.tail = TRUE, ...) {
+qtgamma_flip <- function(p, shape, rate = 1, offset = 0, a = 0, b = NULL, lower.tail = TRUE, ...) {
   if(is.null(b)) stop("Need to supply upper bound.")
-  a + b - truncdist::qtrunc(p, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
+  offset - truncdist::qtrunc(p, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
 }

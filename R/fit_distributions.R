@@ -195,10 +195,18 @@ fit_distributions_helper <- function(
         lower <- c(head(interval_start, 1), 0.001)
         upper <- c(tail(interval_end, 1), (tail(interval_end, 1) - head(interval_start, 1)) * 0.5)
         names_par <- c("mean", "sd")
-      } else if (distr %in% c("gamma", "gamma_flip")){
+      } else if (!truncated && distr %in% c("gamma", "gamma_flip")){
         lower <- c(0.001, 0.001)
         upper <- c(L, L)
         names_par <- c("shape", "rate")
+      } else if (truncated && distr == "gamma"){
+        lower <- c(0.001, 0.001, 0.001)
+        upper <- c(L, L, tail(interval_end, 1))
+        names_par <- c("shape", "rate", "shift")
+      } else if (truncated && distr == "gamma_flip") {
+        lower <- c(0.001, 0.001, head(interval_start, 1))
+        upper <- c(L, L, tail(interval_end, 1))
+        names_par <- c("shape", "rate", "offset")
       }
 
       control_args <- list(
