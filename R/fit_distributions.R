@@ -68,7 +68,7 @@ fit_distributions.GenomicHistogram <- function(
     x = x$histogram_data,
     interval_start = x$consecutive_start - 0.5,
     interval_end = x$consecutive_end + 0.5,
-    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
+    interval_midpoint = find_midpoint(x),
     metric = metric,
     truncated = truncated,
     distributions = distributions
@@ -89,7 +89,7 @@ fit_distributions.Histogram <- function(
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
+    interval_midpoint = find_midpoint(x),
     metric = metric,
     truncated = truncated,
     distributions = distributions

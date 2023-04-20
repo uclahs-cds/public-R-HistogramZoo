@@ -82,12 +82,44 @@ is_equal_integer <- function(x){
 }
 
 
-#' Finds the midpoint of histogram bins
+#' Finds the bin_width of Histogram or GenomicHistogram bins
 #'
-#' @param start bin start
-#' @param end bin end
+#' @param x a Histogram or GenomicHistogram object
+#' 
+#' @return a numeric vector representing bin_widths of each bin
+#' 
+#' @export
+find_bin_width <- function(x){
+  UseMethod('find_bin_width')
+}
+
+#' @exportS3Method find_bin_width Histogram
+find_bin_width.Histogram <- function(x){
+  (x$interval_start + x$interval_end)/2
+}
+
+#' @exportS3Method find_bin_width GenomicHistogram
+find_bin_width.GenomicHistogram <- function(x){
+  x$consecutive_end - x$consecutive_start + 1
+}
+
+#' Finds the midpoint of Histogram or GenomicHistogram bins
 #'
+#' @param x a Histogram or GenomicHistogram object
+#' 
 #' @return a numeric vector representing midpoints of each bin
-find_midpoint <- function(start, end){
-  (start + end)/2
+#' 
+#' @export
+find_midpoint <- function(x){
+  UseMethod('find_midpoint')
+}
+
+#' @exportS3Method find_midpoint Histogram
+find_midpoint.Histogram <- function(x){
+  (x$interval_start + x$interval_end)/2
+}
+
+#' @exportS3Method find_midpoint GenomicHistogram
+find_midpoint.GenomicHistogram <- function(x){
+  (x$consecutive_start + x$consecutive_end)/2
 }

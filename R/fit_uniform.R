@@ -41,7 +41,7 @@ fit_uniform.Histogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
+    interval_midpoint = find_midpoint(x),
     metric = metric
   )
 
@@ -54,7 +54,7 @@ fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersec
     x = x$histogram_data,
     interval_start = x$consecutive_start - 0.5,
     interval_end = x$consecutive_end + 0.5,
-    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
+    interval_midpoint = find_midpoint(x),
     metric = metric
   )
 
