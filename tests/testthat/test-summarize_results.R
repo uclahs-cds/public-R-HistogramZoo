@@ -25,8 +25,10 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
   expect_true(all(c("region_id", "segment_id", "start", "end",
-    "interval_count", "interval_sizes", "interval_starts", "histogram_start",
-    "histogram_end", "value", "metric", "dist") %in% colnames(results)))
+    "interval_count", "interval_sizes", "interval_starts", 
+    "histogram_start", "histogram_end",
+    "empirical_mean", "empirical_var", "empirical_sd", "empirical_skew",
+    "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"region_id"], "character")
   expect_is(results[,"segment_id"], "integer")
@@ -44,6 +46,12 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   expect_is(results[,"value"], "numeric")
   expect_is(results[,"metric"], "character")
   expect_is(results[,"dist"], "character")
+  
+  # Summary statistics
+  expect_is(results[,"empirical_mean"], "numeric")
+  expect_is(results[,"empirical_var"], "numeric")
+  expect_is(results[,"empirical_sd"], "numeric")
+  expect_is(results[,"empirical_skew"], "numeric")  
 
 })
 
@@ -75,8 +83,10 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
   expect_true(all(c("region_id", "segment_id", "start", "end",
-    "interval_count", "interval_sizes", "interval_starts", "histogram_start",
-    "histogram_end", "value", "metric", "dist") %in% colnames(results)))
+    "interval_count", "interval_sizes", "interval_starts", 
+    "histogram_start", "histogram_end", 
+    "empirical_mean", "empirical_var", "empirical_sd", "empirical_skew",
+    "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"chr"], "character")
   expect_is(results[,"strand"], "character")
