@@ -60,7 +60,7 @@ test_that("Generating an invalid GenomicHistogram object", {
   )
 
   # Violation of continuity hypothesis
-  x <- Histogram(c(1, 2, 3, 4, 5))
+  x <- GenomicHistogram(c(1, 2, 3, 4, 5))
   expect_error(
     x[c(1, 3, 5)]
   )
