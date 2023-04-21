@@ -12,7 +12,11 @@ results_columns <- c(
   "histogram_end",
   "value",
   "metric",
-  "dist"
+  "dist",
+  "empirical_mean",
+  "empirical_var",
+  "empirical_sd",
+  "empirical_skew"
 )
 
 #' Extract stats from models
@@ -142,14 +146,26 @@ summarize_results.Histogram <- function(
 
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
+    
+    # Model parameters
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
     if(result$bin_width > 1) {
       stats <- scale_model_params(stats, bin_width = result$bin_width)
     }
 
+    # Bin coordinates
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
+    
+    # Empirical moment estimation from histogram
+    moment_estimation <- list(
+      "empirical_mean" = weighted.mean(x[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_var" = weighted.var(x[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_sd" = weighted.sd(x[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_skew" = weighted.skewness(x[stats[['histogram_start']]:stats[['histogram_end']]])
+    )
 
+    # Parameters
     if (max_param_length > 0) {
       # Convert parameters into common naming scheme rather than
       # actual parameter names like mean, sd, rate, shape, etc
@@ -166,9 +182,9 @@ summarize_results.Histogram <- function(
 
       stats$params <- NULL
 
-      data.frame(stats[lengths(stats) > 0], as.list(new_params), coords, segment_id = i)
+      data.frame(stats[lengths(stats) > 0], as.list(new_params), coords, moment_estimation, segment_id = i)
     } else {
-      data.frame(stats[lengths(stats) > 0], coords, segment_id = i)
+      data.frame(stats[lengths(stats) > 0], coords, moment_estimation, segment_id = i)
     }
   })
   results_table <- do.call('rbind.data.frame', results_table)
