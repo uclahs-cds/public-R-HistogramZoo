@@ -146,7 +146,7 @@ summarize_results.Histogram <- function(
 
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
-    
+
     # Model parameters
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
     if(result$bin_width > 1) {
@@ -156,13 +156,13 @@ summarize_results.Histogram <- function(
     # Bin coordinates
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
-    
+
     # Empirical moment estimation from histogram
     moment_estimation <- list(
-      "empirical_mean" = weighted.mean(x[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_var" = weighted.var(x[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_sd" = weighted.sd(x[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_skew" = weighted.skewness(x[stats[['histogram_start']]:stats[['histogram_end']]])
+      "empirical_mean" = weighted.mean(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_var" = weighted.var(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_sd" = weighted.sd(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "empirical_skew" = weighted.skewness(result[stats[['histogram_start']]:stats[['histogram_end']]])
     )
 
     # Parameters
