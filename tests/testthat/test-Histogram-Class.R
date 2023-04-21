@@ -76,6 +76,11 @@ test_that("Generating an invalid Histogram object", {
     )
   )
 
+  x <- Histogram(c(1, 2, 3, 4, 5))
+  expect_error(
+    x[c(1, 3, 5)]
+  )
+
 })
 
 test_that("Histogram-class methods", {
