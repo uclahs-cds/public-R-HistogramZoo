@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - shifted gamma function to allow for non-zero starts
 
 ### Changed
+- Enforcing continuity of bins in Histogram and GenomicHistogram objects when subsetting [Pull #125](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/125)
 
 ### Fixed
 - Fix vignette/README/image file paths for pkgdown [Pull #115](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/115)
