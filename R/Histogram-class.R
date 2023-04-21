@@ -245,6 +245,11 @@ print.Histogram = function(x, ...){
 #' @export
 `[.Histogram` = function(x, i){
 
+  # Continuity enforcement
+  if(length(i) > 1 && !all(diff(i)== 1)){
+    stop("Subsetting of Histograms must include a valid continuous set of indices")
+  }
+  
   # Bin width reestimation
   if(length(i) == 1 && i == length(x)){
     x$bin_width <- x$interval_end[i] - x$interval_start[i]
