@@ -156,14 +156,14 @@ fit_distributions_helper <- function(
       args$b <- tail(interval_end, 1) + 1e-10
     }
     if(truncated && .dist %in% c("gamma_flip", "gamma")){
-      args$a <- - 1e-10
-      args$b <- L + 1e-10
+      args$a <- 0
+      args$b <- L
     }
     if(.dist == "gamma_flip"){
-      args$offset <- tail(interval_end, 1)
+      args$offset <- tail(interval_end, 1) + 1e-10
     }
     if(.dist == "gamma"){
-      args$shift <- head(interval_start, 1)
+      args$shift <- head(interval_start, 1) - 1e-10
     }
     trunc.letter <- if(truncated) "t" else ""
     dens <- tryCatch({
@@ -223,19 +223,20 @@ fit_distributions_helper <- function(
           control = control_args
           )
 
+        if (distr == "gamma") {
+          mle.options.args$shift <- head(interval_start, 1) - 1e-10
+        } else if (distr == "gamma_flip") {
+          mle.options.args$offset <- tail(interval_end, 1) + 1e-10
+        }
+
         if (truncated) {
           tdistr <- paste0('t', tdistr)
           if(distr == "normal"){
-            mle.options.args$a <- head(interval_start, 1) - 1e-10 # min(bin)
-            mle.options.args$b <- tail(interval_end, 1) + 1e-10 # max(bin)
+            mle.options.args$a <- head(interval_start, 1) - 1e-10
+            mle.options.args$b <- tail(interval_end, 1) + 1e-10
           } else if (distr %in% c("gamma", "gamma_flip")){
-            mle.options.args$a <- -1e-10 # min(bin)
-            mle.options.args$b <- L + 1e-10 # max(bin)
-            if(distr == "gamma"){
-              mle.options.args$shift <- head(interval_start, 1)
-            } else {
-              mle.options.args$offset <- tail(interval_end, 1)
-            }
+            mle.options.args$a <- 0
+            mle.options.args$b <- L
           }
 
         }
@@ -265,19 +266,19 @@ fit_distributions_helper <- function(
       # Adjusting for truncated distributions
       trunc.letter = if(truncated) "t" else ""
       if(truncated && distr == "normal") {
-        dist_par$a <- head(interval_start, 1) - 1e-10 # min(bin)
-        dist_par$b <- tail(interval_end, 1) + 1e-10 # max(bin)
+        dist_par$a <- head(interval_start, 1)
+        dist_par$b <- tail(interval_end, 1)
       }
       # Adjusting for shift & offset
       if(distr == "gamma_flip"){
-        dist_par$offset <- tail(interval_end, 1)
+        dist_par$offset <- tail(interval_end, 1) + 1e-10
       }
       if(distr == "gamma"){
-        dist_par$shift <- head(interval_start, 1)
+        dist_par$shift <- head(interval_start, 1) - 1e-10
       }
       if(truncated && distr %in% c("gamma", "gamma_flip")){
-        dist_par$a <- -1e-10
-        dist_par$b <- L + 1e-10
+        dist_par$a <- 0
+        dist_par$b <- L
       }
 
       # Return model
@@ -298,7 +299,6 @@ fit_distributions_helper <- function(
           }
         )
       )
-      ##
     })
   })
 
