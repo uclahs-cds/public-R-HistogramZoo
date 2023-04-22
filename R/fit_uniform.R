@@ -20,7 +20,7 @@ fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse
 #' @exportS3Method fit_uniform numeric
 fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
 
-  interval_midpoint <- seq(1, length(x), 1)
+  interval_midpoint <- seq(from = 1, to = length(x), by = 1)
   fit_uniform_helper(
     x = x,
     interval_start = interval_midpoint - 0.5,
