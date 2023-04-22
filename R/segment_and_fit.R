@@ -1,36 +1,3 @@
-#' Find changepoints in a vector with uniform stretches of values
-#' @param x A numeric vector
-find_change_points <- function(x){
-  change_points <- which(diff(x) != 0)
-  change_points_plus <- change_points+1
-  keep <- (x[change_points] < x[change_points_plus])
-  return( c(change_points[keep], change_points_plus[!keep]) )
-}
-
-
-#' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
-#'
-#' @param x numeric vector
-#' @param threshold numeric threshold
-#'
-#' @return list of coordinates with `start` and `end` coordinates
-#' @export
-#'
-#' @examples
-#' find_consecutive_threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
-#' find_consecutive_threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
-find_consecutive_threshold <- function(
-  x,
-  threshold = 0){
-  x_thresholded <- rle(x > threshold)
-  end_coords <- cumsum(x_thresholded$lengths)
-  start_coords <- end_coords - x_thresholded$lengths + 1
-  start_coords_thresholded <- start_coords[x_thresholded$values]
-  end_coords_thresholded <- end_coords[x_thresholded$values]
-
-  return(list(start = start_coords_thresholded, end = end_coords_thresholded))
-}
-
 #' Segmentation of histograms and distribution fitting
 #'
 #' @param histogram_obj a Histogram or HistogramList object
