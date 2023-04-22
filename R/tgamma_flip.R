@@ -11,8 +11,7 @@
 #'
 #' @return density of distribution
 #' @export
-dtgamma_flip <- function(x, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
-  if(is.null(b)) stop("Need to supply upper bound.")
+dtgamma_flip <- function(x, shape, rate = 1, offset = 0, a = 0, b = Inf, ...) {
   truncdist::dtrunc(offset - x, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
 }
 
@@ -29,8 +28,7 @@ dtgamma_flip <- function(x, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
 #'
 #' @return distribution function
 #' @export
-ptgamma_flip <- function(q, shape, rate = 1, offset = 0, a = 0, b = NULL, lower.tail = TRUE, ...) {
-  if(is.null(b)) stop("Need to supply upper bound.")
+ptgamma_flip <- function(q, shape, rate = 1, offset = 0, a = 0, b = Inf, lower.tail = TRUE, ...) {
   truncdist::ptrunc(offset - q, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
 }
 
@@ -46,8 +44,7 @@ ptgamma_flip <- function(q, shape, rate = 1, offset = 0, a = 0, b = NULL, lower.
 #'
 #' @return random deviates
 #' @export
-rtgamma_flip <- function(n, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
-  if(is.null(b)) stop("Need to supply upper bound.")
+rtgamma_flip <- function(n, shape, rate = 1, offset = 0, a = 0, b = Inf, ...) {
   offset - truncdist::rtrunc(n, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, ...)
 }
 
@@ -64,7 +61,6 @@ rtgamma_flip <- function(n, shape, rate = 1, offset = 0, a = 0, b = NULL, ...) {
 #'
 #' @return quantile function
 #' @export
-qtgamma_flip <- function(p, shape, rate = 1, offset = 0, a = 0, b = NULL, lower.tail = TRUE, ...) {
-  if(is.null(b)) stop("Need to supply upper bound.")
+qtgamma_flip <- function(p, shape, rate = 1, offset = 0, a = 0, b = Inf, lower.tail = TRUE, ...) {
   offset - truncdist::qtrunc(p, spec = 'gamma', a = a, b = b, shape = shape, rate = rate, lower.tail = !lower.tail, ...)
 }
