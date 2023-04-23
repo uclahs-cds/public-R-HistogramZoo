@@ -115,16 +115,16 @@ segment_and_fit <- function(
   x <- histogram_obj$histogram_data
 
   # Finding local optima
-  optima <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
+  optima <- find_local_optima(histogram_obj, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
   optima <- sort(c(optima$min_ind, optima$max_ind))
 
   # Finding change points for remove_low_entropy
   if(remove_low_entropy){
-    changepoints <- find_change_points(x)
+    changepoints <- find_change_points(histogram_obj)
   }
 
   # Looking for regions that surpass a hard count threshold
-  x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
+  x_segs <- as.data.frame(find_consecutive_threshold(histogram_obj, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
 
   if(nrow(x_segs) == 0){
@@ -134,12 +134,12 @@ segment_and_fit <- function(
   # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], optima[optima > segs['start'] & optima < segs['end']], segs['end']))
-    p <- ftc(x, p_init, eps)
+    p <- ftc(histogram_obj, p_init, eps)
 
     # Max gap
     if(remove_low_entropy) {
       changepoints_subset <- unname(c(segs['start'], changepoints[changepoints > segs['start'] & changepoints < segs['end']], segs['end']))
-      mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
+      mgaps <-  meaningful_gaps_local(x = histogram_obj, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
       p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
       p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_segment_size)
     } else {
