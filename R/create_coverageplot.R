@@ -333,8 +333,8 @@ create_coverageplot.HistogramFit <- function(
   mp <- find_midpoint(histogram_obj) # This S3 method differentiates between Histogram and GenomicHistogram
   distribution_plotting_data <- lapply(seq_along(mods), function(i) {
     m <- mods[[i]]
-    x <- seq(m$seg_start, m$seg_end, by = 10^-3)
-    seg_mp <- seq(mp[m$seg_start], mp[m$seg_end], by = 10^-3)
+    x <- seq(m$seg_start, m$seg_end, length.out = 10^3)
+    seg_mp <- seq(mp[m$seg_start], mp[m$seg_end], length.out = 10^3)
     dens <- m$dens(x = seg_mp, mpar = m$par)
     return(
       data.frame("dens" = dens, "labels_x" = x, "dist" = m$dist, "segment" = i)

@@ -100,7 +100,7 @@ create_residualplot.HistogramFit = function(
   mp <- find_midpoint(histogram_obj) # This S3 method differentiates between Histogram and GenomicHistogram
   distribution_plotting_data <- lapply(mods, function(m) {
     x <- seq(m$seg_start, m$seg_end, by = 1)
-    seg_mp <- seq(mp[m$seg_start], mp[m$seg_end], by = 1)
+    seg_mp <- mp[m$seg_start:m$seg_end]
     dens <- m$dens(x = seg_mp, mpar = m$par)
     return(
       data.frame("fitted" = dens, "labels_x" = x)
