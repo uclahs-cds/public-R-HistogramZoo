@@ -112,7 +112,7 @@ segment_and_fit <- function(
   }
 
   # Extracting data
-  x <- histogram_obj$histogram_data
+  # x <- histogram_obj$histogram_data
 
   # Finding local optima
   optima <- find_local_optima(histogram_obj, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
@@ -165,8 +165,7 @@ segment_and_fit <- function(
     seg_start <- seg[['start']]
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
-    bin_data <- x[seg_start:seg_end]
-    # sub_hist <- histogram_obj[seg_start:seg_end]
+    sub_hist <- histogram_obj[seg_start:seg_end]
 
     # Find the maximum uniform segment
     dist_optim <- unif_segment <- list()
@@ -178,7 +177,7 @@ segment_and_fit <- function(
     ){
       unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
-          x = bin_data,
+          x = sub_hist,
           metric = met,
           threshold = uniform_threshold,
           stepsize = uniform_stepsize,
@@ -198,7 +197,7 @@ segment_and_fit <- function(
 
     if( length(distributions) > 0 ){
       dist_optim <- fit_distributions(
-        x = bin_data,
+        x = sub_hist,
         metric = metric,
         truncated = truncated_models,
         distributions = distributions
