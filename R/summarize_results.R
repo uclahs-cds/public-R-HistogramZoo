@@ -143,9 +143,9 @@ summarize_results.Histogram <- function(
   bins <- IRanges::IRanges(start = interval_start, end = interval_end)
   results_table <- lapply(seq_along(models), function(i){
     stats <- extract_stats_from_models(model_list = models[[i]], model_name = model_name)
-    if(result$bin_width > 1) {
-      stats <- scale_model_params(stats, bin_width = result$bin_width)
-    }
+    # if(result$bin_width > 1) {
+    #   stats <- scale_model_params(stats, bin_width = result$bin_width)
+    # }
 
     coords <- IRanges::reduce(bins[stats[['histogram_start']]:stats[['histogram_end']]])
     coords <- extract_segments(coords)
