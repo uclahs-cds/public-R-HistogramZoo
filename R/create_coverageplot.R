@@ -90,10 +90,10 @@ create_coverageplot.Histogram <- function(
     xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
     xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
     xlimits = c(1, length(histogram_obj)),
-    ylimits = NULL, 
-    xat = generate_xlabels(histogram_obj, return_xat = T), 
-    yat = TRUE, 
-    xaxis.lab = generate_xlabels(histogram_obj), 
+    ylimits = NULL,
+    xat = generate_xlabels(histogram_obj, return_xat = T),
+    yat = TRUE,
+    xaxis.lab = generate_xlabels(histogram_obj),
     yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
     xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
     cex = 0.75, col.border = 'black', pch = 19, alpha = 1,
@@ -270,10 +270,10 @@ create_coverageplot.HistogramFit <- function(
   ylab.label = "Histogram Data",
   xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
   xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
-  xlimits = c(1, length(histogram_obj)),  
+  xlimits = c(1, length(histogram_obj)),
   ylimits = NULL,
-  xat = generate_xlabels(histogram_obj, return_xat = T), 
-  yat = TRUE, 
+  xat = generate_xlabels(histogram_obj, return_xat = T),
+  yat = TRUE,
   xaxis.lab = generate_xlabels(histogram_obj),
   yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
   xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
@@ -322,18 +322,20 @@ create_coverageplot.HistogramFit <- function(
   histogram_data <- histogram_obj$histogram_data
   # choosing the midpoint of the start/end as the label
   plotting_data <- data.frame(
-    "dens" = histogram_data, 
-    "labels_x" = seq(1, length(histogram_data), 1), 
+    "dens" = histogram_data,
+    "labels_x" = seq(1, length(histogram_data), 1),
     "dist" = "coverage"
   )
   segment_dists <- unlist(lapply(histogram_obj$models, function(x) x$consensus$dist))
   dist_colors <- col_distributions[segment_dists]
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
+  mp <- find_midpoint(histogram_obj) # This S3 method differentiates between Histogram and GenomicHistogram
   distribution_plotting_data <- lapply(seq_along(mods), function(i) {
     m <- mods[[i]]
-    x <- seq(m$seg_start, m$seg_end, by = 1)
-    dens <- m$dens(x = seq_along(x), mpar = m$par)
+    x <- seq(m$seg_start, m$seg_end, by = 10^-3)
+    seg_mp <- seq(mp[m$seg_start], mp[m$seg_end], by = 10^-3)
+    dens <- m$dens(x = seg_mp, mpar = m$par)
     return(
       data.frame("dens" = dens, "labels_x" = x, "dist" = m$dist, "segment" = i)
     )
