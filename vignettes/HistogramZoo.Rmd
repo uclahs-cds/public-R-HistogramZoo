@@ -28,21 +28,30 @@ The HistogramZoo R package is a collection of functions which aim to identify an
 
 A **Histogram** object contains 1 piece of essential data and 4 pieces of optional data:
 
-* **histogram_data** is a numeric vector representing the histogram density or counts
+* **histogram_data** is a numeric vector representing histogram data. In cases of equal bin width, `histogram_data` can equally represent counts or density with no functional differences. However, in cases of unequal bin width, only density is appropriate for distribution fitting and visualization.
 
 * **interval_start** and **histogram_end** are numeric vectors representing the start and end coordinates of each bin
 
-* **bin_width** is the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`
+* **bin_width** is the numeric length of bins. This can be automatically estimated from `interval_start` and `interval_end`. Objects are required to have equal bin width for every bin with the exception of the last bin, which can have a shorter bin width.
 
 * **region_id** is a character id for the histogram
 
-A **GenomicHistogram** object contains 2 additional pieces of optional data: **chr** for chromosome and **strand** for strand which is restricted to one of `+`, `-` and `*`. A Histogram and a GenomicHistogram differ in one of several ways:
+A **GenomicHistogram** object contains up to 6 additional pieces of data.
+
+* **chr** is a character chromosome
+
+* **strand** is a character strand which is restricted to one of `+`, `-` and `*` 
+
+* **intron_start** and **intron_end** are numeric vectors representing intron coordinates - these can be automatically computed based on non-consecutive `interval_start` and `interval_end` indices
+
+* **consecutive_start** and **consecutive_end** are numeric vectors representing a continuous intronless bin coordinate system on which summary statistics can be computed and distributions can be fitted. Optionally specified by the user, `consecutive_start/end` will be automatically generated based on provided `interval_start/end` and `intron` data starting at base 1. 
+
+A Histogram and a GenomicHistogram differ in several ways:
 
 1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale. Starts are closed while ends are open with the exception of the last bin where both start and end are closed. `GenomicHistogram` objects were designed to represent a discrete [base 1](https://www.biostars.org/p/84686/) system where each histogram bin represents a set of indices on which observations are collected.
 
-2. Restrictions on `bin_width`: `Histogram` objects require that the length of each bin is equal with the exception of the last bin which can be shorter than the rest. `GenomicHistogram` objects allow the lengths of each bin to vary as long as they are shorter or equal to the the designated `bin_width` and leaves the equal distribution of bin lengths up to user discretion. This allows users to construct `GenomicHistogram` objects using the `tile` and `binnedAverage` functions of `GenomicRanges`.
+2. Only `GenomicHistogram` objects support the use of disjoint intervals, or non-consecutive bins. This feature was designed with `GenomicHistogram` objects in mind to support the representation of transcripts and genes as a set of exons which might not be consecutive intervals on the genomic coordinate system. Summary statistics and distributions are fit on `consecutive_start/end` coordinates for GenomicHistograms. In operational cases using consecutive bins, `consecutive_start/end` can be specified to be the same as `interval_start/end`.
 
-3. Disjoint intervals: Both `Histogram` and `GenomicHistogram` objects support the use of disjoint intervals but this feature was designed with `GenomicHistogram` objects in mind to support the representation of transcripts and genes as a set of exons which might not be consecutive intervals on the genomic coordinate system.
 
 ```{r Histogram_example, include=TRUE, fig.show="hold", out.width="40%"}
 
@@ -69,12 +78,16 @@ create_coverageplot(
 
 my_genomic_histogram <- GenomicHistogram(
   histogram_data = c(4,5,2,3,6,8),
-  interval_start = seq(6),
-  interval_end = seq(6),
+  interval_start = c(1:3, 5:7),
+  interval_end = c(1:3, 5:7),
   bin_width = 1,
   region_id = "my_genomic_histogram",
   chr = "chr1",
-  strand = "*"
+  strand = "*",
+  intron_start = c(4),
+  intron_end = c(4),
+  consecutive_start = seq(6),
+  consecutive_end = seq(6)
 )
 
 create_coverageplot(
@@ -91,6 +104,34 @@ create_coverageplot(
 )
 
 
+```
+
+## Estimation of summary statistics
+
+Built-in functions can be used to estimate summary statistics, including a weighted mean, variance, standard deviation and skew, on each Histogram object.
+
+```{r summary_statistics, include=TRUE, fig.show="hold", out.width="100%"}
+
+histogram_summary <- data.frame(
+  "id" = "my_histogram",
+  "mean" = weighted.mean(my_histogram),
+  "var" = weighted.var(my_histogram),
+  "sd" = weighted.sd(my_histogram),
+  "skew" = weighted.skewness(my_histogram)
+)
+
+genomic_histogram_summary <- data.frame(
+  "id" = "my_genomic_histogram",
+  "mean" = weighted.mean(my_genomic_histogram),
+  "var" = weighted.var(my_genomic_histogram),
+  "sd" = weighted.sd(my_genomic_histogram),
+  "skew" = weighted.skewness(my_genomic_histogram)
+
+)
+
+knitr::kable(
+  rbind(histogram_summary, genomic_histogram_summary)
+)
 ```
 
 # Data loaders
@@ -185,9 +226,11 @@ histograms <- transcript_BED_to_histogram(
 
 * **allow_overlapping_segments_per_sample** `[transcriptomic and genomic BED]`: Each BED file is assumed to contain the elements of a single experimental sample. Thus, overlapping elements in each BED file can be eliminated by setting the parameter to `FALSE`.
 
-# Segmentation and Distribution Fitting
+# Segmentation and distribution fitting
 
 The function **segment_and_fit** is designed to be a pipeline constructed from the following sub-functions which enables the segmentation, denoising and fitting of statistical distributions on Histogram and GenomicHistogram objects. Each of the parameters in `segment_and_fit` have counterparts in the sub-functions which is explored in further detail below.
+
+**NOTA BENE:** Most of the functions below are implemented as S3 methods which can take `Histogram`, `GenomicHistogram` and `numeric` vector objects as input.
 
 ## Finding local optima
 
@@ -199,17 +242,16 @@ The function **segment_and_fit** is designed to be a pipeline constructed from t
 set.seed(314)
 dt = rnorm(10000, mean = 20, sd = 10)
 xhist = observations_to_histogram(dt, histogram_bin_width = 2)
-data = xhist$histogram_data
 
 # basic use
-optima = find_local_optima(data)
+optima = find_local_optima(xhist)
 optima = sort(unlist(optima))
 
 create_coverageplot(
   xhist, 
   add.points = T, 
   points.x = optima, 
-  points.y = data[optima], 
+  points.y = xhist$histogram_data[optima], 
   points.col = "red",
   main = "basic optima",
   main.cex = 1, 
@@ -231,17 +273,16 @@ The parameter `threshold` allows the user to tune the sparsity of local optima t
 set.seed(314)
 dt = rnorm(1000, mean = 20, sd = 10)
 xhist = observations_to_histogram(dt, histogram_bin_width = 1)
-data = xhist$histogram_data
 
 # find_local_optima with threshold 0
-zero_threshold_optima = find_local_optima(data, threshold = 0)
+zero_threshold_optima = find_local_optima(xhist, threshold = 0)
 zero_threshold_optima = sort(unlist(zero_threshold_optima))
 
 create_coverageplot(
   xhist,
   add.points = T, 
   points.x = zero_threshold_optima,
-  points.y = data[zero_threshold_optima],
+  points.y = xhist$histogram_data[zero_threshold_optima],
   points.col = "red", 
   type = "h",
   main = "threshold = 0",
@@ -255,14 +296,14 @@ create_coverageplot(
 )
 
 # find_local_optima with threshold 2
-threshold_optima = find_local_optima(data, threshold = 2)
+threshold_optima = find_local_optima(xhist, threshold = 2)
 threshold_optima = sort(unlist(threshold_optima))
 
 create_coverageplot(
   xhist, 
   add.points = T, 
   points.x = threshold_optima, 
-  points.y = data[threshold_optima], 
+  points.y = xhist$histogram_data[threshold_optima], 
   points.col = "red", 
   type = "h",
   main = "threshold = 2",
@@ -288,14 +329,14 @@ data = c(rep(1, 3), rep(2, 4), rep(3, 3), rep(2, 1), rep(1, 5))
 xhist = Histogram(histogram_data = data)
 
 # flat_endpoints
-optima_flat = find_local_optima(data, flat_endpoints = TRUE)
+optima_flat = find_local_optima(xhist, flat_endpoints = TRUE)
 optima_flat = sort(unlist(optima_flat))
 
 create_coverageplot(
   xhist, 
   add.points = T, 
   points.x = optima_flat, 
-  points.y = data[optima_flat], 
+  points.y = xhist$histogram_data[optima_flat], 
   points.col = "red",
   main = "flat endpoints",
   main.cex = 1, 
@@ -308,14 +349,14 @@ create_coverageplot(
 )
 
 # midpoints
-optima_midpoints = find_local_optima(data, flat_endpoints = FALSE)
+optima_midpoints = find_local_optima(xhist, flat_endpoints = FALSE)
 optima_midpoints = sort(unlist(optima_midpoints))
 
 create_coverageplot(
   xhist, 
   add.points = T, 
   points.x = optima_midpoints, 
-  points.y = data[optima_midpoints], 
+  points.y = xhist$histogram_data[optima_midpoints], 
   points.col = "red",
   main = "midpoints",
   main.cex = 1, 
@@ -329,7 +370,7 @@ create_coverageplot(
 
 ```
 
-## The Fine-to-Coarse Segmentation Algorithm
+## The Fine-to-Coarse segmentation algorithm
 
 The Fine-to-Coarse segmentation algorithm was described in @delon2005color, @lisani2021automatic and @delon2006nonparametric. Briefly, for a given histogram and a set of local optima, the FTC algorithm iterates through consecutive segments identifying _peaks_, segments of increasing counts followed by segments of decreasing counts. Consecutive segments are merged based on the prioritization derived from a monotone cost function, until an optimal set of peaks are acquired. Granularity of the optimal peak set can be tuned via the hyperparamter $\epsilon$. 
 
@@ -340,18 +381,15 @@ set.seed(314)
 dt = rnorm(1000, mean = 20, sd = 10)
 xhist = observations_to_histogram(dt, histogram_bin_width = 1)
 
-# Extracting the histogram data
-data = xhist$histogram_data
-
 # local optima
-zero_threshold_optima = find_local_optima(data, threshold = 0)
+zero_threshold_optima = find_local_optima(xhist, threshold = 0)
 zero_threshold_optima = sort(unlist(zero_threshold_optima))
 
 create_coverageplot(
   xhist,
   add.points = T, 
   points.x = zero_threshold_optima,
-  points.y = data[zero_threshold_optima],
+  points.y = xhist$histogram_data[zero_threshold_optima],
   points.col = "red", 
   type = "h",
   main = "Local Optima",
@@ -365,17 +403,17 @@ create_coverageplot(
 )
 
 # Using different epsilons on FTC
-ftc_eps_0.05 <- ftc(data, s = zero_threshold_optima, eps = 0.05)
-ftc_eps_0.09 <- ftc(data, s = zero_threshold_optima, eps = 0.09)
-ftc_eps_0.15 <- ftc(data, s = zero_threshold_optima, eps = 0.15)
-ftc_eps_0.25 <- ftc(data, s = zero_threshold_optima, eps = 0.25)
-ftc_eps_0.5 <- ftc(data, s = zero_threshold_optima, eps = 0.5)
+ftc_eps_0.05 <- ftc(xhist, s = zero_threshold_optima, eps = 0.05)
+ftc_eps_0.09 <- ftc(xhist, s = zero_threshold_optima, eps = 0.09)
+ftc_eps_0.15 <- ftc(xhist, s = zero_threshold_optima, eps = 0.15)
+ftc_eps_0.25 <- ftc(xhist, s = zero_threshold_optima, eps = 0.25)
+ftc_eps_0.5 <- ftc(xhist, s = zero_threshold_optima, eps = 0.5)
 
 create_coverageplot(
   xhist,
   add.points = T, 
   points.x = ftc_eps_0.05,
-  points.y = data[ftc_eps_0.05],
+  points.y = xhist$histogram_data[ftc_eps_0.05],
   points.col = "red", 
   type = "h",
   main = expression(bold(paste("FTC: ", epsilon, "=0.05"))),
@@ -392,7 +430,7 @@ create_coverageplot(
   xhist,
   add.points = T, 
   points.x = ftc_eps_0.09,
-  points.y = data[ftc_eps_0.09],
+  points.y = xhist$histogram_data[ftc_eps_0.09],
   points.col = "red", 
   type = "h",
   main = expression(bold(paste("FTC: ", epsilon, "=0.09"))),
@@ -409,7 +447,7 @@ create_coverageplot(
   xhist,
   add.points = T, 
   points.x = ftc_eps_0.15,
-  points.y = data[ftc_eps_0.15],
+  points.y = xhist$histogram_data[ftc_eps_0.15],
   points.col = "red", 
   type = "h",
   main = expression(bold(paste("FTC: ", epsilon, "=0.15"))),
@@ -426,7 +464,7 @@ create_coverageplot(
   xhist,
   add.points = T, 
   points.x = ftc_eps_0.25,
-  points.y = data[ftc_eps_0.25],
+  points.y = xhist$histogram_data[ftc_eps_0.25],
   points.col = "red", 
   type = "h",
   main = expression(bold(paste("FTC: ", epsilon, "=0.25"))),
@@ -443,7 +481,7 @@ create_coverageplot(
   xhist,
   add.points = T, 
   points.x = ftc_eps_0.5,
-  points.y = data[ftc_eps_0.5],
+  points.y = xhist$histogram_data[ftc_eps_0.5],
   points.col = "red", 
   type = "h",
   main = expression(bold(paste("FTC: ", epsilon, "=0.5"))),
@@ -457,7 +495,7 @@ create_coverageplot(
 )
 ```
 
-## Filtering Low Entropy Regions
+## Filtering low entropy regions
 
 In the presence of noisy data, it can be helpful to filter regions with low entropy to extract high density regions. Low entropy regions or `max_gaps` can be identified using the algorithm described in @delon2005color. Briefly, a region is defined as a gap if it has high entropy and low density relative to its adjacent peak. Identification of max gaps is conducted on each segment post-segmentation.
 
@@ -493,10 +531,10 @@ unfiltered_plt <- create_coverageplot(
   main = "Unfiltered",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.lab = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -507,10 +545,10 @@ filtered_plt <- create_coverageplot(
   main = "Remove max gaps",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -520,7 +558,7 @@ print(filtered_plt)
 
 ``` 
 
-## Fitting Statistical Distributions
+## Fitting statistical distributions
 
 ### Distributions
 
@@ -557,10 +595,10 @@ gaussian_full_plt <- create_coverageplot(
   main = "Normal (Full)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -570,10 +608,10 @@ gaussian_truncated_plt <- create_coverageplot(
   main = "Normal (Truncated)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -614,10 +652,10 @@ gamma_full_plt <- create_coverageplot(
   main = "Gamma (Full)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -627,10 +665,10 @@ gamma_truncated_plt <- create_coverageplot(
   main = "Gamma (Truncated)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -671,10 +709,10 @@ gamma_flip_full_plt <- create_coverageplot(
   main = "Gamma Flipped (Full)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -684,10 +722,10 @@ gamma_flip_truncated_plt <- create_coverageplot(
   main = "Gamma Flipped (Truncated)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -717,10 +755,10 @@ uniform_plt <- create_coverageplot(
   main = "Uniform",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -738,11 +776,11 @@ Five metrics are provided to optimize for the best fitting statistical distribut
 * **Mean squared error** is the mean squared difference between the fitted and observed distributions.
 * **$\chi$-squared statistic** is the $\chi$-squared distance between the two distributions i.e. $\sum{\frac{(x-y)^2}{(x+y)}}$
 
-### Finding a Consensus Model
+### Finding a consensus model
 
 The function `find_consensus_model` is used to determine the best fitting model for each segment and provides two methods of doing so: `weighted_majority_vote` (weighted majority voting) and `rra` (robust rank aggregation, @kolde2012robust). Weighted majority voting requires the users to provide a ranking of metrics in descending order of importance and their associated weights and used the weighted sum of ranks to determine the best fitting distribution. In the event of a tie, the highest ranked metric is used to break the tie.  
 
-### Maximizing Uniform Segments
+### Maximizing uniform segments
 
 The function `identify_uniform_segment` optimizes the identification of uniform segments by iteratively trimming the ends of the region and refitting a uniform distribution to the shortened region. This is controlled by the `threshold` parameter which is the proportion of the original region which must be preserved and the `stepsize` which indicates the stepsize taken for each search. One of the metrics must be selected to determine the best fit while the parameter `max_sd_size` indicates the maximum tolerable standard deviation of the goodness-of-fit from the best fitting uniform distribution where the function can select the longest uniform distribution. 
 
@@ -788,10 +826,10 @@ uniform_untrimmed_plt <- create_coverageplot(
   main = "Uniform (Untrimmed)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -801,10 +839,10 @@ uniform_trimmed_plt <- create_coverageplot(
   main = "Uniform (Max Uniform)",
   main.cex = 1, 
   xaxis.tck = 0, 
-  yaxis.tck = 0.5, 
-  xlab.label = '', 
+  yaxis.tck = 0, 
+  xlab.cex = 1, 
   ylab.cex = 1, 
-  xaxis.label = NULL, 
+  xaxis.cex = 0.8, 
   yaxis.cex = 0.8,
   legend = NULL
 )
@@ -813,9 +851,9 @@ print(uniform_untrimmed_plt)
 print(uniform_trimmed_plt)
 ```
 
-# Exporting Results
+# Exporting results
 
-## Summary statistics
+## Summary table of results
 
 **summarize_results** can be applied to a `HistogramFit` object to extract the indices and summary statistics of the analysis.
 
@@ -843,19 +881,19 @@ A data frame will be returned with the following columns.
 
 Several plotting functions are available to aid with the visualization of results. Plotting functions can be combined with plotting capabilities from `BoutrosLab.plotting.general` [@p2019bpg] based on the `lattice` R package [@sarkar2015package].
 
-* **create_coverageplot** can be used to visualize the `Histogram`, `GenomicHistogram` or `HistogramFit` object with annotated segmentation points and distributions.
+* **create_histogram** and  **create_coverageplot** can be used to visualize the `Histogram` or `GenomicHistogram`  objects. Currently, `create_coverageplot` can be used to visualize `HistogramFit` objects, resulting from `segment_and_fit` analysis, with annotated segmentation points and distributions. `create_histogram` generates the traditional representation of histograms as consecutive blocks while `create_coverageplot` represents the histograms as lollipop plots or as lines. `create_coverageplot` was designed with large histograms, such as those derived from genomic datasets, in mind.
 
 * **create_residualplot** can be used to visualize the residuals between the fitted and observed distributions of a `HistogramFit` object
 
 * **create_trackplot** can be used to add complementary tracks to a histogram visualization when combined with `create_layerplot`
 
-* **create_layerplot** can be used to create a multi-panel plot with combinations of coverage, residual and track plots.
+* **create_layerplot** can be used to create a multi-panel plot with combinations of histogram, coverage, residual and track plots.
 
 ## Example
 
-A histogram is simulated from 3 statistical distributions.
+A histogram is simulated from 3 statistical distributions. Two equivalent visualizations are shown below using `create_coverageplot` and `create_histogram`.
 
-```{r plotting_example_p1, include=TRUE, fig.show="hold", out.width="50%"}
+```{r plotting_example_p1, include=TRUE, fig.show="hold", out.width="40%"}
 
 set.seed(314)
 my_data <- c(
@@ -869,7 +907,7 @@ my_histogram <- observations_to_histogram(my_data)
 # A basic coverageplot to visualize the data
 create_coverageplot(
   my_histogram,
-  main = "Histogram",
+  main = "Coverage plot",
   main.cex = 1, 
   xaxis.tck = 0.5, 
   yaxis.tck = 0.5, 
@@ -879,6 +917,19 @@ create_coverageplot(
   yaxis.cex = 0.8
 )
 
+create_histogram(
+  my_histogram,
+  type = "count",
+  main = "Histogram plot",
+  main.cex = 1, 
+  xaxis.tck = 0.5, 
+  yaxis.tck = 0.5, 
+  xlab.cex = 1, 
+  ylab.cex = 1, 
+  xaxis.cex = 0.8, 
+  yaxis.cex = 0.8,
+  xat = seq(0, 80, 10)
+)
 ```
 
 HistogramZoo is applied to segment the histogram and fit distributions. Results are reported in a table. 
