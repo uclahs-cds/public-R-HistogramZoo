@@ -768,7 +768,13 @@ print(uniform_plt)
 
 ### Metrics
 
-Five metrics are provided to optimize for the best fitting statistical distribution.
+Maximum likelihood estimation using histogram data [(ref)](https://stats.stackexchange.com/questions/60256/standard-deviation-of-binned-observations) is provided for distribution fitting and parameter estimation. The log likelihood of a bin is given by the following formula:
+
+$\log \prod_{i = 1}^{k} (F_\theta(x_i) - F_\theta(x_0))= k\log(F_\theta(x_1) - F_\theta(x_0))$
+
+where $F_\theta$ is the cumulative distribution function of the fitted distribution with parameters $\theta$ and $x_i$ and $x_0$ are the start and endpoints of a bin $(x_0, x_1]$.
+
+Additionally, five metrics are provided to optimize fitting distributions by minimizing the error between the density function of a statistical distribution and the observed histogram density.
 
 * **Jaccard index** is the ratio between the intersection of the fitted and observed distributions and the union of the two distributions.
 * **Intersection** is the intersection between the fitted and observed distributions.
@@ -873,6 +879,10 @@ A data frame will be returned with the following columns.
 * **value** the fitted value of the metric function
 * **metric** the metric used to fit the distribution
 * **dist** the distribution name
+* **empirical_mean** the mean of the observed histogram data
+* **empirical_var** the variance of the observed histogram data
+* **empirical_sd** the standard deviation of the observed histogram data
+* **empirical_skew** the skew of the observed histogram data
 * **dist_param[0-9]** the values of distribution parameters
 * **dist_param_name[0-9]** the matching names of distribution parameters
 
@@ -961,19 +971,24 @@ The `histogram_start` and `histogram_end` columns indicate the start and end ind
 knitr::kable(res[,c("histogram_start", "histogram_end", "value", "metric", "dist")])
 ```
 
-The `dist_param` columns hold the values of the distribution parameters
+The `empirical_mean`, `empirical_var`, `empirical_sd` and `empirical_skew` columns show summary statistics estimated on the observed data for each segment.
 ```{r plotting_example_p5, include=TRUE, fig.show="hold", out.width="100%"}
+# knitr::kable(res[,c("empirical_mean", "empirical_var", "empirical_sd", "emprical_skew")])
+```
+
+The `dist_param` columns hold the values of the distribution parameters
+```{r plotting_example_p6, include=TRUE, fig.show="hold", out.width="100%"}
 knitr::kable(res[,c("dist_param1", "dist_param2", "dist_param3", "dist_param4")])
 ```
 
 while the `dist_param_name` columns hold the names of the parameters corresponding to each distribution
-```{r plotting_example_p6, include=TRUE, fig.show="hold", out.width="100%"}
+```{r plotting_example_p7, include=TRUE, fig.show="hold", out.width="100%"}
 knitr::kable(res[,c("dist_param1_name", "dist_param2_name", "dist_param3_name", "dist_param4_name")])
 ```
 
 A plot of the result is generated.
 
-```{r plotting_example_p7, include=TRUE, fig.show="hold",out.height=7, out.width=7}
+```{r plotting_example_p8, include=TRUE, fig.show="hold",out.height=7, out.width=7}
 
 # Histogram Fit
 coverage_plt <- create_coverageplot(
