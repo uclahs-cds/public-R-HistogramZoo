@@ -20,7 +20,7 @@ weighted.skewness <- function(x, ...) UseMethod('weighted.skewness')
 #' @exportS3Method weighted.mean Histogram
 #' @rdname weighted.moments
 weighted.mean.Histogram <- function(x) {
-  midpoints <- (x$interval_end + x$interval_start) / 2
+  midpoints <- find_midpoint(x)
   return(weighted.mean(x = midpoints, w = x$histogram_data))
 }
 
@@ -32,8 +32,8 @@ weighted.mean.Histogram <- function(x) {
 #' @rdname weighted.moments
 #' @exportS3Method weighted.var Histogram
 weighted.var.Histogram <- function(x, sheppard = FALSE) {
-  bin_width <- x$interval_end - x$interval_start
-  midpoints <- (x$interval_end + x$interval_start) / 2
+  bin_width <- find_bin_width(x)
+  midpoints <- find_midpoint(x)
   adj <- 0
   if (sheppard) {
     if (length(unique(bin_width)) > 1 && sheppard) {
@@ -69,7 +69,7 @@ weighted.sd.Histogram <- function(x, sheppard = FALSE) {
 #' weighted.var(x)
 #' weighted.skewness(x)
 weighted.skewness.Histogram <- function(x, ...) {
-  midpoints <- (x$interval_end + x$interval_start) / 2
+  midpoints <- find_midpoint(x)
   weighted.skewness(x = midpoints, w = x$histogram_data, ...)
 }
 

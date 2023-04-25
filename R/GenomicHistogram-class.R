@@ -11,6 +11,8 @@
 #' @param strand strand
 #' @param intron_start integer vector representing the starts of introns
 #' @param intron_end integer vector representing the ends of introns
+#' @param consecutive_start start of intervals, integer vector representing an intronless set of bins - defaults to starting at 1 
+#' @param consecutive_end end of intervals, integer vector representing an intronless set of bins - defaults to starting at `bin_width` 
 #'
 #' @return A GenomicHistogram object
 new_GenomicHistogram <- function(
@@ -22,7 +24,9 @@ new_GenomicHistogram <- function(
     chr = NULL,
     strand = NULL,
     intron_start = NULL,
-    intron_end = NULL
+    intron_end = NULL,
+    consecutive_start = NULL,
+    consecutive_end = NULL
   ){
 
   # Checking types
@@ -30,6 +34,8 @@ new_GenomicHistogram <- function(
   stopifnot(is.character(strand))
   stopifnot(is.numeric(intron_start))
   stopifnot(is.numeric(intron_end))
+  stopifnot(is.numeric(consecutive_start))
+  stopifnot(is.numeric(consecutive_end))
 
   # Creating object
   return(
@@ -43,13 +49,13 @@ new_GenomicHistogram <- function(
       strand = strand,
       intron_start = intron_start,
       intron_end = intron_end,
+      consecutive_start = consecutive_start,
+      consecutive_end = consecutive_end,
       class = "GenomicHistogram"
     )
   )
 }
 
-# TODO: If we change this to base 0, then we can obliterate all of these tests in favour of Histogram validator
-# validator
 #' Validates GenomicHistogram objects
 #'
 #' @param x a GenomicHistogram object candidate
@@ -72,6 +78,10 @@ validate_GenomicHistogram <- function(x){
   intron_end <- x$intron_end
   intron_length <- length(intron_start)
   intron_gr <- IRanges::IRanges(start = intron_start, end = intron_end)
+  
+  # Consecutive start and end
+  consecutive_start <- x$consecutive_start
+  consecutive_end <- x$consecutive_end
 
   # Validate
   # 0. Everything has to be the same length, Histogram has to be at least length 1
@@ -171,7 +181,28 @@ validate_GenomicHistogram <- function(x){
       call. = FALSE
     )
   }
-
+  
+  # 14. Checking basic properties of consecutive bin width
+  if(!all(consecutive_start <= consecutive_end)){
+    stop("consecutive_start must be less than or equal to consecutive_end for a valid interval", call. = FALSE)
+  }
+  
+  if(histogram_length > 1){
+    if(!all(diff(consecutive_start) > 0 & diff(consecutive_end) > 0)){
+      stop("consecutive intervals must be ordered and nonoverlapping.", call. = FALSE)
+    }
+    
+    if(!all(consecutive_start[2:(histogram_length)] == consecutive_end[1:(histogram_length-1)] + 1)){
+      stop("consecutive intervals must be consecutive", call. = FALSE)
+    }
+  }
+  
+  # 15. Consecutive bins follow estimated bin width
+  consecutive_bin_vec <- consecutive_end - consecutive_start + 1
+  if(!all(consecutive_bin_vec == bin_width_vec)){
+    stop('consecutive bin width not equal to estimated bin width, missing introns or incorrect consecutive bin specification')
+  }
+  
   return(x)
 }
 
@@ -187,6 +218,8 @@ validate_GenomicHistogram <- function(x){
 #' @param strand strand
 #' @param intron_start integer vector representing the starts of introns (optional: to represent intron-spanning histograms on transcripts)
 #' @param intron_end integer vector representing the ends of introns (optional: to represent intron-spanning histograms on transcripts)
+#' @param consecutive_start start of intervals, integer vector representing an intronless set of bins - defaults to starting at 1 
+#' @param consecutive_end end of intervals, integer vector representing an intronless set of bins - defaults to starting at `bin_width` 
 #'
 #' @return a GenomicHistogram object
 #' @export
@@ -207,7 +240,9 @@ GenomicHistogram <- function(
     chr = character(),
     strand = c("*", "+", "-"),
     intron_start = integer(),
-    intron_end = integer()
+    intron_end = integer(),
+    consecutive_start = integer(),
+    consecutive_end = integer()
 ){
 
   # Coercing values to the right thing
@@ -237,6 +272,12 @@ GenomicHistogram <- function(
   }
   if(!is.character(region_id)){
     region_id <- as.character(region_id)
+  }
+  if(!is.integer(consecutive_start)){
+    consecutive_start <- as.integer(consecutive_start)
+  }
+  if(!is.integer(consecutive_end)){
+    consecutive_end <- as.integer(consecutive_end)
   }
 
   # Estimating missing parameters
@@ -277,6 +318,19 @@ GenomicHistogram <- function(
         sum(IRanges::width(IRanges::setdiff(bins[1], intron_gr)))
       )
     }
+    
+    # Estimating consecutive intervals
+    if(missing(consecutive_start) | missing(consecutive_end)){
+
+      consecutive_start <- seq(0, length(histogram_data)-1)*bin_width + 1
+      consecutive_end <- seq(1, length(histogram_data))*bin_width
+      
+      # Estimating last bin width
+      last_bin_intron <- (intron_start >= tail(interval_start, 1) & intron_end <= tail(interval_end, 1))
+      last_bin_width <- (tail(interval_end, 1) - tail(interval_start, 1) + 1) - sum(intron_end[last_bin_intron] - intron_start[last_bin_intron] + 1)
+      consecutive_end[length(histogram_data)] <- consecutive_start[length(histogram_data)] + last_bin_width - 1
+    }
+
   }
 
   # Region ID
@@ -296,7 +350,9 @@ GenomicHistogram <- function(
         chr = chr,
         strand = strand,
         intron_start = intron_start,
-        intron_end = intron_end
+        intron_end = intron_end,
+        consecutive_start = consecutive_start,
+        consecutive_end = consecutive_end
       )
     )
   )
@@ -426,8 +482,10 @@ print.GenomicHistogram <- function(x, ...){
     chr = x$chr,
     strand = x$strand,
     intron_start = x$intron_start[keep_introns],
-    intron_end = x$intron_end[keep_introns]
-    )
+    intron_end = x$intron_end[keep_introns],
+    consecutive_start = x$consecutive_start[i],
+    consecutive_end = x$consecutive_end[i]
+  )
 }
 
 
@@ -448,3 +506,37 @@ reassign_region_id.GenomicHistogram <- function(histogram_obj, region_id){
 
   return(histogram_obj)
 }
+
+
+#' Reset consecutive intervals to starting at 1, bin_width
+#'
+#' @param x GenomicHistogram object
+#'
+#' @return a GenomicHistogram object where `consecutive_start` is reset to 1 and `consecutive_end` is reset to bin_width
+#' 
+#' @export
+#'
+#' @examples \dontrun{
+#' x <- GenomicHistogram(c(1,2,3,4,5))
+#' x <- x[3:5]
+#' reset_consecutive_intervals(x)
+#' }
+reset_consecutive_intervals <- function(x){
+  
+  stopifnot(inherits(x, "GenomicHistogram"))
+  
+  new_GenomicHistogram(
+    histogram_data = x$histogram_data,
+    interval_start = x$interval_start,
+    interval_end = x$interval_end,
+    region_id = x$region_id,
+    bin_width = x$bin_width,
+    chr = x$chr,
+    strand = x$strand,
+    intron_start = x$intron_start,
+    intron_end = x$intron_end,
+    consecutive_start = x$consecutive_start - head(x$consecutive_start, 1) + 1,
+    consecutive_end = x$consecutive_end - head(x$consecutive_start, 1) + 1
+  )
+}
+

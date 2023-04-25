@@ -69,8 +69,12 @@ coverage_to_histogram <- function(
     bins <- unlist(GenomicRanges::tile(x = region, width = 1))
     cvg <- compute_coverage_on_bins(coverage, bins)
 
+    # Generating consecutive bins starting at 1
+    bin_start <- seq(1, length(bins), 1)
+    df_idx <- data.frame("start" = bin_start, "end" = bin_start)
+
   } else {
-  
+
     # Identify start and end coordinates
     region_start <- GenomicRanges::start(region)
     region_end <- GenomicRanges::end(region)
@@ -78,9 +82,10 @@ coverage_to_histogram <- function(
     index <- do.call(c, index)
     breaks <- seq(1, length(index), histogram_bin_size)
     breaks <- unique(c(breaks, length(index)))
-    breaks <- index[breaks]
 
-    # Generate a table
+    # Generate tables
+    df_idx <- index_to_start_end(breaks, right = FALSE)
+    breaks <- index[breaks]
     df <- index_to_start_end(breaks, right = FALSE)
 
     # If introns do not exist
@@ -129,7 +134,9 @@ coverage_to_histogram <- function(
       chr = as.character(GenomicRanges::seqnames(cvg))[1],
       strand = as.character(GenomicRanges::strand(cvg))[1],
       intron_start = GenomicRanges::start(introns),
-      intron_end = GenomicRanges::end(introns)
+      intron_end = GenomicRanges::end(introns),
+      consecutive_start = df_idx$start,
+      consecutive_end = df_idx$end
     )
   )
 }

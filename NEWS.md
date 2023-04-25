@@ -10,10 +10,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 ### Changed
-- S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions
 
 ### Fixed
-- Minor fixes to vignette file path locations for successful pkgdown build
+
+## [1.4.0] - 2023-04-19
+
+### Added
+- S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions [Pull #121](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/121)
+  - consecutive_start and consecutive_end for GenomicHistogram to keep track of disjoint intervals
+  - shifted gamma function to allow for non-zero starts
+
+### Changed
+- Added summary statistics estimation for GenomicHistogram objects [Pull #124](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/124)
+   - Added `bin_width` and `midpoint` estimation for Histogram and GenomicHistogram objects
+
+### Fixed
+- Fix vignette/README/image file paths for pkgdown [Pull #115](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/115)
 
 ## [1.3.0] - 2023-04-14
 

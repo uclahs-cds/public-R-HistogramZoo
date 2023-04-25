@@ -1,4 +1,32 @@
 
+#' Uniform maximum likelihood estimation 
+#'
+#' @param x numeric vector representing observed histogram data 
+#' @param x.start start coordinate(s) of histogram bins
+#' @param x.end end coordinate(s) of histogram bins
+#' @param a start coordinate of the uniform distribution
+#' @param b end coordinate of the uniform distribution 
+#' @param inclusive whether a/b coordinates of the uniform distributions are inclusive
+#' @param log whether to return the log mle
+#'
+#' @export
+#' @return the (optional: log) maximum likelihood estimation 
+uniform_mle <- function(x, x.start, x.end, a, b, inclusive = TRUE, log = TRUE) {
+  N <- sum(x)
+  if (inclusive && any(x.start < a | x.end > b)) {
+    return(-Inf)
+  } else if (! inclusive && any(x.start <= a & x.end >= b)) {
+    return(-Inf)
+  }
+  
+  if (log) {
+    return(- N * log(b - a))
+  } else {
+    return((1 / (b - a))^N)
+  }
+}
+
+
 #' Computes the negative log likelihood of an underlying continuous distribution from binned data.
 #'
 #' From: https://stats.stackexchange.com/a/68238/97417
