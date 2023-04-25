@@ -879,10 +879,10 @@ A data frame will be returned with the following columns.
 * **value** the fitted value of the metric function
 * **metric** the metric used to fit the distribution
 * **dist** the distribution name
-* **empirical_mean** the mean of the observed histogram data
-* **empirical_var** the variance of the observed histogram data
-* **empirical_sd** the standard deviation of the observed histogram data
-* **empirical_skew** the skew of the observed histogram data
+* **sample_mean** the mean of the observed histogram data
+* **sample_var** the variance of the observed histogram data
+* **sample_sd** the standard deviation of the observed histogram data
+* **sample_skew** the skew of the observed histogram data
 * **dist_param[0-9]** the values of distribution parameters
 * **dist_param_name[0-9]** the matching names of distribution parameters
 
@@ -971,9 +971,9 @@ The `histogram_start` and `histogram_end` columns indicate the start and end ind
 knitr::kable(res[,c("histogram_start", "histogram_end", "value", "metric", "dist")])
 ```
 
-The `empirical_mean`, `empirical_var`, `empirical_sd` and `empirical_skew` columns show summary statistics estimated on the observed data for each segment.
+The `sample_mean`, `sample_var`, `sample_sd` and `sample_skew` columns show summary statistics estimated on the observed data for each segment.
 ```{r plotting_example_p5, include=TRUE, fig.show="hold", out.width="100%"}
-# knitr::kable(res[,c("empirical_mean", "empirical_var", "empirical_sd", "emprical_skew")])
+# knitr::kable(res[,c("sample_mean", "sample_var", "sample_sd", "sample_skew")])
 ```
 
 The `dist_param` columns hold the values of the distribution parameters
