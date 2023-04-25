@@ -18,6 +18,7 @@
 #'     \item{seg_end}{end index of the interval}
 #' }
 #'
+#' @rdname identify_uniform_segment
 #' @export
 identify_uniform_segment <- function(
     x,
@@ -29,6 +30,7 @@ identify_uniform_segment <- function(
   UseMethod("identify_uniform_segment")
 }
 
+#' @rdname identify_uniform_segment
 #' @exportS3Method identify_uniform_segment numeric
 identify_uniform_segment.numeric <- function(
     x,
@@ -50,6 +52,7 @@ identify_uniform_segment.numeric <- function(
   )
 }
 
+#' @rdname identify_uniform_segment
 #' @exportS3Method identify_uniform_segment Histogram
 identify_uniform_segment.Histogram <- function(
     x,
@@ -70,6 +73,7 @@ identify_uniform_segment.Histogram <- function(
   )
 }
 
+#' @rdname identify_uniform_segment
 #' @exportS3Method identify_uniform_segment GenomicHistogram
 identify_uniform_segment.GenomicHistogram <- function(
     x,
@@ -130,7 +134,6 @@ identify_uniform_segment_helper <- function(
             interval_midpoint = interval_midpoint[a:b],
             metric = metric
           ),
-          # TODO: this is currently index-based, do we want this coordinate based?
           list('seg_start' = a, 'seg_end' = b)
         )
     })
@@ -142,7 +145,6 @@ identify_uniform_segment_helper <- function(
   res_df$index <- 1:nrow(res_df)
 
   # Calculating length
-  # Again, coordinate-based?
   res_df$length <- res_df$seg_end - res_df$seg_start + 1
 
   # Correct for Jaccard/Intersection
