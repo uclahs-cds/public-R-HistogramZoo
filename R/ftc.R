@@ -102,17 +102,20 @@ monotone_cost <- function(x, s = NULL, eps = 1, increasing = TRUE) {
 #' s = c(1, 9, 11, 15)
 #' ftc(x = x, s = s, eps = 1)
 #' }
-#'
+#' 
+#' @rdname ftc
 #' @export
 ftc <- function(x, s = NULL, eps = 1) {
   UseMethod("ftc")
 }
 
+#' @rdname ftc
 #' @exportS3Method ftc Histogram
 ftc.Histogram <- function(x, s = NULL, eps = 1) {
   ftc.numeric(x$histogram_data, s = s, eps = eps)
 }
 
+#' @rdname ftc
 #' @exportS3Method ftc numeric
 ftc.numeric <- function(x, s = NULL, eps = 1) {
 
