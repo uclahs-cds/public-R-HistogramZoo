@@ -25,8 +25,10 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
   expect_true(all(c("region_id", "segment_id", "start", "end",
-    "interval_count", "interval_sizes", "interval_starts", "histogram_start",
-    "histogram_end", "value", "metric", "dist") %in% colnames(results)))
+    "interval_count", "interval_sizes", "interval_starts",
+    "histogram_start", "histogram_end",
+    "sample_mean", "sample_var", "sample_sd", "sample_skew",
+    "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"region_id"], "character")
   expect_is(results[,"segment_id"], "integer")
@@ -44,6 +46,25 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   expect_is(results[,"value"], "numeric")
   expect_is(results[,"metric"], "character")
   expect_is(results[,"dist"], "character")
+
+  # Summary statistics
+  expect_is(results[,"sample_mean"], "numeric")
+  expect_is(results[,"sample_var"], "numeric")
+  expect_is(results[,"sample_sd"], "numeric")
+  expect_is(results[,"sample_skew"], "numeric")
+
+  # Test for dist_param
+  expect_equal(results[1, "dist"], "norm")
+  expect_is(results[1, "dist_param1"], "numeric")
+  expect_is(results[1, "dist_param2"], "numeric")
+  expect_equal(results[1, "dist_param1_name"], "mean")
+  expect_equal(results[1, "dist_param2_name"], "sd")
+
+  expect_equal(results[2, "dist"], "unif")
+  expect_true(is.na(results[2, "dist_param1"]))
+  expect_true(is.na(results[2, "dist_param2"]))
+  expect_true(is.na(results[2, "dist_param1_name"]))
+  expect_true(is.na(results[2, "dist_param2_name"]))
 
 })
 
@@ -75,8 +96,10 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
   # Checking the format of the output table
   expect_equal(nrow(results), 2)
   expect_true(all(c("region_id", "segment_id", "start", "end",
-    "interval_count", "interval_sizes", "interval_starts", "histogram_start",
-    "histogram_end", "value", "metric", "dist") %in% colnames(results)))
+    "interval_count", "interval_sizes", "interval_starts",
+    "histogram_start", "histogram_end",
+    "sample_mean", "sample_var", "sample_sd", "sample_skew",
+    "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"chr"], "character")
   expect_is(results[,"strand"], "character")

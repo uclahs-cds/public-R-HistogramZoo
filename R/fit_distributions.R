@@ -18,7 +18,8 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-#'
+#' 
+#' @rdname fit_distributions
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
@@ -29,6 +30,7 @@ fit_distributions <- function(
   UseMethod("fit_distributions")
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions numeric
 fit_distributions.numeric <- function(
     x,
@@ -52,9 +54,11 @@ fit_distributions.numeric <- function(
 
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions table
 fit_distributions.table <- fit_distributions.numeric
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions GenomicHistogram
 fit_distributions.GenomicHistogram <- function(
     x,
@@ -76,6 +80,7 @@ fit_distributions.GenomicHistogram <- function(
 
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions Histogram
 fit_distributions.Histogram <- function(
     x,
