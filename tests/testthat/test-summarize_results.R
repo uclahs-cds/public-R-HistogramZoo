@@ -27,7 +27,7 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   expect_true(all(c("region_id", "segment_id", "start", "end",
     "interval_count", "interval_sizes", "interval_starts",
     "histogram_start", "histogram_end",
-    "empirical_mean", "empirical_var", "empirical_sd", "empirical_skew",
+    "sample_mean", "sample_var", "sample_sd", "sample_skew",
     "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"region_id"], "character")
@@ -48,10 +48,10 @@ test_that("summarize_results returns an appropriate table for a Histogram", {
   expect_is(results[,"dist"], "character")
 
   # Summary statistics
-  expect_is(results[,"empirical_mean"], "numeric")
-  expect_is(results[,"empirical_var"], "numeric")
-  expect_is(results[,"empirical_sd"], "numeric")
-  expect_is(results[,"empirical_skew"], "numeric")
+  expect_is(results[,"sample_mean"], "numeric")
+  expect_is(results[,"sample_var"], "numeric")
+  expect_is(results[,"sample_sd"], "numeric")
+  expect_is(results[,"sample_skew"], "numeric")
 
   # Test for dist_param
   expect_equal(results[1, "dist"], "norm")
@@ -98,7 +98,7 @@ test_that("summarize_results returns an appropriate table for a GenomicHistogram
   expect_true(all(c("region_id", "segment_id", "start", "end",
     "interval_count", "interval_sizes", "interval_starts",
     "histogram_start", "histogram_end",
-    "empirical_mean", "empirical_var", "empirical_sd", "empirical_skew",
+    "sample_mean", "sample_var", "sample_sd", "sample_skew",
     "value", "metric", "dist") %in% colnames(results)))
 
   expect_is(results[,"chr"], "character")

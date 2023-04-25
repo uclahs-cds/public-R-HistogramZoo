@@ -13,10 +13,10 @@ results_columns <- c(
   "value",
   "metric",
   "dist",
-  "empirical_mean",
-  "empirical_var",
-  "empirical_sd",
-  "empirical_skew"
+  "sample_mean",
+  "sample_var",
+  "sample_sd",
+  "sample_skew"
 )
 
 #' Extract stats from models
@@ -107,6 +107,10 @@ extract_segments <- function(iranges){
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{metric}{the metric used to fit the distribution}
 #'     \item{dist}{the distribution name}
+#'     \item{sample_mean}{weighted mean of the histogram}
+#'     \item{sample_var}{weighted variance of the histogram}
+#'     \item{sample_sd}{weighted standard deviation of the histogram}
+#'     \item{sample_skew}{weighted skew of the histogram}
 #'     \item{dist_param[0-9]}{the values of distribution parameters}
 #'     \item{dist_param_name[0-9]}{the matching names of distribution parameters}
 #' }
@@ -159,10 +163,10 @@ summarize_results.Histogram <- function(
 
     # Empirical moment estimation from histogram
     moment_estimation <- list(
-      "empirical_mean" = weighted.mean(result[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_var" = weighted.var(result[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_sd" = weighted.sd(result[stats[['histogram_start']]:stats[['histogram_end']]]),
-      "empirical_skew" = weighted.skewness(result[stats[['histogram_start']]:stats[['histogram_end']]])
+      "sample_mean" = weighted.mean(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "sample_var" = weighted.var(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "sample_sd" = weighted.sd(result[stats[['histogram_start']]:stats[['histogram_end']]]),
+      "sample_skew" = weighted.skewness(result[stats[['histogram_start']]:stats[['histogram_end']]])
     )
 
     # Parameters
