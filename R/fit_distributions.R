@@ -18,7 +18,8 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-#'
+#' 
+#' @rdname fit_distributions
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
@@ -29,6 +30,7 @@ fit_distributions <- function(
   UseMethod("fit_distributions")
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions numeric
 fit_distributions.numeric <- function(
     x,
@@ -52,9 +54,11 @@ fit_distributions.numeric <- function(
 
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions table
 fit_distributions.table <- fit_distributions.numeric
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions GenomicHistogram
 fit_distributions.GenomicHistogram <- function(
     x,
@@ -68,7 +72,7 @@ fit_distributions.GenomicHistogram <- function(
     x = x$histogram_data,
     interval_start = x$consecutive_start - 0.5,
     interval_end = x$consecutive_end + 0.5,
-    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
+    interval_midpoint = find_midpoint(x),
     metric = metric,
     truncated = truncated,
     distributions = distributions
@@ -76,6 +80,7 @@ fit_distributions.GenomicHistogram <- function(
 
 }
 
+#' @rdname fit_distributions
 #' @exportS3Method fit_distributions Histogram
 fit_distributions.Histogram <- function(
     x,
@@ -89,7 +94,7 @@ fit_distributions.Histogram <- function(
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
+    interval_midpoint = find_midpoint(x),
     metric = metric,
     truncated = truncated,
     distributions = distributions

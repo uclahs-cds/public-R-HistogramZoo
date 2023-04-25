@@ -26,14 +26,39 @@ test_that("weighted moments work with counts", {
 })
 
 
-test_that("weighted moments work with on", {
+test_that("weighted moments work with Histograms + GenomicHistograms", {
+  
   set.seed(13)
+  
+  # Histogram
   x <- rnorm(100, sd = 5)
   hist_x <- observations_to_histogram(x, histogram_bin_width = 2)
-  mp <- (hist_x$interval_end + hist_x$interval_start) / 2
+  mp <- find_midpoint(hist_x)
   long_values <- .replicate_vals(hist_x$histogram_data, mp)
+  
   expect_equal(mean(long_values), weighted.mean(hist_x))
   expect_equal(var(long_values), weighted.var(hist_x))
   expect_equal(sd(long_values), weighted.sd(hist_x))
   expect_equal(moments::skewness(long_values), weighted.skewness(hist_x, type = 'g'))
+  
+  # GenomicHistogram
+  genomichistogram_x <- GenomicHistogram(
+    histogram_data = hist_x$histogram_data,
+    # Testing that the shift in interval start/end doesn't influence the calculation
+    interval_start = hist_x$interval_start + 10,
+    interval_end = hist_x$interval_end + 9,
+    chr = "chr1",
+    strand = "*",
+    consecutive_start = hist_x$interval_start + 1,
+    consecutive_end = hist_x$interval_end
+  )
+  
+  mp <- find_midpoint(genomichistogram_x)
+  long_values <- .replicate_vals(genomichistogram_x$histogram_data, mp)
+  
+  expect_equal(mean(long_values), weighted.mean(genomichistogram_x))
+  expect_equal(var(long_values), weighted.var(genomichistogram_x))
+  expect_equal(sd(long_values), weighted.sd(genomichistogram_x))
+  expect_equal(moments::skewness(long_values), weighted.skewness(genomichistogram_x, type = 'g'))
+  
 })

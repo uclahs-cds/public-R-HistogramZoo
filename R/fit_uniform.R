@@ -11,12 +11,14 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-#' @export fit_uniform
+#' 
+#' @rdname fit_uniform
+#' @export
 fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
   UseMethod('fit_uniform')
 }
 
-
+#' @rdname fit_uniform
 #' @exportS3Method fit_uniform numeric
 fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
 
@@ -31,9 +33,11 @@ fit_uniform.numeric <- function(x, metric=c('mle', 'jaccard', 'intersection', 'k
 
 }
 
+#' @rdname fit_uniform
 #' @exportS3Method  fit_uniform table
 fit_uniform.table <- fit_uniform.numeric
 
+#' @rdname fit_uniform
 #' @exportS3Method fit_uniform Histogram
 fit_uniform.Histogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
 
@@ -41,12 +45,13 @@ fit_uniform.Histogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 
     x = x$histogram_data,
     interval_start = x$interval_start,
     interval_end = x$interval_end,
-    interval_midpoint = find_midpoint(x$interval_start, x$interval_end),
+    interval_midpoint = find_midpoint(x),
     metric = metric
   )
 
 }
 
+#' @rdname fit_uniform
 #' @exportS3Method fit_uniform GenomicHistogram
 fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
 
@@ -54,7 +59,7 @@ fit_uniform.GenomicHistogram <- function(x, metric=c('mle', 'jaccard', 'intersec
     x = x$histogram_data,
     interval_start = x$consecutive_start - 0.5,
     interval_end = x$consecutive_end + 0.5,
-    interval_midpoint = find_midpoint(x$consecutive_start - 0.5, x$consecutive_end + 0.5),
+    interval_midpoint = find_midpoint(x),
     metric = metric
   )
 
