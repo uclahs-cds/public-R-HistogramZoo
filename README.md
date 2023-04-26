@@ -21,8 +21,8 @@ Finally, HistogramZoo provides several convenient functions to summarize fits an
 
 Using devtools in R:
 ```R
-library(devtools)
-install_github('https://github.com/uclahs-cds/public-R-HistogramZoo')
+library(devtools);
+install_github('https://github.com/uclahs-cds/public-R-HistogramZoo'); 
 ```
 
 From source:
