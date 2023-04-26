@@ -6,3 +6,6 @@ vignettes/HistogramZoo.html
 *.Rproj
 inst/setup.R
 docs
+man
+.DS_Store
+**/.DS_Store
