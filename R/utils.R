@@ -85,9 +85,9 @@ is_equal_integer <- function(x){
 #' Finds the bin_width of Histogram or GenomicHistogram bins
 #'
 #' @param x a Histogram or GenomicHistogram object
-#' 
+#'
 #' @return a numeric vector representing bin_widths of each bin
-#' 
+#'
 #' @rdname find_bin_width
 #' @export
 find_bin_width <- function(x){
@@ -109,9 +109,9 @@ find_bin_width.GenomicHistogram <- function(x){
 #' Finds the midpoint of Histogram or GenomicHistogram bins
 #'
 #' @param x a Histogram or GenomicHistogram object
-#' 
+#'
 #' @return a numeric vector representing midpoints of each bin
-#' 
+#'
 #' @rdname find_midpoint
 #' @export
 find_midpoint <- function(x){

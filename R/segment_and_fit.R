@@ -1,36 +1,3 @@
-#' Find changepoints in a vector with uniform stretches of values
-#' @param x A numeric vector
-find_change_points <- function(x){
-  change_points <- which(diff(x) != 0)
-  change_points_plus <- change_points+1
-  keep <- (x[change_points] < x[change_points_plus])
-  return( c(change_points[keep], change_points_plus[!keep]) )
-}
-
-
-#' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
-#'
-#' @param x numeric vector
-#' @param threshold numeric threshold
-#'
-#' @return list of coordinates with `start` and `end` coordinates
-#' @export
-#'
-#' @examples
-#' find_consecutive_threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
-#' find_consecutive_threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
-find_consecutive_threshold <- function(
-  x,
-  threshold = 0){
-  x_thresholded <- rle(x > threshold)
-  end_coords <- cumsum(x_thresholded$lengths)
-  start_coords <- end_coords - x_thresholded$lengths + 1
-  start_coords_thresholded <- start_coords[x_thresholded$values]
-  end_coords_thresholded <- end_coords[x_thresholded$values]
-
-  return(list(start = start_coords_thresholded, end = end_coords_thresholded))
-}
-
 #' Segmentation of histograms and distribution fitting
 #'
 #' @param histogram_obj a Histogram or HistogramList object
@@ -145,19 +112,19 @@ segment_and_fit <- function(
   }
 
   # Extracting data
-  x <- histogram_obj$histogram_data
+  # x <- histogram_obj$histogram_data
 
   # Finding local optima
-  optima <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
+  optima <- find_local_optima(histogram_obj, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
   optima <- sort(c(optima$min_ind, optima$max_ind))
 
   # Finding change points for remove_low_entropy
   if(remove_low_entropy){
-    changepoints <- find_change_points(x)
+    changepoints <- find_change_points(histogram_obj)
   }
 
   # Looking for regions that surpass a hard count threshold
-  x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
+  x_segs <- as.data.frame(find_consecutive_threshold(histogram_obj, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
 
   if(nrow(x_segs) == 0){
@@ -167,12 +134,12 @@ segment_and_fit <- function(
   # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], optima[optima > segs['start'] & optima < segs['end']], segs['end']))
-    p <- ftc(x, p_init, eps)
+    p <- ftc(histogram_obj, p_init, eps)
 
     # Max gap
     if(remove_low_entropy) {
       changepoints_subset <- unname(c(segs['start'], changepoints[changepoints > segs['start'] & changepoints < segs['end']], segs['end']))
-      mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
+      mgaps <-  meaningful_gaps_local(x = histogram_obj, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
       p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
       p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_segment_size)
     } else {
@@ -198,8 +165,7 @@ segment_and_fit <- function(
     seg_start <- seg[['start']]
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
-    bin_data <- x[seg_start:seg_end]
-    # sub_hist <- histogram_obj[seg_start:seg_end]
+    sub_hist <- histogram_obj[seg_start:seg_end]
 
     # Find the maximum uniform segment
     dist_optim <- unif_segment <- list()
@@ -211,7 +177,7 @@ segment_and_fit <- function(
     ){
       unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
-          x = bin_data,
+          x = sub_hist,
           metric = met,
           threshold = uniform_threshold,
           stepsize = uniform_stepsize,
@@ -231,7 +197,7 @@ segment_and_fit <- function(
 
     if( length(distributions) > 0 ){
       dist_optim <- fit_distributions(
-        x = bin_data,
+        x = sub_hist,
         metric = metric,
         truncated = truncated_models,
         distributions = distributions

@@ -28,7 +28,7 @@ create_residualplot <- function(
     main, main.just, main.x, main.y, main.cex,
     xlab.label, ylab.label, xlab.cex, ylab.cex, xlab.col, ylab.col,
     xlab.top.label, xlab.top.cex, xlab.top.col, xlab.top.just, xlab.top.x, xlab.top.y,
-    xlimits = c(histogram_obj$interval_start[1], histogram_obj$interval_end[length(histogram_obj)]), 
+    xlimits = c(histogram_obj$interval_start[1], histogram_obj$interval_end[length(histogram_obj)]),
     ylimits, xat, yat, xaxis.lab, yaxis.lab, xaxis.cex, yaxis.cex,
     xaxis.rot, yaxis.rot, xaxis.fontface, yaxis.fontface, xaxis.col, yaxis.col, xaxis.tck, yaxis.tck,
     type, cex, pch, col, col.border, lty, lwd, alpha,
@@ -64,10 +64,10 @@ create_residualplot.HistogramFit = function(
   xlab.cex = 2, ylab.cex = 2,xlab.col = 'black', ylab.col = 'black', xlab.top.label = NULL, xlab.top.cex = 2, xlab.top.col = 'black',
   xlab.top.just = 'center', xlab.top.x = 0.5, xlab.top.y = 0,
   xlimits = c(1, length(histogram_obj)),
-  ylimits = NULL, 
-  xat = generate_xlabels(histogram_obj, return_xat = T), 
-  yat = TRUE, 
-  xaxis.lab = generate_xlabels(histogram_obj), 
+  ylimits = NULL,
+  xat = generate_xlabels(histogram_obj, return_xat = T),
+  yat = TRUE,
+  xaxis.lab = generate_xlabels(histogram_obj),
   yaxis.lab = NA, xaxis.cex = 1.5, yaxis.cex = 1.5,
   xaxis.rot = 0, yaxis.rot = 0, xaxis.fontface = 'bold', yaxis.fontface = 'bold', xaxis.col = 'black', yaxis.col = 'black', xaxis.tck = c(1,1), yaxis.tck = c(1,1),
   type = 'p', cex = 0.75, pch = 19, col = 'black', col.border = 'black', lty = 1, lwd = 1, alpha = 1,
@@ -97,9 +97,11 @@ create_residualplot.HistogramFit = function(
 
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`, model_name)
+  mp <- find_midpoint(histogram_obj) # This S3 method differentiates between Histogram and GenomicHistogram
   distribution_plotting_data <- lapply(mods, function(m) {
     x <- seq(m$seg_start, m$seg_end, by = 1)
-    dens <- m$dens(x = seq_along(x), mpar = m$par)
+    seg_mp <- mp[m$seg_start:m$seg_end]
+    dens <- m$dens(x = seg_mp, mpar = m$par)
     return(
       data.frame("fitted" = dens, "labels_x" = x)
     )

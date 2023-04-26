@@ -23,7 +23,7 @@
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
 ) {
@@ -34,14 +34,14 @@ fit_distributions <- function(
 #' @exportS3Method fit_distributions numeric
 fit_distributions.numeric <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
 ) {
 
   # Assume a bin width of 1 for a numeric vector
   L <- length(x)
-  interval_midpoint <- seq(1, L, 1)
+  interval_midpoint <- seq(from = 1, to = L, by = 1)
   fit_distributions_helper(
     x = x,
     interval_start = interval_midpoint - 0.5,
@@ -62,9 +62,9 @@ fit_distributions.table <- fit_distributions.numeric
 #' @exportS3Method fit_distributions GenomicHistogram
 fit_distributions.GenomicHistogram <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "gamma_flip", "unif")
+    distributions = c("mle", "norm", "gamma", "gamma_flip", "unif")
 ) {
 
   # Base 1 to a base 0 system for GenomicHistogram
@@ -84,7 +84,7 @@ fit_distributions.GenomicHistogram <- function(
 #' @exportS3Method fit_distributions Histogram
 fit_distributions.Histogram <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
 ) {
@@ -129,7 +129,7 @@ fit_distributions_helper <- function(
     interval_start,
     interval_end,
     interval_midpoint,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
     distributions = c("norm", "gamma", "gamma_flip", "unif")
 ) {
