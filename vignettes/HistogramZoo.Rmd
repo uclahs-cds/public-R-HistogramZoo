@@ -48,7 +48,9 @@ A **GenomicHistogram** object contains up to 6 additional pieces of data.
 
 A Histogram and a GenomicHistogram differ in several ways:
 
-1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale. Starts are closed while ends are open with the exception of the last bin where both start and end are closed. `GenomicHistogram` objects were designed to represent a discrete [base 1](https://www.biostars.org/p/84686/) system where each histogram bin represents a set of indices on which observations are collected.
+1. Conceptualization of bins: `Histogram` objects represent conventional histograms where data are binned on a real number scale.
+Bins are of the form `(start, end]` where starts are inclusive while ends are exclusive with the exception of the last bin where both start and end are inclusive.
+`GenomicHistogram` objects were designed to represent a discrete [base 1](https://www.biostars.org/p/84686/) system where each histogram bin represents a set of indices on which observations are collected.
 
 2. Only `GenomicHistogram` objects support the use of disjoint intervals, or non-consecutive bins. This feature was designed with `GenomicHistogram` objects in mind to support the representation of transcripts and genes as a set of exons which might not be consecutive intervals on the genomic coordinate system. Summary statistics and distributions are fit on `consecutive_start/end` coordinates for GenomicHistograms. In operational cases using consecutive bins, `consecutive_start/end` can be specified to be the same as `interval_start/end`.
 
@@ -768,19 +770,42 @@ print(uniform_plt)
 
 ### Metrics
 
-Maximum likelihood estimation using histogram data [(ref)](https://stats.stackexchange.com/questions/60256/standard-deviation-of-binned-observations) is provided for distribution fitting and parameter estimation. The log likelihood of a bin is given by the following formula:
+HistogramZoo provides alternative estimators based on histogram distance for distribution parameters.
+Five potential metrics are available and parameters are selected to minimize the error between the density function of a statistical distribution and the observed histogram density.
+A full collection of histogram comparison metrics is described by [@meshgi2015histogram].
 
-$\log \prod_{i = 1}^{k} (F_\theta(x_i) - F_\theta(x_0))= k\log(F_\theta(x_1) - F_\theta(x_0))$
+Let $h$ be our observed histogram, where $h(i)$ is the density at bin $i$ and $x(i)$ be the mid-point for the bin $i$.
+We define the histogram metrics, compared to a distribution $f$ as follows:
 
-where $F_\theta$ is the cumulative distribution function of the fitted distribution with parameters $\theta$ and $x_i$ and $x_0$ are the start and endpoints of a bin $(x_0, x_1]$.
+* **Jaccard index** is the ratio between the intersection of the fitted and observed distributions and the union of the two distributions. When comparing two histograms, intersection is the minimum and union is the maximum.
 
-Additionally, five metrics are provided to optimize fitting distributions by minimizing the error between the density function of a statistical distribution and the observed histogram density.
+$$
+D_{J}(h, f) = 1 - \frac{\sum_{i=1}^{n}\min\left(h(i), f(x(i))\right)}{\sum_{i=1}^{n}\max\left(h(i), f(x(i))\right)}
+$$
 
-* **Jaccard index** is the ratio between the intersection of the fitted and observed distributions and the union of the two distributions.
-* **Intersection** is the intersection between the fitted and observed distributions.
+* **Intersection** is the intersection between the fitted and observed distributions
+
+$$
+D_{\cap} = 1 - \frac{\sum_{i} \left(\min(h(i),f(x(i)) \right)}{\min\left(\vert h(i)\vert,\vert f(x(i)) \vert \right)}
+$$
+
 * **Kolmogorov-Smirnov statistic** is the maximum divergence between the fitted and observed distributions.
+
+$$
+D_{KS}(h, f) = \max_i \left|h(i) - f(x(i))\right|
+$$
+
 * **Mean squared error** is the mean squared difference between the fitted and observed distributions.
-* **$\chi$-squared statistic** is the $\chi$-squared distance between the two distributions i.e. $\sum{\frac{(x-y)^2}{(x+y)}}$
+
+$$
+D_{MSE}(h, f) = \frac{1}{n}\sum_{i=1}^{n}\left(h(i) - f(x(i))\right)^2
+$$
+
+* **$\chi$-squared statistic** is the $\chi$-squared distance between the two distributions i.e. 
+
+$$
+D_{\chi^2}(h, f) = \sum_{i=1}^{n}\frac{\left[ h(i) - f(x(i)) \right]^2}{h(i) + f(x(i))}
+$$
 
 ### Finding a consensus model
 
