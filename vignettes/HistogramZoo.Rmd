@@ -807,6 +807,17 @@ $$
 D_{\chi^2}(h, f) = \sum_{i=1}^{n}\frac{\left[ h(i) - f(x(i)) \right]^2}{h(i) + f(x(i))}
 $$
 
+### Maximum likelihood estimation
+
+Maximum likelihood estimation using histogram data
+[(ref)](https://stats.stackexchange.com/questions/60256/standard-deviation-of-binned-observations) is provided for distribution fitting and parameter estimation. The log likelihood of a bin is given by the following formula:
+
+$$
+\log \prod_{i = 1}^{k} (F_\theta(x_i) - F_\theta(x_0))= k\log(F_\theta(x_1) - F_\theta(x_0))
+$$
+
+where $F_\theta$ is the cumulative distribution function of the fitted distribution with parameters $\theta$ and $x_i$ and $x_0$ are the start and endpoints of a bin $(x_0, x_1]$.
+
 ### Finding a consensus model
 
 The function `find_consensus_model` is used to determine the best fitting model for each segment and provides two methods of doing so: `weighted_majority_vote` (weighted majority voting) and `rra` (robust rank aggregation, @kolde2012robust). Weighted majority voting requires the users to provide a ranking of metrics in descending order of importance and their associated weights and used the weighted sum of ranks to determine the best fitting distribution. In the event of a tie, the highest ranked metric is used to break the tie.  
