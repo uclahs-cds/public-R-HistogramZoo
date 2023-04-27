@@ -18,7 +18,7 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-#' 
+#'
 #' @rdname fit_distributions
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
@@ -152,38 +152,6 @@ fit_distributions_helper <- function(
   # Area = sum(density * bin_width)
   area <- sum(x*(interval_end - interval_start))
 
-  # Optimization Function
-  .hist.optim <- function(params, .dist = c("norm", "gamma", "gamma_flip"), .metric_func) {
-    # Compute the expected counts for the given parameters
-    args <- c(list(x = interval_midpoint), params)
-    if(truncated && .dist == "normal") {
-      args$a <- head(interval_start, 1) - 1e-10
-      args$b <- tail(interval_end, 1) + 1e-10
-    }
-    if(truncated && .dist %in% c("gamma_flip", "gamma")){
-      args$a <- 0
-      args$b <- L
-    }
-    if(.dist == "gamma_flip"){
-      args$offset <- tail(interval_end, 1) + 1e-10
-    }
-    if(.dist == "gamma"){
-      args$shift <- head(interval_start, 1) - 1e-10
-    }
-    trunc.letter <- if(truncated) "t" else ""
-    dens <- tryCatch({
-      do.call(paste0("d", trunc.letter, .dist), args) * area
-    }, error = function(err) {
-      rep(0, length(x))
-    })
-    dens[is.na(dens)] <- 0
-    res <- .metric_func(x, dens)
-    if(is.na(res) || res == -Inf || res == Inf) {
-      res <- Inf
-    }
-    res
-  }
-
   # Fitting uniform distributions
   unif_fit <- list()
   if("unif" %in% distributions){
@@ -255,9 +223,12 @@ fit_distributions_helper <- function(
 
         # Fitting Data
         dist_optim <- DEoptim::DEoptim(
-          fn = .hist.optim,
-          .dist = distr,
-          .metric_func = metric_func,
+          fn = metric.histogram.dist,
+          x = x,
+          interval_start = interval_start,
+          interval_end = interval_end,
+          dist = distr,
+          metric_func = metric_func,
           lower = lower,
           upper = upper,
           control = control_args

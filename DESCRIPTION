@@ -1,6 +1,6 @@
 Package: HistogramZoo
 Title: A Method for Peak Merging And Distribution Fitting Across Biological Replicates
-Version: 1.4.0
+Version: 1.4.1
 Authors@R:
     c(
     person(given = "Helen",
@@ -41,5 +41,6 @@ Suggests:
     scales,
     RobustRankAggreg
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 URL: https://friendly-invention-3cb82740.pages.github.io/
