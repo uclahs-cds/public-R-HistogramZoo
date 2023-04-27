@@ -223,7 +223,7 @@ fit_distributions_helper <- function(
 
         # Fitting Data
         dist_optim <- DEoptim::DEoptim(
-          fn = hist.optim,
+          fn = metric.histogram.dist,
           x = x,
           interval_start = interval_start,
           interval_end = interval_end,
