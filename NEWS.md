@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Added summary statistics estimation for GenomicHistogram objects [Pull #124](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/124)
    - Added `bin_width` and `midpoint` estimation for Histogram and GenomicHistogram objects
+- Enforcing continuity of bins in Histogram and GenomicHistogram objects when subsetting [Pull #125](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/125)
 
 ### Fixed
 - Fix vignette/README/image file paths for pkgdown [Pull #115](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/115)
