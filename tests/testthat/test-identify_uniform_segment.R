@@ -16,6 +16,7 @@ test_that("identify_uniform_segment works ", {
   expect_named(res, c("par", "dist", "metric", "value", "dens", "seg_start", "seg_end"))
 
   # Basic reproducibility
+  expect_s3_class(res, "ModelFit")
   expect_equal(res[["seg_start"]], 2)
   expect_equal(res[["seg_end"]], 12)
   expect_true(is.null(res[["par"]]))
