@@ -11,7 +11,7 @@
 #'     \item{value}{the fitted value of the metric function}
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
-#' 
+#'
 #' @rdname fit_uniform
 #' @export
 fit_uniform <- function(x, metric=c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')) {
@@ -114,12 +114,12 @@ fit_uniform_helper <- function(
   }
 
   return(
-    list(
-      "par" = NULL,
-      "dist" = "unif",
-      "metric" = metric,
-      "value" = value,
-      "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
+    new_ModelFit(
+      par = NULL,
+      distribution = "unif",
+      metric = metric,
+      value = value,
+      density_function = function(x = NULL, mpar = NULL, scale = TRUE) {
         if(missing(x)) {
           x <- interval_midpoint
         }
