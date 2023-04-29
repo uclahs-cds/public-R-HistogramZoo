@@ -204,7 +204,7 @@ fit_distributions_helper <- function(
 
         if (truncated) {
           tdistr <- paste0('t', tdistr)
-          if(distr == "normal"){
+          if(distr == "norm"){
             mle.options.args$a <- head(interval_start, 1) - 1e-10
             mle.options.args$b <- tail(interval_end, 1) + 1e-10
           } else if (distr %in% c("gamma", "gamma_flip")){
@@ -231,6 +231,7 @@ fit_distributions_helper <- function(
           metric_func = metric_func,
           lower = lower,
           upper = upper,
+          truncated = truncated,
           control = control_args
         )
       }
@@ -241,7 +242,7 @@ fit_distributions_helper <- function(
 
       # Adjusting for truncated distributions
       trunc.letter = if(truncated) "t" else ""
-      if(truncated && distr == "normal") {
+      if(truncated && distr == "norm") {
         dist_par$a <- head(interval_start, 1)
         dist_par$b <- tail(interval_end, 1)
       }
