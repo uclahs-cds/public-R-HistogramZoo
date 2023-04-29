@@ -28,7 +28,7 @@ new_ModelFit <- function(
   stopifnot(is.list(par) || is.null(par))
   stopifnot(is.character(distribution))
   stopifnot(is.character(metric))
-  stopifnot(is.numeric(value))
+  stopifnot(is.numeric(value) || is.na(value))
   stopifnot(is.function(density_function))
   stopifnot(is.integer(seg_start) || is.null(seg_start))
   stopifnot(is.integer(seg_end) || is.null(seg_start))
@@ -55,8 +55,12 @@ print.ModelFit = function(x, ...){
   # Distribution/Metric/Observations
   cat("ModelFit\n")
   cat("Distribution: ", x$dist, "\n")
-  cat("Metric: ", x$metric, "\n")
-  cat("Metric(obs, exp): ", x$value, "\n\n")
+  if(x$metric == "mle"){
+    cat("MLE: ", x$value, "\n\n")
+  } else {
+    cat("Metric: ", x$metric, "\n")
+    cat("Metric(obs, exp): ", x$value, "\n\n")
+  }
 
   # Parameters
   if(!is.null(x$par)){
