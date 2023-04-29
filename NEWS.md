@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
+- ModelFit class to allow pretty-printing of `fit_distributions` results
 
 ### Changed
 
 ### Fixed
+- Bugs associated with fitting truncated distributions
 
 ## [1.4.0] - 2023-04-19
 
