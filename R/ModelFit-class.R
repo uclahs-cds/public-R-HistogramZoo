@@ -1,6 +1,6 @@
 
 # constructor
-#' Constructs a new ModelFit object
+#' Constructs a new HZModelFit object
 #'
 #' @param par list of named parameters
 #' @param dist character name of distribution
@@ -13,7 +13,7 @@
 #' @param ... additional parameters, allowing child classes to be built
 #'
 #' @return an HZModelFit object
-new_ModelFit <- function(
+new_HZModelFit <- function(
     par = NULL,
     dist = NULL,
     metric = NULL,
@@ -50,7 +50,7 @@ new_ModelFit <- function(
 }
 
 #' @export
-print.ModelFit <- function(x, ...){
+print.HZModelFit <- function(x, ...){
 
   # Distribution/Metric/Observations
   cat("ModelFit\n")

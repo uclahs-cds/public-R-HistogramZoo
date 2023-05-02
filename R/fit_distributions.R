@@ -260,7 +260,7 @@ fit_distributions_helper <- function(
 
       # Return model
       return(
-        new_ModelFit(
+        new_HZModelFit(
           par = dist_par,
           dist = distr,
           metric = met,

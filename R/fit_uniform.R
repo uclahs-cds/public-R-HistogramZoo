@@ -114,7 +114,7 @@ fit_uniform_helper <- function(
   }
 
   return(
-    new_ModelFit(
+    new_HZModelFit(
       par = NULL,
       dist = "unif",
       metric = metric,
