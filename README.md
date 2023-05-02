@@ -69,7 +69,8 @@ create_coverageplot(results);
 
 ## Resources
 
-The function reference and a detailed vignette are available [here](https://uclahs-cds.github.io/public-R-HistogramZoo/). A CRAN page is currently in progress.
+- [Function reference](https://uclahs-cds.github.io/public-R-HistogramZoo/reference/index.html)
+- [Vignette](https://uclahs-cds.github.io/public-R-HistogramZoo/articles/HistogramZoo.html)
 
 ## Getting help
 
