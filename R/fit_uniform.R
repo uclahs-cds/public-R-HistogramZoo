@@ -116,10 +116,10 @@ fit_uniform_helper <- function(
   return(
     new_ModelFit(
       par = NULL,
-      distribution = "unif",
+      dist = "unif",
       metric = metric,
       value = value,
-      density_function = function(x = NULL, mpar = NULL, scale = TRUE) {
+      dens = function(x = NULL, mpar = NULL, scale = TRUE) {
         if(missing(x)) {
           x <- interval_midpoint
         }

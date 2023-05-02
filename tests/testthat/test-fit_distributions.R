@@ -20,7 +20,7 @@ test_that("fit_distributions works ", {
     distributions = distributions
   )
 
-  expect_s3_class(res[[1]], "ModelFit")
+  expect_s3_class(res[[1]], "HZModelFit")
   expect_length(res, length(distributions) * length(metric))
   expect_true(
     all(c("norm", "unif", "gamma", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))

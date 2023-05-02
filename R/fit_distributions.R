@@ -262,10 +262,10 @@ fit_distributions_helper <- function(
       return(
         new_ModelFit(
           par = dist_par,
-          distribution = distr,
+          dist = distr,
           metric = met,
           value = correct_fitted_value(met, dist_optim$optim$bestval),
-          density_function = function(x = NULL, mpar = NULL, scale = TRUE) {
+          dens = function(x = NULL, mpar = NULL, scale = TRUE) {
             if(missing(x)) {
               x <- interval_midpoint
             }

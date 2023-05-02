@@ -3,22 +3,22 @@
 #' Constructs a new ModelFit object
 #'
 #' @param par list of named parameters
-#' @param distribution character name of distribution
+#' @param dist character name of distribution
 #' @param metric character name of metric
 #' @param value numeric result of applying metric to observed data and fitted distribution
-#' @param density_function function which takes a vector of coordinates, a list of parameters and
+#' @param dens function which takes a vector of coordinates, a list of parameters and
 #' a logical determining whether the output should be scaled; returns the fitted distribution density
 #' @param seg_start integer histogram index start of uniform segment
 #' @param seg_end integer histogram index end of uniform segment
 #' @param ... additional parameters, allowing child classes to be built
 #'
-#' @return a Histogram object
+#' @return an HZModelFit object
 new_ModelFit <- function(
     par = NULL,
-    distribution = NULL,
+    dist = NULL,
     metric = NULL,
     value = NULL,
-    density_function = NULL,
+    dens = NULL,
     seg_start = NULL,
     seg_end = NULL,
     ...
@@ -26,31 +26,31 @@ new_ModelFit <- function(
 
   # Checking types
   stopifnot(is.list(par) || is.null(par))
-  stopifnot(is.character(distribution))
+  stopifnot(is.character(dist))
   stopifnot(is.character(metric))
   stopifnot(is.numeric(value) || is.na(value))
-  stopifnot(is.function(density_function))
+  stopifnot(is.function(dens))
   stopifnot(is.integer(seg_start) || is.null(seg_start))
   stopifnot(is.integer(seg_end) || is.null(seg_start))
 
   # Creating object
   x <- list(
     par = par,
-    dist = distribution,
+    dist = dist,
     metric = metric,
     value = value,
-    dens = density_function,
+    dens = dens,
     seg_start = seg_start,
     seg_end = seg_end,
     ...
   )
-  class(x) <- "ModelFit"
+  class(x) <- "HZModelFit"
 
   return(x)
 }
 
 #' @export
-print.ModelFit = function(x, ...){
+print.ModelFit <- function(x, ...){
 
   # Distribution/Metric/Observations
   cat("ModelFit\n")
@@ -79,7 +79,7 @@ print.ModelFit = function(x, ...){
   }
 
   # Truncated Uniform
-  if(!is.null(x$seg_start) & !is.null(x$seg_end)){
+  if(!is.null(x$seg_start) && !is.null(x$seg_end)){
     cat("Fitted segment:\n")
 
     start_end <- as.character(c(x$seg_start, x$seg_end))
