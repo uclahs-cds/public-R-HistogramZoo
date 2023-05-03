@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -38,7 +44,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Generate GenomicHistogram objects from BED files using coordinates defined by a GTF file</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/R/transcript_BED_to_histogram.R" class="external-link"><code>R/transcript_BED_to_histogram.R</code></a></small>
       <div class="d-none name"><code>transcript_BED_to_histogram.Rd</code></div>
     </div>
 
@@ -64,7 +70,7 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>filenames</dt>
-<dd><p>A vector of BED filenames. The `name` column of the BED files must indicate gene or transcript name</p></dd>
+<dd><p>A vector of BED filenames. The <code>name</code> column of the BED files must indicate gene or transcript name</p></dd>
 
 
 <dt>n_fields</dt>
@@ -80,11 +86,11 @@
 
 
 <dt>gene_or_transcript</dt>
-<dd><p>`gene` or `transcript` indicating whether histograms should be built on gene coordinates or transcript coordinates, default gene</p></dd>
+<dd><p><code>gene</code> or <code>transcript</code> indicating whether histograms should be built on gene coordinates or transcript coordinates, default gene</p></dd>
 
 
 <dt>select_strand</dt>
-<dd><p>`*`, `+` or `-`  to filter regions by strand, default '*'</p></dd>
+<dd><p><code>*</code>, <code>+</code> or <code>-</code>  to filter regions by strand, default '*'</p></dd>
 
 
 <dt>select_chrs</dt>
@@ -129,7 +135,7 @@ NOTE: regions are determined by GTF gene/transcript IDs and the name column of B
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

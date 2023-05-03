@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -83,8 +90,8 @@
 </h2>
 <p>Using devtools in R:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'https://github.com/uclahs-cds/public-R-HistogramZoo'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span>;</span>
+<span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'https://github.com/uclahs-cds/public-R-HistogramZoo'</span><span class="op">)</span>; </span></code></pre></div>
 <p>From source: <code>shell script git clone https://github.com/uclahs-cds/public-R-HistogramZoo.git R CMD INSTALL public-R-HistogramZoo</code></p>
 <p>From CRAN (coming soon!)</p>
 </div>
@@ -94,7 +101,7 @@
 <p>A basic example of applying HistogramZoo to a histogram of Gaussian data is provided below:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://friendly-invention-3cb82740.pages.github.io/" class="external-link">HistogramZoo</a></span><span class="op">)</span>;</span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://uclahs-cds.github.io/public-R-HistogramZoo">HistogramZoo</a></span><span class="op">)</span>;</span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">271828</span><span class="op">)</span>;</span>
 <span></span>
@@ -172,7 +179,10 @@
 <div class="section level2">
 <h2 id="resources">Resources<a class="anchor" aria-label="anchor" href="#resources"></a>
 </h2>
-<p>The function reference and a detailed vignette are available <a href="https://uclahs-cds.github.io/public-R-HistogramZoo/">here</a>. A CRAN page is currently in progress.</p>
+<ul>
+<li><a href="https://uclahs-cds.github.io/public-R-HistogramZoo/reference/index.html">Function reference</a></li>
+<li><a href="https://uclahs-cds.github.io/public-R-HistogramZoo/articles/HistogramZoo.html">Vignette</a></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
@@ -199,7 +209,15 @@
 <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
@@ -218,7 +236,8 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Helen Zhu <br><small class="roles"> Author, maintainer </small>  </li>
-<li>Stefan Eng <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5245-6507" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Stefan E. Eng <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5245-6507" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Paul C. Boutros <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-0553-7520" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -230,7 +249,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Helen Zhu, Stefan Eng.</p>
+<p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

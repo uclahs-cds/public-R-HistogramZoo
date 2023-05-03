@@ -12,7 +12,7 @@ See stats::weighted.mean."><!-- mathjax --><script src="https://cdnjs.cloudflare
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,13 @@ See stats::weighted.mean."><!-- mathjax --><script src="https://cdnjs.cloudflare
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -40,7 +46,7 @@ See stats::weighted.mean."><!-- mathjax --><script src="https://cdnjs.cloudflare
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Weighted higher order moments</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/R/moments.R" class="external-link"><code>R/moments.R</code></a></small>
       <div class="d-none name"><code>weighted.moments.Rd</code></div>
     </div>
 
@@ -101,13 +107,13 @@ See stats::<a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-
     <h2 id="sample-skewness">Sample Skewness<a class="anchor" aria-label="anchor" href="#sample-skewness"></a></h2>
     
 
-<p>Sample skewness either computes 'b' or 'g' skewness using the notation from [1].</p><ul><li><p>`b` skewness follows MINITAB and uses the unbiased formula for sd with (N - 1) in the denominator</p></li>
-<li><p>`g` skewness follows SAS format (and that of the R moments::<a href="https://rdrr.io/pkg/moments/man/skewness.html" class="external-link">skewness</a>) and uses the biased formula for sd with N in the denominator</p></li>
+<p>Sample skewness either computes 'b' or 'g' skewness using the notation from 1.</p><ul><li><p><code>b</code> skewness follows MINITAB and uses the unbiased formula for sd with (N - 1) in the denominator</p></li>
+<li><p><code>g</code> skewness follows SAS format (and that of the R moments::<a href="https://rdrr.io/pkg/moments/man/skewness.html" class="external-link">skewness</a>) and uses the biased formula for sd with N in the denominator</p></li>
 </ul><p>"For small samples from a normal distribution b has smaller mean-squared error than g... for small samples from non-normal distributions... g has a smaller mean-squared error."</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>[1] Joanes, D. N., &amp; Gill, C. A. (1998). Comparing Measures of Sample Skewness and Kurtosis. Journal of the Royal Statistical Society. Series D (The Statistician), 47(1), 183–189. http://www.jstor.org/stable/2988433</p>
+    <p>1 Joanes, D. N., &amp; Gill, C. A. (1998). Comparing Measures of Sample Skewness and Kurtosis. Journal of the Royal Statistical Society. Series D (The Statistician), 47(1), 183–189. http://www.jstor.org/stable/2988433</p>
     </div>
 
     <div class="section level2">
@@ -128,7 +134,7 @@ See stats::<a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

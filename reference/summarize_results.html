@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -38,7 +44,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Formats results of segment_and_fit</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/R/summarize_results.R" class="external-link"><code>R/summarize_results.R</code></a></small>
       <div class="d-none name"><code>summarize_results.Rd</code></div>
     </div>
 
@@ -68,49 +74,61 @@
 <p>a data.frame with all or a subset of the following columns summarizing the results of the fit</p><dl><dt>region_id</dt>
 <dd><p>character string denoting the region_id of the Histogram</p></dd>
 
-    <dt>segment_id</dt>
+<dt>segment_id</dt>
 <dd><p>an integer id identifying the ordinal segment of the Histogram segmentation</p></dd>
 
-    <dt>chr</dt>
+<dt>chr</dt>
 <dd><p>an optional column denoting the chromosome of a GenomicHistogram object</p></dd>
 
-    <dt>start</dt>
+<dt>start</dt>
 <dd><p>the interval start of the segment</p></dd>
 
-    <dt>end</dt>
+<dt>end</dt>
 <dd><p>the interval end of the segment</p></dd>
 
-    <dt>strand</dt>
+<dt>strand</dt>
 <dd><p>an optional column denoting the strand of a GenomicHistogram object</p></dd>
 
-    <dt>interval_count</dt>
+<dt>interval_count</dt>
 <dd><p>the number of intervals in the segment - used for collapsing disjoint intervals</p></dd>
 
-    <dt>interval_sizes</dt>
+<dt>interval_sizes</dt>
 <dd><p>the width of each interval</p></dd>
 
-    <dt>interval_starts</dt>
+<dt>interval_starts</dt>
 <dd><p>the start index of each interval</p></dd>
 
-    <dt>histogram_start</dt>
+<dt>histogram_start</dt>
 <dd><p>the start index of the segment in the Histogram representation</p></dd>
 
-    <dt>histogram_end</dt>
+<dt>histogram_end</dt>
 <dd><p>the end index of the segment in the Histogram representation</p></dd>
 
-    <dt>value</dt>
+<dt>value</dt>
 <dd><p>the fitted value of the metric function</p></dd>
 
-    <dt>metric</dt>
+<dt>metric</dt>
 <dd><p>the metric used to fit the distribution</p></dd>
 
-    <dt>dist</dt>
+<dt>dist</dt>
 <dd><p>the distribution name</p></dd>
 
-    <dt>dist_param[0-9]</dt>
+<dt>sample_mean</dt>
+<dd><p>weighted mean of the histogram</p></dd>
+
+<dt>sample_var</dt>
+<dd><p>weighted variance of the histogram</p></dd>
+
+<dt>sample_sd</dt>
+<dd><p>weighted standard deviation of the histogram</p></dd>
+
+<dt>sample_skew</dt>
+<dd><p>weighted skew of the histogram</p></dd>
+
+<dt>dist_param0-9</dt>
 <dd><p>the values of distribution parameters</p></dd>
 
-    <dt>dist_param_name[0-9]</dt>
+<dt>dist_param_name0-9</dt>
 <dd><p>the matching names of distribution parameters</p></dd>
 
 
@@ -121,7 +139,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

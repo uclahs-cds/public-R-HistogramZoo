@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -60,12 +66,12 @@
           
           <code><a href="GenomicHistogram.html">GenomicHistogram()</a></code> 
         </dt>
-        <dd>Generates an S3 `GenomicHistogram` object</dd>
+        <dd>Generates an S3 <code>GenomicHistogram</code> object</dd>
       </dl><dl><dt>
           
           <code><a href="Histogram.html">Histogram()</a></code> 
         </dt>
-        <dd>Generates an S3 `Histogram` object</dd>
+        <dd>Generates an S3 <code>Histogram</code> object</dd>
       </dl><dl><dt>
           
           <code><a href="are_colours.html">are_colours()</a></code> 
@@ -90,7 +96,7 @@
           
           <code><a href="calculate_probability_difference.html">calculate_probability_difference()</a></code> 
         </dt>
-        <dd>Calculate whether h[a,b] &gt; p[a,b]</dd>
+        <dd>Calculate whether ha,b &gt; pa,b</dd>
       </dl><dl><dt>
           
           <code><a href="compute_coverage_on_bins.html">compute_coverage_on_bins()</a></code> 
@@ -133,24 +139,9 @@
         <dd>create_trackplot creates a horizontal plot with rows representing separate tracks</dd>
       </dl><dl><dt>
           
-          <code><a href="dgamma_flip.html">dgamma_flip()</a></code> 
-        </dt>
-        <dd>gamma flip</dd>
-      </dl><dl><dt>
-          
           <code><a href="dput_str.html">dput_str()</a></code> 
         </dt>
         <dd>Return a string representation of an object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="dtgamma.html">dtgamma()</a></code> 
-        </dt>
-        <dd>truncated gamma</dd>
-      </dl><dl><dt>
-          
-          <code><a href="dtgamma_flip.html">dtgamma_flip()</a></code> 
-        </dt>
-        <dd>truncated gamma flip</dd>
       </dl><dl><dt>
           
           <code><a href="extract_segments.html">extract_segments()</a></code> 
@@ -166,6 +157,11 @@
           <code><a href="find_all_meaningful_gap.html">find_all_meaningful_gap()</a></code> 
         </dt>
         <dd>Find all meaningful gaps</dd>
+      </dl><dl><dt>
+          
+          <code><a href="find_bin_width.html">find_bin_width()</a></code> 
+        </dt>
+        <dd>Finds the bin_width of Histogram or GenomicHistogram bins</dd>
       </dl><dl><dt>
           
           <code><a href="find_change_points.html">find_change_points()</a></code> 
@@ -188,14 +184,29 @@
         <dd>find_local_optima returns the local optima of histograms</dd>
       </dl><dl><dt>
           
+          <code><a href="find_midpoint.html">find_midpoint()</a></code> 
+        </dt>
+        <dd>Finds the midpoint of Histogram or GenomicHistogram bins</dd>
+      </dl><dl><dt>
+          
           <code><a href="fit_distributions.html">fit_distributions()</a></code> 
         </dt>
         <dd>Fit the model parameters by optimizing a histogram metric</dd>
       </dl><dl><dt>
           
-          <code><a href="fit_uniform.numeric.html">fit_uniform(<i>&lt;numeric&gt;</i>)</a></code> 
+          <code><a href="fit_distributions_helper.html">fit_distributions_helper()</a></code> 
+        </dt>
+        <dd>A helper function for fit_distributions</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fit_uniform.html">fit_uniform()</a></code> 
         </dt>
         <dd>Fit a uniform distribution to a histogram</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fit_uniform_helper.html">fit_uniform_helper()</a></code> 
+        </dt>
+        <dd>A helper function for the S3 method fit_uniform</dd>
       </dl><dl><dt>
           
           <code><a href="format_print_intervals.html">format_print_intervals()</a></code> 
@@ -206,6 +217,16 @@
           <code><a href="ftc.html">ftc()</a></code> 
         </dt>
         <dd>Fine-to-coarse segmentation algorithm</dd>
+      </dl><dl><dt>
+          
+          <code><a href="gamma.html">dgamma()</a></code> <code><a href="gamma.html">pgamma()</a></code> <code><a href="gamma.html">rgamma()</a></code> <code><a href="gamma.html">qgamma()</a></code> 
+        </dt>
+        <dd>The Gamma Distribution</dd>
+      </dl><dl><dt>
+          
+          <code><a href="gamma_flip.html">dgamma_flip()</a></code> <code><a href="gamma_flip.html">pgamma_flip()</a></code> <code><a href="gamma_flip.html">rgamma_flip()</a></code> <code><a href="gamma_flip.html">qgamma_flip()</a></code> 
+        </dt>
+        <dd>The Flipped Gamma Distribution</dd>
       </dl><dl><dt>
           
           <code><a href="generate_granges_from_parent_and_ranges.html">generate_granges_from_parent_and_ranges()</a></code> 
@@ -230,7 +251,7 @@
           
           <code><a href="generate_xlabels.html">generate_xlabels()</a></code> 
         </dt>
-        <dd>Generates x labels for histogram-based plots, `create_coverageplot` and `create_residualplot`</dd>
+        <dd>Generates x labels for histogram-based plots, <code>create_coverageplot</code> and <code>create_residualplot</code></dd>
       </dl><dl><dt>
           
           <code><a href="genome_BED_to_histogram.html">genome_BED_to_histogram()</a></code> 
@@ -297,12 +318,12 @@ intervals, can also be applied to find the max gap</dd>
           
           <code><a href="maximum_entropy.html">maximum_entropy()</a></code> 
         </dt>
-        <dd>Computes H, the maximum H_h,p([a,b])</dd>
+        <dd>Computes H, the maximum H_h,p(a,b)</dd>
       </dl><dl><dt>
           
           <code><a href="meaningful_gap.html">meaningful_gap()</a></code> 
         </dt>
-        <dd>Determines whether h[a,b] is a meaningful gap</dd>
+        <dd>Determines whether ha,b is a meaningful gap</dd>
       </dl><dl><dt>
           
           <code><a href="meaningful_gaps_local.html">meaningful_gaps_local()</a></code> 
@@ -312,7 +333,12 @@ intervals, can also be applied to find the max gap</dd>
           
           <code><a href="meaningful_interval.html">meaningful_interval()</a></code> 
         </dt>
-        <dd>Determines whether h[a,b] is a meaningful interval</dd>
+        <dd>Determines whether ha,b is a meaningful interval</dd>
+      </dl><dl><dt>
+          
+          <code><a href="metric.histogram.dist.html">metric.histogram.dist()</a></code> 
+        </dt>
+        <dd>Computes a given histogram distance metric to a distribution</dd>
       </dl><dl><dt>
           
           <code><a href="monotone_cost.html">monotone_cost()</a></code> 
@@ -325,6 +351,11 @@ intervals, can also be applied to find the max gap</dd>
         <dd>GenomicHistogram constructor</dd>
       </dl><dl><dt>
           
+          <code><a href="new_HZModelFit.html">new_HZModelFit()</a></code> 
+        </dt>
+        <dd>Constructs a new HZModelFit object</dd>
+      </dl><dl><dt>
+          
           <code><a href="new_Histogram.html">new_Histogram()</a></code> 
         </dt>
         <dd>Constructs a new Histogram object</dd>
@@ -333,36 +364,6 @@ intervals, can also be applied to find the max gap</dd>
           <code><a href="observations_to_histogram.html">observations_to_histogram()</a></code> 
         </dt>
         <dd>Take a vector of values and get the histogram for integer breaks</dd>
-      </dl><dl><dt>
-          
-          <code><a href="pgamma_flip.html">pgamma_flip()</a></code> 
-        </dt>
-        <dd>gamma flip</dd>
-      </dl><dl><dt>
-          
-          <code><a href="ptgamma.html">ptgamma()</a></code> 
-        </dt>
-        <dd>truncated gamma</dd>
-      </dl><dl><dt>
-          
-          <code><a href="ptgamma_flip.html">ptgamma_flip()</a></code> 
-        </dt>
-        <dd>truncated gamma flip</dd>
-      </dl><dl><dt>
-          
-          <code><a href="qgamma_flip.html">qgamma_flip()</a></code> 
-        </dt>
-        <dd>gamma flip</dd>
-      </dl><dl><dt>
-          
-          <code><a href="qtgamma.html">qtgamma()</a></code> 
-        </dt>
-        <dd>truncated gamma</dd>
-      </dl><dl><dt>
-          
-          <code><a href="qtgamma_flip.html">qtgamma_flip()</a></code> 
-        </dt>
-        <dd>truncated gamma</dd>
       </dl><dl><dt>
           
           <code><a href="reassign_region_id.html">reassign_region_id()</a></code> 
@@ -380,6 +381,11 @@ intervals, can also be applied to find the max gap</dd>
         <dd>Creates a new set of segments from a partition of points</dd>
       </dl><dl><dt>
           
+          <code><a href="reset_consecutive_intervals.html">reset_consecutive_intervals()</a></code> 
+        </dt>
+        <dd>Reset consecutive intervals to starting at 1, bin_width</dd>
+      </dl><dl><dt>
+          
           <code><a href="return_x_points.html">return_x_points()</a></code> 
         </dt>
         <dd>Returns the segment_and_fit x coordinates of the identified points</dd>
@@ -388,21 +394,6 @@ intervals, can also be applied to find the max gap</dd>
           <code><a href="return_y_points.html">return_y_points()</a></code> 
         </dt>
         <dd>Returns the segment_and_fit y coordinates of the identified points</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rgamma_flip.html">rgamma_flip()</a></code> 
-        </dt>
-        <dd>gamma flip</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rtgamma.html">rtgamma()</a></code> 
-        </dt>
-        <dd>truncated gamma</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rtgamma_flip.html">rtgamma_flip()</a></code> 
-        </dt>
-        <dd>truncated gamma flip</dd>
       </dl><dl><dt>
           
           <code><a href="scale_model_params.html">scale_model_params()</a></code> 
@@ -420,9 +411,24 @@ intervals, can also be applied to find the max gap</dd>
         <dd>Formats results of segment_and_fit</dd>
       </dl><dl><dt>
           
+          <code><a href="tgamma.html">dtgamma()</a></code> <code><a href="tgamma.html">ptgamma()</a></code> <code><a href="tgamma.html">rtgamma()</a></code> <code><a href="tgamma.html">qtgamma()</a></code> 
+        </dt>
+        <dd>The Truncated Gamma Distribution</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tgamma_flip.html">dtgamma_flip()</a></code> <code><a href="tgamma_flip.html">ptgamma_flip()</a></code> <code><a href="tgamma_flip.html">rtgamma_flip()</a></code> <code><a href="tgamma_flip.html">qtgamma_flip()</a></code> 
+        </dt>
+        <dd>The Truncated Flipped Gamma Distribution</dd>
+      </dl><dl><dt>
+          
           <code><a href="transcript_BED_to_histogram.html">transcript_BED_to_histogram()</a></code> 
         </dt>
         <dd>Generate GenomicHistogram objects from BED files using coordinates defined by a GTF file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="uniform_mle.html">uniform_mle()</a></code> 
+        </dt>
+        <dd>Uniform maximum likelihood estimation</dd>
       </dl><dl><dt>
           
           <code><a href="validate_GenomicHistogram.html">validate_GenomicHistogram()</a></code> 
@@ -448,7 +454,7 @@ intervals, can also be applied to find the max gap</dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

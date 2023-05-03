@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -38,14 +44,113 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Changelog</h1>
-      
+      <small>Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-  </main></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.4.0" id="histogramzoo-v140">HistogramZoo v1.4.0<a class="anchor" aria-label="anchor" href="#histogramzoo-v140"></a></h2>
+<div class="section level3">
+<h3 id="id_141---1-4-0">[1.4.1] - 2023-05-02<a class="anchor" aria-label="anchor" href="#id_141---1-4-0"></a></h3>
+<div class="section level4">
+<h4 id="added-1-4-0">Added<a class="anchor" aria-label="anchor" href="#added-1-4-0"></a></h4>
+<ul><li>ModelFit class to allow pretty-printing of <code>fit_distributions</code> results</li>
+</ul></div>
+<div class="section level4">
+<h4 id="fixed-1-4-0">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1-4-0"></a></h4>
+<ul><li>Bugs associated with fitting truncated distributions</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="id_140---1-4-0">[1.4.0] - 2023-04-19<a class="anchor" aria-label="anchor" href="#id_140---1-4-0"></a></h3>
+<div class="section level4">
+<h4 id="added-1-4-0-1">Added<a class="anchor" aria-label="anchor" href="#added-1-4-0-1"></a></h4>
+<ul><li>S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/121" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/121" class="external-link">#121</a>
+<ul><li>consecutive_start and consecutive_end for GenomicHistogram to keep track of disjoint intervals</li>
+<li>shifted gamma function to allow for non-zero starts</li>
+</ul></li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="changed-1-4-0">Changed<a class="anchor" aria-label="anchor" href="#changed-1-4-0"></a></h3>
+<ul><li>Added summary statistics estimation for GenomicHistogram objects <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/124" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/124" class="external-link">#124</a>
+<ul><li>Added <code>bin_width</code> and <code>midpoint</code> estimation for Histogram and GenomicHistogram objects</li>
+</ul></li>
+<li>Enforcing continuity of bins in Histogram and GenomicHistogram objects when subsetting <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/125" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/125" class="external-link">#125</a>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-1-4-0-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1-4-0-1"></a></h3>
+<ul><li>Fix vignette/README/image file paths for pkgdown <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/115" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/115" class="external-link">#115</a>
+</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.3.0" id="histogramzoo-v130">HistogramZoo v1.3.0<a class="anchor" aria-label="anchor" href="#histogramzoo-v130"></a></h2>
+<div class="section level3">
+<h3 id="added-1-3-0">Added<a class="anchor" aria-label="anchor" href="#added-1-3-0"></a></h3>
+<ul><li>Added summary statistics (mean, sd, var, skew) estimation from histogram objects <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/113" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/113" class="external-link">#113</a>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-1-3-0">Changed<a class="anchor" aria-label="anchor" href="#changed-1-3-0"></a></h3>
+<ul><li>Enforcing bin width and addition of intron-traversing bins in GenomicHistogram <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/108" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/108" class="external-link">#108</a>
+</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.0" id="histogramzoo-v120">HistogramZoo v1.2.0<a class="anchor" aria-label="anchor" href="#histogramzoo-v120"></a></h2>
+<div class="section level3">
+<h3 id="added-1-2-0">Added<a class="anchor" aria-label="anchor" href="#added-1-2-0"></a></h3>
+<ul><li>Added a classic histogram plotting function <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/111" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/111" class="external-link">#111</a>
+</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="histogramzoo-v110">HistogramZoo v1.1.0<a class="anchor" aria-label="anchor" href="#histogramzoo-v110"></a></h2>
+<div class="section level3">
+<h3 id="added-1-1-0">Added<a class="anchor" aria-label="anchor" href="#added-1-1-0"></a></h3>
+<ul><li>Maxiumum likelihood estimation for distribution parameters <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/97" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/97" class="external-link">#97</a>
+</li>
+<li>A vignette! <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/81" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/81" class="external-link">#81</a>
+</li>
+<li>Added <code>gamma_flip</code> as an available distribution <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/62" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/62" class="external-link">#62</a>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-1-1-0">Changed<a class="anchor" aria-label="anchor" href="#changed-1-1-0"></a></h3>
+<ul><li>New rules for <code>Histogram</code> and <code>GenomicHistogram</code> <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/76" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/76" class="external-link">#76</a>
+<ul><li>
+<code>Histogram</code> uses a strictly continuous Base 0 system while <code>GenomicHistogram</code> uses a potentially disjoint Base 1 system</li>
+<li>Both are restricted to having a fixed <code>bin_width</code> in (n-1) bins</li>
+</ul></li>
+<li>Add pkgdown build on new release <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/56" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/56" class="external-link">#56</a>
+</li>
+<li>Updated <code>find_consensus_model</code> to include user-specified weights and metric prioritization &amp; addition of new RRA method <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/53" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/53" class="external-link">#53</a>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-1-1-0">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1-1-0"></a></h3>
+<ul><li>Bug in <code>segment_and_fit</code> - finer segmentation is required to initialize <code>meaningful_gaps_local</code> <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/73" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/73" class="external-link">#73</a>
+</li>
+<li>Refactored <code>create_trackplot</code> to use <code><a href="https://rdrr.io/pkg/BoutrosLab.plotting.general/man/create.scatterplot.html" class="external-link">BoutrosLab.plotting.general::create.scatterplot</a></code> as a base function thus increasing efficiency <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/71" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/71" class="external-link">#71</a>
+</li>
+<li>Refactored <code>find_uniform_segment</code> to reduce code redundancy <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/pull/59" class="external-link">Pull </a><a href="https://github.com/uclahs-cds/public-R-HistogramZoo/issues/59" class="external-link">#59</a>
+</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="histogramzoo-v100">HistogramZoo v1.0.0<a class="anchor" aria-label="anchor" href="#histogramzoo-v100"></a></h2>
+<div class="section level3">
+<h3 id="added-1-0-0">Added<a class="anchor" aria-label="anchor" href="#added-1-0-0"></a></h3>
+<ul><li>First release!</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

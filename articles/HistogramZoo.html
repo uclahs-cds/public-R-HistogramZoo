@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -66,7 +73,7 @@
 Stefan Eng</h4>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/vignettes/HistogramZoo.Rmd" class="external-link"><code>vignettes/HistogramZoo.Rmd</code></a></small>
       <div class="d-none name"><code>HistogramZoo.Rmd</code></div>
     </div>
 
@@ -85,46 +92,60 @@ identify and characterize patterns from histogram data.</p>
 data and 4 pieces of optional data:</p>
 <ul>
 <li><p><strong>histogram_data</strong> is a numeric vector representing
-the histogram density or counts</p></li>
+histogram data. In cases of equal bin width, <code>histogram_data</code>
+can equally represent counts or density with no functional differences.
+However, in cases of unequal bin width, only density is appropriate for
+distribution fitting and visualization.</p></li>
 <li><p><strong>interval_start</strong> and
 <strong>histogram_end</strong> are numeric vectors representing the
 start and end coordinates of each bin</p></li>
 <li><p><strong>bin_width</strong> is the numeric length of bins. This
 can be automatically estimated from <code>interval_start</code> and
-<code>interval_end</code></p></li>
+<code>interval_end</code>. Objects are required to have equal bin width
+for every bin with the exception of the last bin, which can have a
+shorter bin width.</p></li>
 <li><p><strong>region_id</strong> is a character id for the
 histogram</p></li>
 </ul>
-<p>A <strong>GenomicHistogram</strong> object contains 2 additional
-pieces of optional data: <strong>chr</strong> for chromosome and
-<strong>strand</strong> for strand which is restricted to one of
-<code>+</code>, <code>-</code> and <code>*</code>. A Histogram and a
-GenomicHistogram differ in one of several ways:</p>
+<p>A <strong>GenomicHistogram</strong> object contains up to 6
+additional pieces of data.</p>
+<ul>
+<li><p><strong>chr</strong> is a character chromosome</p></li>
+<li><p><strong>strand</strong> is a character strand which is restricted
+to one of <code>+</code>, <code>-</code> and <code>*</code></p></li>
+<li><p><strong>intron_start</strong> and <strong>intron_end</strong> are
+numeric vectors representing intron coordinates - these can be
+automatically computed based on non-consecutive
+<code>interval_start</code> and <code>interval_end</code>
+indices</p></li>
+<li><p><strong>consecutive_start</strong> and
+<strong>consecutive_end</strong> are numeric vectors representing a
+continuous intronless bin coordinate system on which summary statistics
+can be computed and distributions can be fitted. Optionally specified by
+the user, <code>consecutive_start/end</code> will be automatically
+generated based on provided <code>interval_start/end</code> and
+<code>intron</code> data starting at base 1.</p></li>
+</ul>
+<p>A Histogram and a GenomicHistogram differ in several ways:</p>
 <ol style="list-style-type: decimal">
 <li><p>Conceptualization of bins: <code>Histogram</code> objects
 represent conventional histograms where data are binned on a real number
-scale. Starts are closed while ends are open with the exception of the
-last bin where both start and end are closed.
-<code>GenomicHistogram</code> objects were designed to represent a
-discrete <a href="https://www.biostars.org/p/84686/" class="external-link">base 1</a> system
-where each histogram bin represents a set of indices on which
-observations are collected.</p></li>
-<li><p>Restrictions on <code>bin_width</code>: <code>Histogram</code>
-objects require that the length of each bin is equal with the exception
-of the last bin which can be shorter than the rest.
-<code>GenomicHistogram</code> objects allow the lengths of each bin to
-vary as long as they are shorter or equal to the the designated
-<code>bin_width</code> and leaves the equal distribution of bin lengths
-up to user discretion. This allows users to construct
-<code>GenomicHistogram</code> objects using the <code>tile</code> and
-<code>binnedAverage</code> functions of
-<code>GenomicRanges</code>.</p></li>
-<li><p>Disjoint intervals: Both <code>Histogram</code> and
-<code>GenomicHistogram</code> objects support the use of disjoint
-intervals but this feature was designed with
-<code>GenomicHistogram</code> objects in mind to support the
+scale. Bins are of the form <code>(start, end]</code> where starts are
+inclusive while ends are exclusive with the exception of the last bin
+where both start and end are inclusive. <code>GenomicHistogram</code>
+objects were designed to represent a discrete <a href="https://www.biostars.org/p/84686/" class="external-link">base 1</a> system where each
+histogram bin represents a set of indices on which observations are
+collected.</p></li>
+<li><p>Only <code>GenomicHistogram</code> objects support the use of
+disjoint intervals, or non-consecutive bins. This feature was designed
+with <code>GenomicHistogram</code> objects in mind to support the
 representation of transcripts and genes as a set of exons which might
-not be consecutive intervals on the genomic coordinate system.</p></li>
+not be consecutive intervals on the genomic coordinate system. Summary
+statistics and distributions are fit on
+<code>consecutive_start/end</code> coordinates for GenomicHistograms. In
+operational cases using consecutive bins,
+<code>consecutive_start/end</code> can be specified to be the same as
+<code>interval_start/end</code>.</p></li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Histogram.html">Histogram</a></span><span class="op">(</span></span>
@@ -150,12 +171,16 @@ not be consecutive intervals on the genomic coordinate system.</p></li>
 <span></span>
 <span><span class="va">my_genomic_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GenomicHistogram.html">GenomicHistogram</a></span><span class="op">(</span></span>
 <span>  histogram_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">5</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">6</span>,<span class="fl">8</span><span class="op">)</span>,</span>
-<span>  interval_start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
-<span>  interval_end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
+<span>  interval_start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span>,</span>
+<span>  interval_end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span>,</span>
 <span>  bin_width <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  region_id <span class="op">=</span> <span class="st">"my_genomic_histogram"</span>,</span>
 <span>  chr <span class="op">=</span> <span class="st">"chr1"</span>,</span>
-<span>  strand <span class="op">=</span> <span class="st">"*"</span></span>
+<span>  strand <span class="op">=</span> <span class="st">"*"</span>,</span>
+<span>  intron_start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>,</span>
+<span>  intron_end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>,</span>
+<span>  consecutive_start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
+<span>  consecutive_end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
@@ -171,6 +196,59 @@ not be consecutive intervals on the genomic coordinate system.</p></li>
 <span>  xaxis.lab <span class="op">=</span> <span class="fu"><a href="../reference/generate_xlabels.html">generate_xlabels</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span>, n_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span><span class="op">)</span><span class="op">)</span>, </span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="HistogramZoo_files/figure-html/Histogram_example-1.png" width="40%"><img src="HistogramZoo_files/figure-html/Histogram_example-2.png" width="40%"></p>
+<div class="section level3">
+<h3 id="estimation-of-summary-statistics">Estimation of summary statistics<a class="anchor" aria-label="anchor" href="#estimation-of-summary-statistics"></a>
+</h3>
+<p>Built-in functions can be used to estimate summary statistics,
+including a weighted mean, variance, standard deviation and skew, on
+each Histogram object.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">histogram_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  <span class="st">"id"</span> <span class="op">=</span> <span class="st">"my_histogram"</span>,</span>
+<span>  <span class="st">"mean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">my_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"var"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.var</a></span><span class="op">(</span><span class="va">my_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"sd"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.sd</a></span><span class="op">(</span><span class="va">my_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"skew"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.skewness</a></span><span class="op">(</span><span class="va">my_histogram</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">genomic_histogram_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  <span class="st">"id"</span> <span class="op">=</span> <span class="st">"my_genomic_histogram"</span>,</span>
+<span>  <span class="st">"mean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"var"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.var</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"sd"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.sd</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span><span class="op">)</span>,</span>
+<span>  <span class="st">"skew"</span> <span class="op">=</span> <span class="fu"><a href="../reference/weighted.moments.html">weighted.skewness</a></span><span class="op">(</span><span class="va">my_genomic_histogram</span><span class="op">)</span></span>
+<span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">histogram_summary</span>, <span class="va">genomic_histogram_summary</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left">id</th>
+<th align="right">mean</th>
+<th align="right">var</th>
+<th align="right">sd</th>
+<th align="right">skew</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">my_histogram</td>
+<td align="right">3.888889</td>
+<td align="right">2.722222</td>
+<td align="right">1.649916</td>
+<td align="right">-0.5943331</td>
+</tr>
+<tr class="even">
+<td align="left">my_genomic_histogram</td>
+<td align="right">3.928571</td>
+<td align="right">3.550265</td>
+<td align="right">1.884215</td>
+<td align="right">-0.3173915</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
 <h2 id="data-loaders">Data loaders<a class="anchor" aria-label="anchor" href="#data-loaders"></a>
@@ -181,7 +259,7 @@ not be consecutive intervals on the genomic coordinate system.</p></li>
 <p><strong>observations_to_histogram</strong> bins a set of observations
 at a designated <code>histogram_bin_width</code> to generate a
 <code>Histogram</code></p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">my_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10000</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">my_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">my_data</span>, histogram_bin_width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -205,7 +283,7 @@ at a designated <code>histogram_bin_width</code> to generate a
 bigWig file on a set of user-defined regions (provided as a GRanges
 object, a GRangesList* object or a GTF file) and returns a list of
 GenomicHistogram objects.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges" class="external-link">GenomicRanges</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">filename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"bigwigs"</span>,  <span class="st">"S1.bw"</span>, package <span class="op">=</span> <span class="st">"HistogramZoo"</span><span class="op">)</span></span>
@@ -227,7 +305,7 @@ GenomicHistogram objects.</p>
 of genomic BED files and returns a list of GenomicHistogram objects.
 Users have the option of providing a set of regions as a GRanges or
 GRangesList* object.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datadir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"dna_bedfiles"</span>,  package <span class="op">=</span> <span class="st">"HistogramZoo"</span><span class="op">)</span></span>
 <span><span class="va">genome_bed_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">datadir</span>, pattern <span class="op">=</span> <span class="st">".bed$"</span><span class="op">)</span></span>
 <span><span class="va">genome_bed_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="va">genome_bed_files</span><span class="op">)</span></span>
@@ -241,7 +319,7 @@ GRangesList* object.</p>
 overlapping transcript annotations, bins the coverage on a set of BED
 files where each element can be pre-assigned to a region using the 4th
 column (name) of the BED file.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datadir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"rna_bedfiles"</span>, package <span class="op">=</span> <span class="st">"HistogramZoo"</span><span class="op">)</span></span>
 <span><span class="va">transcript_bed_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Sample."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="st">".bed"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gtf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"genes.gtf"</span>, package <span class="op">=</span> <span class="st">"HistogramZoo"</span><span class="op">)</span></span>
@@ -281,7 +359,7 @@ parameter to <code>FALSE</code>.</p></li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="segmentation-and-distribution-fitting">Segmentation and Distribution Fitting<a class="anchor" aria-label="anchor" href="#segmentation-and-distribution-fitting"></a>
+<h2 id="segmentation-and-distribution-fitting">Segmentation and distribution fitting<a class="anchor" aria-label="anchor" href="#segmentation-and-distribution-fitting"></a>
 </h2>
 <p>The function <strong>segment_and_fit</strong> is designed to be a
 pipeline constructed from the following sub-functions which enables the
@@ -289,27 +367,30 @@ segmentation, denoising and fitting of statistical distributions on
 Histogram and GenomicHistogram objects. Each of the parameters in
 <code>segment_and_fit</code> have counterparts in the sub-functions
 which is explored in further detail below.</p>
+<p><strong>NOTA BENE:</strong> Most of the functions below are
+implemented as S3 methods which can take <code>Histogram</code>,
+<code>GenomicHistogram</code> and <code>numeric</code> vector objects as
+input.</p>
 <div class="section level3">
 <h3 id="finding-local-optima">Finding local optima<a class="anchor" aria-label="anchor" href="#finding-local-optima"></a>
 </h3>
 <p><strong>find_local_optima</strong> identifies the local minima and
 maxima on a vector of counts (histogram data).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generating a Histogram </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">dt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10000</span>, mean <span class="op">=</span> <span class="fl">20</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">xhist</span> <span class="op">=</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">dt</span>, histogram_bin_width <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">data</span> <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span></span>
 <span></span>
 <span><span class="co"># basic use</span></span>
-<span><span class="va">optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span><span class="va">optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span><span class="op">)</span></span>
 <span><span class="va">optima</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">optima</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>, </span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">optima</span>, </span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">optima</span><span class="op">]</span>, </span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">optima</span><span class="op">]</span>, </span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"basic optima"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
@@ -324,22 +405,21 @@ maxima on a vector of counts (histogram data).</p>
 <p>The parameter <code>threshold</code> allows the user to tune the
 sparsity of local optima to histograms with potentially noisy counts,
 i.e. by thresholding the difference between neighbouring optima.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generating a Histogram with noisy counts</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">dt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">20</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">xhist</span> <span class="op">=</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">dt</span>, histogram_bin_width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">data</span> <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span></span>
 <span></span>
 <span><span class="co"># find_local_optima with threshold 0</span></span>
-<span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span>, threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span>, threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">zero_threshold_optima</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">zero_threshold_optima</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">zero_threshold_optima</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">zero_threshold_optima</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"threshold = 0"</span>,</span>
@@ -353,14 +433,14 @@ i.e. by thresholding the difference between neighbouring optima.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># find_local_optima with threshold 2</span></span>
-<span><span class="va">threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span>, threshold <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span>, threshold <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">threshold_optima</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>, </span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">threshold_optima</span>, </span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">threshold_optima</span><span class="op">]</span>, </span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">threshold_optima</span><span class="op">]</span>, </span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"threshold = 2"</span>,</span>
@@ -379,20 +459,20 @@ files in a GenomicHistogram). Setting the parameter to <code>TRUE</code>
 will allow the user to return both endpoints of a flat region while
 setting the parameter to <code>FALSE</code> will return the estimated
 midpoint of a flat region.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generating a Histogram with consecutive equal values</span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">xhist</span> <span class="op">=</span> <span class="fu"><a href="../reference/Histogram.html">Histogram</a></span><span class="op">(</span>histogram_data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># flat_endpoints</span></span>
-<span><span class="va">optima_flat</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span>, flat_endpoints <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">optima_flat</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span>, flat_endpoints <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">optima_flat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">optima_flat</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>, </span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">optima_flat</span>, </span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">optima_flat</span><span class="op">]</span>, </span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">optima_flat</span><span class="op">]</span>, </span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"flat endpoints"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
@@ -405,14 +485,14 @@ midpoint of a flat region.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># midpoints</span></span>
-<span><span class="va">optima_midpoints</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span>, flat_endpoints <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">optima_midpoints</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span>, flat_endpoints <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">optima_midpoints</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">optima_midpoints</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>, </span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">optima_midpoints</span>, </span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">optima_midpoints</span><span class="op">]</span>, </span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">optima_midpoints</span><span class="op">]</span>, </span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"midpoints"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
@@ -426,7 +506,7 @@ midpoint of a flat region.</p>
 <p><img src="HistogramZoo_files/figure-html/find_local_optima_stepfunction-1.png" width="40%"><img src="HistogramZoo_files/figure-html/find_local_optima_stepfunction-2.png" width="40%"></p>
 </div>
 <div class="section level3">
-<h3 id="the-fine-to-coarse-segmentation-algorithm">The Fine-to-Coarse Segmentation Algorithm<a class="anchor" aria-label="anchor" href="#the-fine-to-coarse-segmentation-algorithm"></a>
+<h3 id="the-fine-to-coarse-segmentation-algorithm">The Fine-to-Coarse segmentation algorithm<a class="anchor" aria-label="anchor" href="#the-fine-to-coarse-segmentation-algorithm"></a>
 </h3>
 <p>The Fine-to-Coarse segmentation algorithm was described in <span class="citation">Delon et al. (2005)</span>, <span class="citation">Lisani and Petro (2021)</span> and <span class="citation">Delon et al. (2006)</span>. Briefly, for a given
 histogram and a set of local optima, the FTC algorithm iterates through
@@ -435,24 +515,21 @@ counts followed by segments of decreasing counts. Consecutive segments
 are merged based on the prioritization derived from a monotone cost
 function, until an optimal set of peaks are acquired. Granularity of the
 optimal peak set can be tuned via the hyperparamter <span class="math inline">\(\epsilon\)</span>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generating a Histogram with noisy counts</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">dt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">20</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">xhist</span> <span class="op">=</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">dt</span>, histogram_bin_width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extracting the histogram data</span></span>
-<span><span class="va">data</span> <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span></span>
-<span></span>
 <span><span class="co"># local optima</span></span>
-<span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">data</span>, threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="../reference/find_local_optima.html">find_local_optima</a></span><span class="op">(</span><span class="va">xhist</span>, threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">zero_threshold_optima</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">zero_threshold_optima</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">zero_threshold_optima</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">zero_threshold_optima</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">zero_threshold_optima</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"Local Optima"</span>,</span>
@@ -466,17 +543,17 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Using different epsilons on FTC</span></span>
-<span><span class="va">ftc_eps_0.05</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="va">ftc_eps_0.09</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.09</span><span class="op">)</span></span>
-<span><span class="va">ftc_eps_0.15</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
-<span><span class="va">ftc_eps_0.25</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
-<span><span class="va">ftc_eps_0.5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">ftc_eps_0.05</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">xhist</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="va">ftc_eps_0.09</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">xhist</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.09</span><span class="op">)</span></span>
+<span><span class="va">ftc_eps_0.15</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">xhist</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
+<span><span class="va">ftc_eps_0.25</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">xhist</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span><span class="va">ftc_eps_0.5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ftc.html">ftc</a></span><span class="op">(</span><span class="va">xhist</span>, s <span class="op">=</span> <span class="va">zero_threshold_optima</span>, eps <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">ftc_eps_0.05</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">ftc_eps_0.05</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">ftc_eps_0.05</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"FTC: "</span>, <span class="va">epsilon</span>, <span class="st">"=0.05"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -493,7 +570,7 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">ftc_eps_0.09</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">ftc_eps_0.09</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">ftc_eps_0.09</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"FTC: "</span>, <span class="va">epsilon</span>, <span class="st">"=0.09"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -510,7 +587,7 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">ftc_eps_0.15</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">ftc_eps_0.15</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">ftc_eps_0.15</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"FTC: "</span>, <span class="va">epsilon</span>, <span class="st">"=0.15"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -527,7 +604,7 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">ftc_eps_0.25</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">ftc_eps_0.25</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">ftc_eps_0.25</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"FTC: "</span>, <span class="va">epsilon</span>, <span class="st">"=0.25"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -544,7 +621,7 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <span>  <span class="va">xhist</span>,</span>
 <span>  add.points <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  points.x <span class="op">=</span> <span class="va">ftc_eps_0.5</span>,</span>
-<span>  points.y <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">ftc_eps_0.5</span><span class="op">]</span>,</span>
+<span>  points.y <span class="op">=</span> <span class="va">xhist</span><span class="op">$</span><span class="va">histogram_data</span><span class="op">[</span><span class="va">ftc_eps_0.5</span><span class="op">]</span>,</span>
 <span>  points.col <span class="op">=</span> <span class="st">"red"</span>, </span>
 <span>  type <span class="op">=</span> <span class="st">"h"</span>,</span>
 <span>  main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"FTC: "</span>, <span class="va">epsilon</span>, <span class="st">"=0.5"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -559,7 +636,7 @@ optimal peak set can be tuned via the hyperparamter <span class="math inline">\(
 <p><img src="HistogramZoo_files/figure-html/ftc_epsilon-1.png" width="40%"><img src="HistogramZoo_files/figure-html/ftc_epsilon-2.png" width="40%"><img src="HistogramZoo_files/figure-html/ftc_epsilon-3.png" width="40%"><img src="HistogramZoo_files/figure-html/ftc_epsilon-4.png" width="40%"><img src="HistogramZoo_files/figure-html/ftc_epsilon-5.png" width="40%"><img src="HistogramZoo_files/figure-html/ftc_epsilon-6.png" width="40%"></p>
 </div>
 <div class="section level3">
-<h3 id="filtering-low-entropy-regions">Filtering Low Entropy Regions<a class="anchor" aria-label="anchor" href="#filtering-low-entropy-regions"></a>
+<h3 id="filtering-low-entropy-regions">Filtering low entropy regions<a class="anchor" aria-label="anchor" href="#filtering-low-entropy-regions"></a>
 </h3>
 <p>In the presence of noisy data, it can be helpful to filter regions
 with low entropy to extract high density regions. Low entropy regions or
@@ -568,7 +645,7 @@ with low entropy to extract high density regions. Low entropy regions or
 defined as a gap if it has high entropy and low density relative to its
 adjacent peak. Identification of max gaps is conducted on each segment
 post-segmentation.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generating a Histogram with noisy counts</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">dt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -599,10 +676,10 @@ post-segmentation.</p>
 <span>  main <span class="op">=</span> <span class="st">"Unfiltered"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.lab <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -613,10 +690,10 @@ post-segmentation.</p>
 <span>  main <span class="op">=</span> <span class="st">"Remove max gaps"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -626,7 +703,7 @@ post-segmentation.</p>
 <p><img src="HistogramZoo_files/figure-html/low_entropy-1.png" width="40%"><img src="HistogramZoo_files/figure-html/low_entropy-2.png" width="40%"></p>
 </div>
 <div class="section level3">
-<h3 id="fitting-statistical-distributions">Fitting Statistical Distributions<a class="anchor" aria-label="anchor" href="#fitting-statistical-distributions"></a>
+<h3 id="fitting-statistical-distributions">Fitting statistical distributions<a class="anchor" aria-label="anchor" href="#fitting-statistical-distributions"></a>
 </h3>
 <div class="section level4">
 <h4 id="distributions">Distributions<a class="anchor" aria-label="anchor" href="#distributions"></a>
@@ -636,7 +713,7 @@ the uniform distribution and the gamma distribution. The gamma
 distribution can be flipped to account for skew in the negative
 direction. Normal and gamma distributions can be fit in their full form
 or in a truncated form.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">gaussian_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10000</span>, mean <span class="op">=</span> <span class="fl">50</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">gaussian_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">gaussian_data</span><span class="op">)</span></span>
@@ -666,10 +743,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Normal (Full)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -679,10 +756,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Normal (Truncated)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -690,9 +767,9 @@ or in a truncated form.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gaussian_full_plt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gaussian_truncated_plt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="HistogramZoo_files/figure-html/distributions_normal-1.png" width="40%"><img src="HistogramZoo_files/figure-html/distributions_normal-2.png" width="40%"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
-<span><span class="va">gamma_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="fl">10000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
+<span><span class="va">gamma_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gamma.html">rgamma</a></span><span class="op">(</span><span class="fl">10000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
 <span><span class="va">gamma_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">gamma_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Keeping all data and fitting a full model</span></span>
@@ -720,10 +797,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Gamma (Full)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -733,10 +810,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Gamma (Truncated)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -744,9 +821,9 @@ or in a truncated form.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamma_full_plt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamma_truncated_plt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="HistogramZoo_files/figure-html/distributions_gamma-1.png" width="40%"><img src="HistogramZoo_files/figure-html/distributions_gamma-2.png" width="40%"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
-<span><span class="va">gamma_flip_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rgamma_flip.html">rgamma_flip</a></span><span class="op">(</span><span class="fl">9000</span>, shape <span class="op">=</span> <span class="fl">4</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">80</span></span>
+<span><span class="va">gamma_flip_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gamma_flip.html">rgamma_flip</a></span><span class="op">(</span><span class="fl">9000</span>, shape <span class="op">=</span> <span class="fl">4</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">80</span></span>
 <span><span class="va">gamma_flip_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">gamma_flip_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Keeping all data and fitting a full model</span></span>
@@ -774,10 +851,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Gamma Flipped (Full)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -787,10 +864,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Gamma Flipped (Truncated)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -798,7 +875,7 @@ or in a truncated form.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamma_flip_full_plt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamma_flip_truncated_plt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="HistogramZoo_files/figure-html/distributions_gamma_flip-1.png" width="40%"><img src="HistogramZoo_files/figure-html/distributions_gamma_flip-2.png" width="40%"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">uniform_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10000</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">uniform_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">uniform_data</span><span class="op">)</span></span>
@@ -817,10 +894,10 @@ or in a truncated form.</p>
 <span>  main <span class="op">=</span> <span class="st">"Uniform"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -831,31 +908,80 @@ or in a truncated form.</p>
 <div class="section level4">
 <h4 id="metrics">Metrics<a class="anchor" aria-label="anchor" href="#metrics"></a>
 </h4>
-<p>Five metrics are provided to optimize for the best fitting
-statistical distribution.</p>
+<p>HistogramZoo provides alternative estimators based on histogram
+distance for distribution parameters. Five potential metrics are
+available and parameters are selected to minimize the error between the
+density function of a statistical distribution and the observed
+histogram density. A full collection of histogram comparison metrics is
+described by <span class="citation">(Meshgi and Ishii 2015)</span>.</p>
+<p>Let <span class="math inline">\(h\)</span> be our observed histogram,
+where <span class="math inline">\(h(i)\)</span> is the density at bin
+<span class="math inline">\(i\)</span> and <span class="math inline">\(x(i)\)</span> be the mid-point for the bin <span class="math inline">\(i\)</span>. We define the histogram metrics,
+compared to a distribution <span class="math inline">\(f\)</span> as
+follows:</p>
 <ul>
 <li>
 <strong>Jaccard index</strong> is the ratio between the intersection
 of the fitted and observed distributions and the union of the two
-distributions.</li>
+distributions. When comparing two histograms, intersection is the
+minimum and union is the maximum.</li>
+</ul>
+<p><span class="math display">\[
+D_{J}(h, f) = 1 - \frac{\sum_{i=1}^{n}\min\left(h(i),
+f(x(i))\right)}{\sum_{i=1}^{n}\max\left(h(i), f(x(i))\right)}
+\]</span></p>
+<ul>
 <li>
 <strong>Intersection</strong> is the intersection between the fitted
-and observed distributions.</li>
+and observed distributions</li>
+</ul>
+<p><span class="math display">\[
+D_{\cap} = 1 - \frac{\sum_{i} \left(\min(h(i),f(x(i))
+\right)}{\min\left(\vert h(i)\vert,\vert f(x(i)) \vert \right)}
+\]</span></p>
+<ul>
 <li>
 <strong>Kolmogorov-Smirnov statistic</strong> is the maximum
 divergence between the fitted and observed distributions.</li>
+</ul>
+<p><span class="math display">\[
+D_{KS}(h, f) = \max_i \left|h(i) - f(x(i))\right|
+\]</span></p>
+<ul>
 <li>
 <strong>Mean squared error</strong> is the mean squared difference
 between the fitted and observed distributions.</li>
+</ul>
+<p><span class="math display">\[
+D_{MSE}(h, f) = \frac{1}{n}\sum_{i=1}^{n}\left(h(i) - f(x(i))\right)^2
+\]</span></p>
+<ul>
 <li>
 <strong><span class="math inline">\(\chi\)</span>-squared
 statistic</strong> is the <span class="math inline">\(\chi\)</span>-squared distance between the two
-distributions i.e. <span class="math inline">\(\sum{\frac{(x-y)^2}{(x+y)}}\)</span>
-</li>
+distributions i.e. </li>
 </ul>
+<p><span class="math display">\[
+D_{\chi^2}(h, f) = \sum_{i=1}^{n}\frac{\left[ h(i) - f(x(i))
+\right]^2}{h(i) + f(x(i))}
+\]</span></p>
 </div>
 <div class="section level4">
-<h4 id="finding-a-consensus-model">Finding a Consensus Model<a class="anchor" aria-label="anchor" href="#finding-a-consensus-model"></a>
+<h4 id="maximum-likelihood-estimation">Maximum likelihood estimation<a class="anchor" aria-label="anchor" href="#maximum-likelihood-estimation"></a>
+</h4>
+<p>Maximum likelihood estimation using histogram data <a href="https://stats.stackexchange.com/questions/60256/standard-deviation-of-binned-observations" class="external-link">(ref)</a>
+is provided for distribution fitting and parameter estimation. The log
+likelihood of a bin is given by the following formula:</p>
+<p><span class="math display">\[
+\log \prod_{i = 1}^{k} (F_\theta(x_i) - F_\theta(x_0))=
+k\log(F_\theta(x_1) - F_\theta(x_0))
+\]</span></p>
+<p>where <span class="math inline">\(F_\theta\)</span> is the cumulative
+distribution function of the fitted distribution with parameters <span class="math inline">\(\theta\)</span> and <span class="math inline">\(x_i\)</span> and <span class="math inline">\(x_0\)</span> are the start and endpoints of a bin
+<span class="math inline">\((x_0, x_1]\)</span>.</p>
+</div>
+<div class="section level4">
+<h4 id="finding-a-consensus-model">Finding a consensus model<a class="anchor" aria-label="anchor" href="#finding-a-consensus-model"></a>
 </h4>
 <p>The function <code>find_consensus_model</code> is used to determine
 the best fitting model for each segment and provides two methods of
@@ -867,7 +993,7 @@ ranks to determine the best fitting distribution. In the event of a tie,
 the highest ranked metric is used to break the tie.</p>
 </div>
 <div class="section level4">
-<h4 id="maximizing-uniform-segments">Maximizing Uniform Segments<a class="anchor" aria-label="anchor" href="#maximizing-uniform-segments"></a>
+<h4 id="maximizing-uniform-segments">Maximizing uniform segments<a class="anchor" aria-label="anchor" href="#maximizing-uniform-segments"></a>
 </h4>
 <p>The function <code>identify_uniform_segment</code> optimizes the
 identification of uniform segments by iteratively trimming the ends of
@@ -880,7 +1006,7 @@ while the parameter <code>max_sd_size</code> indicates the maximum
 tolerable standard deviation of the goodness-of-fit from the best
 fitting uniform distribution where the function can select the longest
 uniform distribution.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Simulating uniform data that can benefit from trimming</span></span>
@@ -920,10 +1046,10 @@ uniform distribution.</p>
 <span>  main <span class="op">=</span> <span class="st">"Uniform (Untrimmed)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -933,10 +1059,10 @@ uniform distribution.</p>
 <span>  main <span class="op">=</span> <span class="st">"Uniform (Max Uniform)"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
-<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
-<span>  xlab.label <span class="op">=</span> <span class="st">''</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>  xaxis.label <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -948,10 +1074,10 @@ uniform distribution.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="exporting-results">Exporting Results<a class="anchor" aria-label="anchor" href="#exporting-results"></a>
+<h2 id="exporting-results">Exporting results<a class="anchor" aria-label="anchor" href="#exporting-results"></a>
 </h2>
 <div class="section level3">
-<h3 id="summary-statistics">Summary statistics<a class="anchor" aria-label="anchor" href="#summary-statistics"></a>
+<h3 id="summary-table-of-results">Summary table of results<a class="anchor" aria-label="anchor" href="#summary-table-of-results"></a>
 </h3>
 <p><strong>summarize_results</strong> can be applied to a
 <code>HistogramFit</code> object to extract the indices and summary
@@ -995,6 +1121,18 @@ Histogram representation</li>
 <li>
 <strong>dist</strong> the distribution name</li>
 <li>
+<strong>sample_mean</strong> the mean of the observed histogram
+data</li>
+<li>
+<strong>sample_var</strong> the variance of the observed histogram
+data</li>
+<li>
+<strong>sample_sd</strong> the standard deviation of the observed
+histogram data</li>
+<li>
+<strong>sample_skew</strong> the skew of the observed histogram
+data</li>
+<li>
 <strong>dist_param[0-9]</strong> the values of distribution
 parameters</li>
 <li>
@@ -1012,10 +1150,18 @@ plotting capabilities from <code>BoutrosLab.plotting.general</code>
 <code>lattice</code> R package <span class="citation">(Sarkar, Sarkar,
 and KernSmooth 2015)</span>.</p>
 <ul>
-<li><p><strong>create_coverageplot</strong> can be used to visualize the
-<code>Histogram</code>, <code>GenomicHistogram</code> or
-<code>HistogramFit</code> object with annotated segmentation points and
-distributions.</p></li>
+<li><p><strong>create_histogram</strong> and
+<strong>create_coverageplot</strong> can be used to visualize the
+<code>Histogram</code> or <code>GenomicHistogram</code> objects.
+Currently, <code>create_coverageplot</code> can be used to visualize
+<code>HistogramFit</code> objects, resulting from
+<code>segment_and_fit</code> analysis, with annotated segmentation
+points and distributions. <code>create_histogram</code> generates the
+traditional representation of histograms as consecutive blocks while
+<code>create_coverageplot</code> represents the histograms as lollipop
+plots or as lines. <code>create_coverageplot</code> was designed with
+large histograms, such as those derived from genomic datasets, in
+mind.</p></li>
 <li><p><strong>create_residualplot</strong> can be used to visualize the
 residuals between the fitted and observed distributions of a
 <code>HistogramFit</code> object</p></li>
@@ -1023,20 +1169,22 @@ residuals between the fitted and observed distributions of a
 complementary tracks to a histogram visualization when combined with
 <code>create_layerplot</code></p></li>
 <li><p><strong>create_layerplot</strong> can be used to create a
-multi-panel plot with combinations of coverage, residual and track
-plots.</p></li>
+multi-panel plot with combinations of histogram, coverage, residual and
+track plots.</p></li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
-<p>A histogram is simulated from 3 statistical distributions.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>A histogram is simulated from 3 statistical distributions. Two
+equivalent visualizations are shown below using
+<code>create_coverageplot</code> and <code>create_histogram</code>.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">314</span><span class="op">)</span></span>
 <span><span class="va">my_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">8000</span>, mean <span class="op">=</span> <span class="fl">50</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="fl">10000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="../reference/rgamma_flip.html">rgamma_flip</a></span><span class="op">(</span><span class="fl">9000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">80</span></span>
+<span>  <span class="fu"><a href="../reference/gamma.html">rgamma</a></span><span class="op">(</span><span class="fl">10000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="../reference/gamma_flip.html">rgamma_flip</a></span><span class="op">(</span><span class="fl">9000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">80</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">my_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observations_to_histogram.html">observations_to_histogram</a></span><span class="op">(</span><span class="va">my_data</span><span class="op">)</span></span>
@@ -1044,7 +1192,7 @@ plots.</p></li>
 <span><span class="co"># A basic coverageplot to visualize the data</span></span>
 <span><span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_histogram</span>,</span>
-<span>  main <span class="op">=</span> <span class="st">"Histogram"</span>,</span>
+<span>  main <span class="op">=</span> <span class="st">"Coverage plot"</span>,</span>
 <span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
 <span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
@@ -1052,11 +1200,25 @@ plots.</p></li>
 <span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
 <span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/create_histogram.html">create_histogram</a></span><span class="op">(</span></span>
+<span>  <span class="va">my_histogram</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"count"</span>,</span>
+<span>  main <span class="op">=</span> <span class="st">"Histogram plot"</span>,</span>
+<span>  main.cex <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>  xaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
+<span>  yaxis.tck <span class="op">=</span> <span class="fl">0.5</span>, </span>
+<span>  xlab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>  ylab.cex <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>  xaxis.cex <span class="op">=</span> <span class="fl">0.8</span>, </span>
+<span>  yaxis.cex <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  xat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">80</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="HistogramZoo_files/figure-html/plotting_example_p1-1.png" width="50%"></p>
+<p><img src="HistogramZoo_files/figure-html/plotting_example_p1-1.png" width="40%"><img src="HistogramZoo_files/figure-html/plotting_example_p1-2.png" width="40%"></p>
 <p>HistogramZoo is applied to segment the histogram and fit
 distributions. Results are reported in a table.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Conducting analysis</span></span>
 <span><span class="va">histogram_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/segment_and_fit.html">segment_and_fit</a></span><span class="op">(</span></span>
 <span>  histogram_obj <span class="op">=</span> <span class="va">my_histogram</span>,</span>
@@ -1080,7 +1242,7 @@ indices relative to the <code>interval_start</code> and
 <code>interval_starts</code> columns aid in describing histograms with
 disjoint intervals following a <a href="https://genome.ucsc.edu/FAQ/FAQformat.html" class="external-link">BED file
 format</a>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_id"</span>, <span class="st">"segment_id"</span>, <span class="st">"start"</span>, <span class="st">"end"</span>, <span class="st">"interval_count"</span>, <span class="st">"interval_sizes"</span>, <span class="st">"interval_starts"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1136,7 +1298,7 @@ columns indicate the start and end indices relative to the histogram
 itself (i.e. assuming that each bin is ordinal). The <code>value</code>
 refers to the GOF of the selected <code>metric</code> and the
 <code>dist</code> column indicates the distribution fitted.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"histogram_start"</span>, <span class="st">"histogram_end"</span>, <span class="st">"value"</span>, <span class="st">"metric"</span>, <span class="st">"dist"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -1150,29 +1312,62 @@ refers to the GOF of the selected <code>metric</code> and the
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">10</td>
-<td align="right">0.9560695</td>
+<td align="right">0.9807606</td>
 <td align="left">consensus</td>
 <td align="left">gamma</td>
 </tr>
 <tr class="even">
 <td align="right">47</td>
 <td align="right">54</td>
-<td align="right">0.9619485</td>
+<td align="right">0.9656822</td>
 <td align="left">consensus</td>
 <td align="left">norm</td>
 </tr>
 <tr class="odd">
 <td align="right">72</td>
 <td align="right">80</td>
-<td align="right">0.9473543</td>
+<td align="right">0.9789559</td>
 <td align="left">consensus</td>
 <td align="left">gamma_flip</td>
 </tr>
 </tbody>
 </table>
+<p>The <code>sample_mean</code>, <code>sample_var</code>,
+<code>sample_sd</code> and <code>sample_skew</code> columns show summary
+statistics estimated on the observed data for each segment.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_mean"</span>, <span class="st">"sample_var"</span>, <span class="st">"sample_sd"</span>, <span class="st">"sample_skew"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">sample_mean</th>
+<th align="right">sample_var</th>
+<th align="right">sample_sd</th>
+<th align="right">sample_skew</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">4.225027</td>
+<td align="right">5.872675</td>
+<td align="right">2.423360</td>
+<td align="right">0.4214018</td>
+</tr>
+<tr class="even">
+<td align="right">50.000982</td>
+<td align="right">3.111514</td>
+<td align="right">1.763948</td>
+<td align="right">0.0132582</td>
+</tr>
+<tr class="odd">
+<td align="right">75.984753</td>
+<td align="right">5.005186</td>
+<td align="right">2.237227</td>
+<td align="right">-0.3302141</td>
+</tr>
+</tbody>
+</table>
 <p>The <code>dist_param</code> columns hold the values of the
 distribution parameters</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dist_param1"</span>, <span class="st">"dist_param2"</span>, <span class="st">"dist_param3"</span>, <span class="st">"dist_param4"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -1183,28 +1378,28 @@ distribution parameters</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">2.678828</td>
-<td align="right">0.4942402</td>
-<td align="right">1</td>
-<td align="right">10</td>
+<td align="right">2.017559</td>
+<td align="right">0.3974044</td>
+<td align="right">0</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="right">4.527836</td>
-<td align="right">1.9906070</td>
-<td align="right">1</td>
-<td align="right">8</td>
+<td align="right">50.007707</td>
+<td align="right">1.9119002</td>
+<td align="right">46</td>
+<td align="right">54</td>
 </tr>
 <tr class="odd">
-<td align="right">2.670898</td>
-<td align="right">0.4949953</td>
-<td align="right">1</td>
-<td align="right">9</td>
+<td align="right">1.988789</td>
+<td align="right">0.3840282</td>
+<td align="right">80</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
 <p>while the <code>dist_param_name</code> columns hold the names of the
 parameters corresponding to each distribution</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dist_param1_name"</span>, <span class="st">"dist_param2_name"</span>, <span class="st">"dist_param3_name"</span>, <span class="st">"dist_param4_name"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1223,8 +1418,8 @@ parameters corresponding to each distribution</p>
 <tr class="odd">
 <td align="left">shape</td>
 <td align="left">rate</td>
+<td align="left">shift</td>
 <td align="left">a</td>
-<td align="left">b</td>
 </tr>
 <tr class="even">
 <td align="left">mean</td>
@@ -1235,13 +1430,13 @@ parameters corresponding to each distribution</p>
 <tr class="odd">
 <td align="left">shape</td>
 <td align="left">rate</td>
+<td align="left">offset</td>
 <td align="left">a</td>
-<td align="left">b</td>
 </tr>
 </tbody>
 </table>
 <p>A plot of the result is generated.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Histogram Fit</span></span>
 <span><span class="va">coverage_plt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_coverageplot.html">create_coverageplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">histogram_fit</span>,</span>
@@ -1386,6 +1581,12 @@ Lisani, Jose Luis, and Ana Belén Petro. 2021. <span>“Automatic 1D
 Histogram Segmentation and Application to the Computation of Color
 Palettes.”</span>
 </div>
+<div id="ref-meshgi2015histogram" class="csl-entry">
+Meshgi, Kourosh, and Shin Ishii. 2015. <span>“Expanding Histogram of
+Colors with Gridding to Improve Tracking Accuracy.”</span> In <em>2015
+14th IAPR International Conference on Machine Vision Applications
+(MVA)</em>, 475–79. <a href="https://doi.org/10.1109/MVA.2015.7153234" class="external-link">https://doi.org/10.1109/MVA.2015.7153234</a>.
+</div>
 <div id="ref-p2019bpg" class="csl-entry">
 P’ng, Christine, Jeffrey Green, Lauren C Chong, Daryl Waggott, Stephenie
 D Prokopec, Mehrdad Shamsi, Francis Nguyen, et al. 2019. <span>“BPG:
@@ -1407,7 +1608,7 @@ Sarkar, Deepayan, Maintainer Deepayan Sarkar, and Suggests KernSmooth.
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Helen Zhu, Stefan Eng.</p>
+<p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -70,16 +70,7 @@
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/create_trackplot.html</loc>
   </url>
   <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dgamma_flip.html</loc>
-  </url>
-  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dput_str.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dtgamma.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/dtgamma_flip.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/extract_segments.html</loc>
@@ -89,6 +80,9 @@
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_all_meaningful_gap.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_bin_width.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_change_points.html</loc>
@@ -103,16 +97,31 @@
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_local_optima.html</loc>
   </url>
   <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/find_midpoint.html</loc>
+  </url>
+  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_distributions.html</loc>
   </url>
   <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_uniform.numeric.html</loc>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_distributions_helper.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_uniform.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/fit_uniform_helper.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/format_print_intervals.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ftc.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/gamma.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/gamma_flip.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/generate_granges_from_parent_and_ranges.html</loc>
@@ -181,34 +190,22 @@
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/meaningful_interval.html</loc>
   </url>
   <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/metric.histogram.dist.html</loc>
+  </url>
+  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/monotone_cost.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/new_GenomicHistogram.html</loc>
   </url>
   <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/new_HZModelFit.html</loc>
+  </url>
+  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/new_Histogram.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/observations_to_histogram.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/pgamma_flip.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ptgamma.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/ptgamma_flip.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qgamma_flip.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qtgamma.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/qtgamma_flip.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/reassign_region_id.html</loc>
@@ -220,19 +217,13 @@
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/remove_max_gaps.html</loc>
   </url>
   <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/reset_consecutive_intervals.html</loc>
+  </url>
+  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/return_x_points.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/return_y_points.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rgamma_flip.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rtgamma.html</loc>
-  </url>
-  <url>
-    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/rtgamma_flip.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/scale_model_params.html</loc>
@@ -244,7 +235,16 @@
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/summarize_results.html</loc>
   </url>
   <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/tgamma.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/tgamma_flip.html</loc>
+  </url>
+  <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/transcript_BED_to_histogram.html</loc>
+  </url>
+  <url>
+    <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/uniform_mle.html</loc>
   </url>
   <url>
     <loc>https://uclahs-cds.github.io/public-R-HistogramZoo/reference/validate_GenomicHistogram.html</loc>

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">HistogramZoo</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,13 @@
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/uclahs-cds/public-R-HistogramZoo/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -38,7 +44,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Methods for voting for a consensus model based on the metrics of fit_distributions</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/uclahs-cds/public-R-HistogramZoo/blob/HEAD/R/find_consensus_model.R" class="external-link"><code>R/find_consensus_model.R</code></a></small>
       <div class="d-none name"><code>find_consensus_model.Rd</code></div>
     </div>
 
@@ -60,48 +66,48 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>models</dt>
-<dd><p>a list of models, e.g. derived from `fit_distributions`</p></dd>
+<dd><p>a list of models, e.g. derived from <code>fit_distributions</code></p></dd>
 
 
 <dt>method</dt>
-<dd><p>one of `weighted_majority_vote` and `rra` as a method of determining the best method. `rra` requires the package `RobustRankAggreg`</p></dd>
+<dd><p>one of <code>weighted_majority_vote</code> and <code>rra</code> as a method of determining the best method. <code>rra</code> requires the package <code>RobustRankAggreg</code></p></dd>
 
 
 <dt>metric</dt>
-<dd><p>metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.</p></dd>
+<dd><p>metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the <code>consensus</code> model for the distribution determined through voting.</p></dd>
 
 
 <dt>distribution_prioritization</dt>
-<dd><p>if `method` is `weighted_majority_voting`, a list of ranked distributions, to break ties</p></dd>
+<dd><p>if <code>method</code> is <code>weighted_majority_voting</code>, a list of ranked distributions, to break ties</p></dd>
 
 
 <dt>weights</dt>
-<dd><p>required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.</p></dd>
+<dd><p>required if <code>method</code> is <code>weighted_majority_voting</code>. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric. Each model is a list of the following data:</p><dl><dt>par</dt>
+<p>a list of the best model for each metric and a <code>consensus</code> model representing the model with the consensus distribution and the lowest weighted metric. Each model is a list of the following data:</p><dl><dt>par</dt>
 <dd><p>A character string denoting the region_id of the Histogram</p></dd>
 
-    <dt>dist</dt>
+<dt>dist</dt>
 <dd><p>The distribution name</p></dd>
 
-    <dt>metric</dt>
+<dt>metric</dt>
 <dd><p>The metric used to fit the distribution</p></dd>
 
-    <dt>value</dt>
+<dt>value</dt>
 <dd><p>The fitted value of the metric function</p></dd>
 
-    <dt>dens</dt>
+<dt>dens</dt>
 <dd><p>A function that returns the density of the fitted distribution</p></dd>
 
-    <dt>seg_start</dt>
+<dt>seg_start</dt>
 <dd><p>start index of the interval</p></dd>
 
-    <dt>seg_end</dt>
+<dt>seg_end</dt>
 <dd><p>end index of the interval</p></dd>
 
 
@@ -123,7 +129,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Helen Zhu, Stefan Eng.</p>
+  <p></p><p>Developed by Helen Zhu, Stefan E. Eng, Paul C. Boutros.</p>
 </div>
 
 <div class="pkgdown-footer-right">
