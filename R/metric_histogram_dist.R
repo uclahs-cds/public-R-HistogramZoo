@@ -57,6 +57,7 @@ metric.histogram.dist <- function(
 
   area <- sum(x*(interval_end - interval_start))
   interval_midpoint <- (interval_end + interval_start) / 2
+  L <- tail(interval_end, 1) - head(interval_start, 1)
 
   if (is.character(metric_func)) metric_func <- get(metric_func)
 

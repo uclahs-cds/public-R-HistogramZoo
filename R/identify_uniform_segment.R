@@ -126,16 +126,16 @@ identify_uniform_segment_helper <- function(
 
   res <- lapply(seq(from = 1, to = num_bins - min_seg_size, by = stepsize), function(a) {
     lapply(seq(from = min_seg_size + a, to = num_bins, by = stepsize), function(b) {
-        c(
-          fit_uniform_helper(
+        fitted_unif <- fit_uniform_helper(
             x = x[a:b],
             interval_start = interval_start[a:b],
             interval_end = interval_end[a:b],
             interval_midpoint = interval_midpoint[a:b],
             metric = metric
-          ),
-          list('seg_start' = a, 'seg_end' = b)
-        )
+          )
+        fitted_unif$seg_start <- a
+        fitted_unif$seg_end <- b
+        return(fitted_unif)
     })
   })
 

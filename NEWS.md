@@ -1,6 +1,22 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+
 # HistogramZoo v1.4.0
 
-## Added
+## [1.4.1] - 2023-05-02
+
+### Added
+- ModelFit class to allow pretty-printing of `fit_distributions` results
+
+### Fixed
+- Bugs associated with fitting truncated distributions
+
+## [1.4.0] - 2023-04-19
+
+### Added
 - S3 methods to allow numeric/Histogram/GenomicHistogram input in key segment_and_fit functions [Pull #121](https://github.com/uclahs-cds/public-R-HistogramZoo/pull/121)
   - consecutive_start and consecutive_end for GenomicHistogram to keep track of disjoint intervals
   - shifted gamma function to allow for non-zero starts

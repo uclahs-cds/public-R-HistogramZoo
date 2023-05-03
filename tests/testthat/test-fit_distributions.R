@@ -5,7 +5,7 @@ context("fit_distributions")
 # NOTE: ks and mse provide much different results so they were removed
 metric <- c("jaccard", "intersection", "chisq")
 distributions <- c("norm", "gamma", "unif", "gamma_flip")
-fit_names <- c("par", "dist", "metric", "value", "dens")
+fit_names <- c("par", "dist", "metric", "value", "dens", "seg_start", "seg_end")
 
 test_that("fit_distributions works ", {
 
@@ -20,6 +20,7 @@ test_that("fit_distributions works ", {
     distributions = distributions
   )
 
+  expect_s3_class(res[[1]], "HZModelFit")
   expect_length(res, length(distributions) * length(metric))
   expect_true(
     all(c("norm", "unif", "gamma", "gamma_flip") %in% unlist(lapply(res, `[`, "dist")))
