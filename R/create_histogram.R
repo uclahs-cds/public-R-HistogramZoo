@@ -112,3 +112,13 @@ create_histogram.Histogram <- function(
           )
     })
 }
+
+
+create_histogram.HistogramFit <- function(
+    x,
+    ...) {
+  create_histogram.Histogram(
+    x,
+    ...
+    )
+}

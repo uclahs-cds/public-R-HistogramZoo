@@ -1,26 +1,3 @@
-
-# Defining plotting parameters
-distributions <- c(
-  "norm",
-  "gamma",
-  "gamma_flip",
-  "unif"
-)
-
-distribution_colours <- c(
-  "norm" = "darkorange",
-  "gamma" = "chartreuse4",
-  "gamma_flip" = "chartreuse3",
-  "unif" = "darkorchid4"
-)
-
-distribution_names <- c(
-  "norm" = "Normal",
-  "gamma" = "Gamma",
-  "gamma_flip" = "Gamma Flip",
-  "unif" = "Uniform"
-)
-
 #' create_coverageplot creates a histogram/coverage plot with the potential to add annotations
 #'
 #' @param histogram_obj a `Histogram` or `HistogramFit` object
@@ -310,6 +287,7 @@ create_coverageplot.HistogramFit <- function(
   height = 6, width = 6, size.units = 'in', resolution = 1600, enable.warnings = FALSE,
   ...
 ){
+  passed_args <- as.list(match.call(expand.dots=TRUE))
 
   # Error checking
   stopifnot(inherits(histogram_obj, "HistogramFit"))
@@ -346,10 +324,8 @@ create_coverageplot.HistogramFit <- function(
   distribution_plotting_data$dist <- factor(distribution_plotting_data$dist, levels = histogram_obj$distributions)
 
   # Plotting
-  base_plot <- BoutrosLab.plotting.general::create.scatterplot(
-    dens ~ labels_x,
-    data = plotting_data,
-    filename = filename,
+  base_plot <- create_coverageplot.Histogram(
+    histogram_obj,
     # Lines & PCH
     cex = cex,
     col.border = col.border,
@@ -449,6 +425,7 @@ create_coverageplot.HistogramFit <- function(
   )
 
 
+  # TODO: refactor into function
   dist_plot <- BoutrosLab.plotting.general::create.scatterplot(
     formula = dens ~ labels_x,
     data = distribution_plotting_data,
@@ -466,6 +443,22 @@ create_coverageplot.HistogramFit <- function(
   )
 
 
-  # Return plot
-  return(base_plot + dist_plot)
+  plot.rtn <- base_plot + dist_plot;
+
+  if ('filename' %in% names(passed_args) && ! is.null(passed_args[['filename']])) {
+    write.plot.args <- setdiff(
+      formalArgs(write.plot),
+      'trellis.object'
+      );
+    write.plot.args.names <- intersect(write.plot.args, names(passed_args));
+    write.plot.args <- c(
+      list(trellis.object = plot.rtn),
+      passed_args[write.plot.args.names]
+      );
+
+    do.call(BoutrosLab.plotting.general::write.plot, write.plot.args);
+    invisible(plot.rtn);
+    } else {
+      return(plot.rtn);
+    }
 }
