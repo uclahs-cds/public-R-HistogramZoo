@@ -17,9 +17,13 @@ dput_str <- function(x) {
 #'
 #' @return if metric is `jaccard` or `intersection`, return 1 - value
 correct_fitted_value <- function(met, value){
-  return(
-    if (met %in% c("jaccard", "intersection")) (1 - value) else value
-  )
+  if (! is.finite(value)) {
+    value <- NA
+  } else if (met %in% c("jaccard", "intersection")) {
+    return(1 - value)
+  } else {
+    return(value)
+  }
 }
 
 #' Convert a vector of points into a data.frame of start/end points representing
@@ -78,16 +82,52 @@ is_equal_integer <- function(x){
 }
 
 
-#' Generate observations approximating a histogram
+#' Finds the bin_width of Histogram or GenomicHistogram bins
 #'
-#' @param x A numeric vector representing the density of a histogram
-#' @return A numeric vector representing approximate observations of that histogram where
-#' observations are integer indices of the histogram bin
-#' NOTE: This also works on non-integer densities, values are rounded, use with caution
-histogram_to_approximate_observations <- function(x){
-  return(
-    rep(1:length(x), x)
-  )
+#' @param x a Histogram or GenomicHistogram object
+#'
+#' @return a numeric vector representing bin_widths of each bin
+#'
+#' @rdname find_bin_width
+#' @export
+find_bin_width <- function(x){
+  UseMethod('find_bin_width')
+}
+
+#' @rdname find_bin_width
+#' @exportS3Method find_bin_width Histogram
+find_bin_width.Histogram <- function(x){
+  (x$interval_start + x$interval_end)/2
+}
+
+#' @rdname find_bin_width
+#' @exportS3Method find_bin_width GenomicHistogram
+find_bin_width.GenomicHistogram <- function(x){
+  x$consecutive_end - x$consecutive_start + 1
+}
+
+#' Finds the midpoint of Histogram or GenomicHistogram bins
+#'
+#' @param x a Histogram or GenomicHistogram object
+#'
+#' @return a numeric vector representing midpoints of each bin
+#'
+#' @rdname find_midpoint
+#' @export
+find_midpoint <- function(x){
+  UseMethod('find_midpoint')
+}
+
+#' @rdname find_midpoint
+#' @exportS3Method find_midpoint Histogram
+find_midpoint.Histogram <- function(x){
+  (x$interval_start + x$interval_end)/2
+}
+
+#' @rdname find_midpoint
+#' @exportS3Method find_midpoint GenomicHistogram
+find_midpoint.GenomicHistogram <- function(x){
+  (x$consecutive_start + x$consecutive_end)/2
 }
 
 #' Loads base config file and overwrites with an optional additional file

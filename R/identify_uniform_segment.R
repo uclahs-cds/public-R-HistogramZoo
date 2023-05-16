@@ -18,18 +18,94 @@
 #'     \item{seg_end}{end index of the interval}
 #' }
 #'
+#' @rdname identify_uniform_segment
 #' @export
 identify_uniform_segment <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  UseMethod("identify_uniform_segment")
+}
+
+#' @rdname identify_uniform_segment
+#' @exportS3Method identify_uniform_segment numeric
+identify_uniform_segment.numeric <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  interval_midpoint <- seq(1, length(x), 1)
+  identify_uniform_segment_helper(
+    x = x,
+    interval_start = interval_midpoint - 0.5,
+    interval_end = interval_midpoint + 0.5,
+    interval_midpoint = interval_midpoint,
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
+  )
+}
+
+#' @rdname identify_uniform_segment
+#' @exportS3Method identify_uniform_segment Histogram
+identify_uniform_segment.Histogram <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  identify_uniform_segment_helper(
+    x = x$histogram_data,
+    interval_start = x$interval_start,
+    interval_end = x$interval_end,
+    interval_midpoint = find_midpoint(x),
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
+  )
+}
+
+#' @rdname identify_uniform_segment
+#' @exportS3Method identify_uniform_segment GenomicHistogram
+identify_uniform_segment.GenomicHistogram <- function(
+    x,
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    threshold = 0.5,
+    stepsize = 1,
+    max_sd_size = 1
+){
+  identify_uniform_segment_helper(
+    x = x$histogram_data,
+    interval_start = x$consecutive_start - 0.5,
+    interval_end = x$consecutive_end + 0.5,
+    interval_midpoint = find_midpoint(x),
+    metric = metric,
+    threshold = threshold,
+    stepsize = stepsize,
+    max_sd_size = max_sd_size
+  )
+}
+
+identify_uniform_segment_helper <- function(
   x,
+  interval_start,
+  interval_end,
+  interval_midpoint,
   metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
   threshold = 0.5,
   stepsize = 1,
-  max_sd_size = 1) {
+  max_sd_size = 1
+){
 
   # Error checking
-  if(!is.numeric(x)){
-    stop("x must be a numeric vector")
-  }
   metric <- match.arg(metric)
   if(!is.numeric(threshold) | length(threshold) != 1 ){
     stop("threshold must be a numeric of length 1")
@@ -47,15 +123,19 @@ identify_uniform_segment <- function(
   # Set-up
   num_bins <- length(x)
   min_seg_size <- ceiling(num_bins * threshold)
-  # metric_func <- get(paste('histogram', metric, sep = "."))
-  # TODO: pass in metric_func rather than metric as a param for fit_uniform?
 
   res <- lapply(seq(from = 1, to = num_bins - min_seg_size, by = stepsize), function(a) {
     lapply(seq(from = min_seg_size + a, to = num_bins, by = stepsize), function(b) {
-      x_sub <- x[a:b]
-      return(
-        c(fit_uniform(x_sub, metric), list('seg_start' = a, 'seg_end' = b))
-      )
+        fitted_unif <- fit_uniform_helper(
+            x = x[a:b],
+            interval_start = interval_start[a:b],
+            interval_end = interval_end[a:b],
+            interval_midpoint = interval_midpoint[a:b],
+            metric = metric
+          )
+        fitted_unif$seg_start <- a
+        fitted_unif$seg_end <- b
+        return(fitted_unif)
     })
   })
 

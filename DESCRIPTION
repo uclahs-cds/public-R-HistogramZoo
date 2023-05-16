@@ -1,17 +1,22 @@
 Package: HistogramZoo
 Title: A Method for Peak Merging And Distribution Fitting Across Biological Replicates
-Version: 1.0.0
+Version: 1.4.2
 Authors@R:
     c(
     person(given = "Helen",
            family = "Zhu",
            email = "helen.zhu@mail.utoronto.ca",
            role = c("aut", "cre")),
-    person(given = "Stefan",
+    person(given = "Stefan E.",
            family = "Eng",
            role = c("aut"),
            email = "stefaneng@mednet.ucla.edu",
-           comment = c(ORCID = "0000-0002-5245-6507"))
+           comment = c(ORCID = "0000-0002-5245-6507")),
+    person(given = "Paul C.",
+           family = "Boutros",
+           role = c("aut"),
+           email = "PBoutros@mednet.ucla.edu",
+           comment = c(ORCID = "0000-0003-0553-7520"))
     )
 Description: A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.
 Depends:
@@ -41,5 +46,7 @@ Suggests:
     scales,
     RobustRankAggreg
 VignetteBuilder: knitr
-RoxygenNote: 7.2.0
-URL: https://friendly-invention-3cb82740.pages.github.io/
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+URL: https://uclahs-cds.github.io/public-R-HistogramZoo
+BugReports: https://github.com/uclahs-cds/public-R-HistogramZoo/issues

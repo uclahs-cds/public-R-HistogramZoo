@@ -1,58 +1,12 @@
-#' Fit a uniform distribution to a histogram
-#'
-#' @param x numeric vector representing the density of a histogram
-#' @param metric one of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
-#'
-#' @return a list with the following data
-#' \describe{
-#'     \item{par}{a character string denoting the region_id of the Histogram}
-#'     \item{dist}{the distribution name}
-#'     \item{metric}{the metric used to fit the distribution}
-#'     \item{value}{the fitted value of the metric function}
-#'     \item{dens}{a function that returns the density of the fitted distribution}
-#' }
-fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chisq')){
-
-  # Error checking
-  metric <- match.arg(metric)
-
-  N <- sum(x)
-  bin <- 1:length(x)
-  p_unif <- generate_uniform_distribution(x)
-  # h_unif <- x / sum(x)
-  metric_func <- get(paste('histogram', metric, sep = "."))
-
-  # m <- metric_func(h_unif, p_unif)
-  m <- metric_func(x, p_unif*N)
-
-  return(
-    list(
-      "par" = NULL,
-      "dist" = "unif",
-      "metric" = metric,
-      "value" = correct_fitted_value(metric, m),
-      "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
-        if(missing(x)) {
-          x <- bin
-        }
-        res <- ifelse(x >= min(bin) & x <= max(bin), p_unif[1], 0)
-        if(scale) res * N
-        else res
-      }
-    )
-  )
-
-}
 
 #' Fit the model parameters by optimizing a histogram metric
 #'
 #' @param x numeric vector, representing data to be fit
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
 #' indicating metrics to use for fit optimization
 #' @param truncated logical, whether to fit truncated distributions
 #' @param distributions character vector indicating distributions,
-#' subset of `norm`, `gamma`, `gamma_flip` and `unif`. If both `gamma` and `gamma_flip`
-#' are indicated, only one will be fit depending on the skew of the data.
+#' subset of `norm`, `gamma`, `gamma_flip` and `unif`.
 #'
 #' @export
 #'
@@ -65,86 +19,158 @@ fit_uniform <- function(x, metric=c('jaccard', 'intersection', 'ks', 'mse', 'chi
 #'     \item{dens}{a function that returns the density of the fitted distribution}
 #' }
 #'
+#' @rdname fit_distributions
 #' @importFrom DEoptim DEoptim
 fit_distributions <- function(
     x,
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
     truncated = FALSE,
-    distributions = c("norm", "gamma", "gamma_flip", "unif")) {
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+  UseMethod("fit_distributions")
+}
+
+#' @rdname fit_distributions
+#' @exportS3Method fit_distributions numeric
+fit_distributions.numeric <- function(
+    x,
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Assume a bin width of 1 for a numeric vector
+  L <- length(x)
+  interval_midpoint <- seq(from = 1, to = L, by = 1)
+  fit_distributions_helper(
+    x = x,
+    interval_start = interval_midpoint - 0.5,
+    interval_end = interval_midpoint + 0.5,
+    interval_midpoint = interval_midpoint,
+    metric = metric,
+    truncated = truncated,
+    distributions = distributions
+  )
+
+}
+
+#' @rdname fit_distributions
+#' @exportS3Method fit_distributions table
+fit_distributions.table <- fit_distributions.numeric
+
+#' @rdname fit_distributions
+#' @exportS3Method fit_distributions GenomicHistogram
+fit_distributions.GenomicHistogram <- function(
+    x,
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("mle", "norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Base 1 to a base 0 system for GenomicHistogram
+  fit_distributions_helper(
+    x = x$histogram_data,
+    interval_start = x$consecutive_start - 0.5,
+    interval_end = x$consecutive_end + 0.5,
+    interval_midpoint = find_midpoint(x),
+    metric = metric,
+    truncated = truncated,
+    distributions = distributions
+  )
+
+}
+
+#' @rdname fit_distributions
+#' @exportS3Method fit_distributions Histogram
+fit_distributions.Histogram <- function(
+    x,
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
+
+  # Interval start and end from Histogram
+  fit_distributions_helper(
+    x = x$histogram_data,
+    interval_start = x$interval_start,
+    interval_end = x$interval_end,
+    interval_midpoint = find_midpoint(x),
+    metric = metric,
+    truncated = truncated,
+    distributions = distributions
+  )
+
+}
+
+#' A helper function for fit_distributions
+#'
+#' @param x numeric vector, representing data to be fit
+#' @param interval_start starting coordinates for the bins
+#' @param interval_end ending coordinates for the bins
+#' @param interval_midpoint bin midpoints
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq`
+#' indicating metrics to use for fit optimization
+#' @param truncated logical, whether to fit truncated distributions
+#' @param distributions character vector indicating distributions,
+#' subset of `norm`, `gamma`, `gamma_flip` and `unif`.
+#'
+#' @return a nested list where each sublist represents a model with the following data
+#' \describe{
+#'     \item{par}{a character string denoting the region_id of the Histogram}
+#'     \item{dist}{the distribution name}
+#'     \item{metric}{the metric used to fit the distribution}
+#'     \item{value}{the fitted value of the metric function}
+#'     \item{dens}{a function that returns the density of the fitted distribution}
+#' }
+#'
+#' @importFrom DEoptim DEoptim
+fit_distributions_helper <- function(
+    x,
+    interval_start,
+    interval_end,
+    interval_midpoint,
+    metric = c("mle", "jaccard", "intersection", "ks", "mse", "chisq"),
+    truncated = FALSE,
+    distributions = c("norm", "gamma", "gamma_flip", "unif")
+) {
 
   # Matching arguments
-  # TODO: consider checking minimum length of x or
-  # check if Histogram object
-  if(!is.numeric(x)){
-    stop('x has to be a numeric vector')
-  }
+  # NOTE: not checking validity of interval start/end/midpoint
+  # because computed internally
   if(!is.logical(truncated) | length(truncated) != 1){
     stop("truncated has to be a logical of length 1")
   }
-  metric <- match.arg(metric, several.ok = TRUE)
+  metric <- match.arg(
+    metric,
+    several.ok = TRUE,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+  )
   distributions <- match.arg(distributions, several.ok = TRUE)
 
-  # Initializing Data
-  L <- length(x)
-  N <- sum(x)
-  bin <- 1:L
-
-  # Optimization Function
-  .hist.optim <- function(params, .dist = c("norm", "gamma", "gamma_flip"), .metric_func) {
-    # Compute the expected counts for the given parameters
-    args <- c(list(x = bin), params)
-    if(truncated) {
-      args$a <- min(bin) - 1e-10
-      args$b <- max(bin) + 1e-10
-    }
-    if(!truncated & .dist == "gamma_flip"){
-      args$offset <- length(bin)
-    }
-    trunc.letter <- if(truncated) "t" else ""
-    dens <- tryCatch({
-      do.call(paste0("d", trunc.letter, .dist), args) * N
-    }, error = function(err) {
-      rep(0, length(bin))
-    })
-    dens[is.na(dens)] <- 0
-    res <- .metric_func(x, dens)
-    if(is.na(res) || res == -Inf || res == Inf) {
-      res <- Inf
-    }
-    res
-  }
+  # Setting vars for parameter estimation
+  L <- tail(interval_end, 1) - head(interval_start, 1)
+  # Area = sum(density * bin_width)
+  area <- sum(x*(interval_end - interval_start))
 
   # Fitting uniform distributions
   unif_fit <- list()
   if("unif" %in% distributions){
     distributions <- setdiff(distributions, "unif")
-    unif_fit <- lapply(metric, function(met) fit_uniform(x, met))
-  }
-
-  # Using skew to determine gamma or gamma_flip
-  if( "gamma" %in% distributions & "gamma_flip" %in% distributions){
-    skew <- moments::skewness(
-      histogram_to_approximate_observations(
-        x
-      )
-    )
-    if (skew < 0){
-      distributions <- setdiff(distributions, "gamma")
-    } else {
-      distributions <- setdiff(distributions, "gamma_flip")
-    }
+    unif_fit <- lapply(metric, function(met) fit_uniform_helper(
+      x,
+      interval_start,
+      interval_end,
+      interval_midpoint,
+      met
+    ))
   }
 
   rtn <- lapply(distributions, function(distr) {
     lapply(metric, function(met){
-
-      # Get one of the metrics from histogram.distances
-      metric_func <- get(paste('histogram', met, sep = "."))
-
       # Setting boundaries & parameter names
       if(distr == "norm"){
-        lower <- c(min(bin), 0.001)
-        upper <- c(max(bin), (max(bin) - min(bin)) * 0.5)
+        lower <- c(head(interval_start, 1), 0.001)
+        upper <- c(tail(interval_end, 1), (tail(interval_end, 1) - head(interval_start, 1)) * 0.5)
         names_par <- c("mean", "sd")
       } else if (distr %in% c("gamma", "gamma_flip")){
         lower <- c(0.001, 0.001)
@@ -152,19 +178,63 @@ fit_distributions <- function(
         names_par <- c("shape", "rate")
       }
 
-      # Fitting Data
-      dist_optim <- DEoptim::DEoptim(
-        fn = .hist.optim,
-        .dist = distr,
-        .metric_func = metric_func,
-        lower = lower,
-        upper = upper,
-        control = list(
-          trace = FALSE, # Do not print results
-          itermax = 500, # Iterations
-          VTR = 10^-2 # At 1 %, stop optimizing
+      control_args <- list(
+        trace = FALSE,
+        itermax = 500,
+        steptol = 50
         )
-      )
+
+      if (met == 'mle') {
+        tdistr <- distr
+        mle.options.args <- list(
+          fn = bin_log_likelihood,
+          counts = x,
+          bin_lower = interval_start,
+          bin_upper = interval_end,
+          lower = lower,
+          upper = upper,
+          control = control_args
+          )
+
+        if (distr == "gamma") {
+          mle.options.args$shift <- head(interval_start, 1) - 1e-10
+        } else if (distr == "gamma_flip") {
+          mle.options.args$offset <- tail(interval_end, 1) + 1e-10
+        }
+
+        if (truncated) {
+          tdistr <- paste0('t', tdistr)
+          if(distr == "norm"){
+            mle.options.args$a <- head(interval_start, 1) - 1e-10
+            mle.options.args$b <- tail(interval_end, 1) + 1e-10
+          } else if (distr %in% c("gamma", "gamma_flip")){
+            mle.options.args$a <- 0
+            mle.options.args$b <- L
+          }
+
+        }
+
+        mle.options.args$cdf = get(paste0('p', tdistr))
+
+        dist_optim <- do.call(DEoptim::DEoptim, mle.options.args)
+      } else {
+        # Get one of the metrics from histogram.distances
+        metric_func <- get(paste('histogram', met, sep = "."))
+
+        # Fitting Data
+        dist_optim <- DEoptim::DEoptim(
+          fn = metric.histogram.dist,
+          x = x,
+          interval_start = interval_start,
+          interval_end = interval_end,
+          dist = distr,
+          metric_func = metric_func,
+          lower = lower,
+          upper = upper,
+          truncated = truncated,
+          control = control_args
+        )
+      }
 
       # Extracting parameters
       names(dist_optim$optim$bestmem) <- names_par
@@ -172,34 +242,40 @@ fit_distributions <- function(
 
       # Adjusting for truncated distributions
       trunc.letter = if(truncated) "t" else ""
-      if(truncated) {
-        dist_par$a <- min(bin) - 1e-10
-        dist_par$b <- max(bin) + 1e-10
+      if(truncated && distr == "norm") {
+        dist_par$a <- head(interval_start, 1)
+        dist_par$b <- tail(interval_end, 1)
       }
-      # Adjusting for offset
-      if(!truncated & distr == "gamma_flip"){
-        dist_par$offset <- length(bin)
+      # Adjusting for shift & offset
+      if(distr == "gamma_flip"){
+        dist_par$offset <- tail(interval_end, 1) + 1e-10
       }
-      
+      if(distr == "gamma"){
+        dist_par$shift <- head(interval_start, 1) - 1e-10
+      }
+      if(truncated && distr %in% c("gamma", "gamma_flip")){
+        dist_par$a <- 0
+        dist_par$b <- L
+      }
+
       # Return model
       return(
-        list(
-          "par" = dist_par,
-          "dist" = distr,
-          "metric" = met,
-          "value" = correct_fitted_value(met, dist_optim$optim$bestval),
-          "dens" = function(x = NULL, mpar = NULL, scale = TRUE) {
+        new_HZModelFit(
+          par = dist_par,
+          dist = distr,
+          metric = met,
+          value = correct_fitted_value(met, dist_optim$optim$bestval),
+          dens = function(x = NULL, mpar = NULL, scale = TRUE) {
             if(missing(x)) {
-              x <- bin
+              x <- interval_midpoint
             }
             args <- c(list(x = x), as.list(mpar))
             res <- do.call(paste0("d", trunc.letter, distr), args)
-            if(scale) res * N
+            if(scale) res * area
             else res
           }
         )
       )
-      ##
     })
   })
 

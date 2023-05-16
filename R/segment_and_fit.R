@@ -1,36 +1,3 @@
-#' Find changepoints in a vector with uniform stretches of values
-#' @param x A numeric vector
-find_change_points <- function(x){
-  change_points <- which(diff(x) != 0)
-  change_points_plus <- change_points+1
-  keep <- (x[change_points] < x[change_points_plus])
-  return( c(change_points[keep], change_points_plus[!keep]) )
-}
-
-
-#' Returns the indices for consecutive elements of a vector that are greater than a specified threshold
-#'
-#' @param x numeric vector
-#' @param threshold numeric threshold
-#'
-#' @return list of coordinates with `start` and `end` coordinates
-#' @export
-#'
-#' @examples
-#' find_consecutive_threshold(c(0,0,0,1,1,1,0,0,0,1,1,1,0,0))
-#' find_consecutive_threshold(c(0,0,1,2,2,0,1,1,1,0,0), threshold = 1)
-find_consecutive_threshold <- function(
-  x,
-  threshold = 0){
-  x_thresholded <- rle(x > threshold)
-  end_coords <- cumsum(x_thresholded$lengths)
-  start_coords <- end_coords - x_thresholded$lengths + 1
-  start_coords_thresholded <- start_coords[x_thresholded$values]
-  end_coords_thresholded <- end_coords[x_thresholded$values]
-
-  return(list(start = start_coords_thresholded, end = end_coords_thresholded))
-}
-
 #' Segmentation of histograms and distribution fitting
 #'
 #' @param histogram_obj a Histogram or HistogramList object
@@ -47,11 +14,11 @@ find_consecutive_threshold <- function(
 #' @param uniform_stepsize integer, indicating the stepsize (relative to the histogram bins) to take in the search for the uniform subsegment
 #' @param uniform_max_sd numeric, the number of standard deviations of the computed metric distribution away from the optimal uniform which has maximum length
 #' @param truncated_models logical, whether to fit truncated distributions
-#' @param metric a subset of `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
-#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.  If both `gamma` and `gamma_flip`
-#' are indicated, only one will be fit depending on the skew of the data.
+#' @param metric a subset of `mle`, `jaccard`, `intersection`, `ks`, `mse`, `chisq` indicating metrics to use for fit optimization. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param distributions a subset of `norm`, `gamma`, and `unif` indicating distributions to fit.
 #' @param consensus_method one of `weighted_majority_vote` and `rra` as a method of determining the best method
 #' @param metric_weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
+#' @param distribution_prioritization if `method` is `weighted_majority_voting`, a list of ranked distributions, to break ties
 #'
 #' @return a HistogramFit object representing the Histogram and results of the fit
 #' @export
@@ -69,15 +36,16 @@ segment_and_fit <- function(
     min_gap_size = 2,
     min_segment_size = 3,
     seed = NULL,
-    max_uniform = T,
+    max_uniform = FALSE,
     uniform_threshold = 0.75,
     uniform_stepsize = 5,
     uniform_max_sd = 0,
     truncated_models = FALSE,
     metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    distributions = c("norm", "gamma", "gamma_flip", "unif"),
+    distributions = c("norm", "unif", "gamma", "gamma_flip"),
     consensus_method = c("weighted_majority_vote", "rra"),
-    metric_weights = rev(seq(1, 1.8, 0.2))
+    metric_weights = rev(seq(1, 2, length.out = length(metric))),
+    distribution_prioritization = distributions
 ) {
 
   # Error checking
@@ -121,25 +89,42 @@ segment_and_fit <- function(
   if(!is.logical(max_uniform) | length(max_uniform) != 1){
     stop("max_uniform has to be a logical of length 1")
   }
-  metric <- match.arg(metric, several.ok = T)
+
+  metric <- match.arg(
+    metric,
+    several.ok = T,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   consensus_method <- match.arg(consensus_method)
-  # Potential todo: add error checking for weights for majority voting
   distributions <- match.arg(distributions, several.ok = T)
 
+  # Pre-error checking for weighted_majority_vote
+  if(consensus_method == "weighted_majority_vote"){
+    if(!all(sort(distributions) == sort(distribution_prioritization))){
+      stop("distribution_prioritization needs be an ordering of distributions")
+    }
+    if(!is.numeric(metric_weights) | length(metric_weights) != length(metric)){
+      stop("Numeric weights must be provided for all metrics.")
+    }
+    if(!all(sort(metric_weights, decreasing = T) == metric_weights)){
+      warning("Weights should be in decreasing order.")
+    }
+  }
+
   # Extracting data
-  x <- histogram_obj$histogram_data
+  # x <- histogram_obj$histogram_data
 
   # Finding local optima
-  optima <- find_local_optima(x, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
+  optima <- find_local_optima(histogram_obj, threshold = optima_threshold, flat_endpoints = optima_flat_endpoints)
   optima <- sort(c(optima$min_ind, optima$max_ind))
 
   # Finding change points for remove_low_entropy
   if(remove_low_entropy){
-    changepoints <- find_change_points(x)
+    changepoints <- find_change_points(histogram_obj)
   }
 
   # Looking for regions that surpass a hard count threshold
-  x_segs <- as.data.frame(find_consecutive_threshold(x, threshold = histogram_count_threshold))
+  x_segs <- as.data.frame(find_consecutive_threshold(histogram_obj, threshold = histogram_count_threshold))
   x_segs <- x_segs[x_segs$start != x_segs$end,]
 
   if(nrow(x_segs) == 0){
@@ -149,12 +134,12 @@ segment_and_fit <- function(
   # Identifying endpoints of each segment
   all_points <- apply(x_segs, 1, function(segs) {
     p_init <- unname(c(segs['start'], optima[optima > segs['start'] & optima < segs['end']], segs['end']))
-    p <- ftc(x, p_init, eps)
+    p <- ftc(histogram_obj, p_init, eps)
 
     # Max gap
     if(remove_low_entropy) {
       changepoints_subset <- unname(c(segs['start'], changepoints[changepoints > segs['start'] & changepoints < segs['end']], segs['end']))
-      mgaps <-  meaningful_gaps_local(x = x, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
+      mgaps <-  meaningful_gaps_local(x = histogram_obj, seg_points = p, change_points = changepoints_subset, min_gap = min_gap_size)
       p <- p[((p - segs['start'] + 1) >= min_segment_size & (segs['end'] - p + 1) >= min_segment_size) | p %in% segs]
       p_pairs <- remove_max_gaps(start_end_points = index_to_start_end(p), max_gaps = mgaps, remove_short_segment = min_segment_size)
     } else {
@@ -180,35 +165,39 @@ segment_and_fit <- function(
     seg_start <- seg[['start']]
     seg_end <- seg[['end']]
     seg_len <- seg_end - seg_start + 1
-    bin_data <- x[seg_start:seg_end]
+    sub_hist <- histogram_obj[seg_start:seg_end]
 
     # Find the maximum uniform segment
     dist_optim <- unif_segment <- list()
-    if("unif" %in% distributions &
-       max_uniform &
-       seg_len > uniform_stepsize &
-       seg_len > ceiling(uniform_threshold*seg_len)
+    if("unif" %in% distributions &&
+       max_uniform &&
+       seg_len > uniform_stepsize &&
+       seg_len > ceiling(uniform_threshold*seg_len) &&
+       ! 'mle' %in% metric
     ){
-
       unif_segment <- lapply(metric, function(met) {
         res <- identify_uniform_segment(
-          x = bin_data,
+          x = sub_hist,
           metric = met,
           threshold = uniform_threshold,
           stepsize = uniform_stepsize,
           max_sd_size = uniform_max_sd
         )
-        res[['seg_start']] <- res[['seg_start']] + seg_start -1
-        res[['seg_end']] <- res[['seg_end']] + seg_start -1
+        res[['seg_start']] <- res[['seg_start']] + seg_start - 1
+        res[['seg_end']] <- res[['seg_end']] + seg_start - 1
         return(res)
       })
       # Removing unif from the vector of distributions
       distributions <- setdiff(distributions, "unif")
     }
 
+    if (max_uniform && 'mle' %in% metric) {
+      warning("Cannot fit max_uniform with 'mle' in metrics. Setting max_uniform = FALSE.")
+    }
+
     if( length(distributions) > 0 ){
       dist_optim <- fit_distributions(
-        x = bin_data,
+        x = sub_hist,
         metric = metric,
         truncated = truncated_models,
         distributions = distributions
@@ -226,6 +215,7 @@ segment_and_fit <- function(
       models = dist_optim,
       method = consensus_method,
       metric = metric,
+      distribution_prioritization = distribution_prioritization,
       weights = metric_weights
     )
 
@@ -241,7 +231,7 @@ segment_and_fit <- function(
               "seed" = seed,
               "max_uniform" = max_uniform, "uniform_threshold" = uniform_threshold, "uniform_stepsize" = uniform_stepsize, "uniform_max_sd" = uniform_max_sd,
               "truncated_models" = truncated_models, "metric" = metric, "distributions" = distributions,
-              "consensus_method" = consensus_method, "metric_weights" = metric_weights)
+              "consensus_method" = consensus_method, "distribution_prioritization" = distribution_prioritization, "metric_weights" = metric_weights)
   res <- c(histogram_obj, res)
   class(res) <- c("HistogramFit", class(histogram_obj))
 

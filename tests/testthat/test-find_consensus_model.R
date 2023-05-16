@@ -9,7 +9,7 @@ models <- fit_distributions(data)
 
 test_that("basic use", {
 
-  results <- find_consensus_model(models)
+  results <- find_consensus_model(models, metric =  c("jaccard", "intersection", "ks", "mse", "chisq"))
 
   # Formatting
   expect_named(
@@ -56,8 +56,16 @@ test_that("edge case: one metric", {
 
 test_that("edge case: one distribution", {
 
-  models_norm <- fit_distributions(data, distributions = "norm")
-  results <- find_consensus_model(models_norm)
+  models_norm <- fit_distributions(
+    data,
+    distributions = "norm",
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+    )
+  results <- find_consensus_model(
+    models_norm,
+    distribution_prioritization = "norm",
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+    )
 
   expect_named(
     results,
@@ -87,7 +95,7 @@ test_that("selecting a subset of metrics", {
 
 })
 
-test_that("majority voting - weights", {
+test_that("majority voting - breaking metric ties with weights", {
 
   # NOTE: FIX THIS IF INVERT METRIC VALUES FOR JACCARD AND INTERSECTION
   models_test <- list(
@@ -101,6 +109,7 @@ test_that("majority voting - weights", {
     models_test,
     method = "weighted_majority_vote",
     metric = c("intersection", "jaccard"),
+    distribution_prioritization = c("norm", "unif"),
     weight = c(2, 1)
   )
 
@@ -114,6 +123,53 @@ test_that("majority voting - weights", {
     "norm"
   )
 
+})
+
+test_that("majority voting - breaking distribution ties with prioritization", {
+
+  # NOTE: FIX THIS IF INVERT METRIC VALUES FOR JACCARD AND INTERSECTION
+  models_test <- list(
+    "A" = list("metric" = "jaccard", "dist" = "norm", "value" = 0.95),
+    "B" = list("metric" = "intersection", "dist" = "norm", "value" = 0.90),
+    "C" = list("metric" = "jaccard", "dist" = "unif", "value" = 0.95),
+    "D" = list("metric" = "intersection", "dist" = "unif", "value" = 0.9)
+  )
+
+  results <- find_consensus_model(
+    models_test,
+    method = "weighted_majority_vote",
+    metric = c("intersection", "jaccard"),
+    distribution_prioritization = c("unif", "norm"),
+    weight = c(2, 1)
+  )
+
+  expect_equal(
+    results$intersection$value,
+    results$consensus$value
+  )
+
+  expect_equal(
+    results$consensus$dist,
+    "unif"
+  )
+
+  results <- find_consensus_model(
+    models_test,
+    method = "weighted_majority_vote",
+    metric = c("intersection", "jaccard"),
+    distribution_prioritization = c("norm", "unif"),
+    weight = c(2, 1)
+  )
+
+  expect_equal(
+    results$intersection$value,
+    results$consensus$value
+  )
+
+  expect_equal(
+    results$consensus$dist,
+    "norm"
+  )
 })
 
 test_that("rra aggregation", {

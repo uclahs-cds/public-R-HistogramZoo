@@ -19,9 +19,18 @@
 #' find_local_optima(x)
 #' }
 find_local_optima <- function(x, threshold = 0, flat_endpoints = T){
+  UseMethod('find_local_optima')
+}
+
+#' @exportS3Method find_local_optima Histogram
+find_local_optima.Histogram <- function(x, threshold = 0, flat_endpoints = T){
+  find_local_optima.numeric(x$histogram_data, threshold = threshold, flat_endpoints = flat_endpoints)
+}
+
+#' @exportS3Method find_local_optima numeric
+find_local_optima.numeric <- function(x, threshold = 0, flat_endpoints = T){
 
   # Error checking
-  x <- as.numeric(x)
   stopifnot(length(x) > 1)
   if(!is_equal_integer(threshold) | !(threshold >= 0) | length(threshold) != 1){
     stop("optima_threshold must be functional as a integer greater than or equal to 0 and of length 1")

@@ -27,7 +27,7 @@ genomic_results <- segment_and_fit(genomic_hist, eps = 0.005)
 interval_test_data <- Histogram(
   histogram_data = c(0, 0, 1, 2, 3, 2, 1, 2, 3, 4, 5, 3, 1, 0),
   interval_start = seq(0, 26, 2),
-  interval_end = seq(1, 27, 2))
+  interval_end = seq(2, 28, 2))
 interval_test_results <- segment_and_fit(interval_test_data, eps = 0.005)
 
 # Not all distributions are used

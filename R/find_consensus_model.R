@@ -4,6 +4,7 @@
 #' @param models a list of models, e.g. derived from `fit_distributions`
 #' @param method one of `weighted_majority_vote` and `rra` as a method of determining the best method. `rra` requires the package `RobustRankAggreg`
 #' @param metric metrics used to fit models. Metrics should be ordered in descending priority. The first metric in the vector will be used to return the `consensus` model for the distribution determined through voting.
+#' @param distribution_prioritization if `method` is `weighted_majority_voting`, a list of ranked distributions, to break ties
 #' @param weights required if `method` is `weighted_majority_voting`. weights of each metric to be multiplied by rankings. Weights should be in decreasing order. A higher weight results in a higher priority of the metric.
 #'
 #' @return a list of the best model for each metric and a `consensus` model representing the model with the consensus distribution and the lowest weighted metric. Each model is a list of the following data:
@@ -29,8 +30,9 @@
 find_consensus_model <- function(
     models,
     method = c("weighted_majority_vote", "rra"),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq"),
-    weights = rev(sqrt(seq(1, 5))[1:length(metric)])
+    metric = unique(sapply(models, `[[`, "metric")),
+    distribution_prioritization = c("norm", "unif", "gamma", "gamma_flip"),
+    weights = rev(sqrt(seq(1, 6))[1:length(metric)])
 ){
 
   # Initialization
@@ -40,7 +42,11 @@ find_consensus_model <- function(
   tag <- paste0(met, ".", distr)
 
   # Error checking
-  metric <- match.arg(metric, several.ok = T)
+  metric <- match.arg(
+    metric,
+    several.ok = T,
+    choices = c("mle", "jaccard", "intersection", "ks", "mse", "chisq")
+    )
   method <- match.arg(method)
   stopifnot(is.numeric(weights))
   if(!all(sort(weights, decreasing = T) == weights)){
@@ -64,9 +70,12 @@ find_consensus_model <- function(
   if(length(tag) > length(unique(tag))){
     stop("Models cannot contain repeated fits using the same metric and distribution.")
   }
+  if((length(distribution_prioritization) != length(unique(distr)) | !all(distribution_prioritization %in% distr)) & method == "weighted_majority_vote"){
+    stop("distribution_prioritization needs to overlap with fitted distributions")
+  }
 
   # Correcting for Jaccard and Intersection
-  val = ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
+  val <- ifelse(met %in% c("jaccard", "intersection"), 1-val, val)
 
   # Base case: if there is only 1 metric
   if(length(metric) == 1){
@@ -103,10 +112,10 @@ find_consensus_model <- function(
     model_metrics[] <- apply(model_metrics, 2, function(x) rank(-x))
     model_metrics[] <- model_metrics %*% diag(weights)
     score <- rowSums(model_metrics)
-    if(sum(score == max(score)) > 1){
-      warning("Ties exist between distributions chosen by metric.")
-    }
-    model_metrics <- model_metrics[order(score, decreasing = T),]
+    # if(sum(score == max(score)) > 1){
+    #   warning("Ties exist between distributions chosen by metric.")
+    # }
+    model_metrics <- model_metrics[order(-score, distribution_prioritization),]
     consensus_dist <- rownames(model_metrics)[1]
     metric_best_model <- apply(model_metrics, 2, which.max)
   }
