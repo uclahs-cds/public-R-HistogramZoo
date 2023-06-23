@@ -13,16 +13,14 @@ if (length(opts) >= 1) {
 sim.data <- replicate(
   N,
   HistogramZoo:::random_unimodal_sim(
-    metric = 'mle'
-  ),
+    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
+    ),
   simplify = FALSE
   )
 
 sim.df <- do.call(
     plyr::rbind.fill,
-    lapply(seq_along(sim.data), function(j) {
-        HistogramZoo:::process_sim(sim.data[[j]])
-        })
+    sim.data
     )
 
 filename <- gsub('[ ]', '_', paste0(Sys.time(), '_', sample(1:1e4, 1), '_Unimodal_Sim.tsv'))

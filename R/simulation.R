@@ -5,7 +5,7 @@ random_unimodal_sim <- function(
     gamma_shape = c(1, 4),
     eps = c(0.05, 0.5),
     noise = c(.05, .95),
-    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
+    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
   ) {
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
   # .runif1 <- function(...) runif(n = 1, ...)
@@ -56,25 +56,31 @@ random_unimodal_sim <- function(
         histogram_data,
         max_uniform = FALSE,
         remove_low_entropy = TRUE,
-        metric = metric,
+        metric = metrics,
         eps = eps_sample,
         truncated_models = FALSE,
-        metric_weights = sqrt(rev(seq_along(metric)))
+        metric_weights = sqrt(rev(seq_along(metrics)))
         )
       }, silent = TRUE)
-  })
+    seg_results <- summarize_results_error(seg_results)
+    })
 
-  list(
+    seg_results <- cbind.data.frame(
+      seg_results,
+      t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
+      )
+
+  res <- list(
     N = N_sim,
     param = param,
     noise_min = noise_min,
     noise_max = noise_max,
     noise = noise_sim,
-    dist = sim_dist,
-    eps = eps_sample,
-    timing = timing,
-    seg_results = seg_results
+    actual_dist = sim_dist,
+    eps = eps_sample
     )
+
+    return(cbind.data.frame(res, seg_results))
 }
 
   # Set optima_flat_endpoints = FALSE
@@ -141,18 +147,31 @@ general_sim <- function(
   )
 }
 
+summarize_results_error <- function(x) {
+  if (! is(x,  'try-error')) {
+        models <- x$models
+        metrics <- x$metric
+        all_metric_results <- do.call(plyr::rbind.fill, lapply(metrics, summarize_results, result = x))
+
+        rtn <- all_metric_results
+        rtn$num_segments <- length(models)
+        rtn
+    } else {
+        rtn <- data.frame(error = x[[1]])
+    }
+  return(rtn);
+}
+
 process_sim <- function(x) {
     res <- x[c('N', 'dist', 'param', 'noise', 'eps')]
     names(res) <- c('N', 'actual_dist', 'param', 'noise', 'eps')
     res$timing <- x$timing[['user.self']]
-    if (! is(x$seg_results,  'try-error')) {
-        models <- x$seg_results$models
-        metrics <- x$seg_results$metric
-        res$num_segments <- length(models)
-        all_metric_results <- do.call(plyr::rbind.fill, lapply(metrics, summarize_results, result = x$seg_results))
 
-        cbind.data.frame(all_metric_results, res)
+    if (class(x$seg_results) == 'HistogramFit') {
+      seg.results <- summarize_results_error(x$seg_results)
     } else {
-        cbind.data.frame( data.frame(error = x[[1]]), res)
+      seg.results <- do.call(plyr::rbind.fill, x$seg_results)
     }
+
+    return(cbind.data.frame(res, seg.results))
 }
