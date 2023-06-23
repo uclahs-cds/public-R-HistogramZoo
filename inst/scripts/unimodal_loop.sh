@@ -2,7 +2,7 @@
 
 while true
 do
-  for i in {1..12}
+  for i in {1..2}
   do
     sbatch sbatch_unimodal.sh 100
   done

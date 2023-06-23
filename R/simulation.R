@@ -4,7 +4,8 @@ random_unimodal_sim <- function(
     norm_sd = c(1, 4),
     gamma_shape = c(1, 4),
     eps = c(0.05, 0.5),
-    noise = c(.05, .95)
+    noise = c(.05, .95),
+    metric = c("jaccard", "intersection", "ks", "mse", "chisq")
   ) {
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
   # .runif1 <- function(...) runif(n = 1, ...)
@@ -55,9 +56,10 @@ random_unimodal_sim <- function(
         histogram_data,
         max_uniform = FALSE,
         remove_low_entropy = TRUE,
+        metric = metric,
         eps = eps_sample,
         truncated_models = FALSE,
-        metric_weights =  sqrt(c(5,4,3,2,1))
+        metric_weights = sqrt(rev(seq_along(metric)))
         )
       }, silent = TRUE)
   })
@@ -137,4 +139,20 @@ general_sim <- function(
     timing = timing,
     seg_results = seg_results
   )
+}
+
+process_sim <- function(x) {
+    res <- x[c('N', 'dist', 'param', 'noise', 'eps')]
+    names(res) <- c('N', 'actual_dist', 'param', 'noise', 'eps')
+    res$timing <- x$timing[['user.self']]
+    if (! is(x$seg_results,  'try-error')) {
+        models <- x$seg_results$models
+        metrics <- x$seg_results$metric
+        res$num_segments <- length(models)
+        all_metric_results <- do.call(plyr::rbind.fill, lapply(metrics, summarize_results, result = x$seg_results))
+
+        cbind.data.frame(all_metric_results, res)
+    } else {
+        cbind.data.frame( data.frame(error = x[[1]]), res)
+    }
 }
