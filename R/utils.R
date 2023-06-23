@@ -143,5 +143,10 @@ load.config <- function(file = NULL) {
     base.yaml <- modifyList(base.yaml, user.yaml);
     }
 
+  hz.home <- Sys.getenv('HZ_HOME');
+  if (hz.home != '') {
+    base.yaml$root.path <- hz.home
+    }
+
   return(base.yaml);
   }
