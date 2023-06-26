@@ -43,8 +43,6 @@ sim.data.largest[
       ), by = .(metric, actual_dist)
     ]
 
-
-
 # TODO: Deciles
 quantile_p <- c(0, 1/4, 2/4, 3/4, 1)
 sim.data.largest$noise_quartile <- cut(sim.data.largest$noise, quantile(sim.data.largest$noise, probs = quantile_p))
@@ -53,6 +51,8 @@ sim.data.largest$N_quartile <- cut(sim.data.largest$N, quantile(sim.data.largest
 levels(sim.data.largest$noise_quartile) <- quantile_p[-1]
 levels(sim.data.largest$eps_quartile) <- quantile_p[-1]
 levels(sim.data.largest$N_quartile) <- quantile_p[-1]
+
+sim.data.largest$correct <- as.factor(sim.data.largest$actual_dist == sim.data.largest$dist)
 
 sim.data.largest[
     order(
@@ -90,7 +90,6 @@ heatmap.data <- heatmap.data[c('gamma_flip', 'gamma', 'norm', 'unif'), ]
 heatmap.xaxis.lab <- c('Gamma Flip', 'Gamma', 'Normal', 'Uniform')
 heatmap.yaxis.lab <- c('Gamma', 'Normal', 'Uniform')
 
-
 create.heatmap(
   heatmap.data,
   cluster.dimensions = 'none',
@@ -106,3 +105,18 @@ create.heatmap(
   colourkey.labels = c('0', '0.25', '0.5', '0.75', '1')
   )
 
+# Boxplot separated by 'Correct' == True
+create.boxplot(
+  N ~ correct | actual_dist,
+  data = sim.data.largest
+  )
+
+create.boxplot(
+  eps ~ correct | actual_dist,
+  data = sim.data.largest
+  )
+
+create.boxplot(
+  noise ~ correct | actual_dist,
+  data = sim.data.largest
+  )
