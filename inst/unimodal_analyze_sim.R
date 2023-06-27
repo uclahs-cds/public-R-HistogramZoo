@@ -61,18 +61,18 @@ sim.data.largest[
       ), by = .(metric, actual_dist)
     ]
 
+quantile_p <- seq(0, 1, by = 0.1) # c(0, 1/4, 2/4, 3/4, 1)
+sim.data.largest$noise_decile <- cut(sim.data.largest$noise, quantile(sim.data.largest$noise, probs = quantile_p))
+sim.data.largest$eps_decile <- cut(sim.data.largest$eps, quantile(sim.data.largest$eps, probs = quantile_p))
+sim.data.largest$N_decile <- cut(sim.data.largest$N, quantile(sim.data.largest$N, probs = quantile_p))
+# levels(sim.data.largest$noise_decile) <- quantile_p[-1]
+# levels(sim.data.largest$eps_decile) <- quantile_p[-1]
+# levels(sim.data.largest$N_decile) <- quantile_p[-1]
+
 sim.data.split <- split(sim.data.largest, sim.data.largest$metric)
 
 for (m in names(sim.data.split)) {
   sim.data.metric <- sim.data.split[[m]]
-
-  quantile_p <- c(0, 1/4, 2/4, 3/4, 1)
-  sim.data.metric$noise_quartile <- cut(sim.data.metric$noise, quantile(sim.data.metric$noise, probs = quantile_p))
-  sim.data.metric$eps_quartile <- cut(sim.data.metric$eps, quantile(sim.data.metric$eps))
-  sim.data.metric$N_quartile <- cut(sim.data.metric$N, quantile(sim.data.metric$N))
-  levels(sim.data.metric$noise_quartile) <- quantile_p[-1]
-  levels(sim.data.metric$eps_quartile) <- quantile_p[-1]
-  levels(sim.data.metric$N_quartile) <- quantile_p[-1]
 
   sim.data.metric$correct <- sim.data.metric$actual_dist == sim.data.metric$dist
   sim.data.metric$correct_fct <- as.factor(sim.data.metric$correct)
@@ -172,30 +172,30 @@ for (m in names(sim.data.split)) {
   )
 }
 
-  # Quartile accuracy of the number of peaks
-  quartile.accuracy <- sim.data.metric[
+  # decile accuracy of the number of peaks
+  decile.accuracy <- sim.data.largest[
     order(
       actual_dist,
-      N_quartile,
-      eps_quartile
+      N_decile,
+      eps_decile
     ), .(
       accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
       N = mean(N),
       eps = mean(eps)
-      ), by = .(actual_dist, eps_quartile, N_quartile)
+      ), by = .(actual_dist, eps_decile, N_decile)
     ]
 
-  quartile.accuracy.split <- split(quartile.accuracy, quartile.accuracy$actual_dist)
+  decile.accuracy.split <- split(decile.accuracy, decile.accuracy$actual_dist)
 
-  quartile.heatmaps <- lapply(names(quartile.accuracy.split), function(d) {
-    x <- quartile.accuracy.split[[d]]
+  decile.heatmaps <- lapply(names(decile.accuracy.split), function(d) {
+    x <- decile.accuracy.split[[d]]
     heatmap.data <- dcast(
       x[complete.cases(x)],
-      eps_quartile ~ N_quartile, value.var = 'accuracy_peaks'
+      eps_decile ~ N_decile, value.var = 'accuracy_peaks'
       )
 
-    heatmap.rownames <- heatmap.data$eps_quartile
-    heatmap.data$eps_quartile <- NULL
+    heatmap.rownames <- heatmap.data$eps_decile
+    heatmap.data$eps_decile <- NULL
 
     heatmap.data <- as.matrix(heatmap.data)
 
@@ -205,8 +205,10 @@ for (m in names(sim.data.split)) {
       main = d,
       main.cex = 2,
       text.col = 'black',
-      xaxis.lab = c('', colnames(heatmap.data)),
-      yaxis.lab = as.character(heatmap.rownames),
+      xat = seq_len(ncol(heatmap.data)),
+      xaxis.lab = colnames(heatmap.data),
+      yaxis.lab = if (d == 'gamma') as.character(heatmap.rownames) else NULL,
+      ylab.label = if (d == 'gamma') 'eps' else '',
       cell.text = round(heatmap.data, 2),
       col.pos = rep(rep(1:nrow(heatmap.data)), ncol(heatmap.data)),
       row.pos = unlist(lapply(1:ncol(heatmap.data), function(i) rep(i, nrow(heatmap.data)))),
@@ -214,7 +216,8 @@ for (m in names(sim.data.split)) {
       colour.scheme = c('white', 'red'),
       colourkey.labels.at = seq(0, 1, length.out = 5),
       colourkey.labels = c('0', '0.25', '0.5', '0.75', '1'),
-      colourkey.cex = 1.5
+      colourkey.cex = 1.5,
+      print.colour.key = d == 'norm'
       )
   })
 
@@ -224,12 +227,12 @@ for (m in names(sim.data.split)) {
       )
   cat('Saving multipanel heatmap to: ', mpp_heatmap, '\n')
   create.multipanelplot(
-    quartile.heatmaps,
+    decile.heatmaps,
     main = 'Number of distribution accuracy',
     layout.width = 3,
     layout.height = 1,
     width = 24,
-    height = 8,
+    height = 12,
     resolution = 100,
     filename = mpp_heatmap
   )
