@@ -19,6 +19,7 @@ random_unimodal_sim <- function(
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(remove_low_entropy)) remove_low_entropy <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(truncated_models)) truncated_models <- sample(c(TRUE, FALSE), size = 1)
+
   .sample_unif <- function(x, n = 1) {
     runif(n, min = x[1], max = x[2])
   }
@@ -65,10 +66,10 @@ random_unimodal_sim <- function(
     seg_results <- try({
       segment_and_fit(
         histogram_data,
-        metric = metrics,
-        eps = eps_sample,
         max_uniform = max_uniform,
         remove_low_entropy = remove_low_entropy,
+        metric = metrics,
+        eps = eps_sample,
         truncated_models = truncated_models,
         metric_weights = sqrt(rev(seq_along(metrics)))
         )

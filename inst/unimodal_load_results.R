@@ -13,7 +13,6 @@ all_results <- rbindlist(
 filename <- file.path(results.folder, 'processed_results.tsv');
 cat('Writing to: ', filename, '\n');
 
-generate
 # TODO: Split this into batches and combine?
 write.table(
     x = all_results,
