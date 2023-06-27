@@ -5,9 +5,17 @@ random_unimodal_sim <- function(
     gamma_shape = c(1, 4),
     eps = c(0.05, 0.5),
     noise = c(.05, .95),
-    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
+    max_uniform = NULL,
+    remove_low_entropy = NULL,
+    truncated_models = FALSE,
+    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
+    ...
   ) {
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
+  if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
+  if (is.null(remove_low_entropy)) remove_low_entropy <- sample(c(TRUE, FALSE), size = 1)
+  if (is.null(truncated_models)) truncated_models <- sample(c(TRUE, FALSE), size = 1)
+
   # .runif1 <- function(...) runif(n = 1, ...)
   .sample_unif <- function(x, n = 1) {
     runif(n, min = x[1], max = x[2])
@@ -54,11 +62,11 @@ random_unimodal_sim <- function(
     seg_results <- try({
       segment_and_fit(
         histogram_data,
-        max_uniform = FALSE,
-        remove_low_entropy = TRUE,
+        max_uniform = max_uniform,
+        remove_low_entropy = remove_low_entropy,
         metric = metrics,
         eps = eps_sample,
-        truncated_models = FALSE,
+        truncated_models = truncated_models,
         metric_weights = sqrt(rev(seq_along(metrics)))
         )
       }, silent = TRUE)
@@ -77,7 +85,10 @@ random_unimodal_sim <- function(
     noise_max = noise_max,
     noise = noise_sim,
     actual_dist = sim_dist,
-    eps = eps_sample
+    eps = eps_sample,
+    max_uniform = max_uniform,
+    remove_low_entropy = remove_low_entropy,
+    truncated_models = truncated_models
     )
 
     return(cbind.data.frame(res, seg_results))
