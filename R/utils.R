@@ -129,3 +129,11 @@ find_midpoint.Histogram <- function(x){
 find_midpoint.GenomicHistogram <- function(x){
   (x$consecutive_start + x$consecutive_end)/2
 }
+
+#' Intervals [a, b], [c,d]
+#' Need a <= b, c <= d
+#' @return TRUE if [a,b] and [c,d] overlap
+int_overlap <- function(a,b,c,d) {
+  stopifnot(a <= b & c <= d)
+  c <= b && a <= d
+}

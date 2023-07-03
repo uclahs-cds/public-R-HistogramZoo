@@ -249,7 +249,7 @@ print.Histogram = function(x, ...){
   if(length(i) > 1 && !all(diff(i)== 1)){
     stop("Subsetting of Histograms must include a valid continuous set of indices")
   }
-  
+
   # Bin width reestimation
   if(length(i) == 1 && i == length(x)){
     x$bin_width <- x$interval_end[i] - x$interval_start[i]
@@ -304,4 +304,53 @@ length.Histogram = function(x){
   return(
     length(x$histogram_data)
   )
+}
+
+#' @export
+`+.Histogram` = function(x, y) {
+  stopifnot(x$bin_width == y$bin_width)
+  histogram_bin_width <- x$bin_width
+
+  min_x <- x$interval_start[1]
+  max_x <- tail(x$interval_end, n = 1)
+  min_y <- y$interval_start[1]
+  max_y <- tail(y$interval_end, n = 1)
+
+  # Sanify check:
+  # If the intervals overlap, need to make sure that the bins are the same in the overlapping region
+  if (int_overlap(min_x, max_x, min_y, max_y)) {
+    intr <- intersect(x$interval_start, y$interval_start)
+    if (is.null(intr) || length(intr) == 0) stop('Bins do not appear to be on same scale')
+    }
+
+  # new bounds
+  a <- min(min_x, min_y)
+  b <- max(max_x, max_y)
+
+  breaks <- c(
+    seq(a, b, by = histogram_bin_width)
+    )
+
+  if (! b %in% breaks) {
+    breaks <- c(breaks, b)
+    }
+
+  # Generating endpoints
+  break_start <- breaks[1:(length(breaks) - 1)]
+  break_end <- breaks[2:length(breaks)]
+
+  histogram_data <- rep(0, length(break_start))
+
+  x_int_indices <- match(x$interval_start, break_start)
+  histogram_data[x_int_indices] <- x$histogram_data
+  y_int_indices <- match(y$interval_start, break_start)
+  histogram_data[y_int_indices] <- histogram_data[y_int_indices] + y$histogram_data
+
+  new_Histogram(
+    histogram_data = histogram_data,
+    interval_start = break_start,
+    interval_end = break_end,
+    region_id = paste0(break_start[1], "-", break_end[length(break_end)]),
+    bin_width = histogram_bin_width
+    )
 }
