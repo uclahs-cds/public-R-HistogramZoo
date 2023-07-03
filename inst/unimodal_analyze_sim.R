@@ -172,69 +172,95 @@ for (m in names(sim.data.split)) {
   )
 }
 
-  # decile accuracy of the number of peaks
-  decile.accuracy <- sim.data.largest[
-    order(
-      actual_dist,
-      N_decile,
-      eps_decile
-    ), .(
-      accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
-      N = mean(N),
-      eps = mean(eps)
-      ), by = .(actual_dist, eps_decile, N_decile)
-    ]
+# decile accuracy of the number of peaks
+decile.accuracy <- sim.data.largest[
+  order(
+    actual_dist,
+    N_decile,
+    eps_decile
+  ), .(
+    accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
+    N = mean(N),
+    eps = mean(eps)
+    ), by = .(actual_dist, eps_decile, N_decile)
+  ]
 
-  decile.accuracy.split <- split(decile.accuracy, decile.accuracy$actual_dist)
+decile.accuracy.split <- split(decile.accuracy, decile.accuracy$actual_dist)
 
-  decile.heatmaps <- lapply(names(decile.accuracy.split), function(d) {
-    x <- decile.accuracy.split[[d]]
-    heatmap.data <- dcast(
-      x[complete.cases(x)],
-      eps_decile ~ N_decile, value.var = 'accuracy_peaks'
-      )
+decile.heatmaps <- lapply(names(decile.accuracy.split), function(d) {
+  x <- decile.accuracy.split[[d]]
+  heatmap.data <- dcast(
+    x[complete.cases(x)],
+    eps_decile ~ N_decile, value.var = 'accuracy_peaks'
+    )
 
-    heatmap.rownames <- heatmap.data$eps_decile
-    heatmap.data$eps_decile <- NULL
+  heatmap.rownames <- heatmap.data$eps_decile
+  heatmap.data$eps_decile <- NULL
 
-    heatmap.data <- as.matrix(heatmap.data)
+  heatmap.data <- as.matrix(heatmap.data)
 
-    create.heatmap(
-      heatmap.data,
-      cluster.dimensions = 'none',
-      main = d,
-      main.cex = 2,
-      text.col = 'black',
-      xat = seq_len(ncol(heatmap.data)),
-      xaxis.lab = colnames(heatmap.data),
-      yaxis.lab = if (d == 'gamma') as.character(heatmap.rownames) else NULL,
-      ylab.label = if (d == 'gamma') 'eps' else '',
-      cell.text = round(heatmap.data, 2),
-      col.pos = rep(rep(1:nrow(heatmap.data)), ncol(heatmap.data)),
-      row.pos = unlist(lapply(1:ncol(heatmap.data), function(i) rep(i, nrow(heatmap.data)))),
-      at =  seq(0, 1, length.out = 15),
-      colour.scheme = c('white', 'red'),
-      colourkey.labels.at = seq(0, 1, length.out = 5),
-      colourkey.labels = c('0', '0.25', '0.5', '0.75', '1'),
-      colourkey.cex = 1.5,
-      print.colour.key = d == 'norm'
-      )
-  })
+  create.heatmap(
+    heatmap.data,
+    cluster.dimensions = 'none',
+    main = d,
+    main.cex = 2,
+    text.col = 'black',
+    xat = seq_len(ncol(heatmap.data)),
+    xaxis.lab = colnames(heatmap.data),
+    yaxis.lab = if (d == 'gamma') as.character(heatmap.rownames) else NULL,
+    ylab.label = if (d == 'gamma') 'eps' else '',
+    cell.text = round(heatmap.data, 2),
+    col.pos = rep(rep(1:nrow(heatmap.data)), ncol(heatmap.data)),
+    row.pos = unlist(lapply(1:ncol(heatmap.data), function(i) rep(i, nrow(heatmap.data)))),
+    at =  seq(0, 1, length.out = 15),
+    colour.scheme = c('white', 'red'),
+    colourkey.labels.at = seq(0, 1, length.out = 5),
+    colourkey.labels = c('0', '0.25', '0.5', '0.75', '1'),
+    colourkey.cex = 1.5,
+    print.colour.key = d == 'norm'
+    )
+})
 
-  mpp_heatmap <- file.path(
-      plots.folder,
-      generate.filename('HZSimulation', 'mpp_correct_segments_heatmap', 'png')
-      )
-  cat('Saving multipanel heatmap to: ', mpp_heatmap, '\n')
-  create.multipanelplot(
-    decile.heatmaps,
-    main = 'Number of distribution accuracy',
-    layout.width = 3,
-    layout.height = 1,
-    width = 24,
-    height = 12,
-    resolution = 100,
-    filename = mpp_heatmap
+mpp_heatmap <- file.path(
+    plots.folder,
+    generate.filename('HZSimulation', 'mpp_correct_segments_heatmap', 'png')
+    )
+cat('Saving multipanel heatmap to: ', mpp_heatmap, '\n')
+create.multipanelplot(
+  decile.heatmaps,
+  main = 'Number of peaks == 1 accuracy',
+  plot.objects.widths = c(8.5, 7, 7),
+  layout.width = 3,
+  layout.height = 1,
+  width = 24,
+  height = 12,
+  resolution = 100,
+  filename = mpp_heatmap
+  )
+
+
+sim.data.split.dist <- split(sim.data.largest, sim.data.largest$actual_dist)
+## Normal distribution specific
+
+## Gamma specific
+hist(sim.data.split.dist$gamma$param - sim.data.split.dist$gamma$dist_param1)
+
+correct.gamma <- sim.data.split.dist$gamma[sim.data.split.dist$gamma$dist == 'gamma', ]
+
+correct.gamma.metric.split <- split(correct.gamma, correct.gamma$metric)
+
+# param 1 = shape
+# param 2 = rate (should be 1)
+
+
+create.histogram(
+  correct.gamma.metric.split$mle$param - correct.gamma.metric.split$mle$dist_param1,
+  col = default.colours(2)[1]
+  )
+
+create.histogram(
+  correct.gamma.metric.split$mle$dist_param2,
+  col = default.colours(2)[2]
   )
 
 # create.scatterplot(
