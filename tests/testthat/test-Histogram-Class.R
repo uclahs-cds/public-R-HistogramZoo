@@ -118,3 +118,14 @@ test_that("Histogram-class methods", {
   expect_equal(x_reassign$region_id, "TEST")
 
 })
+
+
+test_that("We can add histograms together", {
+  x <- Histogram(c(1,1,1), interval_start = c(1,2,3))
+  y <- Histogram(c(3,3,4), interval_start = c(3,4,5))
+  x_y_sum <- x + y
+  expect_equal(x_y_sum$histogram_data, c(1,1,4,3,4))
+
+  x_wrong_bins <- Histogram(c(1,1,1), interval_start = c(4.5,5.5,6.5))
+  expect_error(x + x_wrong_bins)
+  })
