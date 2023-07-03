@@ -311,6 +311,10 @@ length.Histogram = function(x){
   stopifnot(x$bin_width == y$bin_width)
   histogram_bin_width <- x$bin_width
 
+  # Eventually allow for alternative bin width
+  # For now force bin_width = 1
+  stopifnot(`Only bin_width = 1 is supported at this time` = histogram_bin_width == 1)
+
   min_x <- x$interval_start[1]
   max_x <- tail(x$interval_end, n = 1)
   min_y <- y$interval_start[1]
@@ -342,8 +346,14 @@ length.Histogram = function(x){
   histogram_data <- rep(0, length(break_start))
 
   x_int_indices <- match(x$interval_start, break_start)
+  if (any(sapply(x_int_indices, is.na))) {
+    stop('Histograms are not aligned. Spacing between them may not be a multiple of bin_width')
+    }
   histogram_data[x_int_indices] <- x$histogram_data
   y_int_indices <- match(y$interval_start, break_start)
+  if (any(sapply(y_int_indices, is.na))) {
+    stop('Histograms are not aligned. Spacing between them may not be a multiple of bin_width')
+    }
   histogram_data[y_int_indices] <- histogram_data[y_int_indices] + y$histogram_data
 
   new_Histogram(
