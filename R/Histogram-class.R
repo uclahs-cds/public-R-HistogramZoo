@@ -320,13 +320,6 @@ length.Histogram = function(x){
   min_y <- y$interval_start[1]
   max_y <- tail(y$interval_end, n = 1)
 
-  # Sanify check:
-  # If the intervals overlap, need to make sure that the bins are the same in the overlapping region
-  if (int_overlap(min_x, max_x, min_y, max_y)) {
-    intr <- intersect(x$interval_start, y$interval_start)
-    if (is.null(intr) || length(intr) == 0) stop('Bins do not appear to be on same scale')
-    }
-
   # new bounds
   a <- min(min_x, min_y)
   b <- max(max_x, max_y)

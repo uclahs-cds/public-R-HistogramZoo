@@ -11,6 +11,7 @@ random_multi_peak_sim <- function(
     peaks = 2:3,
     peak_shift = c(1, 5), # Peak shift in standard deviations from previous peak
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
+    return_fit = FALSE,
     seed = as.integer(Sys.time())
   ) {
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
@@ -33,8 +34,6 @@ random_multi_peak_sim <- function(
   eps_sample <- .sample_unif(eps, n = 1)
   noise_sim <- .sample_unif(noise)
   N_noise_sim <- round(sum(N_sim) * noise_sim)
-
-  # Shift...
 
   multi_histogram_data <- lapply(seq_len(peaks_sim), function(i) {
     # Mean is 0 for each of the distributions
@@ -117,7 +116,7 @@ random_multi_peak_sim <- function(
         )
 
   timing <- system.time({
-    seg_results <- try({
+    seg_results_mod <- try({
       segment_and_fit(
         merged_peak_histograms_noise,
         max_uniform = max_uniform,
@@ -128,7 +127,9 @@ random_multi_peak_sim <- function(
         metric_weights = sqrt(rev(seq_along(metrics)))
         )
       }, silent = TRUE)
-    seg_results <- summarize_results_error(seg_results)
+    peak_start <- seg_results_mod$interval_start[seg_results_mod$p[, 'start']]
+    peak_end <- seg_results_mod$interval_end[seg_results_mod$p[, 'end']]
+    seg_results <- summarize_results_error(seg_results_mod)
     })
 
   seg_results <- cbind.data.frame(
@@ -142,12 +143,14 @@ random_multi_peak_sim <- function(
   res <- list(
     N = N_sim,
     param = unlist(lapply(multi_histogram_data, function(x) x$param)),
+    peak_num = seq_along(peak_min),
     peak_min = peak_min,
     peak_max = peak_max,
     peak_shift = peak_shift_sample,
     noise_min = noise_min,
     noise_max = noise_max,
     noise = noise_sim,
+    noise_N = N_noise_sim,
     actual_dist = sim_dist,
     eps = eps_sample,
     seed = seed,
@@ -158,31 +161,65 @@ random_multi_peak_sim <- function(
     )
 
     # long format, one peak per line
-    res <- data.frame(res)
+    actual_peaks <- data.frame(res)
 
     # Joined by seed
     seg_results$seed <- seed
 
-    return(
-      list(
-        actual_peaks = res,
-        seg_results = seg_results
+    # Compute overlap data for peaks
+    overlap_data <- apply(actual_peaks[, c('peak_min', 'peak_max')], 1, function(x) {
+      which.max(
+        sapply(seq_along(peak_start), function(i) {
+          overlap_size(
+            a1 = x['peak_min'],
+            a2 = x['peak_max'],
+            b1 = peak_start[i],
+            b2 = peak_end[i]
+            )
+          }, simplify = FALSE)
         )
-    )
-}
+      }, simplify = FALSE)
 
+    overlap_data <- merge(
+      actual_peaks[, c('peak_num', 'peak_min', 'peak_max')],
+      data.frame(
+        fit_peak_start = peak_start,
+        fit_peak_end = peak_end,
+        fit_peak_num = seq_along(peak_start)
+        ),
+      all = TRUE,
+      by = character() # Cross join
+      )
 
-summarize_results_error <- function(x) {
-  if (! is(x,  'try-error')) {
-        models <- x$models
-        metrics <- x$metric
-        all_metric_results <- do.call(plyr::rbind.fill, lapply(metrics, summarize_results, result = x))
+    overlap_data$overlap <- apply(
+      X = overlap_data[, c('peak_min', 'peak_max', 'fit_peak_start', 'fit_peak_end')],
+      MARGIN = 1,
+      FUN = function(x) {
+        do.call(overlap_size, as.list(unname(x)))
+      })
 
-        rtn <- all_metric_results
-        rtn$num_segments <- length(models)
-        rtn
-    } else {
-        rtn <- data.frame(error = x[[1]])
-    }
-  return(rtn);
-}
+    overlap_data <- data.frame(
+      overlap_data,
+      actual_dist = sim_dist,
+      eps = eps_sample,
+      param = actual_peaks$param,
+      N = N_sim,
+      noise = noise_sim,
+      noise_N = N_noise_sim,
+      max_uniform = max_uniform,
+      remove_low_entropy = remove_low_entropy,
+      truncated_models = truncated_models
+      )
+
+    rtn <- list(
+        actual_peaks = actual_peaks,
+        seg_results = seg_results,
+        overlap = overlap_data
+        )
+
+    if (return_fit) {
+      rtn$hz_fit <- seg_results_mod
+      }
+
+    return(rtn)
+  }
