@@ -48,5 +48,9 @@ for (n in results.names) {
 
   full.filename <- file.path(results.folder, filename)
   cat('Saving output to: ', full.filename, '\n')
-  write.table(result.df, file = full.filename, sep = '\t', row.names = FALSE)
+  write.table(
+    file = full.filename,
+    sep = '\t',
+    row.names = FALSE
+    )
   }
