@@ -22,7 +22,7 @@ if (length(opts) >= 2) {
 sim.data <- replicate(
   N,
   expr = {
-    cat('New multi-modal sim with : ', as.character(Sys.time()), '\n');
+    cat('New multi-modal sim: ', as.character(Sys.time()), '\n');
     HistogramZoo:::random_multi_peak_sim(
       metrics = metrics,
       peaks = 2:4,
@@ -49,6 +49,7 @@ for (n in results.names) {
   full.filename <- file.path(results.folder, filename)
   cat('Saving output to: ', full.filename, '\n')
   write.table(
+    x  = result.df,
     file = full.filename,
     sep = '\t',
     row.names = FALSE
