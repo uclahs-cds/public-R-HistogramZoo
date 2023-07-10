@@ -33,18 +33,20 @@ sim.data <- replicate(
   )
 
 suffix <- '_multi-peak-sim_'
-if (mle) suffix <- paste0(suffix, '_MLE')
+if (mle) suffix <- paste0(suffix, '_MLE_')
 file.prefix <- gsub('[ ]', '_', as.integer(Sys.time()))
 
 results.names <- names(sim.data[[1]])
 for (n in results.names) {
   filename <- paste0(file.prefix, suffix, n, '.tsv')
   result.df <- do.call(
-    'rbind.data.frame',
+    plyr::rbind.fill,
     lapply(sim.data, function(x) {
       x[[n]]
     })
   )
+
+  result.df$mle <- mle
 
   full.filename <- file.path(results.folder, filename)
   cat('Saving output to: ', full.filename, '\n')
