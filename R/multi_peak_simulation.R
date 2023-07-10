@@ -74,7 +74,7 @@ random_multi_peak_sim <- function(
   # In standard deviations
   if (peaks_sim > 1) {
     peak_shift_sample <- c(0, .sample_unif(peak_shift, n = peaks_sim - 1))
-    for (p in 2:peaks) {
+    for (p in 2:peaks_sim) {
       # Shift peaks
       multi_histogram_data[[p]]$shift <- peak_shift_sample[p]
       multi_histogram_data[[p]]$peak <- multi_histogram_data[[p]]$peak +
@@ -208,7 +208,8 @@ random_multi_peak_sim <- function(
       noise_N = N_noise_sim,
       max_uniform = max_uniform,
       remove_low_entropy = remove_low_entropy,
-      truncated_models = truncated_models
+      truncated_models = truncated_models,
+      seed = seed
       )
 
     rtn <- list(
