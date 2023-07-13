@@ -23,14 +23,23 @@ sim.data <- replicate(
   N,
   expr = {
     cat('New multi-modal sim: ', as.character(Sys.time()), '\n');
-    HistogramZoo:::random_multi_peak_sim(
-      metrics = metrics,
-      peaks = 2:4,
-      return_fit = FALSE
+    tryCatch(
+      expr = {
+        HistogramZoo:::random_multi_peak_sim(
+          metrics = metrics,
+          peaks = 2:4,
+          return_fit = FALSE
+          )
+      },
+      error = function(x) {
+        return(NULL)
+        }
       )
     },
   simplify = FALSE
   )
+
+sim.data <- sim.data[sapply(sim.data, Negate(is.null))];
 
 suffix <- '_multi-peak-sim_'
 if (mle) suffix <- paste0(suffix, '_MLE_')
