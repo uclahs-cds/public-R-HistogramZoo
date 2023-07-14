@@ -39,7 +39,8 @@ unimodal.sim <- rbindlist(
 
 metrics <- c("mle", "chisq", "intersection", "jaccard", "ks", "mse")
 
-setDT(unimodal.sim)[, id := .GRP, by = .(N, param, noise, actual_dist, eps, metric)]
+# setDT(unimodal.sim)[, id := .GRP, by = .(N, param, noise, actual_dist, eps, metric)]
+setDT(unimodal.sim)[, id := .GRP, by = .(seed)]
 
 # Remove really high noise
 unimodal.sim <- unimodal.sim[noise <= 0.5, ]
@@ -48,6 +49,8 @@ unimodal.sim$seg_length <-  unimodal.sim$end - unimodal.sim$start;
 
 # Only keep the largest segment
 unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(seg_length)], by=.(id, metric)]$V1]
+
+# sim.data.largest$num_segments
 
 sim.plot.overall.accuracy(
   unimodal.sim,
@@ -58,4 +61,23 @@ sim.plot.overall.accuracy(
       generate.filename('HZSimulation', 'overall-classification-heatmap', 'png')
       )
     )
-  );
+  )
+
+
+quantile_p <- seq(0, 1, by = 0.1) # c(0, 1/4, 2/4, 3/4, 1)
+unimodal.sim$noise_decile <- cut(unimodal.sim$noise, quantile(unimodal.sim$noise, probs = quantile_p))
+unimodal.sim$eps_decile <- cut(unimodal.sim$eps, quantile(unimodal.sim$eps, probs = quantile_p))
+unimodal.sim$N_decile <- cut(unimodal.sim$N, quantile(unimodal.sim$N, probs = quantile_p))
+
+#
+sim.plot.quantile.accuracy(
+  unimodal.sim,
+  resolution = 200,
+  filename =  print(
+    file.path(
+      plots.folder,
+      generate.filename('HZSimulation', 'decile-classification-heatmap', 'png')
+      )
+    )
+  )
+
