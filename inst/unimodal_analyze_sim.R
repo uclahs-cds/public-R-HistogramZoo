@@ -52,16 +52,23 @@ unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(seg_length)], by=.(id, 
 
 # sim.data.largest$num_segments
 
-sim.plot.overall.accuracy(
-  unimodal.sim,
-  resolution = 200,
-  filename = print(
-    file.path(
-      plots.folder,
-      generate.filename('HZSimulation', 'overall-classification-heatmap', 'png')
+for (acc in c('dist', 'peaks', 'both')) {
+  sim.plot.overall.accuracy(
+    unimodal.sim,
+    resolution = 200,
+    acc = acc,
+    filename = print(
+      file.path(
+        plots.folder,
+        generate.filename(
+          'HZSimulation',
+          paste0('overall-classification-heatmap-', acc),
+          'png'
+          )
+        )
       )
     )
-  )
+}
 
 
 quantile_p <- seq(0, 1, by = 0.1) # c(0, 1/4, 2/4, 3/4, 1)
@@ -69,15 +76,35 @@ unimodal.sim$noise_decile <- cut(unimodal.sim$noise, quantile(unimodal.sim$noise
 unimodal.sim$eps_decile <- cut(unimodal.sim$eps, quantile(unimodal.sim$eps, probs = quantile_p))
 unimodal.sim$N_decile <- cut(unimodal.sim$N, quantile(unimodal.sim$N, probs = quantile_p))
 
-#
-sim.plot.quantile.accuracy(
+for (acc in c('dist', 'peaks')) {
+  sim.plot.quantile.accuracy(
+    unimodal.sim,
+    resolution = 200,
+    acc = acc,
+    filename =  print(
+      file.path(
+        plots.folder,
+        generate.filename('HZSimulation', paste0('decile-classification-heatmap-', acc), 'png')
+        )
+      )
+    )
+  }
+
+# Decile partitioned by parameters
+for (m in metrics) {
+  sim.plot.quantile.accuracy(
   unimodal.sim,
+  sort.cols = m,
   resolution = 200,
   filename =  print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'decile-classification-heatmap', 'png')
+      generate.filename(
+        'HZSimulation',
+        paste0('decile-sort-classification-heatmap-', m),
+        'png'
+        )
       )
     )
   )
-
+}

@@ -1,17 +1,36 @@
 max.uniform.col <- 'firebrick3';
 remove.low.entropy.col <- 'dodgerblue2';
 
-common.legend <- legend.grob(
-    list(
+common.sim.legend <- function(
+    include.legends = c('params', 'distributions', 'quantiles'),
+    params.to.include = c('max_uniform', 'remove_low_entropy')
+  ) {
+  include.legends <- match.arg(include.legends, several.ok = TRUE);
+  params.to.include <- match.arg(params.to.include, several.ok = TRUE);
+
+  legend.list <- list()
+  if ('params' %in% include.legends) {
+    params.select <- match(params.to.include, c('max_uniform', 'remove_low_entropy'));
+
+    legend.list <- c(
+      legend.list,
+      list(
         legend = list(
-            colours = c(max.uniform.col, remove.low.entropy.col),
+            colours = c(max.uniform.col, remove.low.entropy.col)[params.select],
             title = "Parameters",
-            labels = c('Max uniform', 'Remove low entropy'),
+            labels = c('Max uniform', 'Remove low entropy')[params.select],
             size = 3,
             title.cex = 1,
             label.cex = 1,
             border = 'black'
-            ),
+            )
+        )
+      )
+    }
+  if ('distributions' %in% include.legends) {
+    legend.list <- c(
+      legend.list,
+      list(
         legend = list(
             colours = distribution_colours[c('norm', 'gamma', 'unif')],
             title = "Distribution",
@@ -21,12 +40,24 @@ common.legend <- legend.grob(
             label.cex = 1,
             border = 'black'
             )
-        ),
+        )
+      )
+    }
+
+  common.params <- list(
+
+    )
+
+  BoutrosLab.plotting.general::legend.grob(
+    legends = legend.list,
     label.cex = 1.5,
     title.cex = 1.5,
     size = 3,
-    layout = c(1,2)
+    layout = c(1,length(include.legends))
     )
+  }
+
+
 
 assign.cov.factor.col <- function(x, ramp.colors) {
   x.levels <- levels(x);
@@ -78,12 +109,14 @@ sim.plot.heatmap.cov <- function(cov.data) {
 
 #' @export
 #' @import data.table
-sim.plot.overall.accuracy <- function(x, ...) {
+sim.plot.overall.accuracy <- function(x, acc = c('dist', 'peaks', 'both'), ...) {
+  acc <- match.arg(acc);
   # Accuracy by distribution
   overall.accuracy <- x[
       , .(
         accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
         accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
+        accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
         N = mean(N),
         eps = mean(eps),
         noise = mean(noise)
@@ -93,7 +126,7 @@ sim.plot.overall.accuracy <- function(x, ...) {
   overall.accuracy.dist.wide <- dcast(
     overall.accuracy,
     max_uniform + remove_low_entropy + actual_dist ~ metric,
-    value.var = 'accuracy_dist'
+    value.var = paste0('accuracy_', acc)
     )
 
   overall.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
@@ -113,27 +146,35 @@ sim.plot.overall.accuracy <- function(x, ...) {
     fill.colour = 'lightgrey'
     );
 
+  xlab.label <- switch (acc,
+    'dist' = 'Distribution accuracy',
+    'peaks' = 'Number of peaks accuracy',
+    'both' = 'Correct peak and distribution accuracy'
+    )
+
   create.multipanelplot(
     list(overall.accuracy.cov.heatmap, overall.accuracy.dist.heatmap),
     plot.objects.widths = c(0.1, 1),
     x.spacing = c(-0.25, 0),
     width = 12,
     legend = list(right = list(
-      fun = common.legend
+      fun = common.sim.legend()
         )
       ),
     layout.width = 2,
     layout.height = 1,
-    xlab.label = 'Distribution accuracy',
+    xlab.label = xlab.label,
     ...
     )
 }
 
-sim.plot.quantile.accuracy <- function(x, ...) {
+sim.plot.quantile.accuracy <- function(x, acc = c('dist', 'peaks', 'both'), sort.cols = NULL, ...) {
+  acc <- match.arg(acc);
   decile.accuracy <- x[
     , .(
       accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
       accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
+      accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
       N = .N
       ), by = .(metric, actual_dist, max_uniform, remove_low_entropy, N_decile, noise_decile, eps_decile)
     ]
@@ -143,8 +184,12 @@ sim.plot.quantile.accuracy <- function(x, ...) {
   decile.wide.accuracy.dist <- dcast(
     decile.accuracy,
     actual_dist + max_uniform + remove_low_entropy + N_decile + noise_decile + eps_decile ~ metric,
-    value.var = 'accuracy_dist'
+    value.var = paste0('accuracy_', acc)
     )
+
+  if (!is.null(sort.cols)) {
+    setorderv(decile.wide.accuracy.dist, sort.cols);
+  }
 
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
     #data.frame(decile.wide.accuracy.dist[, c('max_uniform', 'remove_low_entropy', 'actual_dist'), drop = FALSE])
@@ -164,18 +209,24 @@ sim.plot.quantile.accuracy <- function(x, ...) {
     fill.colour = 'lightgrey'
     );
 
+  xlab.label <- switch (acc,
+    'dist' = 'Distribution accuracy',
+    'peaks' = 'Number of peaks accuracy',
+    'both' = 'Correct peak and distribution accuracy'
+    )
+
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
     plot.objects.widths = c(0.1, 1),
     x.spacing = c(-0.25, 0),
     width = 12,
     legend = list(right = list(
-      fun = common.legend
+      fun = common.sim.legend(include.legends = c('distributions', 'quantiles'))
         )
       ),
     layout.width = 2,
     layout.height = 1,
-    xlab.label = 'Distribution accuracy',
+    xlab.label = xlab.label,
     ...
     )
 }
