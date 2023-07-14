@@ -4,7 +4,7 @@ random_unimodal_sim <- function(
     norm_sd = c(1, 4),
     gamma_shape = c(1, 4),
     eps = c(0.05, 0.5),
-    noise = c(.05, .95),
+    noise = c(.05, .5),
     max_uniform = NULL,
     remove_low_entropy = NULL,
     truncated_models = FALSE,
@@ -39,8 +39,10 @@ random_unimodal_sim <- function(
   }
 
   data_sd <- sd(peak)
-  noise_min <- min(peak) - data_sd
-  noise_max <- max(peak) + data_sd
+  peak_min <- min(peak)
+  peak_max <- max(peak)
+  noise_min <- peak_min - data_sd
+  noise_max <- peak_max + data_sd
 
   noise_data <- runif(
     N_noise_sim,
@@ -53,13 +55,18 @@ random_unimodal_sim <- function(
     noise_data
     )
 
+  peak_histogram_data <- observations_to_histogram(
+    x = peak,
+    histogram_bin_width = 1
+    )
+
   histogram_data <- observations_to_histogram(
     x = peak_noise,
     histogram_bin_width = 1
     )
 
   timing <- system.time({
-    seg_results <- try({
+    seg_results_mod <- try({
       segment_and_fit(
         histogram_data,
         max_uniform = max_uniform,
@@ -70,19 +77,21 @@ random_unimodal_sim <- function(
         metric_weights = sqrt(rev(seq_along(metrics)))
         )
       }, silent = TRUE)
-    seg_results <- summarize_results_error(seg_results)
+    seg_results <- summarize_results_error(seg_results_mod)
     })
 
-    seg_results <- cbind.data.frame(
-      seg_results,
-      t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
-      )
+  seg_results <- cbind.data.frame(
+    seg_results,
+    t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
+    )
 
   res <- list(
     N = N_sim,
     param = param,
     noise_min = noise_min,
     noise_max = noise_max,
+    peak_min = peak_min,
+    peak_max = peak_max,
     noise = noise_sim,
     actual_dist = sim_dist,
     eps = eps_sample,

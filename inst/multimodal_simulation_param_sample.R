@@ -29,10 +29,10 @@ sim.data <- replicate(
           metrics = metrics,
           peaks = 2:4,
           return_fit = FALSE
-          )
+          );
       },
       error = function(x) {
-        return(NULL)
+        cat(x);
         }
       )
     },
