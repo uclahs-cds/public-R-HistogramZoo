@@ -1,7 +1,7 @@
 library(HistogramZoo)
 
 base.path <- HistogramZoo:::load.config()$root.path;
-results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v2');
+results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v3');
 set.seed(314)
 
 opts <- commandArgs(trailingOnly = TRUE)
@@ -19,10 +19,22 @@ if (length(opts) >= 2) {
     metrics <- 'mle'
     }
 
+params <- list(
+    N = c(25, 500),
+    unif_length = c(6, 25),
+    norm_sd = c(1, 4),
+    gamma_shape = c(1, 4),
+    eps = c(0.05, 0.5),
+    noise = c(.05, .5),
+    max_uniform = NULL,
+    remove_low_entropy = NULL,
+    truncated_models = FALSE
+    )
+
 sim.data <- replicate(
   N,
   {
-    cat('New unimodal sim with : ', as.character(Sys.time()), '\n');
+    cat('New unimodal sim: ', as.character(Sys.time()), '\n');
     HistogramZoo:::random_unimodal_sim(
         metrics = metrics
         )
@@ -36,10 +48,12 @@ sim.df <- do.call(
     )
 
 
-suffix <- '_Unimodal_Sim'
-if (mle) suffix <- paste0(suffix, '_MLE')
+suffix <- 'Unimodal_Sim'
 
-filename <- gsub('[ ]', '_', paste0(Sys.time(), '_', sample(1:1e4, 1), suffix, '.tsv'))
+if (mle) suffix <- paste0(suffix, '_MLE')
+file.prefix <- gsub('[ ]', '_', as.integer(Sys.time()))
+
+filename <- gsub('[ ]', '_', paste0(file.prefix, '_', suffix, '.tsv'))
 full.filename <- file.path(results.folder, filename)
 cat('Saving output to: ', full.filename, '\n')
 write.table(sim.df, file = full.filename, sep = '\t', row.names = FALSE)
