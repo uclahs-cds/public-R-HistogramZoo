@@ -22,7 +22,7 @@ if (length(opts) >= 2) {
 sim.data <- replicate(
   N,
   expr = {
-    cat('New multi-modal sim: ', as.character(Sys.time()), '\n');
+    cat('V2 New multi-modal sim: ', as.character(Sys.time()), '\n');
     tryCatch(
       expr = {
         HistogramZoo:::random_multi_peak_sim(

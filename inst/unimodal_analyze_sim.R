@@ -8,8 +8,6 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 plots.folder <- file.path(base.path, 'plots');
 
-#sim.tsv.mle.paths <- list.files(results.folder, pattern = 'Unimodal_Sim_MLE.tsv$', full.names = TRUE);
-#sim.tsv.paths <- list.files(results.folder, pattern = 'Unimodal_Sim.tsv$', full.names = TRUE);
 
 unimodal.sim.metrics <- data.table::fread(
   file = file.path(
@@ -27,20 +25,40 @@ unimodal.sim.metrics.mle <- data.table::fread(
   sep = '\t'
   )
 
-unimodal.sim.metrics.mle$max_uniform <- FALSE;
-# unimodal.sim <- unimodal.sim.metrics;
-unimodal.sim <- rbindlist(
-  list(
-    unimodal.sim.metrics,
-    unimodal.sim.metrics.mle
-    ),
-  fill = TRUE
-  )
+# sim.data <- rbind.data.frame(
+#   sim.mle.data,
+#   sim.data
+#   )
 
 metrics <- c("mle", "chisq", "intersection", "jaccard", "ks", "mse")
 
-# setDT(unimodal.sim)[, id := .GRP, by = .(N, param, noise, actual_dist, eps, metric)]
-setDT(unimodal.sim)[, id := .GRP, by = .(seed)]
+write.table(
+    sim.data,
+    file = file.path(
+        results.folder,
+        generate.filename(
+            'HZSimulation',
+            'unimodal-sim-noise',
+            'tsv'
+            )
+        ),
+    sep = '\t',
+    row.names = FALSE
+    )
+
+write.table(
+    sim.mle.data,
+    file = file.path(
+        results.folder,
+        generate.filename(
+            'HZSimulation',
+            'unimodal-sim-noise-MLE',
+            'tsv'
+            )
+        ),
+    sep = '\t',
+    row.names = FALSE
+    )
 
 # Remove really high noise
 unimodal.sim <- unimodal.sim[noise <= 0.5, ]
