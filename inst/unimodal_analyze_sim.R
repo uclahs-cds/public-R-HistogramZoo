@@ -25,40 +25,20 @@ unimodal.sim.metrics.mle <- data.table::fread(
   sep = '\t'
   )
 
-# sim.data <- rbind.data.frame(
-#   sim.mle.data,
-#   sim.data
-#   )
 
-metrics <- c("mle", "chisq", "intersection", "jaccard", "ks", "mse")
+unimodal.sim.metrics.mle$max_uniform <- FALSE;
 
-write.table(
-    sim.data,
-    file = file.path(
-        results.folder,
-        generate.filename(
-            'HZSimulation',
-            'unimodal-sim-noise',
-            'tsv'
-            )
-        ),
-    sep = '\t',
-    row.names = FALSE
-    )
+unimodal.sim <- rbindlist(
+  list(
+    unimodal.sim.metrics,
+    unimodal.sim.metrics.mle
+    ),
+  fill = TRUE
+  )
 
-write.table(
-    sim.mle.data,
-    file = file.path(
-        results.folder,
-        generate.filename(
-            'HZSimulation',
-            'unimodal-sim-noise-MLE',
-            'tsv'
-            )
-        ),
-    sep = '\t',
-    row.names = FALSE
-    )
+metrics <- c('mle', 'chisq', 'intersection', 'jaccard', 'ks', 'mse')
+
+setDT(unimodal.sim)[, id := .GRP, by = .(seed)]
 
 # Remove really high noise
 unimodal.sim <- unimodal.sim[noise <= 0.5, ]
