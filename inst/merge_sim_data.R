@@ -8,7 +8,7 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 
 # v1-v3 need to have peak_min, peak_max computed
-sim.folders <- c('unimodal_sim_noise', 'unimodal_sim_noise_v2', 'unimodal_sim_noise_v3');
+sim.folders <- c('unimodal_sim_noise_v2', 'unimodal_sim_noise_v3');
 
 for (sim in sim.folders) {
   for (mle in c(FALSE, TRUE)) {
@@ -16,7 +16,7 @@ for (sim in sim.folders) {
     sim.folder <- file.path(results.folder, sim);
     mle_pattern <- if (mle) 'Unimodal_Sim_MLE.tsv$' else 'Unimodal_Sim.tsv$'
 
-    sim.tsv.paths <- list.files(sim.folder, pattern = , full.names = TRUE);
+    sim.tsv.paths <- list.files(sim.folder, pattern = mle_pattern, full.names = TRUE, include.dirs = FALSE);
 
     sim.data <- rbindlist(
         lapply(sim.tsv.paths, data.table::fread, sep = '\t'),
