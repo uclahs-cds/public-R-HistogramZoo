@@ -30,25 +30,25 @@ for (sim in sim.folders) {
       sim.data[, c('seed', 'actual_dist', 'max_uniform', 'remove_low_entropy', 'truncated_models')]
       )
 
-    recompute.peak.rage <- do.call(
-      'rbind.data.frame',
-      mapply(
-        HistogramZoo:::peak_min_recompute,
-        seed = unique.recompute$seed,
-        actual_dist = unique.recompute$actual_dist,
-        max_uniform = unique.recompute$max_uniform,
-        remove_low_entropy = unique.recompute$remove_low_entropy,
-        SIMPLIFY = FALSE
+      recompute.peak.range <- do.call(
+        'rbind.data.frame',
+        mapply(
+          HistogramZoo:::peak_min_recompute,
+          seed = unique.recompute$seed,
+          actual_dist = unique.recompute$actual_dist,
+          max_uniform = unique.recompute$max_uniform,
+          remove_low_entropy = unique.recompute$remove_low_entropy,
+          SIMPLIFY = FALSE
+          )
         )
-      )
 
-    sim.data <- merge(
-      x = sim.data,
-      y = recompute.peak.rage,
-      by = 'seed',
-      suffixes = c('', '.validation')
-      )
-    }
+      sim.data <- merge(
+        x = sim.data,
+        y = recompute.peak.range,
+        by = 'seed',
+        suffixes = c('', '.validation')
+        )
+      }
 
     mle.suffix <- if (mle) '-mle' else '';
 
