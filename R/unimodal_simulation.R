@@ -1,9 +1,16 @@
+unimodal.params <- list(
+  N = c(25, 500),
+  eps = c(0.05, 2),
+  noise = c(.05, .5),
+  param = c(0, 1)
+)
+
 random_unimodal_sim <- function(
     N = c(25, 500),
     unif_length = c(6, 25),
     norm_sd = c(1, 4),
     gamma_shape = c(1, 4),
-    eps = c(0.05, 0.5),
+    eps = c(0.05, 2),
     noise = c(.05, .5),
     max_uniform = NULL,
     remove_low_entropy = NULL,

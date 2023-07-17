@@ -48,7 +48,8 @@ unimodal.sim$seg_length <-  unimodal.sim$end - unimodal.sim$start;
 # Only keep the largest segment
 unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(seg_length)], by=.(id, metric)]$V1]
 
-# sim.data.largest$num_segments
+# TODO: Need to generate the data with the given seed, then can get the peak_min, peak_max
+# Note: This is temporary until the new simulations
 
 for (acc in c('dist', 'peaks', 'both')) {
   sim.plot.overall.accuracy(
@@ -68,11 +69,15 @@ for (acc in c('dist', 'peaks', 'both')) {
     )
 }
 
-
 quantile_p <- seq(0, 1, by = 0.1) # c(0, 1/4, 2/4, 3/4, 1)
-unimodal.sim$noise_decile <- cut(unimodal.sim$noise, quantile(unimodal.sim$noise, probs = quantile_p))
-unimodal.sim$eps_decile <- cut(unimodal.sim$eps, quantile(unimodal.sim$eps, probs = quantile_p))
-unimodal.sim$N_decile <- cut(unimodal.sim$N, quantile(unimodal.sim$N, probs = quantile_p))
+
+scale.param <- function(x, param.range) {
+  (param.range[2] - param.range[1]) * x + param.range[1]
+}
+
+unimodal.sim$noise_decile <- cut(unimodal.sim$noise, scale.param(quantile_p, param.range = unimodal.params$noise))
+unimodal.sim$eps_decile <- cut(unimodal.sim$eps, scale.param(quantile_p, param.range = unimodal.params$eps))
+unimodal.sim$N_decile <- cut(unimodal.sim$N, round(scale.param(quantile_p, param.range = unimodal.params$N)))
 
 for (acc in c('dist', 'peaks')) {
   sim.plot.quantile.accuracy(
@@ -106,3 +111,4 @@ for (m in metrics) {
     )
   )
 }
+
