@@ -19,17 +19,30 @@ if (length(opts) >= 2) {
     metrics <- 'mle'
     }
 
+params <- list(
+    N = c(25, 500),
+    unif_length = c(6, 25),
+    norm_sd = c(1, 4),
+    gamma_shape = c(1, 4),
+    eps = c(0.5, 2),
+    noise = c(.05, 0.5),
+    max_uniform = NULL,
+    remove_low_entropy = NULL,
+    truncated_models = FALSE,
+    peaks = 2:4,
+    peak_shift = c(1, 5), # Peak shift in standard deviations from previous peak
+    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
+    )
+cat('Params: \n')
+print(params)
+
 sim.data <- replicate(
   N,
   expr = {
     cat('V2 New multi-modal sim: ', as.character(Sys.time()), '\n');
     tryCatch(
       expr = {
-        HistogramZoo:::random_multi_peak_sim(
-          metrics = metrics,
-          peaks = 2:4,
-          return_fit = FALSE
-          );
+        do.call( HistogramZoo:::random_multi_peak_sim, params);
       },
       error = function(x) {
         cat(x);

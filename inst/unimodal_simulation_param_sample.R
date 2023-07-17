@@ -1,7 +1,7 @@
 library(HistogramZoo)
 
 base.path <- HistogramZoo:::load.config()$root.path;
-results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v3');
+results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v4');
 set.seed(314)
 
 opts <- commandArgs(trailingOnly = TRUE)
@@ -24,20 +24,25 @@ params <- list(
     unif_length = c(6, 25),
     norm_sd = c(1, 4),
     gamma_shape = c(1, 4),
-    eps = c(0.05, 0.5),
+    eps = c(0.5, 2),
     noise = c(.05, .5),
     max_uniform = NULL,
     remove_low_entropy = NULL,
-    truncated_models = FALSE
+    truncated_models = FALSE,
+    metrics = metrics
     )
+
+cat('Params: \t')
+print(params)
 
 sim.data <- replicate(
   N,
   {
     cat('New unimodal sim: ', as.character(Sys.time()), '\n');
-    HistogramZoo:::random_unimodal_sim(
-        metrics = metrics
-        )
+    do.call(
+      HistogramZoo:::random_unimodal_sim,
+      params
+      )
   },
   simplify = FALSE
   )
