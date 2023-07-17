@@ -1,7 +1,7 @@
 library(HistogramZoo)
 
 base.path <- HistogramZoo:::load.config()$root.path;
-results.folder <- file.path(base.path, 'results', 'multi_modal_sim');
+results.folder <- file.path(base.path, 'results', 'multi_modal_sim_v2');
 set.seed(314)
 
 opts <- commandArgs(trailingOnly = TRUE)

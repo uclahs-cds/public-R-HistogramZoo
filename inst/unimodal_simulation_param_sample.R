@@ -1,7 +1,7 @@
 library(HistogramZoo)
 
 base.path <- HistogramZoo:::load.config()$root.path;
-results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v4');
+results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v5');
 set.seed(314)
 
 opts <- commandArgs(trailingOnly = TRUE)
