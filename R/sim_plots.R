@@ -7,6 +7,13 @@ covariate.col <- list(
   param.decile = 'yellowgreen'
   )
 
+# TODO: Get this from some common param
+covariate.range <- list(
+  N = c(25, 500),
+  eps = c(0.05, 0.5),
+  noise = c(.05, .5),
+  param = c(0, 1)
+)
 
 common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
@@ -64,10 +71,13 @@ common.sim.legend <- function(
     cont.params <- gsub('_', '.', cont.params.to.include)
 
     cont.params.legend <- lapply(cont.params, function(p) {
+    cont.param.name <- sub('[.]decile', '', p);
+
       list(
         colours = c('white', covariate.col[[p]]),
-        labels = c('0', '1'), # TODO
-        title = sub('[.]decile', '', p),
+        labels = as.character(covariate.range[[cont.param.name]]),
+        at = c(0, 100),
+        title = cont.param.name,
         angle = -90,
         width = 6,
         continuous = TRUE
