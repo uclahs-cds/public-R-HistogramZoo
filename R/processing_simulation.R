@@ -42,7 +42,7 @@ peak_min_recompute <- function(
   peak_max <- max(peak)
   noise_min <- peak_min - data_sd
   noise_max <- peak_max + data_sd
-  list(seed = seed, peak_min = peak_min, peak_max = peak_max, noise_min = noise_min)
+  list(seed = seed, peak_min = peak_min, peak_max = peak_max, noise_min = noise_min, noise_max = noise_max)
 }
 
 process_sim <- function(x) {

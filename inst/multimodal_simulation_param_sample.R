@@ -45,7 +45,8 @@ sim.data <- replicate(
         do.call( HistogramZoo:::random_multi_peak_sim, params);
       },
       error = function(x) {
-        cat(x);
+        print(x);
+        NULL;
         }
       )
     },

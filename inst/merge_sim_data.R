@@ -8,7 +8,9 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 
 # v1-v3 need to have peak_min, peak_max computed
-sim.folders <- c('unimodal_sim_noise_v2', 'unimodal_sim_noise_v3');
+sim.folders <- c(
+    'unimodal_sim_noise_v2', 'unimodal_sim_noise_v3',
+    'unimodal_sim_noise_v4', 'unimodal_sim_noise_v5');
 
 for (sim in sim.folders) {
   for (mle in c(FALSE, TRUE)) {
@@ -25,15 +27,19 @@ for (sim in sim.folders) {
 
     sim.data$seg_length <-  sim.data$end - sim.data$start;
 
+    print(head(sim.data))
+
     if (! c('peak_min') %in% colnames(sim.data)) {
       unique.recompute <- unique(
       sim.data[, c('seed', 'actual_dist', 'max_uniform', 'remove_low_entropy', 'truncated_models')]
       )
 
+      noise <- if (sim == 'unimodal_sim_noise_v2') c(.05, .95) else c(.05, .5)
+
       recompute.peak.range <- do.call(
         'rbind.data.frame',
         mapply(
-          HistogramZoo:::peak_min_recompute,
+            function(...) { HistogramZoo:::peak_min_recompute(noise = noise, ...)},
           seed = unique.recompute$seed,
           actual_dist = unique.recompute$actual_dist,
           max_uniform = unique.recompute$max_uniform,
@@ -41,13 +47,23 @@ for (sim in sim.folders) {
           SIMPLIFY = FALSE
           )
         )
+        print(head(recompute.peak.range))
 
       sim.data <- merge(
         x = sim.data,
         y = recompute.peak.range,
         by = 'seed',
-        suffixes = c('', '.validation')
+        suffixes = c('', '.validation'),
+        allow.cartesian = TRUE
         )
+
+        print(head(sim.data))
+
+        cat(
+            'Proportion of re-simulate data that seemed to fail: ',
+            mean(abs(sim.data$noise_min - sim.data$noise_min.validation) > 2.2e-10),
+            '\n'
+        );
       }
 
     mle.suffix <- if (mle) '-mle' else '';
@@ -58,7 +74,7 @@ for (sim in sim.folders) {
             merged.folder,
             generate.filename(
                 'HZSimulation',
-                paste0('merged-unimodal-sim-noise', mle.suffix),
+                paste0(sim, '-merged-unimodal-sim-noise', mle.suffix),
                 'tsv'
                 )
             )),
