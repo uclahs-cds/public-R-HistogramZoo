@@ -66,6 +66,8 @@ for (sim in sim.folders) {
         );
       }
 
+    # Errors have newlines that can complicate things
+    sim.data$error <- gsub('\n', '', sim.data$error);
     mle.suffix <- if (mle) '-mle' else '';
 
     write.table(
