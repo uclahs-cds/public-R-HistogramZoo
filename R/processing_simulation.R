@@ -1,3 +1,13 @@
+# Should be un-scale
+scale.param <- function(x, param.range) {
+  (param.range[2] - param.range[1]) * x + param.range[1]
+}
+
+
+scale.param2 <- function(x, param.range) {
+ (x -  param.range[1]) / (param.range[2] - param.range[1])
+}
+
 # This is just temporary to add peak_min/peak_max to missing sims
 peak_min_recompute <- function(
     N = c(25, 500),

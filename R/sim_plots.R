@@ -4,7 +4,8 @@ covariate.col <- list(
   N.decile = 'slateblue4',
   noise.decile = 'darkorange1',
   eps.decile = 'seagreen3',
-  param.decile = 'yellowgreen'
+  param.decile = 'yellowgreen',
+  jaccard.decile = 'violetred3'
   )
 
 common.sim.legend <- function(
@@ -14,7 +15,8 @@ common.sim.legend <- function(
       ),
     cont.params.to.include = c(
       'N_decile', 'noise_decile',
-      'eps_decile', 'param_decile'
+      'eps_decile', 'param_decile',
+      'jaccard_decile'
     )
   ) {
   include.legends <- match.arg(include.legends, several.ok = TRUE);
@@ -47,9 +49,9 @@ common.sim.legend <- function(
       legend.list,
       list(
         legend = list(
-            colours = distribution_colours[c('norm', 'gamma', 'unif')],
+            colours = distribution_colours[c('norm', 'gamma', 'gamma_flip', 'unif')],
             title = "Distribution",
-            labels = c("Normal","Gamma","Uniform"),
+            labels = c("Normal","Gamma", "Flipped Gamma", "Uniform"),
             size = 3,
             title.cex = 1,
             label.cex = 1,
@@ -67,7 +69,7 @@ common.sim.legend <- function(
 
       list(
         colours = c('white', covariate.col[[p]]),
-        labels = as.character(unimodal.params[[cont.param.name]]),
+        labels = if (cont.param.name == 'jaccard') c('0', '1') else as.character(unimodal.params[[cont.param.name]]),
         at = c(0, 100),
         title = cont.param.name,
         angle = -90,
@@ -115,6 +117,13 @@ sim.plot.heatmap.cov <- function(cov.data) {
   if ('actual_dist' %in% colnames(cov.data)) {
     cov.data$actual_dist <- unname(distribution_colours[cov.data$actual_dist]);
   }
+  if ('dist' %in% colnames(cov.data)) {
+    # TODO: Combine
+    cov.data$dist <- unname(distribution_colours[cov.data$dist]);
+  }
+  if ('jaccard_decile' %in% colnames(cov.data)) {
+    cov.data$jaccard_decile <- assign.cov.factor.col(cov.data$jaccard_decile, c('white', covariate.col$jaccard.decile));
+  }
   if ('N_decile' %in% colnames(cov.data)) {
     cov.data$N_decile <- assign.cov.factor.col(cov.data$N_decile, c('white', covariate.col$N.decile));
   }
@@ -141,75 +150,11 @@ sim.plot.heatmap.cov <- function(cov.data) {
     )
 }
 
-#' @export
 #' @import data.table
-sim.plot.overall.accuracy <- function(
-    x,
-    acc = c('dist', 'peaks', 'both'),
-    ...) {
-  acc <- match.arg(acc);
-  # Accuracy by distribution
-  overall.accuracy <- x[
-      , .(
-        accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
-        accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
-        accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
-        N = mean(N),
-        eps = mean(eps),
-        noise = mean(noise)
-        ), by = .(metric, actual_dist, max_uniform, remove_low_entropy)
-      ];
-
-  overall.accuracy.dist.wide <- dcast(
-    overall.accuracy,
-    max_uniform + remove_low_entropy + actual_dist ~ metric,
-    value.var = paste0('accuracy_', acc)
-    )
-
-  overall.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
-    data.frame(overall.accuracy.dist.wide[, c('max_uniform', 'remove_low_entropy', 'actual_dist')])
-    );
-
-  overall.accuracy.dist.heatmap <- create.heatmap(
-    overall.accuracy.dist.wide[, ..metrics],
-    same.as.matrix = TRUE,
-    clustering.method = 'none',
-    colour.scheme = c('white', 'red'),
-    xaxis.lab = metrics,
-    xaxis.rot = 45,
-    at = seq(0, 1, length.out = 20),
-    xaxis.tck = 0,
-    yaxis.tck = 0,
-    fill.colour = 'lightgrey'
-    );
-
-  xlab.label <- switch (acc,
-    'dist' = 'Distribution accuracy',
-    'peaks' = 'Number of peaks accuracy',
-    'both' = 'Correct peak and distribution accuracy'
-    )
-
-  create.multipanelplot(
-    list(overall.accuracy.cov.heatmap, overall.accuracy.dist.heatmap),
-    plot.objects.widths = c(0.1, 1),
-    x.spacing = c(-0.25, 0),
-    width = 12,
-    legend = list(right = list(
-      fun = common.sim.legend(
-          cont.params.to.include = NULL
-          )
-        )
-      ),
-    layout.width = 2,
-    layout.height = 1,
-    xlab.label = xlab.label,
-    ...
-    )
-}
-
+#' @export
 sim.plot.quantile.accuracy <- function(
     x,
-    acc = c('dist', 'peaks', 'both'),
+    acc = c('dist', 'peaks', 'both', 'count'),
     sort.cols = NULL, ...) {
   acc <- match.arg(acc);
   decile.accuracy <- x[
@@ -217,37 +162,49 @@ sim.plot.quantile.accuracy <- function(
       accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
       accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
       accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
-      N = .N
-      ), by = .(metric, actual_dist, max_uniform, remove_low_entropy, N_decile, noise_decile, eps_decile)
+      count = .N
+      ), by = .(metric, actual_dist, max_uniform, remove_low_entropy, jaccard_decile, N_decile, noise_decile, eps_decile)
     ]
+
+  metrics <- unique(decile.accuracy$metric)
+#  decile.accuracy$count
+#   decile.accuracy$count <-
 
   decile.accuracy <- decile.accuracy[!max_uniform & !remove_low_entropy, ];
 
   decile.wide.accuracy.dist <- dcast(
     decile.accuracy,
-    actual_dist + max_uniform + remove_low_entropy + N_decile + noise_decile + eps_decile ~ metric,
-    value.var = paste0('accuracy_', acc)
+    actual_dist + max_uniform + remove_low_entropy + jaccard_decile + N_decile + noise_decile + eps_decile ~ metric,
+    value.var = if (acc == 'count') acc else paste0('accuracy_', acc)
     )
+  decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
+  if (acc == 'count') {
+    # TODO: Fix this the data way...
+    decile.wide.accuracy.dist[, metrics] <- decile.wide.accuracy.dist[, metrics] / colSums(decile.wide.accuracy.dist[, metrics], na.rm = T)
+    # Scale:
+    decile.wide.accuracy.dist[, metrics] <- lapply(decile.wide.accuracy.dist[, metrics], scale.param2, param.range = range(decile.wide.accuracy.dist[, metrics], na.rm = TRUE))
+  }
 
   cont.cols <- colnames(decile.wide.accuracy.dist)[grepl('_decile', colnames(decile.wide.accuracy.dist))];
 
   if (!is.null(sort.cols)) {
-    setorderv(decile.wide.accuracy.dist, sort.cols);
+    #setorderv(decile.wide.accuracy.dist, sort.cols);
+    decile.wide.accuracy.dist <- decile.wide.accuracy.dist[order(decile.wide.accuracy.dist[, sort.cols]), ]
   }
 
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
     #data.frame(decile.wide.accuracy.dist[, c('max_uniform', 'remove_low_entropy', 'actual_dist'), drop = FALSE])
-    data.frame(decile.wide.accuracy.dist[, c('actual_dist', 'N_decile', 'noise_decile', 'eps_decile')])
+    data.frame(decile.wide.accuracy.dist[, c('actual_dist', 'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile')])
     );
 
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
-    decile.wide.accuracy.dist[, ..metrics],
+    decile.wide.accuracy.dist[, metrics],
     same.as.matrix = TRUE,
     clustering.method = 'none',
     colour.scheme = c('white', 'red'),
     xaxis.lab = metrics,
     xaxis.rot = 45,
-    at = seq(0, 1, length.out = 20),
+    at = if (acc == 'count') NULL else seq(0, 1, length.out = 20),
     xaxis.tck = 0,
     yaxis.tck = 0,
     fill.colour = 'lightgrey'
