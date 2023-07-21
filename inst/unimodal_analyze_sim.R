@@ -90,7 +90,6 @@ best.segment <- unimodal.sim[
 
 unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(jaccard)], by=.(id, metric)]$V1]
 
-
 unimodal.sim[
   ,
   .(seg_length = mean(actual_length),
@@ -164,32 +163,10 @@ sim.plot.segment.jaccard(
     )
   )
 
-.decile.accuracy <- unimodal.sim[
-  , .(
-    accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
-    accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
-    accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
-    count = .N
-    ), by = .(metric, actual_dist, max_uniform, remove_low_entropy, jaccard_decile, N_decile, noise_decile, eps_decile)
-  ]
-
-.decile.wide.accuracy.dist <- dcast(
-    .decile.accuracy,
-    actual_dist + max_uniform + remove_low_entropy + jaccard_decile + N_decile + noise_decile + eps_decile ~ metric,
-    value.var = 'accuracy_dist'
-    )
-
-.decile.wide.accuracy.count <- dcast(
-    .decile.accuracy,
-    actual_dist + max_uniform + remove_low_entropy + jaccard_decile + N_decile + noise_decile + eps_decile ~ metric,
-    value.var = 'count'
-    )
-
 #for (cluster in c(FALSE, TRUE)){
-cluster <- FALSE
+# cluster <- FALSE
 #for (acc in c('count', 'dist', 'peaks')) {
 acc <- 'dist'
-
 
 categorical_vars <- c(
       'actual_dist', 'max_uniform', 'remove_low_entropy'
@@ -197,14 +174,11 @@ categorical_vars <- c(
 decile_vars <- c('eps_decile', 'N_decile', 'noise_decile', 'jaccard_decile')
 
 decile_uni_plots <- lapply(decile_vars, function(v) {
-  # suffix <- if (cluster) '-clustered' else '';
-  main <- if (cluster) 'DIANA Clustered' else 'No Clustering'
-  # main <- paste(main, sub('_decile', '', v), sep = ': ')
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
     resolution = 200,
-    cluster = cluster,
+    cluster = FALSE,
     group_vars = c(categorical_vars, v),
     acc = acc,
     legend = NULL,
@@ -215,7 +189,39 @@ decile_uni_plots <- lapply(decile_vars, function(v) {
     class(res) <- c('frame', 'gTree', 'grob', 'gDesc')
     res
   })
- # }
+
+decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
+  main <- sub('_decile', '', v)
+  res <- sim.plot.quantile.accuracy(
+    unimodal.sim,
+    resolution = 200,
+    cluster = TRUE,
+    group_vars = c(categorical_vars, v),
+    acc = acc,
+    legend = NULL,
+    main = main,
+    print.colour.key = FALSE,
+    xlab.label = ''
+    )
+    class(res) <- c('frame', 'gTree', 'grob', 'gDesc')
+    res
+  })
+
+png(nullfile())
+colourkey <- create.colourkey(
+    x = seq(0, 1, length.out = 100),
+    at = seq(0, 1, length.out = 20),
+    colour.scheme = c('white', 'red'),
+    colourkey.labels.cex = 2.5,
+    placement = viewport(
+        just='center',
+        x = 0.5,
+        y = 1,
+        width = 0.5,
+        height = 0.1
+        )
+    );
+dev.off()
 
 create.multipanelplot(
   decile_uni_plots,
@@ -224,15 +230,55 @@ create.multipanelplot(
   layout.height = 2,
   layout.width = 2,
   resolution = 200,
-  legend = list(right = list(
-    fun = common.sim.legend(
-      include.legends = c('params', 'distributions', 'quantiles'),
-      params.to.include = c('max_uniform', 'remove_low_entropy'),
-      cont.params.to.include = decile_vars
-      )
+  main = 'No Clustering',
+  xlab.label = 'Distribution Accuracy',
+  legend = list(
+    right = list(
+      fun = common.sim.legend(
+        include.legends = c('params', 'distributions', 'quantiles'),
+        params.to.include = c('max_uniform', 'remove_low_entropy'),
+        cont.params.to.include = decile_vars
+        )
+      ),
+    bottom = list(
+      fun = colourkey
     )
   ),
-  filename = 'mpp_test.png'
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp', 'png')
+      )
+    )
+  )
+
+create.multipanelplot(
+  decile_uni_plots_clustered,
+  width = 20,
+  height = 20,
+  layout.height = 2,
+  layout.width = 2,
+  resolution = 200,
+  main = 'DIANA Clustered',
+  xlab.label = 'Distribution Accuracy',
+  legend = list(
+    right = list(
+      fun = common.sim.legend(
+        include.legends = c('params', 'distributions', 'quantiles'),
+        params.to.include = c('max_uniform', 'remove_low_entropy'),
+        cont.params.to.include = decile_vars
+        )
+      ),
+    bottom = list(
+      fun = colourkey
+    )
+  ),
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-cluster', 'png')
+      )
+    )
   )
 
 # Scatter plot of # of segments vs eps?
