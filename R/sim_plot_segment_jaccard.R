@@ -9,6 +9,7 @@ sim.plot.segment.jaccard <- function(
       'N_decile', 'noise_decile',
       'eps_decile'
       ),
+    target = c('median_jaccard', 'count'),
     legend = list(
       right = list(
         fun = common.sim.legend(
@@ -20,19 +21,25 @@ sim.plot.segment.jaccard <- function(
       ),
     ...
     ) {
-
+  target <- match.arg(target);
   res <- x[
       , .(
-        median_jaccard = median(jaccard)
+        median_jaccard = median(jaccard),
+        count = .N
         ), by = c('actual_dist', group_vars)
       ]
 
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'actual_dist', sep = ' ~ ')
   res.wide <- dcast(
-      res,
-      max_uniform + remove_low_entropy + N_decile + noise_decile + eps_decile ~ actual_dist,
-      value.var = 'median_jaccard'
+      data = res,
+      formula = long.wide.formula,
+      value.var = target
       )
+
+  # Scale
+  if (target == 'count') {
+    res.wide[, c('gamma', 'norm', 'unif')] <- as.data.frame(scale(res.wide[, c('gamma', 'norm', 'unif')]))
+  }
 
   if (cluster) {
       diana.jaccard.clust <- diana(
@@ -49,7 +56,7 @@ sim.plot.segment.jaccard <- function(
         )])
       );
 
-  heatmap.at <- seq(0, 1, length.out = 20);
+  heatmap.at <- if (target == 'count') NULL else seq(0, 1, length.out = 20);
 
   jaccard.heatmap <- create.heatmap(
       res.wide[diana.jaccard.clust, c('gamma', 'norm', 'unif')],

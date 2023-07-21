@@ -151,6 +151,21 @@ sim.plot.segment.jaccard(
     )
   )
 
+# Shouldn't really have major differences since we are sampling uniformly
+# sim.plot.segment.jaccard(
+#   best.segment,
+#   cluster = FALSE,
+#   print.colour.key = FALSE,
+#   resolution = 200,
+#   target = 'count',
+#   filename = print(
+#     file.path(
+#       plots.folder,
+#       generate.filename('HZSimulation', 'count-jaccard', 'png')
+#       )
+#     )
+#   )
+
 sim.plot.segment.jaccard(
   best.segment,
   cluster = TRUE,
@@ -221,7 +236,6 @@ colourkey <- create.colourkey(
         height = 0.1
         )
     );
-dev.off()
 
 create.multipanelplot(
   decile_uni_plots,

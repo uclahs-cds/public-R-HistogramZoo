@@ -1,6 +1,6 @@
 unimodal.params <- list(
   N = c(25, 500),
-  eps = c(0.05, 2),
+  eps = c(0.5, 2),
   noise = c(.05, 0.5)
 )
 
