@@ -157,4 +157,4 @@ load.config <- function(file = NULL) {
 int_overlap <- function(a,b,c,d) {
   stopifnot(a <= b & c <= d)
   c <= b && a <= d
-}
+  }
