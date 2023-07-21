@@ -8,6 +8,8 @@ covariate.col <- list(
   jaccard.decile = 'violetred3'
   )
 
+acc.colour.scheme <- c('white', 'red');
+
 common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
     params.to.include = c(
@@ -34,7 +36,7 @@ common.sim.legend <- function(
       list(
         legend = list(
             colours = c(covariate.col$max.uniform, covariate.col$remove.low.entropy)[params.select],
-            title = "Parameters",
+            title = 'Parameters',
             labels = c('Max uniform', 'Remove low entropy')[params.select],
             size = 3,
             title.cex = 1,
@@ -50,8 +52,8 @@ common.sim.legend <- function(
       list(
         legend = list(
             colours = distribution_colours[c('norm', 'gamma', 'gamma_flip', 'unif')],
-            title = "Distribution",
-            labels = c("Normal","Gamma", "Flipped Gamma", "Uniform"),
+            title = 'Distribution',
+            labels = c('Normal','Gamma', 'Flipped Gamma', 'Uniform'),
             size = 3,
             title.cex = 1,
             label.cex = 1,
@@ -155,7 +157,29 @@ sim.plot.heatmap.cov <- function(cov.data) {
 sim.plot.quantile.accuracy <- function(
     x,
     acc = c('dist', 'peaks', 'both', 'count'),
-    sort.cols = NULL, ...) {
+    sort.cols = NULL,
+    cluster = FALSE,
+    print.colour.key = TRUE,
+    group_vars = c(
+      'actual_dist', 'max_uniform', 'remove_low_entropy',
+      'jaccard_decile', 'N_decile', 'noise_decile',
+      'eps_decile'
+      ),
+    legend = list(
+      right = list(
+        fun = common.sim.legend(
+          include.legends = c('params', 'distributions', 'quantiles'),
+          params.to.include = intersect(group_vars, c('max_uniform', 'remove_low_entropy')),
+          cont.params.to.include = group_vars[grepl('_decile', group_vars)]
+          )
+        )
+      ),
+    xlab.label = switch (acc,
+      'dist' = 'Distribution accuracy',
+      'peaks' = 'Number of peaks accuracy',
+      'both' = 'Correct peak and distribution accuracy'
+      ),
+    ...) {
   acc <- match.arg(acc);
   decile.accuracy <- x[
     , .(
@@ -163,45 +187,45 @@ sim.plot.quantile.accuracy <- function(
       accuracy_peaks = mean(num_segments == 1, na.rm = TRUE),
       accuracy_both = mean(actual_dist == dist & num_segments == 1, na.rm = TRUE),
       count = .N
-      ), by = .(metric, actual_dist, max_uniform, remove_low_entropy, jaccard_decile, N_decile, noise_decile, eps_decile)
+      ), by = c('metric', group_vars)
     ]
 
   metrics <- unique(decile.accuracy$metric)
-#  decile.accuracy$count
-#   decile.accuracy$count <-
 
-  decile.accuracy <- decile.accuracy[!max_uniform & !remove_low_entropy, ];
+  # decile.accuracy <- decile.accuracy[(!max_uniform), ];
 
+  long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'metric', sep = ' ~ ')
   decile.wide.accuracy.dist <- dcast(
     decile.accuracy,
-    actual_dist + max_uniform + remove_low_entropy + jaccard_decile + N_decile + noise_decile + eps_decile ~ metric,
+    long.wide.formula,
     value.var = if (acc == 'count') acc else paste0('accuracy_', acc)
     )
   decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
-  if (acc == 'count') {
-    # TODO: Fix this the data way...
-    decile.wide.accuracy.dist[, metrics] <- decile.wide.accuracy.dist[, metrics] / colSums(decile.wide.accuracy.dist[, metrics], na.rm = T)
-    # Scale:
-    decile.wide.accuracy.dist[, metrics] <- lapply(decile.wide.accuracy.dist[, metrics], scale.param2, param.range = range(decile.wide.accuracy.dist[, metrics], na.rm = TRUE))
-  }
 
   cont.cols <- colnames(decile.wide.accuracy.dist)[grepl('_decile', colnames(decile.wide.accuracy.dist))];
 
-  if (!is.null(sort.cols)) {
-    #setorderv(decile.wide.accuracy.dist, sort.cols);
-    decile.wide.accuracy.dist <- decile.wide.accuracy.dist[order(decile.wide.accuracy.dist[, sort.cols]), ]
-  }
+  if (cluster) {
+    cluster.mat <- decile.wide.accuracy.dist[, metrics]
+    na.cells <- is.na(decile.wide.accuracy.dist[, metrics])
+    cluster.mat[na.cells] <- -1
+
+    diana.acc.clust <- diana(
+      cluster.mat
+      )$order
+  } else {
+      diana.acc.clust <- seq_len(nrow(decile.wide.accuracy.dist))
+    }
 
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
-    #data.frame(decile.wide.accuracy.dist[, c('max_uniform', 'remove_low_entropy', 'actual_dist'), drop = FALSE])
-    data.frame(decile.wide.accuracy.dist[, c('actual_dist', 'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile')])
+    data.frame(decile.wide.accuracy.dist[diana.acc.clust, group_vars])
     );
 
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
-    decile.wide.accuracy.dist[, metrics],
+    decile.wide.accuracy.dist[diana.acc.clust, metrics],
     same.as.matrix = TRUE,
     clustering.method = 'none',
-    colour.scheme = c('white', 'red'),
+    print.colour.key = print.colour.key,
+    colour.scheme = acc.colour.scheme,
     xaxis.lab = metrics,
     xaxis.rot = 45,
     at = if (acc == 'count') NULL else seq(0, 1, length.out = 20),
@@ -210,24 +234,13 @@ sim.plot.quantile.accuracy <- function(
     fill.colour = 'lightgrey'
     );
 
-  xlab.label <- switch (acc,
-    'dist' = 'Distribution accuracy',
-    'peaks' = 'Number of peaks accuracy',
-    'both' = 'Correct peak and distribution accuracy'
-    )
-
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
     plot.objects.widths = c(0.1, 1),
     x.spacing = c(-0.25, 0),
     width = 12,
-    legend = list(right = list(
-      fun = common.sim.legend(
-        include.legends = c('distributions', 'quantiles'),
-        cont.params.to.include = cont.cols
-        )
-      )
-    ),
+    legend = legend,
+    main.cex = 2,
     layout.width = 2,
     layout.height = 1,
     xlab.label = xlab.label,
