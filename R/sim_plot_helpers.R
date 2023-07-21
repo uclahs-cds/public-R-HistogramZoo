@@ -117,11 +117,11 @@ sim.plot.heatmap.cov <- function(cov.data) {
     cov.data$remove_low_entropy <- ifelse(cov.data$remove_low_entropy, covariate.col$remove.low.entropy, 'white');
   }
   if ('actual_dist' %in% colnames(cov.data)) {
-    cov.data$actual_dist <- unname(distribution_colours[cov.data$actual_dist]);
+    cov.data$actual_dist <- unname(distribution_colours[as.character(cov.data$actual_dist)]);
   }
   if ('dist' %in% colnames(cov.data)) {
     # TODO: Combine
-    cov.data$dist <- unname(distribution_colours[cov.data$dist]);
+    cov.data$dist <- unname(distribution_colours[as.character(cov.data$dist)]);
   }
   if ('jaccard_decile' %in% colnames(cov.data)) {
     cov.data$jaccard_decile <- assign.cov.factor.col(cov.data$jaccard_decile, c('white', covariate.col$jaccard.decile));

@@ -295,6 +295,35 @@ create.multipanelplot(
     )
   )
 
-# Scatter plot of # of segments vs eps?
-#
+# Across all variables
+sim.plot.quantile.accuracy(
+    unimodal.sim,
+    resolution = 800,
+    cluster = TRUE,
+    acc = 'dist',
+    main = 'DIANA Clustered Distribution Accuracy',
+    print.colour.key = TRUE,
+    xlab.label = 'Distribution Accuracy',
+    filename = print(
+    file.path(
+      plots.folder,
+      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-cluster-all', 'png')
+      )
+    )
+  )
 
+sim.plot.quantile.accuracy(
+    unimodal.sim,
+    resolution = 400,
+    cluster = FALSE,
+    acc = 'dist',
+    main = 'No clustering',
+    print.colour.key = TRUE,
+    xlab.label = 'Distribution Accuracy',
+    filename = print(
+    file.path(
+      plots.folder,
+      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-all', 'png')
+      )
+    )
+  )

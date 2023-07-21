@@ -8,8 +8,7 @@ sim.plot.quantile.accuracy <- function(
     print.colour.key = TRUE,
     group_vars = c(
       'actual_dist', 'max_uniform', 'remove_low_entropy',
-      'jaccard_decile', 'N_decile', 'noise_decile',
-      'eps_decile'
+      'jaccard_decile', 'N_decile', 'noise_decile'
       ),
     legend = list(
       right = list(
@@ -49,12 +48,16 @@ sim.plot.quantile.accuracy <- function(
   decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
 
   cont.cols <- colnames(decile.wide.accuracy.dist)[grepl('_decile', colnames(decile.wide.accuracy.dist))];
-
   if (cluster) {
     cluster.mat <- decile.wide.accuracy.dist[, metrics]
     na.cells <- is.na(decile.wide.accuracy.dist[, metrics])
     cluster.mat[na.cells] <- -1
 
+    # diana.acc.clust <- hclust(
+    #   dist(
+    #     cluster.mat
+    #   )
+    # )$order
     diana.acc.clust <- diana(
       cluster.mat
       )$order
@@ -63,8 +66,8 @@ sim.plot.quantile.accuracy <- function(
     }
 
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
-    data.frame(decile.wide.accuracy.dist[diana.acc.clust, group_vars])
-    );
+    decile.wide.accuracy.dist[diana.acc.clust, group_vars]
+    )
 
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
     decile.wide.accuracy.dist[diana.acc.clust, metrics],
