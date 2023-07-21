@@ -9,10 +9,10 @@ random_multi_peak_sim <- function(
     remove_low_entropy = NULL,
     truncated_models = FALSE,
     peaks = 2:3,
-    peak_shift = c(1, 5), # Peak shift in standard deviations from previous peak
+    peak_shift = c(2, 8), # Peak shift in standard deviations from first peak
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
     return_fit = FALSE,
-    seed = as.integer(Sys.time())
+    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
   ) {
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(remove_low_entropy)) remove_low_entropy <- sample(c(TRUE, FALSE), size = 1)
@@ -73,12 +73,14 @@ random_multi_peak_sim <- function(
   # Shift each eap
   # In standard deviations
   if (peaks_sim > 1) {
-    peak_shift_sample <- c(0, .sample_unif(peak_shift, n = peaks_sim - 1))
+    peak_shift_sample <- cumsum(c(0, .sample_unif(peak_shift, n = peaks_sim - 1)))
+    peaK_shift_actual <- multi_histogram_data[[1]]$sd_dist * peak_shift_sample
     for (p in 2:peaks_sim) {
       # Shift peaks
       multi_histogram_data[[p]]$shift <- peak_shift_sample[p]
+      multi_histogram_data[[p]]$true_shift <- peaK_shift_actual[p]
       multi_histogram_data[[p]]$peak <- multi_histogram_data[[p]]$peak +
-        peak_shift_sample[p] * multi_histogram_data[[p]]$sd_dist
+        multi_histogram_data[[p]]$true_shift
     }
   }
 
@@ -115,6 +117,34 @@ random_multi_peak_sim <- function(
         histogram_bin_width = 1
         )
 
+  peak_min <- unlist(lapply(peak_histograms, function(x) head(x$interval_start, n = 1)))
+  peak_max <- unlist(lapply(peak_histograms, function(x) tail(x$interval_end, n = 1)))
+
+    res <- list(
+        N = N_sim,
+        param = unlist(lapply(multi_histogram_data, function(x) x$param)),
+        peak_num = seq_along(peak_min),
+        peak_min = peak_min,
+        peak_max = peak_max,
+        peak_shift = peak_shift_sample,
+        peak_shift_actual = peaK_shift_actual,
+        noise_min = noise_min,
+        noise_max = noise_max,
+        noise = noise_sim,
+        noise_N = N_noise_sim,
+        actual_dist = sim_dist,
+        eps = eps_sample,
+        seed = seed,
+        max_uniform = max_uniform,
+        remove_low_entropy = remove_low_entropy,
+        truncated_models = truncated_models,
+        peaks = peaks_sim
+        )
+
+    print.res <- as.data.frame(res)
+    print('PARAMS: ')
+    print(print.res)
+
   timing <- system.time({
     seg_results_mod <- try({
       segment_and_fit(
@@ -124,7 +154,8 @@ random_multi_peak_sim <- function(
         metric = metrics,
         eps = eps_sample,
         truncated_models = truncated_models,
-        metric_weights = sqrt(rev(seq_along(metrics)))
+        metric_weights = sqrt(rev(seq_along(metrics))),
+        seed = seed
         )
       }, silent = TRUE)
     peak_start <- seg_results_mod$interval_start[seg_results_mod$p[, 'start']]
@@ -135,29 +166,6 @@ random_multi_peak_sim <- function(
   seg_results <- cbind.data.frame(
     seg_results,
     t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
-    )
-
-  peak_min <- unlist(lapply(peak_histograms, function(x) head(x$interval_start, n = 1)))
-  peak_max <- unlist(lapply(peak_histograms, function(x) tail(x$interval_end, n = 1)))
-
-  res <- list(
-    N = N_sim,
-    param = unlist(lapply(multi_histogram_data, function(x) x$param)),
-    peak_num = seq_along(peak_min),
-    peak_min = peak_min,
-    peak_max = peak_max,
-    peak_shift = peak_shift_sample,
-    noise_min = noise_min,
-    noise_max = noise_max,
-    noise = noise_sim,
-    noise_N = N_noise_sim,
-    actual_dist = sim_dist,
-    eps = eps_sample,
-    seed = seed,
-    max_uniform = max_uniform,
-    remove_low_entropy = remove_low_entropy,
-    truncated_models = truncated_models,
-    peaks = peaks_sim
     )
 
     # long format, one peak per line

@@ -8,9 +8,11 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 
 # v1-v3 need to have peak_min, peak_max computed
-sim.folders <- c(
-    'unimodal_sim_noise_v2', 'unimodal_sim_noise_v3',
-    'unimodal_sim_noise_v4', 'unimodal_sim_noise_v5');
+# sim.folders <- c(
+#     'unimodal_sim_noise_v2', 'unimodal_sim_noise_v3',
+#     'unimodal_sim_noise_v4', 'unimodal_sim_noise_v5');
+
+sim.folders <- 'unimodal_sim_noise_v5';
 
 for (sim in sim.folders) {
   for (mle in c(FALSE, TRUE)) {

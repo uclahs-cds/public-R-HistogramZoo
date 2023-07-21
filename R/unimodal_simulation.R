@@ -1,8 +1,7 @@
 unimodal.params <- list(
   N = c(25, 500),
   eps = c(0.05, 2),
-  noise = c(.05, 2),
-  param = c(0, 1)
+  noise = c(.05, 2)
 )
 
 random_unimodal_sim <- function(
@@ -16,7 +15,7 @@ random_unimodal_sim <- function(
     remove_low_entropy = NULL,
     truncated_models = FALSE,
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
-    seed = as.integer(Sys.time())
+    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
   ) {
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
@@ -72,26 +71,6 @@ random_unimodal_sim <- function(
     histogram_bin_width = 1
     )
 
-  timing <- system.time({
-    seg_results_mod <- try({
-      segment_and_fit(
-        histogram_data,
-        max_uniform = max_uniform,
-        remove_low_entropy = remove_low_entropy,
-        metric = metrics,
-        eps = eps_sample,
-        truncated_models = truncated_models,
-        metric_weights = sqrt(rev(seq_along(metrics)))
-        )
-      }, silent = TRUE)
-    seg_results <- summarize_results_error(seg_results_mod)
-    })
-
-  seg_results <- cbind.data.frame(
-    seg_results,
-    t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
-    )
-
   res <- list(
     N = N_sim,
     param = param,
@@ -106,6 +85,31 @@ random_unimodal_sim <- function(
     max_uniform = max_uniform,
     remove_low_entropy = remove_low_entropy,
     truncated_models = truncated_models
+    )
+
+    print.res <- as.data.frame(res)
+    rownames(print.res) <- 'PARAMS: '
+    print(print.res)
+
+  timing <- system.time({
+    seg_results_mod <- try({
+      segment_and_fit(
+        histogram_data,
+        max_uniform = max_uniform,
+        remove_low_entropy = remove_low_entropy,
+        metric = metrics,
+        eps = eps_sample,
+        truncated_models = truncated_models,
+        metric_weights = sqrt(rev(seq_along(metrics))),
+        seed = seed
+        )
+      }, silent = TRUE)
+    seg_results <- summarize_results_error(seg_results_mod)
+    })
+
+  seg_results <- cbind.data.frame(
+    seg_results,
+    t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
     )
 
     return(cbind.data.frame(res, seg_results))
