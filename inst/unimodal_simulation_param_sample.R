@@ -1,7 +1,7 @@
 library(HistogramZoo)
 
 base.path <- HistogramZoo:::load.config()$root.path;
-results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v6');
+results.folder <- file.path(base.path, 'results', 'unimodal_sim_noise_v7');
 
 opts <- commandArgs(trailingOnly = TRUE)
 N <- 10
@@ -20,9 +20,9 @@ if (length(opts) >= 2) {
 
 params <- list(
     N = c(25, 500),
-    unif_length = c(6, 25),
+    unif_length = c(6, 24),
     norm_sd = c(1, 4),
-    gamma_shape = c(4, 10),
+    gamma_shape = c(1, 13),
     eps = c(0.5, 2),
     noise = c(.05, .5),
     max_uniform = NULL,

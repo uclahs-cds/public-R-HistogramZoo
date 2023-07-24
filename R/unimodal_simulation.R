@@ -6,18 +6,22 @@ unimodal.params <- list(
 
 random_unimodal_sim <- function(
     N = c(25, 500),
-    unif_length = c(6, 25),
+    unif_length = c(6, 24),
     norm_sd = c(1, 4),
-    gamma_shape = c(1, 4),
+    gamma_shape = c(1, 13),
     eps = c(0.05, 2),
     noise = c(.05, .5),
     max_uniform = NULL,
     remove_low_entropy = NULL,
     truncated_models = FALSE,
+    include_data = FALSE,
+    include_segment_and_fit = TRUE,
+    actual_dist = c('norm', 'unif', 'gamma'),
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
     seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
   ) {
-  sim_dist <- sample(c('norm', 'unif', 'gamma'), size = 1)
+  set.seed(seed);
+  sim_dist <- if (length(actual_dist) == 1) actual_dist else sample(actual_dist, size = 1)
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(remove_low_entropy)) remove_low_entropy <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(truncated_models)) truncated_models <- sample(c(TRUE, FALSE), size = 1)
@@ -25,13 +29,15 @@ random_unimodal_sim <- function(
   .sample_unif <- function(x, n = 1) {
     runif(n, min = x[1], max = x[2])
   }
+
   set.seed(seed);
 
-  N_sim <- .sample_unif(N)
-  eps_sample <- .sample_unif(eps)
-  noise_sim <- .sample_unif(noise)
+  N_sim <- if (length(N) == 1) N else .sample_unif(N)
+  eps_sample <- if (length(eps) == 1) eps else .sample_unif(eps)
+  noise_sim <- if (length(noise) == 1) noise else .sample_unif(noise)
   N_noise_sim <- round(N_sim * noise_sim)
 
+  set.seed(seed);
   if (sim_dist == 'norm') {
     param <- .sample_unif(norm_sd)
     peak <- rnorm(N_sim, mean = 0, sd = param)
@@ -91,26 +97,33 @@ random_unimodal_sim <- function(
     rownames(print.res) <- 'PARAMS: '
     print(print.res)
 
-  timing <- system.time({
-    seg_results_mod <- try({
-      segment_and_fit(
-        histogram_data,
-        max_uniform = max_uniform,
-        remove_low_entropy = remove_low_entropy,
-        metric = metrics,
-        eps = eps_sample,
-        truncated_models = truncated_models,
-        metric_weights = sqrt(rev(seq_along(metrics))),
-        seed = seed
+    if (! include_data && include_segment_and_fit) {
+      timing <- system.time({
+      seg_results_mod <- try({
+        segment_and_fit(
+          histogram_data,
+          max_uniform = max_uniform,
+          remove_low_entropy = remove_low_entropy,
+          metric = metrics,
+          eps = eps_sample,
+          truncated_models = truncated_models,
+          metric_weights = sqrt(rev(seq_along(metrics))),
+          seed = seed
+          )
+        }, silent = TRUE)
+      seg_results <- summarize_results_error(seg_results_mod)
+      })
+
+      seg_results <- cbind.data.frame(
+        seg_results,
+        t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
         )
-      }, silent = TRUE)
-    seg_results <- summarize_results_error(seg_results_mod)
-    })
 
-  seg_results <- cbind.data.frame(
-    seg_results,
-    t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
-    )
-
-    return(cbind.data.frame(res, seg_results))
+      return(cbind.data.frame(res, seg_results))
+    } else {
+      # Return the actual data
+        res$peak_data <- peak
+        res$noise_data <- noise_data
+        return(res)
+      }
 }
