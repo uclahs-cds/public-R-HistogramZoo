@@ -8,9 +8,14 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 plots.folder <- file.path(base.path, 'plots');
 
+sim_version <- c('v5', 'v6');
+sim_merge_date <- '2023-07-24'
+
+sim_version_regex <- paste0('[', paste0(sim_version, collapse = '|'), ']')
+sim_version <- paste0(sim_version, collapse = '-')
 metric.files <- list.files(
   path = merged.folder,
-  pattern = '2023-07-24_.*v5.*noise.tsv',
+  pattern = paste0(sim_merge_date, '_.*', sim_version_regex, '.*noise.tsv'),
   full.names = TRUE
   )
 
@@ -21,7 +26,7 @@ unimodal.sim.metrics <- rbindlist(
 
 mle.files <- list.files(
   path = merged.folder,
-  pattern = '2023-07-24_.*v5.*mle',
+  pattern = paste0(sim_merge_date, '_.*', sim_version_regex, '.*mle'),
   full.names = TRUE
   )
 
@@ -100,6 +105,119 @@ unimodal.sim[
   , by = .(actual_dist)
   ]
 
+unimodal.sim[
+  ,
+  .(seg_length = mean(actual_length),
+    seg_length_median = median(actual_length),
+    max_seg_length = max(actual_length),
+    min_seg_length = min(seg_length),
+    mean_param1 = mean(dist_param1, na.rm = TRUE),
+    mean_param2 = mean(dist_param2, na.rm = TRUE),
+    mean_true_param = mean(param, na.rm = TRUE)
+    )
+  , by = .(actual_dist)
+  ]
+
+dput(colnames(unimodal.sim))
+
+### Create heatmap of the correlations
+jaccard.cor.data <- as.data.frame(unimodal.sim[
+  ,
+  .(
+    N_cor = cor(N, jaccard, method = 'spearman'),
+    eps_cor = cor(eps, jaccard, method = 'spearman'),
+    noise_cor = cor(noise, jaccard, method = 'spearman'),
+    param_cor = cor(param, jaccard, method = 'spearman')
+    )
+  , by = .(remove_low_entropy, max_uniform, actual_dist)
+  ])
+
+# jaccard.cor.data.wide <- dcast(
+#       data = jaccard.cor.data,
+#       formula = long.wide.formula,
+#       value.var = ''
+#       )
+
+cor.cols <- colnames(jaccard.cor.data)[grepl('_cor', colnames(jaccard.cor.data))]
+
+jaccard.cor.order <- diana(jaccard.cor.data[, cor.cols])$order
+jaccard.cor.order.t <- diana(t(jaccard.cor.data[, cor.cols]))$order
+
+cor.cov.heatmap <- sim.plot.heatmap.cov(
+    jaccard.cor.data[jaccard.cor.order, c(
+      'remove_low_entropy', 'max_uniform', 'actual_dist'
+      )]
+    );
+
+cor.data <- jaccard.cor.data[jaccard.cor.order, cor.cols[jaccard.cor.order.t]]
+
+row.col.text <- cbind.data.frame(
+  which(abs(cor.data) > 0.1, arr.ind = TRUE),
+  value = round(cor.data[abs(cor.data) > 0.1], digits = 2)
+  )
+row.col.text$row <- nrow(cor.data) - row.col.text$row + 1
+
+xaxis.lab <- c(
+  expression('\u03c1'['N']),
+  expression('\u03c1'['\u03B5']),
+  expression('\u03c1'['noise']),
+  expression('\u03c1'['param'])
+  )[jaccard.cor.order.t]
+
+cov.hm <- create.heatmap(
+  x = cor.data,
+  same.as.matrix = TRUE,
+  colourkey.cex = 2,
+  clustering.method = 'none',
+  row.pos = row.col.text$row,
+  col.pos = row.col.text$col,
+  cell.text = cor.data.round[abs(cor.data) > 0.1],
+  text.use.grid.coordinates = TRUE,
+  xaxis.lab = xaxis.lab,
+  xaxis.rot = 0,
+  at = seq(-1, 1, length.out = 10),
+  xaxis.tck = 0,
+  yaxis.tck = 0,
+  fill.colour = 'lightgrey'
+  )
+
+create.multipanelplot(
+  list(cor.cov.heatmap, cov.hm),
+  plot.objects.widths = c(0.1, 1),
+  x.spacing = c(-0.25, 0),
+  width = 12,
+  main = 'Spearman correlation with segment Jaccard',
+  main.cex = 2,
+  layout.width = 2,
+  layout.height = 1,
+  resolution = 400,
+  legend = list(
+      right = list(
+        fun = common.sim.legend(
+          include.legends = c('params', 'distributions'),
+          params.to.include = c('max_uniform', 'remove_low_entropy'),
+          cont.params.to.include = NULL
+          )
+        )
+      ),
+  xlab.label = 'Spearman correlation',
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename(paste0('HZSimulation', sim_version), 'cor-jaccard-segment', 'png')
+      )
+    )
+  )
+
+
+# unimodal.sim.split.actual <- split()
+cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
+
+# View(unimodal.sim[actual_dist == 'unif' & dist == 'unif'])
+# unimodal.sim$dist_param3_name
+
+# TODO: Raw data
+
 # Which metric we select is arbitrary for union, ks, jaccard, etc since they have the same segmentation
 # best.segment <- best.segment[best.segment$metric %in% c('mle', 'ks'), ];
 
@@ -147,7 +265,7 @@ sim.plot.segment.jaccard(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'median-jaccard', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'median-jaccard', 'png')
       )
     )
   )
@@ -162,7 +280,7 @@ sim.plot.segment.jaccard(
 #   filename = print(
 #     file.path(
 #       plots.folder,
-#       generate.filename('HZSimulation', 'count-jaccard', 'png')
+#       generate.filename(paste0('HZSimulation', sim_version), 'count-jaccard', 'png')
 #       )
 #     )
 #   )
@@ -174,7 +292,7 @@ sim.plot.segment.jaccard(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'median-jaccard-clustered', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'median-jaccard-clustered', 'png')
       )
     )
   )
@@ -240,6 +358,27 @@ decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
     res
   })
 
+# What is the average jaccard per *actual distribution*
+print(unimodal.sim[
+  ,
+  .(
+    median_jaccard = median(jaccard),
+    mean_jaccard = mean(jaccard),
+    N = .N
+    ),
+  by = .(max_uniform, remove_low_entropy, actual_dist)
+  ][
+    order(-mean_jaccard)
+  ]) %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
+
+
+
+  # [
+  #   ,
+  #   proportion := N / sum(N)
+  # ][
+  #   order(-N)
+  # ])
 
 
 # hypothesis: uniform only classifies at higher jaccard *because* segmentation gets higher jaccard
@@ -283,6 +422,9 @@ print(unimodal.sim[
     order(-N)
   ]) # %>% head() %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
 
+# Want to calculate F1, precision, recall
+
+
 png(nullfile())
 colourkey <- create.colourkey(
     x = seq(0, 1, length.out = 100),
@@ -322,7 +464,7 @@ create.multipanelplot(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp', 'png')
       )
     )
   )
@@ -351,7 +493,7 @@ create.multipanelplot(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-cluster', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-cluster', 'png')
       )
     )
   )
@@ -372,7 +514,7 @@ sim.plot.quantile.accuracy(
     filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-cluster-all', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-cluster-all', 'png')
       )
     )
   )
@@ -392,7 +534,7 @@ sim.plot.quantile.accuracy(
     filename = print(
     file.path(
       plots.folder,
-      generate.filename('HZSimulation', 'dist-acc-unimodal-mpp-all', 'png')
+      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-all', 'png')
       )
     )
   )
@@ -422,3 +564,4 @@ sim.plot.quantile.accuracy(
 #     ),
 #   by = .(metric, remove_low_entropy)
 #   ]
+
