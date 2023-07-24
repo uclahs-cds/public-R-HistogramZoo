@@ -10,7 +10,7 @@ plots.folder <- file.path(base.path, 'plots');
 
 metric.files <- list.files(
   path = merged.folder,
-  pattern = '2023-07-21_.*v5.*noise.tsv',
+  pattern = '2023-07-24_.*v5.*noise.tsv',
   full.names = TRUE
   )
 
@@ -21,7 +21,7 @@ unimodal.sim.metrics <- rbindlist(
 
 mle.files <- list.files(
   path = merged.folder,
-  pattern = '2023-07-21_.*v5.*mle',
+  pattern = '2023-07-24_.*v5.*mle',
   full.names = TRUE
   )
 
@@ -78,7 +78,6 @@ unimodal.sim$correct_dist <- unimodal.sim$actual_dist == unimodal.sim$dist
 quantile_p <- c(0, 1/4, 2/4, 3/4, 1)
 decile_p <- seq(0, 1, by = 0.1)
 
-unimodal.sim$jaccard_decile <- cut(unimodal.sim$jaccard, quantile(unimodal.sim$jaccard, p = decile_p))
 unimodal.sim$noise_decile <- cut(unimodal.sim$noise, scale.param(quantile_p, param.range = unimodal.params$noise))
 unimodal.sim$eps_decile <- cut(unimodal.sim$eps, scale.param(quantile_p, param.range = unimodal.params$eps))
 unimodal.sim$N_decile <- cut(unimodal.sim$N, round(scale.param(quantile_p, param.range = unimodal.params$N)))
@@ -89,6 +88,8 @@ best.segment <- unimodal.sim[
   ]
 
 unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(jaccard)], by=.(id, metric)]$V1]
+
+unimodal.sim$jaccard_decile <- cut(unimodal.sim$jaccard, quantile(unimodal.sim$jaccard, p = decile_p))
 
 unimodal.sim[
   ,
@@ -222,6 +223,66 @@ decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
     res
   })
 
+decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
+  main <- sub('_decile', '', v)
+  res <- sim.plot.quantile.accuracy(
+    unimodal.sim,
+    resolution = 200,
+    cluster = TRUE,
+    group_vars = c(categorical_vars, v),
+    acc = acc,
+    legend = NULL,
+    main = main,
+    print.colour.key = FALSE,
+    xlab.label = ''
+    )
+    class(res) <- c('frame', 'gTree', 'grob', 'gDesc')
+    res
+  })
+
+
+
+# hypothesis: uniform only classifies at higher jaccard *because* segmentation gets higher jaccard
+jaccard_unif_table <- unimodal.sim[
+  actual_dist == 'unif',
+  .(
+    median_jaccard = median(jaccard),
+    N = .N
+    ),
+  by = .(dist)
+  ]
+
+jaccard_unif_table$perc <- jaccard_unif_table$N / sum(jaccard_unif_table$N)
+jaccard_unif_table$perc
+
+print(unimodal.sim[
+  actual_dist == 'unif',
+  .(
+    median_jaccard = median(jaccard),
+    mean_jaccard = mean(jaccard),
+    N = .N
+    ),
+  by = .(dist)
+  ][
+    ,
+    proportion := N / sum(N)
+  ][
+    order(-N)
+  ]) # %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
+
+print(unimodal.sim[
+  actual_dist == 'unif',
+  .(
+    N = .N
+    ),
+  by = .(dist, jaccard_decile)
+  ][
+   ,
+   proportion := N / sum(N)
+  ][
+    order(-N)
+  ]) # %>% head() %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
+
 png(nullfile())
 colourkey <- create.colourkey(
     x = seq(0, 1, length.out = 100),
@@ -301,6 +362,10 @@ sim.plot.quantile.accuracy(
     resolution = 800,
     cluster = TRUE,
     acc = 'dist',
+    group_vars = c(
+      'actual_dist', 'max_uniform', 'remove_low_entropy',
+      'N_decile', 'noise_decile'
+      ),
     main = 'DIANA Clustered Distribution Accuracy',
     print.colour.key = TRUE,
     xlab.label = 'Distribution Accuracy',
@@ -318,6 +383,10 @@ sim.plot.quantile.accuracy(
     cluster = FALSE,
     acc = 'dist',
     main = 'No clustering',
+    group_vars = c(
+      'actual_dist', 'max_uniform', 'remove_low_entropy',
+      'N_decile', 'noise_decile'
+      ),
     print.colour.key = TRUE,
     xlab.label = 'Distribution Accuracy',
     filename = print(
@@ -327,3 +396,29 @@ sim.plot.quantile.accuracy(
       )
     )
   )
+
+
+# How far off are parameters for normal and gamma?
+# correct_norm <- unimodal.sim[
+#   actual_dist == 'norm' & dist == 'norm',
+#   .(
+#     bias_mean = dist_param1,
+#     bias_sd = dist_param2 - param
+#     ),
+#   by = .(metric, remove_low_entropy)
+#   ]
+#
+# correct_norm$metric_rle <- interaction(correct_norm$metric, correct_norm$remove_low_entropy)
+# create.boxplot(
+#   bias_mean ~ metric_rle,
+#   data = correct_norm,
+#   )
+#
+# correct_gamma <- unimodal.sim[
+#   actual_dist == 'gamma' & dist == 'gamma',
+#   .(
+#     bias_shape = mean(dist_param1 - param),
+#     bias_rate = mean(dist_param2 - 1)
+#     ),
+#   by = .(metric, remove_low_entropy)
+#   ]

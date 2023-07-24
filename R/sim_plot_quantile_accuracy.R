@@ -74,7 +74,7 @@ sim.plot.quantile.accuracy <- function(
     same.as.matrix = TRUE,
     clustering.method = 'none',
     print.colour.key = print.colour.key,
-    colour.scheme = acc.colour.scheme,
+    colour.scheme = if (acc != 'count') acc.colour.scheme else c('white', 'forestgreen'),
     xaxis.lab = metrics,
     xaxis.rot = 45,
     at = if (acc == 'count') NULL else seq(0, 1, length.out = 20),
