@@ -14,7 +14,6 @@ random_unimodal_sim <- function(
     max_uniform = NULL,
     remove_low_entropy = NULL,
     truncated_models = FALSE,
-    include_data = FALSE,
     include_segment_and_fit = TRUE,
     actual_dist = c('norm', 'unif', 'gamma'),
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
@@ -97,7 +96,7 @@ random_unimodal_sim <- function(
     rownames(print.res) <- 'PARAMS: '
     print(print.res)
 
-    if (! include_data && include_segment_and_fit) {
+    if (include_segment_and_fit) {
       timing <- system.time({
       seg_results_mod <- try({
         segment_and_fit(
