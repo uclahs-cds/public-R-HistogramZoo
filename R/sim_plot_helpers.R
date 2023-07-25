@@ -51,9 +51,9 @@ common.sim.legend <- function(
       legend.list,
       list(
         legend = list(
-            colours = distribution_colours[c('norm', 'gamma', 'gamma_flip', 'unif')],
+            colours = distribution_colours[c('norm', 'gamma', 'unif')],
             title = 'Distribution',
-            labels = c('Normal','Gamma', 'Flipped Gamma', 'Uniform'),
+            labels = c('Normal','Gamma', 'Uniform'),
             size = 3,
             title.cex = 1,
             label.cex = 1,
