@@ -97,7 +97,8 @@ random_unimodal_sim <- function(
     rownames(print.res) <- 'PARAMS: '
     print(print.res)
 
-    if (! include_data && include_segment_and_fit) {
+    all_seg_results <- NULL
+    if (include_segment_and_fit) {
       timing <- system.time({
       seg_results_mod <- try({
         segment_and_fit(
@@ -119,8 +120,21 @@ random_unimodal_sim <- function(
         t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
         )
 
-      return(cbind.data.frame(res, seg_results))
-    } else {
+      all_seg_results <- cbind.data.frame(res, seg_results)
+      if (!include_data) return(all_seg_results)
+      else {
+        return(
+          list(
+            seg_results = all_seg_results,
+            hz_model = seg_results_mod,
+            peak_data = peak,
+            noise_data = noise_data
+          )
+        )
+      }
+    }
+
+    if (include_data) {
       # Return the actual data
         res$peak_data <- peak
         res$noise_data <- noise_data
