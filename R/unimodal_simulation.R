@@ -39,14 +39,14 @@ random_unimodal_sim <- function(
 
   set.seed(seed);
   if (sim_dist == 'norm') {
-    param <- .sample_unif(norm_sd)
+    param <- if (length(norm_sd) == 1) norm_sd else .sample_unif(norm_sd)
     peak <- rnorm(N_sim, mean = 0, sd = param)
   } else if (sim_dist == 'gamma') {
-    param <- .sample_unif(gamma_shape)
+    param <- if (length(gamma_shape) == 1) gamma_shape else .sample_unif(gamma_shape)
     peak <- rgamma(N_sim, shape = param)
   } else {
     # Unif
-    param <- .sample_unif(unif_length)
+    param <-  if (length(unif_length) == 1) unif_length else .sample_unif(unif_length)
     peak <- runif(N_sim, min = 0, max = param)
   }
 
