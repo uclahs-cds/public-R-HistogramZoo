@@ -84,10 +84,12 @@ summarize_results_error <- function(x) {
   return(rtn);
 }
 
+#' @export
 overlap_size <- function(a1, a2, b1, b2) {
   max(0, min(a2, b2) - max(a1, b1))
 }
 
+#' @export
 union_size <- function(a1, a2, b1, b2) {
   if (overlap_size(a1, a2, b1, b2) > 0) max(a2, b2) - min(a1, b1)
   else (a2 - a1) + (b2 - b1)
