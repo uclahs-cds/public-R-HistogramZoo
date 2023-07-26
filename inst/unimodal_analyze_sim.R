@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 library(HistogramZoo);
 library(data.table);
 library(BoutrosLab.plotting.general);
@@ -8,8 +10,11 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 plots.folder <- file.path(base.path, 'plots');
 
+args <- commandArgs(trailingOnly = TRUE)
+stopifnot(length(args) <= 1)
+
 sim.version <- c('v5', 'v6', 'v7');
-sim.merge.date <- '2023-07-26'
+sim.merge.date <- if (length(args) == 0) '2023-07-26' else args[1];
 
 sim.version.regex <- paste0('[', paste0(sim.version, collapse = '|'), ']')
 sim.version <- paste0(sim.version, collapse = '-')
