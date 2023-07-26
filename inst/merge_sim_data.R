@@ -31,43 +31,6 @@ for (sim in sim.folders) {
 
     print(head(sim.data))
 
-    if (! c('peak_min') %in% colnames(sim.data)) {
-      unique.recompute <- unique(
-      sim.data[, c('seed', 'actual_dist', 'max_uniform', 'remove_low_entropy', 'truncated_models')]
-      )
-
-      noise <- if (sim == 'unimodal_sim_noise_v2') c(.05, .95) else c(.05, .5)
-
-      recompute.peak.range <- do.call(
-        'rbind.data.frame',
-        mapply(
-            function(...) { HistogramZoo:::peak_min_recompute(noise = noise, ...)},
-          seed = unique.recompute$seed,
-          actual_dist = unique.recompute$actual_dist,
-          max_uniform = unique.recompute$max_uniform,
-          remove_low_entropy = unique.recompute$remove_low_entropy,
-          SIMPLIFY = FALSE
-          )
-        )
-        print(head(recompute.peak.range))
-
-      sim.data <- merge(
-        x = sim.data,
-        y = recompute.peak.range,
-        by = 'seed',
-        suffixes = c('', '.validation'),
-        allow.cartesian = TRUE
-        )
-
-        print(head(sim.data))
-
-        cat(
-            'Proportion of re-simulate data that seemed to fail: ',
-            mean(abs(sim.data$noise_min - sim.data$noise_min.validation) > 2.2e-10),
-            '\n'
-        );
-      }
-
     # Errors have newlines that can complicate things
     sim.data$error <- gsub('\n', '', sim.data$error);
     mle.suffix <- if (mle) '-mle' else '';
