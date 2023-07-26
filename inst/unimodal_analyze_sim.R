@@ -142,7 +142,6 @@ unimodal.sim[
   ]
 
 ### Create heatmap of the correlations
-## TODO: Put this in a function
 sim.plot.segment.cor(
   x = best.segment,
   resolution = 400,
