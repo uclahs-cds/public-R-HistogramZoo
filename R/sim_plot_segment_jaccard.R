@@ -1,6 +1,7 @@
 jaccard.colour.scheme <- c('white', 'dodgerblue2');
 
-sim.plot.segment.jaccard <- function(
+#' @export
+sim.plot.segment.eval <- function(
     x,
     cluster = FALSE,
     print.colour.key = TRUE,
@@ -9,7 +10,7 @@ sim.plot.segment.jaccard <- function(
       'N_decile', 'noise_decile',
       'eps_decile'
       ),
-    target = c('median_jaccard', 'count'),
+    target = c('median_jaccard', 'count', 'prob_segment'),
     legend = list(
       right = list(
         fun = common.sim.legend(
@@ -22,12 +23,33 @@ sim.plot.segment.jaccard <- function(
     ...
     ) {
   target <- match.arg(target);
-  res <- x[
-      , .(
-        median_jaccard = median(jaccard),
+  if (target == 'median_jaccard') {
+      res <- x[
+      ,
+      .(
+        median_metric = median(jaccard),
         count = .N
         ), by = c('actual_dist', group_vars)
       ]
+      target <- 'median_metric'
+  } else if (target == 'prob_segment') {
+      res <- x[
+      ,
+      .(
+        median_metric = median(prob_segment),
+        count = .N
+        ), by = c('actual_dist', group_vars)
+      ]
+      target <- 'median_metric'
+  } else {
+      res <- x[
+      ,
+      .(
+        count = .N
+        ), by = c('actual_dist', group_vars)
+      ]
+    }
+
 
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'actual_dist', sep = ' ~ ')
   res.wide <- dcast(
@@ -39,7 +61,7 @@ sim.plot.segment.jaccard <- function(
   # Scale
   if (target == 'count') {
     res.wide[, c('gamma', 'norm', 'unif')] <- as.data.frame(scale(res.wide[, c('gamma', 'norm', 'unif')]))
-  }
+    }
 
   if (cluster) {
       diana.jaccard.clust <- diana(
@@ -82,7 +104,6 @@ sim.plot.segment.jaccard <- function(
       main = if (cluster) 'DIANA Clustered' else 'No Clustering',
       layout.width = 2,
       layout.height = 1,
-      xlab.label = 'Median Jaccard',
       ...
       )
   }

@@ -25,53 +25,6 @@ confusion_matrix_dist <- function(
     )
 }
 
-sim.plot.quantile.cm.metric <- function(
-    x,
-    eval_metric = c(
-      'Sensitivity', 'Specificity', 'Pos Pred Value', 'Neg Pred Value',
-      'Precision', 'Recall', 'F1', 'Prevalence', 'Detection Rate',
-      'Detection Prevalence', 'Balanced Accuracy'
-      ),
-    cluster = FALSE,
-    print.colour.key = TRUE,
-    group_vars = c(
-      'max_uniform', 'remove_low_entropy',
-      'jaccard_decile', 'N_decile', 'noise_decile'
-      ),
-    legend = list(
-      right = list(
-        fun = common.sim.legend(
-          include.legends = c('params', 'distributions', 'quantiles'),
-          params.to.include = intersect(group_vars, c('max_uniform', 'remove_low_entropy')),
-          cont.params.to.include = group_vars[grepl('_decile', group_vars)]
-          )
-        )
-      ),
-    ...
-  ) {
-  eval_metric <- match.arg(eval_metric)
-  group_vars <- setdiff(group_vars, c('actual_dist', 'dist'))
-  cm_matrix <- x[
-    ,
-    confusion_matrix_dist(
-        dist,
-        actual_dist,
-        eval_metrics = ..eval_metric
-        ),
-    by = c('metric', group_vars)
-    ]
-
-  long.wide.formula <- paste(paste0(c(group_vars, 'dist'), collapse = ' + '), 'metric', sep = ' ~ ')
-  cm_matrix_wide <- dcast(
-    cm_matrix,
-    long.wide.formula,
-    value.var = 'value'
-    )
-
-
-  browser()
-  }
-
 #' @import data.table
 #' @export
 sim.plot.quantile.accuracy <- function(

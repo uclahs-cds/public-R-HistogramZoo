@@ -10,6 +10,19 @@ covariate.col <- list(
 
 acc.colour.scheme <- c('white', 'red');
 
+segment_prob <- function(distribution = c('norm', 'gamma', 'unif'), params, a, b) {
+  stopifnot(b >= a)
+  distribution <- match.arg(distribution)
+  # if (distribution == 'gamma' && a < 0 )
+  cdf <- get(paste0('p', distribution))
+  cdf.params.func <- function(q) {
+    args <- params
+    args$q <- q
+    do.call(cdf, args)
+  }
+  cdf.params.func(b) - cdf.params.func(a)
+}
+
 common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
     params.to.include = c(

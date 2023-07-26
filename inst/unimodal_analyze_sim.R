@@ -72,6 +72,36 @@ unimodal.sim$union_size <- do.call(
     )
   )
 rm(jaccard.args)
+
+# Compute F(b) - F(a) to get a better representation of segment accuracy
+unimodal.sim$prob_segment <- unlist(lapply(seq_along(unimodal.sim$actual_dist), function(i) {
+  actual_dist <- unimodal.sim$actual_dist[[i]]
+  param <- unimodal.sim$param[i]
+  arg.params <- if (actual_dist == 'norm') {
+    list(
+      mean = 0,
+      sd = param
+    )
+  } else if (actual_dist == 'gamma') {
+    list(
+      shape = param,
+      rate = 1
+    )
+  } else if (actual_dist == 'unif') {
+    list(
+      min = unimodal.sim$actual_start[[i]],
+      max = unimodal.sim$actual_end[[i]]
+    )
+  }
+
+  segment_prob(
+    distribution = actual_dist,
+    params = arg.params,
+    a = unimodal.sim$start[[i]],
+    b = unimodal.sim$end[[i]]
+    )
+  }))
+
 # unimodal.sim$seg_length == unimodal.sim$actu
 unimodal.sim$actual_length <- unimodal.sim$actual_end - unimodal.sim$actual_start
 
@@ -111,6 +141,7 @@ unimodal.sim[
   ]
 
 ### Create heatmap of the correlations
+## TODO: Put this in a function
 jaccard.cor.data <- as.data.frame(unimodal.sim[
   ,
   .(
@@ -195,10 +226,14 @@ create.multipanelplot(
 
 cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
 
-sim.plot.segment.jaccard(
+
+## Evaulation of segments
+## Jaccard overlap plots
+sim.plot.segment.eval(
   best.segment,
   cluster = FALSE,
   print.colour.key = FALSE,
+  xlab.label = 'Median Jaccard',
   resolution = 200,
   filename = print(
     file.path(
@@ -208,10 +243,11 @@ sim.plot.segment.jaccard(
     )
   )
 
-sim.plot.segment.jaccard(
+sim.plot.segment.eval(
   best.segment,
   cluster = TRUE,
   resolution = 200,
+  xlab.label = 'Median Jaccard',
   filename = print(
     file.path(
       plots.folder,
@@ -219,6 +255,85 @@ sim.plot.segment.jaccard(
       )
     )
   )
+
+sim.plot.segment.eval(
+  best.segment,
+  cluster = FALSE,
+  target = 'prob_segment',
+#   xlab.label = 'Median probability of segment',
+  print.colour.key = FALSE,
+  resolution = 200,
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename(paste0('HZSimulation', sim_version), 'median-CDF-prob', 'png')
+      )
+    )
+  )
+
+sim.plot.segment.eval(
+  best.segment,
+  cluster = TRUE,
+  target = 'prob_segment',
+  xlab.label = 'Median probability of segment',
+  print.colour.key = TRUE,
+  resolution = 200,
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename(paste0('HZSimulation', sim_version), 'median-CDF-prob-clustered', 'png')
+      )
+    )
+  )
+
+# Create the probability of segment histogram plot
+prob_segment_hists_rle <- lapply(c('gamma', 'norm', 'unif'), function(d) {
+  dist_name <- switch (d,
+    'unif' = 'Uniform',
+    'gamma' = 'Gamma',
+    'norm' = 'Normal'
+    )
+  lapply(c(FALSE, TRUE), function(remove_low_entropy) {
+    breaks <- seq(0, 1, by = 0.05)
+    yat <- seq(0, 100, by = 20)
+    create.histogram(
+      best.segment$prob_segment[best.segment$actual_dist == d & best.segment$remove_low_entropy == remove_low_entropy],
+      breaks = breaks,
+      xlimits = c(0, 1),
+      ylimits = c(0, 110),
+      yat = yat,
+      col = adjustcolor(distribution_colours[[d]], alpha.f = 0.4),
+      ylab.label = if (!remove_low_entropy) paste0(dist_name,'\nPercent') else '\n',
+      yaxis.lab = if (!remove_low_entropy) TRUE else rep(' ', length(yat)),
+      xlab.label = if (d == 'unif') as.character(remove_low_entropy) else '',
+      yaxis.tck = if (!remove_low_entropy) c(1, 0) else 0,
+      xaxis.tck = if (d == 'unif') c(1, 0) else 0,
+      xaxis.lab = if (d == 'unif')  TRUE else rep('', length(breaks)),
+    )
+  })
+})
+
+create.multipanelplot(
+  unlist(prob_segment_hists_rle, recursive = FALSE),
+  layout.height = length(prob_segment_hists),
+  main = 'Probability of segment',
+  xlab.label = 'Remove low entropy',
+  xlab.cex = 2.5,
+  x.spacing = -1.5,
+  main.cex = 2.5,
+  layout.width = 2,
+  width = 12,
+  height = 12,
+  resolution = 300,
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename(paste0('HZSimulation', sim_version), 'prob-segment-histogram', 'png')
+      )
+    )
+  )
+
+## Distribution accuracy
 
 acc <- 'dist'
 
@@ -394,20 +509,6 @@ sim.plot.quantile.accuracy(
       )
     )
   )
-
-colourkey <- create.colourkey(
-    x = seq(0, 1, length.out = 100),
-    at = seq(0, 1, length.out = 20),
-    colour.scheme = c('white', 'red'),
-    colourkey.labels.cex = 2.5,
-    placement = viewport(
-        just='center',
-        x = 0.5,
-        y = 1,
-        width = 0.5,
-        height = 0.1
-        )
-    );
 
 ### Prints the alternative metrics on the Noise and N quantiles
 for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity', 'Balanced Accuracy')) {
