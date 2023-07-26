@@ -119,9 +119,27 @@ quantile_p <- c(0, 1/4, 2/4, 3/4, 1)
 decile_p <- seq(0, 1, by = 0.1)
 
 # Note: This are improperly called deciles even though they are quantiles
-unimodal.sim$noise_decile <- cut(unimodal.sim$noise, HistogramZoo:::scale.param(quantile_p, param.range = unimodal.params$noise))
-unimodal.sim$eps_decile <- cut(unimodal.sim$eps, HistogramZoo:::scale.param(quantile_p, param.range = unimodal.params$eps))
-unimodal.sim$N_decile <- cut(unimodal.sim$N, round(HistogramZoo:::scale.param(quantile_p, param.range = unimodal.params$N)))
+unimodal.sim$noise_decile <- cut(
+  unimodal.sim$noise,
+  HistogramZoo:::scale.param(
+    quantile_p,
+    param.range = HistogramZoo:::unimodal.params$noise
+    )
+  )
+unimodal.sim$eps_decile <- cut(
+  unimodal.sim$eps,
+  HistogramZoo:::scale.param(
+    quantile_p,
+    param.range = HistogramZoo:::unimodal.params$eps
+    )
+  )
+unimodal.sim$N_decile <- cut(
+  unimodal.sim$N,
+  round(HistogramZoo:::scale.param(
+    quantile_p,
+    param.range = HistogramZoo:::unimodal.params$N
+    ))
+  )
 
 # Only keep the segment with largest Jaccard
 best.segment <- unimodal.sim[
