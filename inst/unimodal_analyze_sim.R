@@ -146,6 +146,7 @@ unimodal.sim[
 sim.plot.segment.cor(
   x = best.segment,
   resolution = 400,
+  cluster = FALSE,
   main = 'Spearman correlation with segment Jaccard',
   cor.var = 'jaccard',
   filename = print(
@@ -159,6 +160,7 @@ sim.plot.segment.cor(
 sim.plot.segment.cor(
   x = best.segment,
   resolution = 400,
+  cluster = FALSE,
   main = 'Spearman correlation with segment probability',
   cor.var = 'prob_segment',
   filename = print(

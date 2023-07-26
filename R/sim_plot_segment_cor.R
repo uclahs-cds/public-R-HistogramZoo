@@ -1,6 +1,7 @@
 #' @export
 sim.plot.segment.cor <- function(
     x,
+    cluster = FALSE,
     cor.var = c('jaccard', 'prob_segment'),
     ...
     ) {
@@ -14,16 +15,23 @@ sim.plot.segment.cor <- function(
       noise_cor = cor(noise, get(cor.var), method = 'spearman'),
       param_cor = cor(param, get(cor.var), method = 'spearman')
       )
-    , by = .(remove_low_entropy, max_uniform, actual_dist)
+    , by = .(remove_low_entropy, actual_dist)
+    ][
+      order(actual_dist, remove_low_entropy)
     ])
 
   cor.cols <- colnames(seg.cor.data)[grepl('_cor', colnames(seg.cor.data))]
 
-  seg.cor.order <- diana(seg.cor.data[, cor.cols])$order
+  if (cluster) {
+    seg.cor.order <- diana(seg.cor.data[, cor.cols])$order
+  } else {
+    seg.cor.order <- seq_len(nrow(seg.cor.data))
+  }
+
 
   cor.cov.heatmap <- sim.plot.heatmap.cov(
       seg.cor.data[seg.cor.order, c(
-        'remove_low_entropy', 'max_uniform', 'actual_dist'
+        'actual_dist', 'remove_low_entropy'
         )]
       );
 
@@ -72,7 +80,7 @@ sim.plot.segment.cor <- function(
         right = list(
           fun = common.sim.legend(
             include.legends = c('params', 'distributions'),
-            params.to.include = c('max_uniform', 'remove_low_entropy'),
+            params.to.include = c('remove_low_entropy'),
             cont.params.to.include = NULL
             )
           )
