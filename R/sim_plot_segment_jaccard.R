@@ -6,7 +6,7 @@ sim.plot.segment.eval <- function(
     cluster = FALSE,
     print.colour.key = TRUE,
     group_vars = c(
-      'max_uniform', 'remove_low_entropy',
+      'remove_low_entropy',
       'N_decile', 'noise_decile',
       'eps_decile'
       ),
@@ -15,7 +15,7 @@ sim.plot.segment.eval <- function(
       right = list(
         fun = common.sim.legend(
           include.legends = c('params', 'distributions', 'quantiles'),
-          params.to.include = intersect(group_vars, c('max_uniform', 'remove_low_entropy')),
+          params.to.include = intersect(group_vars, c('remove_low_entropy')),
           cont.params.to.include = group_vars[grepl('_decile', group_vars)]
           )
         )
@@ -73,9 +73,7 @@ sim.plot.segment.eval <- function(
 
 
   jaccard.cov.heatmap <- sim.plot.heatmap.cov(
-      data.frame(res.wide[diana.jaccard.clust, c(
-        'max_uniform', 'remove_low_entropy', 'N_decile', 'noise_decile', 'eps_decile'
-        )])
+      data.frame(res.wide[diana.jaccard.clust, ..group_vars])
       );
 
   heatmap.at <- if (target == 'count') NULL else seq(0, 1, length.out = 20);

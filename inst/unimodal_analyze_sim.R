@@ -8,14 +8,14 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 plots.folder <- file.path(base.path, 'plots');
 
-sim_version <- c('v5', 'v6');
-sim_merge_date <- '2023-07-24'
+sim.version <- c('v5', 'v6');
+sim.merge.date <- '2023-07-24'
 
-sim_version_regex <- paste0('[', paste0(sim_version, collapse = '|'), ']')
-sim_version <- paste0(sim_version, collapse = '-')
+sim.version.regex <- paste0('[', paste0(sim.version, collapse = '|'), ']')
+sim.version <- paste0(sim.version, collapse = '-')
 metric.files <- list.files(
   path = merged.folder,
-  pattern = paste0(sim_merge_date, '_.*', sim_version_regex, '.*noise.tsv'),
+  pattern = paste0(sim.merge.date, '_.*', sim.version.regex, '.*noise.tsv'),
   full.names = TRUE
   )
 
@@ -26,7 +26,7 @@ unimodal.sim.metrics <- rbindlist(
 
 mle.files <- list.files(
   path = merged.folder,
-  pattern = paste0(sim_merge_date, '_.*', sim_version_regex, '.*mle'),
+  pattern = paste0(sim.merge.date, '_.*', sim.version.regex, '.*mle'),
   full.names = TRUE
   )
 
@@ -113,6 +113,7 @@ unimodal.sim$correct_dist <- unimodal.sim$actual_dist == unimodal.sim$dist
 quantile_p <- c(0, 1/4, 2/4, 3/4, 1)
 decile_p <- seq(0, 1, by = 0.1)
 
+# Note: This are improperly called deciles even though they are quantiles
 unimodal.sim$noise_decile <- cut(unimodal.sim$noise, scale.param(quantile_p, param.range = unimodal.params$noise))
 unimodal.sim$eps_decile <- cut(unimodal.sim$eps, scale.param(quantile_p, param.range = unimodal.params$eps))
 unimodal.sim$N_decile <- cut(unimodal.sim$N, round(scale.param(quantile_p, param.range = unimodal.params$N)))
@@ -219,12 +220,12 @@ create.multipanelplot(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'cor-jaccard-segment', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'cor-jaccard-segment', 'png')
       )
     )
   )
 
-cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
+# cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
 
 
 ## Evaulation of segments
@@ -238,7 +239,7 @@ sim.plot.segment.eval(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'median-jaccard', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'median-jaccard', 'png')
       )
     )
   )
@@ -251,7 +252,7 @@ sim.plot.segment.eval(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'median-jaccard-clustered', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'median-jaccard-clustered', 'png')
       )
     )
   )
@@ -261,12 +262,12 @@ sim.plot.segment.eval(
   cluster = FALSE,
   target = 'prob_segment',
 #   xlab.label = 'Median probability of segment',
-  print.colour.key = FALSE,
+  print.colour.key = TRUE,
   resolution = 200,
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'median-CDF-prob', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'median-CDF-prob', 'png')
       )
     )
   )
@@ -281,13 +282,13 @@ sim.plot.segment.eval(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'median-CDF-prob-clustered', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'median-CDF-prob-clustered', 'png')
       )
     )
   )
 
 # Create the probability of segment histogram plot
-prob_segment_hists_rle <- lapply(c('gamma', 'norm', 'unif'), function(d) {
+prob.segment.hists.rle <- lapply(c('gamma', 'norm', 'unif'), function(d) {
   dist_name <- switch (d,
     'unif' = 'Uniform',
     'gamma' = 'Gamma',
@@ -314,21 +315,21 @@ prob_segment_hists_rle <- lapply(c('gamma', 'norm', 'unif'), function(d) {
 })
 
 create.multipanelplot(
-  unlist(prob_segment_hists_rle, recursive = FALSE),
-  layout.height = length(prob_segment_hists),
+  unlist(prob.segment.hists.rle, recursive = FALSE),
+  layout.height = length(prob.segment.hists.rle),
+  layout.width = 2,
   main = 'Probability of segment',
   xlab.label = 'Remove low entropy',
   xlab.cex = 2.5,
   x.spacing = -1.5,
   main.cex = 2.5,
-  layout.width = 2,
   width = 12,
   height = 12,
   resolution = 300,
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'prob-segment-histogram', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'prob-segment-histogram', 'png')
       )
     )
   )
@@ -337,18 +338,18 @@ create.multipanelplot(
 
 acc <- 'dist'
 
-categorical_vars <- c(
+categorical.vars <- c(
       'actual_dist', 'max_uniform', 'remove_low_entropy'
     )
-decile_vars <- c('eps_decile', 'N_decile', 'noise_decile', 'jaccard_decile')
+decile.vars <- c('eps_decile', 'N_decile', 'noise_decile', 'jaccard_decile')
 
-decile_uni_plots <- lapply(decile_vars, function(v) {
+decile.uni.plots <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
     resolution = 200,
     cluster = FALSE,
-    group_vars = c(categorical_vars, v),
+    group_vars = c(categorical.vars, v),
     acc = acc,
     legend = NULL,
     main = main,
@@ -359,13 +360,13 @@ decile_uni_plots <- lapply(decile_vars, function(v) {
     res
   })
 
-decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
+decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
     resolution = 200,
     cluster = TRUE,
-    group_vars = c(categorical_vars, v),
+    group_vars = c(categorical.vars, v),
     acc = acc,
     legend = NULL,
     main = main,
@@ -376,13 +377,13 @@ decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
     res
   })
 
-decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
+decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
     resolution = 200,
     cluster = TRUE,
-    group_vars = c(categorical_vars, v),
+    group_vars = c(categorical.vars, v),
     acc = acc,
     legend = NULL,
     main = main,
@@ -412,7 +413,7 @@ colourkey <- create.colourkey(
 dev.off()
 
 create.multipanelplot(
-  decile_uni_plots,
+  decile.uni.plots,
   width = 20,
   height = 20,
   layout.height = 2,
@@ -425,7 +426,7 @@ create.multipanelplot(
       fun = common.sim.legend(
         include.legends = c('params', 'distributions', 'quantiles'),
         params.to.include = c('max_uniform', 'remove_low_entropy'),
-        cont.params.to.include = decile_vars
+        cont.params.to.include = decile.vars
         )
       ),
     bottom = list(
@@ -435,13 +436,13 @@ create.multipanelplot(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'dist-acc-unimodal-mpp', 'png')
       )
     )
   )
 
 create.multipanelplot(
-  decile_uni_plots_clustered,
+  decile.uni.plots.clustered,
   width = 20,
   height = 20,
   layout.height = 2,
@@ -454,7 +455,7 @@ create.multipanelplot(
       fun = common.sim.legend(
         include.legends = c('params', 'distributions', 'quantiles'),
         params.to.include = c('max_uniform', 'remove_low_entropy'),
-        cont.params.to.include = decile_vars
+        cont.params.to.include = decile.vars
         )
       ),
     bottom = list(
@@ -464,7 +465,7 @@ create.multipanelplot(
   filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-cluster', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'dist-acc-unimodal-mpp-cluster', 'png')
       )
     )
   )
@@ -485,7 +486,7 @@ sim.plot.quantile.accuracy(
     filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-cluster-all', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'dist-acc-unimodal-mpp-cluster-all', 'png')
       )
     )
   )
@@ -505,7 +506,7 @@ sim.plot.quantile.accuracy(
     filename = print(
     file.path(
       plots.folder,
-      generate.filename(paste0('HZSimulation', sim_version), 'dist-acc-unimodal-mpp-all', 'png')
+      generate.filename(paste0('HZSimulation', sim.version), 'dist-acc-unimodal-mpp-all', 'png')
       )
     )
   )
@@ -566,7 +567,7 @@ for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
     filename = print(
       file.path(
         plots.folder,
-        generate.filename(paste0('HZSimulation', sim_version), paste0(sub(' ', '-', eval_metric), '-unimodal-mpp-all'), 'png')
+        generate.filename(paste0('HZSimulation', sim.version), paste0(sub(' ', '-', eval_metric), '-unimodal-mpp-all'), 'png')
         )
       )
   )
