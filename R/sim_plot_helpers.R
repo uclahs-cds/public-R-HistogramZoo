@@ -24,6 +24,9 @@ segment_prob <- function(distribution = c('norm', 'gamma', 'unif'), params, a, b
   cdf.params.func(b) - cdf.params.func(a)
 }
 
+#' Creates a common legend for unimodal simulations
+#'
+#' @export
 common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
     params.to.include = c(

@@ -477,13 +477,13 @@ sim.plot.quantile.accuracy(
   )
 
 ### Prints the alternative metrics on the Noise and N quantiles
-for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity', 'Balanced Accuracy')) {
+for (eval.metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity', 'Balanced Accuracy')) {
   no.clust.cm <- sim.plot.quantile.accuracy(
     unimodal.sim,
     cluster = FALSE,
-    acc = eval_metric,
+    acc = eval.metric,
     legend = NULL,
-    main = paste0(eval_metric, ': No clustering'),
+    main = paste0(eval.metric, ': No clustering'),
     group_vars = c(
         'max_uniform', 'remove_low_entropy',
         'N_decile', 'noise_decile'
@@ -496,9 +496,9 @@ for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
   clust.cm <- sim.plot.quantile.accuracy(
     unimodal.sim,
     cluster = TRUE,
-    acc = eval_metric,
+    acc = eval.metric,
     legend = NULL,
-    main = paste0(eval_metric, ': DIANA Clustered'),
+    main = paste0(eval.metric, ': DIANA Clustered'),
     group_vars = c(
         'max_uniform', 'remove_low_entropy',
         'N_decile', 'noise_decile'
@@ -516,7 +516,7 @@ for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
     layout.width = 2,
     resolution = 500,
     main = '',
-    xlab.label = eval_metric,
+    xlab.label = eval.metric,
     legend = list(
       right = list(
         fun = common.sim.legend(
@@ -532,7 +532,7 @@ for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
     filename = print(
       file.path(
         plots.folder,
-        generate.filename(paste0('HZSimulation', sim.version), paste0(sub(' ', '-', eval_metric), '-unimodal-mpp-all'), 'png')
+        generate.filename(paste0('HZSimulation', sim.version), paste0(sub(' ', '-', eval.metric), '-unimodal-mpp-all'), 'png')
         )
       )
   )
