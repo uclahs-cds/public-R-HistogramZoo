@@ -10,6 +10,7 @@ covariate.col <- list(
 
 acc.colour.scheme <- c('white', 'red');
 
+#' @export
 segment_prob <- function(distribution = c('norm', 'gamma', 'unif'), params, a, b) {
   stopifnot(b >= a)
   distribution <- match.arg(distribution)
