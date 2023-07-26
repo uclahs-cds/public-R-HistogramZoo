@@ -8,20 +8,6 @@ scale.param2 <- function(x, param.range) {
  (x -  param.range[1]) / (param.range[2] - param.range[1])
 }
 
-process_sim <- function(x) {
-    res <- x[c('N', 'dist', 'param', 'noise', 'eps')]
-    names(res) <- c('N', 'actual_dist', 'param', 'noise', 'eps')
-    res$timing <- x$timing[['user.self']]
-
-    if (class(x$seg_results) == 'HistogramFit') {
-      seg.results <- summarize_results_error(x$seg_results)
-    } else {
-      seg.results <- do.call(plyr::rbind.fill, x$seg_results)
-    }
-
-    return(cbind.data.frame(res, seg.results))
-}
-
 summarize_results_error <- function(x) {
   if (! is(x,  'try-error')) {
         models <- x$models
