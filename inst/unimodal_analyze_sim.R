@@ -143,80 +143,11 @@ unimodal.sim[
 
 ### Create heatmap of the correlations
 ## TODO: Put this in a function
-jaccard.cor.data <- as.data.frame(unimodal.sim[
-  ,
-  .(
-    N_cor = cor(N, jaccard, method = 'spearman'),
-    eps_cor = cor(eps, jaccard, method = 'spearman'),
-    noise_cor = cor(noise, jaccard, method = 'spearman'),
-    param_cor = cor(param, jaccard, method = 'spearman')
-    )
-  , by = .(remove_low_entropy, max_uniform, actual_dist)
-  ])
-
-cor.cols <- colnames(jaccard.cor.data)[grepl('_cor', colnames(jaccard.cor.data))]
-
-jaccard.cor.order <- diana(jaccard.cor.data[, cor.cols])$order
-jaccard.cor.order.t <- diana(t(jaccard.cor.data[, cor.cols]))$order
-
-cor.cov.heatmap <- sim.plot.heatmap.cov(
-    jaccard.cor.data[jaccard.cor.order, c(
-      'remove_low_entropy', 'max_uniform', 'actual_dist'
-      )]
-    );
-
-cor.data <- jaccard.cor.data[jaccard.cor.order, cor.cols[jaccard.cor.order.t]]
-
-row.col.text <- cbind.data.frame(
-  which(abs(cor.data) > 0.1, arr.ind = TRUE),
-  value = round(cor.data[abs(cor.data) > 0.1], digits = 2)
-  )
-row.col.text$row <- nrow(cor.data) - row.col.text$row + 1
-
-xaxis.lab <- c(
-  expression('\u03c1'['N']),
-  expression('\u03c1'['\u03B5']),
-  expression('\u03c1'['noise']),
-  expression('\u03c1'['param'])
-  )[jaccard.cor.order.t]
-
-cov.hm <- create.heatmap(
-  x = cor.data,
-  same.as.matrix = TRUE,
-  colourkey.cex = 2,
-  clustering.method = 'none',
-  row.pos = row.col.text$row,
-  col.pos = row.col.text$col,
-  cell.text = cor.data.round[abs(cor.data) > 0.1],
-  text.use.grid.coordinates = TRUE,
-  xaxis.lab = xaxis.lab,
-  xaxis.rot = 0,
-  at = seq(-1, 1, length.out = 10),
-  xaxis.tck = 0,
-  yaxis.tck = 0,
-  fill.colour = 'lightgrey'
-  )
-
-create.multipanelplot(
-  list(cor.cov.heatmap, cov.hm),
-  plot.objects.widths = c(0.1, 1),
-  x.spacing = c(-0.25, 0),
-  width = 12,
-  main = 'Spearman correlation with segment Jaccard',
-  main.cex = 2,
-  layout.width = 2,
-  layout.height = 1,
+sim.plot.segment.cor(
+  x = best.segment,
   resolution = 400,
-  legend = list(
-      right = list(
-        fun = common.sim.legend(
-          include.legends = c('params', 'distributions'),
-          params.to.include = c('max_uniform', 'remove_low_entropy'),
-          cont.params.to.include = NULL
-          )
-        )
-      ),
-  xlab.label = 'Spearman correlation',
+  main = 'Spearman correlation with segment Jaccard',
+  cor.var = 'jaccard',
   filename = print(
     file.path(
       plots.folder,
@@ -225,8 +156,18 @@ create.multipanelplot(
     )
   )
 
-# cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
-
+sim.plot.segment.cor(
+  x = best.segment,
+  resolution = 400,
+  main = 'Spearman correlation with segment probability',
+  cor.var = 'prob_segment',
+  filename = print(
+    file.path(
+      plots.folder,
+      generate.filename(paste0('HZSimulation', sim.version), 'cor-prob-segment', 'png')
+      )
+    )
+  )
 
 ## Evaulation of segments
 ## Jaccard overlap plots
