@@ -95,15 +95,7 @@ best.segment <- unimodal.sim[
 unimodal.sim <- unimodal.sim[unimodal.sim[, .I[which.max(jaccard)], by=.(id, metric)]$V1]
 
 unimodal.sim$jaccard_decile <- cut(unimodal.sim$jaccard, quantile(unimodal.sim$jaccard, p = decile_p))
-
-unimodal.sim[
-  ,
-  .(seg_length = mean(actual_length),
-    seg_length_median = median(actual_length),
-    max_seg_length = max(actual_length),
-    min_seg_length = min(seg_length)),
-  , by = .(actual_dist)
-  ]
+unimodal.sim$actual_length_decile <- cut(unimodal.sim$actual_length, quantile(unimodal.sim$actual_length, p = decile_p))
 
 unimodal.sim[
   ,
@@ -118,8 +110,6 @@ unimodal.sim[
   , by = .(actual_dist)
   ]
 
-dput(colnames(unimodal.sim))
-
 ### Create heatmap of the correlations
 jaccard.cor.data <- as.data.frame(unimodal.sim[
   ,
@@ -131,12 +121,6 @@ jaccard.cor.data <- as.data.frame(unimodal.sim[
     )
   , by = .(remove_low_entropy, max_uniform, actual_dist)
   ])
-
-# jaccard.cor.data.wide <- dcast(
-#       data = jaccard.cor.data,
-#       formula = long.wide.formula,
-#       value.var = ''
-#       )
 
 cor.cols <- colnames(jaccard.cor.data)[grepl('_cor', colnames(jaccard.cor.data))]
 
@@ -209,53 +193,7 @@ create.multipanelplot(
     )
   )
 
-
-# unimodal.sim.split.actual <- split()
 cor_results_jaccard <- lapply(unimodal.sim[, c('N', 'noise', 'eps')], cor, method = 'spearman', y = unimodal.sim$jaccard)
-
-# View(unimodal.sim[actual_dist == 'unif' & dist == 'unif'])
-# unimodal.sim$dist_param3_name
-
-# TODO: Raw data
-
-# Which metric we select is arbitrary for union, ks, jaccard, etc since they have the same segmentation
-# best.segment <- best.segment[best.segment$metric %in% c('mle', 'ks'), ];
-
-# class.acc <- unimodal.sim[
-#   dist == actual_dist,
-#   .(jaccard = mean(jaccard),
-#     N = .N)
-#   , by = .(dist, actual_dist, metric),
-#   ]
-# class.acc$perc <- class.acc$N / sum(class.acc$N)
-
-
-# dist.log.mod <- glm(
-#   formula = correct_dist ~ actual_dist + N + actual_dist:param + eps +
-#     noise + max_uniform + remove_low_entropy + metric + actual_dist:jaccard,
-#   data = unimodal.sim,
-#   family = binomial()
-#   )
-# dist.log.mod.coefs <- as.data.frame(summary(dist.log.mod)$coefficients)
-# dist.log.mod.coefs$est.exp <- exp(dist.log.mod.coefs$Estimate)
-
-# kableExtra::kable_styling(kableExtra::kable(dist.log.mod.coefs))
-
-# View(unimodal.sim[, c('jaccard', 'start', 'end', 'actual_start', 'actual_end', 'union_size')])
-
-# create.scatterplot(
-#     formula = jaccard ~ eps | actual_dist,
-#     data = best.segment,
-#     resolution = 200,
-#     alpha = 0.2,
-#     filename = 'test_jaccard_eps_scatter.png'
-#   )
-#
-# cor(best.segment$eps, best.segment$jaccard, method = 'spearman')
-# cor(best.segment$eps, best.segment$num_segments, method = 'spearman')
-#
-# table(best.segment$num_segments)
-# cor(jaccard ~ eps, best.segment)
 
 sim.plot.segment.jaccard(
   best.segment,
@@ -270,21 +208,6 @@ sim.plot.segment.jaccard(
     )
   )
 
-# Shouldn't really have major differences since we are sampling uniformly
-# sim.plot.segment.jaccard(
-#   best.segment,
-#   cluster = FALSE,
-#   print.colour.key = FALSE,
-#   resolution = 200,
-#   target = 'count',
-#   filename = print(
-#     file.path(
-#       plots.folder,
-#       generate.filename(paste0('HZSimulation', sim_version), 'count-jaccard', 'png')
-#       )
-#     )
-#   )
-
 sim.plot.segment.jaccard(
   best.segment,
   cluster = TRUE,
@@ -297,9 +220,6 @@ sim.plot.segment.jaccard(
     )
   )
 
-#for (cluster in c(FALSE, TRUE)){
-# cluster <- FALSE
-#for (acc in c('count', 'dist', 'peaks')) {
 acc <- 'dist'
 
 categorical_vars <- c(
@@ -358,74 +278,9 @@ decile_uni_plots_clustered <- lapply(decile_vars, function(v) {
     res
   })
 
-# What is the average jaccard per *actual distribution*
-print(unimodal.sim[
-  ,
-  .(
-    median_jaccard = median(jaccard),
-    mean_jaccard = mean(jaccard),
-    N = .N
-    ),
-  by = .(max_uniform, remove_low_entropy, actual_dist)
-  ][
-    order(-mean_jaccard)
-  ]) %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
-
-
-
-  # [
-  #   ,
-  #   proportion := N / sum(N)
-  # ][
-  #   order(-N)
-  # ])
-
-
-# hypothesis: uniform only classifies at higher jaccard *because* segmentation gets higher jaccard
-jaccard_unif_table <- unimodal.sim[
-  actual_dist == 'unif',
-  .(
-    median_jaccard = median(jaccard),
-    N = .N
-    ),
-  by = .(dist)
-  ]
-
-jaccard_unif_table$perc <- jaccard_unif_table$N / sum(jaccard_unif_table$N)
-jaccard_unif_table$perc
-
-print(unimodal.sim[
-  actual_dist == 'unif',
-  .(
-    median_jaccard = median(jaccard),
-    mean_jaccard = mean(jaccard),
-    N = .N
-    ),
-  by = .(dist)
-  ][
-    ,
-    proportion := N / sum(N)
-  ][
-    order(-N)
-  ]) # %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
-
-print(unimodal.sim[
-  actual_dist == 'unif',
-  .(
-    N = .N
-    ),
-  by = .(dist, jaccard_decile)
-  ][
-   ,
-   proportion := N / sum(N)
-  ][
-    order(-N)
-  ]) # %>% head() %>% kableExtra::kable(digits = 3) %>% kableExtra::kable_styling()
-
-# Want to calculate F1, precision, recall
-
-
-png(nullfile())
+# This is bug in BPG
+# Need to make a fake device for colourkey to write to
+png(filename = tempfile(fileext = '.png'))
 colourkey <- create.colourkey(
     x = seq(0, 1, length.out = 100),
     at = seq(0, 1, length.out = 20),
@@ -439,6 +294,7 @@ colourkey <- create.colourkey(
         height = 0.1
         )
     );
+dev.off()
 
 create.multipanelplot(
   decile_uni_plots,
@@ -539,29 +395,79 @@ sim.plot.quantile.accuracy(
     )
   )
 
+colourkey <- create.colourkey(
+    x = seq(0, 1, length.out = 100),
+    at = seq(0, 1, length.out = 20),
+    colour.scheme = c('white', 'red'),
+    colourkey.labels.cex = 2.5,
+    placement = viewport(
+        just='center',
+        x = 0.5,
+        y = 1,
+        width = 0.5,
+        height = 0.1
+        )
+    );
 
-# How far off are parameters for normal and gamma?
-# correct_norm <- unimodal.sim[
-#   actual_dist == 'norm' & dist == 'norm',
-#   .(
-#     bias_mean = dist_param1,
-#     bias_sd = dist_param2 - param
-#     ),
-#   by = .(metric, remove_low_entropy)
-#   ]
-#
-# correct_norm$metric_rle <- interaction(correct_norm$metric, correct_norm$remove_low_entropy)
-# create.boxplot(
-#   bias_mean ~ metric_rle,
-#   data = correct_norm,
-#   )
-#
-# correct_gamma <- unimodal.sim[
-#   actual_dist == 'gamma' & dist == 'gamma',
-#   .(
-#     bias_shape = mean(dist_param1 - param),
-#     bias_rate = mean(dist_param2 - 1)
-#     ),
-#   by = .(metric, remove_low_entropy)
-#   ]
+### Prints the alternative metrics on the Noise and N quantiles
+for (eval_metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity', 'Balanced Accuracy')) {
+  no.clust.cm <- sim.plot.quantile.accuracy(
+    unimodal.sim,
+    cluster = FALSE,
+    acc = eval_metric,
+    legend = NULL,
+    main = paste0(eval_metric, ': No clustering'),
+    group_vars = c(
+        'max_uniform', 'remove_low_entropy',
+        'N_decile', 'noise_decile'
+        ),
+      print.colour.key = FALSE,
+      xlab.label = ''
+  )
+  class(no.clust.cm) <- c('multipanel', 'frame', 'gTree', 'grob', 'gDesc')
+
+  clust.cm <- sim.plot.quantile.accuracy(
+    unimodal.sim,
+    cluster = TRUE,
+    acc = eval_metric,
+    legend = NULL,
+    main = paste0(eval_metric, ': DIANA Clustered'),
+    group_vars = c(
+        'max_uniform', 'remove_low_entropy',
+        'N_decile', 'noise_decile'
+        ),
+      print.colour.key = FALSE,
+      xlab.label = ''
+    )
+  class(clust.cm) <- c('multipanel', 'frame', 'gTree', 'grob', 'gDesc')
+
+  create.multipanelplot(
+  list(no.clust.cm, clust.cm),
+    width = 20,
+    height = 10,
+    layout.height = 1,
+    layout.width = 2,
+    resolution = 500,
+    main = '',
+    xlab.label = eval_metric,
+    legend = list(
+      right = list(
+        fun = common.sim.legend(
+          include.legends = c('params', 'distributions', 'quantiles'),
+          params.to.include = c('max_uniform', 'remove_low_entropy'),
+          cont.params.to.include = c('N_decile', 'noise_decile')
+          )
+        ),
+      bottom = list(
+        fun = colourkey
+      )
+    ),
+    filename = print(
+      file.path(
+        plots.folder,
+        generate.filename(paste0('HZSimulation', sim_version), paste0(sub(' ', '-', eval_metric), '-unimodal-mpp-all'), 'png')
+        )
+      )
+  )
+}
 
