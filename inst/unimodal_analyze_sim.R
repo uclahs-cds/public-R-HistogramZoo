@@ -268,7 +268,7 @@ prob.segment.hists.rle <- lapply(c('gamma', 'norm', 'unif'), function(d) {
       xlimits = c(0, 1),
       ylimits = c(0, 110),
       yat = yat,
-      col = adjustcolor(distribution_colours[[d]], alpha.f = 0.4),
+      col = adjustcolor(HistogramZoo:::distribution_colours[[d]], alpha.f = 0.4),
       ylab.label = if (!remove_low_entropy) paste0(dist_name,'\nPercent') else '\n',
       yaxis.lab = if (!remove_low_entropy) TRUE else rep(' ', length(yat)),
       xlab.label = if (d == 'unif') as.character(remove_low_entropy) else '',
