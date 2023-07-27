@@ -38,7 +38,8 @@ Imports:
     GenomeInfoDb,
     reshape2,
     moments,
-    grDevices
+    grDevices,
+    data.table
 Suggests:
     knitr,
     rmarkdown,
