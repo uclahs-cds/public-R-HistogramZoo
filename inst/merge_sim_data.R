@@ -12,7 +12,7 @@ merged.folder <- file.path(results.folder, 'merged_sims');
 #     'unimodal_sim_noise_v2', 'unimodal_sim_noise_v3',
 #     'unimodal_sim_noise_v4', 'unimodal_sim_noise_v5');
 
-sim.folders <- 'unimodal_sim_noise_v5';
+sim.folders <- paste0('unimodal_sim_noise_v', 5:7);
 
 for (sim in sim.folders) {
   for (mle in c(FALSE, TRUE)) {
