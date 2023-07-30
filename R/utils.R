@@ -129,3 +129,32 @@ find_midpoint.Histogram <- function(x){
 find_midpoint.GenomicHistogram <- function(x){
   (x$consecutive_start + x$consecutive_end)/2
 }
+
+#' Loads base config file and overwrites with an optional additional file
+#'
+#' @param file optional file path to user config script
+#'
+#' @return list of yaml config
+load.config <- function(file = NULL) {
+  config.path <- fs::path_package('HistogramZoo', 'config.yaml');
+  base.yaml <- yaml::read_yaml(file = config.path);
+  if (!is.null(file)) {
+    user.yaml <- yaml::read_yaml(file = file);
+    base.yaml <- modifyList(base.yaml, user.yaml);
+    }
+
+  hz.home <- Sys.getenv('HZ_HOME');
+  if (hz.home != '') {
+    base.yaml$root.path <- hz.home
+    }
+
+  return(base.yaml);
+  }
+
+#' Intervals [a, b], [c,d]
+#' Need a <= b, c <= d
+#' @return TRUE if [a,b] and [c,d] overlap
+int_overlap <- function(a,b,c,d) {
+  stopifnot(a <= b & c <= d)
+  c <= b && a <= d
+  }

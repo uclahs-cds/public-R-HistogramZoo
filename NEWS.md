@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # HistogramZoo v1.4.0
 
+## [1.5.0] - 2023-07-26
+
+### Added
+- Uni- and Multi-peak simulations
+- Plots for unimodal simulations
+
+## [1.4.2] - 2023-07-03
+
+### Added
+- Add `+.Histogram` support to add bin width 1 histograms together.
+
 ## [1.4.1] - 2023-05-02
 
 ### Added
