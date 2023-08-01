@@ -29,7 +29,10 @@ for (sim in sim.folders) {
           fill = TRUE
           )
 
-      if (nrow(sim.data) == 0) next;
+      if (nrow(sim.data) == 0) {
+        cat('No data found\n');
+        next;
+      }
 
       suffix <- if (mle) '-mle' else '';
 
