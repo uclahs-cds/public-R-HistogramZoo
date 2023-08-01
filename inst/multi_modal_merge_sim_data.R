@@ -29,6 +29,8 @@ for (sim in sim.folders) {
           fill = TRUE
           )
 
+      if (nrow(sim.data) == 0) next;
+
       suffix <- if (mle) '-mle' else '';
 
       write.table(
