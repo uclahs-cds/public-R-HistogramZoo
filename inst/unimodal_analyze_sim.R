@@ -10,6 +10,8 @@ results.folder <- file.path(base.path, 'results');
 merged.folder <- file.path(results.folder, 'merged_sims');
 plots.folder <- file.path(base.path, 'plots');
 
+resolution <- 1600;
+
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) <= 1)
 
@@ -167,7 +169,7 @@ unimodal.sim[
 ### Create heatmap of the correlations
 sim.plot.segment.cor(
   x = best.segment,
-  resolution = 400,
+  resolution = resolution,
   cluster = FALSE,
   main = 'Spearman correlation with segment Jaccard',
   cor.var = 'jaccard',
@@ -181,7 +183,7 @@ sim.plot.segment.cor(
 
 sim.plot.segment.cor(
   x = best.segment,
-  resolution = 400,
+  resolution = resolution,
   cluster = FALSE,
   main = 'Spearman correlation with segment probability',
   cor.var = 'prob_segment',
@@ -200,7 +202,7 @@ sim.plot.segment.eval(
   cluster = FALSE,
   print.colour.key = FALSE,
   xlab.label = 'Median Jaccard',
-  resolution = 200,
+  resolution = resolution,
   filename = print(
     file.path(
       plots.folder,
@@ -212,7 +214,7 @@ sim.plot.segment.eval(
 sim.plot.segment.eval(
   best.segment,
   cluster = TRUE,
-  resolution = 200,
+  resolution = resolution,
   xlab.label = 'Median Jaccard',
   filename = print(
     file.path(
@@ -228,7 +230,7 @@ sim.plot.segment.eval(
   target = 'prob_segment',
 #   xlab.label = 'Median probability of segment',
   print.colour.key = TRUE,
-  resolution = 200,
+  resolution = resolution,
   filename = print(
     file.path(
       plots.folder,
@@ -243,7 +245,7 @@ sim.plot.segment.eval(
   target = 'prob_segment',
   xlab.label = 'Median probability of segment',
   print.colour.key = TRUE,
-  resolution = 200,
+  resolution = resolution,
   filename = print(
     file.path(
       plots.folder,
@@ -290,7 +292,7 @@ create.multipanelplot(
   main.cex = 2.5,
   width = 12,
   height = 12,
-  resolution = 300,
+  resolution = resolution,
   filename = print(
     file.path(
       plots.folder,
@@ -312,7 +314,7 @@ decile.uni.plots <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
-    resolution = 200,
+    resolution = resolution,
     cluster = FALSE,
     group_vars = c(categorical.vars, v),
     acc = acc,
@@ -329,7 +331,7 @@ decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
-    resolution = 200,
+    resolution = resolution,
     cluster = TRUE,
     group_vars = c(categorical.vars, v),
     acc = acc,
@@ -346,7 +348,7 @@ decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
   res <- sim.plot.quantile.accuracy(
     unimodal.sim,
-    resolution = 200,
+    resolution = resolution,
     cluster = TRUE,
     group_vars = c(categorical.vars, v),
     acc = acc,
@@ -383,7 +385,7 @@ create.multipanelplot(
   height = 20,
   layout.height = 2,
   layout.width = 2,
-  resolution = 200,
+  resolution = resolution,
   main = 'No Clustering',
   xlab.label = 'Distribution Accuracy',
   legend = list(
@@ -412,7 +414,7 @@ create.multipanelplot(
   height = 20,
   layout.height = 2,
   layout.width = 2,
-  resolution = 200,
+  resolution = resolution,
   main = 'DIANA Clustered',
   xlab.label = 'Distribution Accuracy',
   legend = list(
@@ -438,7 +440,7 @@ create.multipanelplot(
 # Across all variables
 sim.plot.quantile.accuracy(
     unimodal.sim,
-    resolution = 800,
+    resolution = resolution,
     cluster = TRUE,
     acc = 'dist',
     group_vars = c(
@@ -458,7 +460,7 @@ sim.plot.quantile.accuracy(
 
 sim.plot.quantile.accuracy(
     unimodal.sim,
-    resolution = 400,
+    resolution = resolution,
     cluster = FALSE,
     acc = 'dist',
     main = 'No clustering',
@@ -514,7 +516,7 @@ for (eval.metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
     height = 10,
     layout.height = 1,
     layout.width = 2,
-    resolution = 500,
+    resolution = resolution,
     main = '',
     xlab.label = eval.metric,
     legend = list(

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # HistogramZoo v1.4.0
 
+## [1.5.1] - 2023-08-02
+- Analysis for multi-peak simulations
+
 ## [1.5.0] - 2023-07-26
 
 ### Added

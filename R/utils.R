@@ -151,10 +151,3 @@ load.config <- function(file = NULL) {
   return(base.yaml);
   }
 
-#' Intervals [a, b], [c,d]
-#' Need a <= b, c <= d
-#' @return TRUE if [a,b] and [c,d] overlap
-int_overlap <- function(a,b,c,d) {
-  stopifnot(a <= b & c <= d)
-  c <= b && a <= d
-  }
