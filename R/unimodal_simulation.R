@@ -67,10 +67,10 @@ random_unimodal_sim <- function(
     noise_data
     )
 
-  peak_histogram_data <- observations_to_histogram(
-    x = peak,
-    histogram_bin_width = 1
-    )
+  # peak_histogram_data <- observations_to_histogram(
+  #   x = peak,
+  #   histogram_bin_width = 1
+  #   )
 
   histogram_data <- observations_to_histogram(
     x = peak_noise,
