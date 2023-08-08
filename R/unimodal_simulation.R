@@ -8,11 +8,12 @@ random_unimodal_sim <- function(
     max_uniform = NULL,
     remove_low_entropy = NULL,
     truncated_models = FALSE,
-    include_data = FALSE,
-    include_segment_and_fit = TRUE,
     actual_dist = c('norm', 'unif', 'gamma'),
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
-    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
+    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time()))),
+    run_segment_and_fit = TRUE,
+    include_simulated_data = FALSE,
+    include_fit_data = FALSE
   ) {
 
   set.seed(seed);
@@ -66,8 +67,11 @@ random_unimodal_sim <- function(
     histogram_bin_width = 1
     )
 
+  optima <- find_local_optima(histogram_data)
+  
   res <- list(
     N = N_sim,
+    local_optima = sum(sapply(optima, length)),
     param = param,
     noise_min = noise_min,
     noise_max = noise_max,
@@ -82,12 +86,13 @@ random_unimodal_sim <- function(
     truncated_models = truncated_models
     )
 
-    print.res <- as.data.frame(res)
-    rownames(print.res) <- 'PARAMS: '
-    print(print.res)
+    res <- as.data.frame(res)
+    
+    print('PARAMS: ')
+    print(res)
 
-    all_seg_results <- NULL
-    if (include_segment_and_fit) {
+    seg_results <- NULL
+    if (run_segment_and_fit) {
       timing <- system.time({
       seg_results_mod <- try({
         segment_and_fit(
@@ -109,24 +114,31 @@ random_unimodal_sim <- function(
         t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
         )
 
-      all_seg_results <- cbind.data.frame(res, seg_results)
-      if (!include_data) return(all_seg_results)
-      else {
-        return(
-          list(
-            seg_results = all_seg_results,
-            hz_model = seg_results_mod,
-            peak_data = peak,
-            noise_data = noise_data
-          )
-        )
-      }
+      res <- cbind.data.frame(res, seg_results)
     }
-
-    if (include_data) {
-      # Return the actual data
-        res$peak_data <- peak
-        res$noise_data <- noise_data
-        return(res)
-      }
+    
+    rtn <- list(
+      "res" = res
+    )
+    
+    if(include_simulated_data){
+      rtn <- c(
+        rtn,
+        list(
+          "peak_data" = peak,
+          "noise_data" = noise_data
+        )
+      )
+    }
+    
+    if(include_fit_data && run_segment_and_fit){
+      rtn <- c(
+        rtn,
+        list(
+          "hz_model" = seg_results_mod
+        )
+      )
+    }
+    
+    return(rtn)
 }
