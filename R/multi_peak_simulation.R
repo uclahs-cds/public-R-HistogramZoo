@@ -14,6 +14,8 @@ random_multi_peak_sim <- function(
     return_fit = FALSE,
     seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
   ) {
+
+  set.seed(seed);
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(remove_low_entropy)) remove_low_entropy <- sample(c(TRUE, FALSE), size = 1)
   if (is.null(truncated_models)) truncated_models <- sample(c(TRUE, FALSE), size = 1)
@@ -21,7 +23,6 @@ random_multi_peak_sim <- function(
   .sample_unif <- function(x, n = 1) {
     runif(n, min = x[1], max = x[2])
   }
-  set.seed(seed);
 
   if (length(peaks) > 1) {
     peaks_sim <- sample(x = peaks, size = 1)
@@ -29,12 +30,14 @@ random_multi_peak_sim <- function(
     peaks_sim <- peaks
     }
 
+  set.seed(seed);
   sim_dist <- sample(c('norm', 'unif', 'gamma'), size = peaks_sim, replace = TRUE)
   N_sim <- round(.sample_unif(N, n = peaks_sim))
   eps_sample <- .sample_unif(eps, n = 1)
   noise_sim <- .sample_unif(noise)
   N_noise_sim <- round(sum(N_sim) * noise_sim)
 
+  set.seed(seed);
   multi_histogram_data <- lapply(seq_len(peaks_sim), function(i) {
     # Mean is 0 for each of the distributions
     if (sim_dist[[i]] == 'norm') {
