@@ -20,6 +20,7 @@ random_unimodal_sim <- function(
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
     seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
   ) {
+
   set.seed(seed);
   sim_dist <- if (length(actual_dist) == 1) actual_dist else sample(actual_dist, size = 1)
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
@@ -31,7 +32,6 @@ random_unimodal_sim <- function(
   }
 
   set.seed(seed);
-
   N_sim <- if (length(N) == 1) N else .sample_unif(N)
   eps_sample <- if (length(eps) == 1) eps else .sample_unif(eps)
   noise_sim <- if (length(noise) == 1) noise else .sample_unif(noise)
@@ -66,11 +66,6 @@ random_unimodal_sim <- function(
     peak,
     noise_data
     )
-
-  # peak_histogram_data <- observations_to_histogram(
-  #   x = peak,
-  #   histogram_bin_width = 1
-  #   )
 
   histogram_data <- observations_to_histogram(
     x = peak_noise,
