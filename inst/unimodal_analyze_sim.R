@@ -125,21 +125,21 @@ unimodal.sim$noise_decile <- cut(
   unimodal.sim$noise,
   HistogramZoo:::scale.param(
     quantile_p,
-    param.range = HistogramZoo:::unimodal.params$noise
+    param.range = c(0.05, 0.5)
     )
   )
 unimodal.sim$eps_decile <- cut(
   unimodal.sim$eps,
   HistogramZoo:::scale.param(
     quantile_p,
-    param.range = HistogramZoo:::unimodal.params$eps
+    param.range = c(0.05, 2)
     )
   )
 unimodal.sim$N_decile <- cut(
   unimodal.sim$N,
   round(HistogramZoo:::scale.param(
     quantile_p,
-    param.range = HistogramZoo:::unimodal.params$N
+    param.range = c(25, 500)
     ))
   )
 
@@ -539,4 +539,3 @@ for (eval.metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
       )
   )
 }
-
