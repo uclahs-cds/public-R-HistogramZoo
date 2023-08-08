@@ -11,8 +11,10 @@ random_multi_peak_sim <- function(
     peaks = 2:3,
     peak_shift = c(2, 8), # Peak shift in standard deviations from first peak
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
-    return_fit = FALSE,
-    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
+    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time()))),
+    run_segment_and_fit = TRUE,
+    include_simulated_data = FALSE,
+    include_fit_data = FALSE
   ) {
 
   set.seed(seed);
@@ -73,8 +75,7 @@ random_multi_peak_sim <- function(
     })
 
   peak_shift_sample <- 0
-  # Shift each eap
-  # In standard deviations
+  # Shift each peak (a sampled number of standard deviations)
   if (peaks_sim > 1) {
     peak_shift_sample <- cumsum(c(0, .sample_unif(peak_shift, n = peaks_sim - 1)))
     peaK_shift_actual <- multi_histogram_data[[1]]$sd_dist * peak_shift_sample
@@ -122,9 +123,12 @@ random_multi_peak_sim <- function(
 
   peak_min <- unlist(lapply(peak_histograms, function(x) head(x$interval_start, n = 1)))
   peak_max <- unlist(lapply(peak_histograms, function(x) tail(x$interval_end, n = 1)))
-
+  
+  optima <- find_local_optima(merged_peak_histograms_noise)
+  
     res <- list(
         N = N_sim,
+        local_optima = sum(sapply(optima, length)),
         param = unlist(lapply(multi_histogram_data, function(x) x$param)),
         peak_num = seq_along(peak_min),
         peak_min = peak_min,
@@ -144,21 +148,24 @@ random_multi_peak_sim <- function(
         peaks = peaks_sim
         )
 
-    print.res <- as.data.frame(res)
+    # long format, one peak per line
+    actual_peaks <- as.data.frame(res)
+    
     print('PARAMS: ')
-    print(print.res)
-
-  timing <- system.time({
-    seg_results_mod <- try({
-      segment_and_fit(
-        merged_peak_histograms_noise,
-        max_uniform = max_uniform,
-        remove_low_entropy = remove_low_entropy,
-        metric = metrics,
-        eps = eps_sample,
-        truncated_models = truncated_models,
-        metric_weights = sqrt(rev(seq_along(metrics))),
-        seed = seed
+    print(actual_peaks)
+    
+  if (run_segment_and_fit) {
+    timing <- system.time({
+      seg_results_mod <- try({
+        segment_and_fit(
+          merged_peak_histograms_noise,
+          max_uniform = max_uniform,
+          remove_low_entropy = remove_low_entropy,
+          metric = metrics,
+          eps = eps_sample,
+          truncated_models = truncated_models,
+          metric_weights = sqrt(rev(seq_along(metrics))),
+          seed = seed
         )
       }, silent = TRUE)
     peak_start <- seg_results_mod$interval_start[seg_results_mod$p[, 'start']]
@@ -166,13 +173,10 @@ random_multi_peak_sim <- function(
     seg_results <- summarize_results_error(seg_results_mod)
     })
 
-  seg_results <- cbind.data.frame(
-    seg_results,
-    t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
+    seg_results <- cbind.data.frame(
+      seg_results,
+      t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
     )
-
-    # long format, one peak per line
-    actual_peaks <- data.frame(res)
 
     # Joined by seed
     seg_results$seed <- seed
@@ -222,16 +226,40 @@ random_multi_peak_sim <- function(
       truncated_models = truncated_models,
       seed = seed
       )
-
-    rtn <- list(
-        actual_peaks = actual_peaks,
-        seg_results = seg_results,
-        overlap = overlap_data
-        )
-
-    if (return_fit) {
-      rtn$hz_fit <- seg_results_mod
-      }
-
-    return(rtn)
   }
+    
+  rtn <- list(
+    "actual_peaks" = actual_peaks
+  )
+    
+  if(run_segment_and_fit){
+    rtn <- c(
+      rtn,
+      list(
+        "seg_results" = seg_results,
+        "overlap" = overlap_data
+      )
+    )
+  }
+    
+  if(include_simulated_data){
+    rtn <- c(
+      rtn,
+      list(
+        "peak_data" = merged_raw_data,
+        "noise_data" = noise_data
+      )
+    )
+  }
+    
+  if(include_fit_data && run_segment_and_fit){
+    rtn <- c(
+      rtn,
+      list(
+        "hz_model" = seg_results_mod
+      )
+    )
+  }
+
+  return(rtn)
+}
