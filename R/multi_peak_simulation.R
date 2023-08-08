@@ -1,3 +1,37 @@
+#' Simulate a multimodal histogram composed as the sum of data from sampling several distributions
+#' WARNING: Comprehensive error checking required before export
+#' TODO: potentially allow for user specification of sampled distributions (i.e. actual dist)
+#' 
+#' @param N number of points to sample from the distribution
+#' @param unif_length range of uniform distribution length (vector of length 2)
+#' @param norm_sd range of normal standard deviations (vector of length 2)
+#' @param gamma_shape range of gamma shape (vector of length 2)
+#' @param eps range of hyperparameter epsilon (vector of length 2)
+#' @param noise range of noise as a proportion of total counts (vector of length 2)
+#' @param max_uniform NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param remove_low_entropy NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param truncated_models NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param peaks range of number of peaks to sample from (vector of length 2)
+#' @param peak_shift range of number of standard deviations of the first peak to sample from (vector of length 2) - this is used to shift subsequent peaks
+#' @param metrics metrics for segment and fit
+#' @param seed numeric seed
+#' @param run_segment_and_fit logical; whether to run segment and fit or not 
+#' @param include_simulated_data logical; whether to return simulated data
+#' @param include_fit_data logical; whether to return the HistogramFit object
+#'
+#' @return A list of results
+#' \describe{
+#'     \item{actual_peaks}{a data frame of parameters used for simulation, one row per simulated peak}
+#'     \item{seg_results}{if `run_segment_and_fit`, a data frame for peaks identified by segment_and_fit}
+#'     \item{overlap}{if `run_segment_and_fit`, a data frame for overlap between simulated and fitted peaks}
+#'     \item{peak_data}{if `include_simulated_data`, simulated peak counts will be returned}
+#'     \item{noise_data}{if `include_simulated_data`, simulated noise counts will be returned}
+#'     \item{hz_model}{if `include_fit_data`, the HistogramFit object will be returned}
+#'}
+#'
+#' @examples \dontrun{
+#' simulated_histogram <- random_multi_peak_sim()
+#'}
 random_multi_peak_sim <- function(
     N = c(25, 500),
     unif_length = c(6, 25),
