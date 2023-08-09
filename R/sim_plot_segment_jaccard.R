@@ -17,7 +17,7 @@ sim.plot.segment.eval <- function(
     cluster = FALSE,
     print.colour.key = TRUE,
     group_vars = c(
-      'remove_low_entropy',
+      'remove_low_entropy', 'max_uniform',
       'N_decile', 'noise_decile',
       'eps_decile'
       ),
@@ -26,7 +26,7 @@ sim.plot.segment.eval <- function(
       right = list(
         fun = common.sim.legend(
           include.legends = c('params', 'distributions', 'quantiles'),
-          params.to.include = intersect(group_vars, c('remove_low_entropy')),
+          params.to.include = intersect(group_vars, c('remove_low_entropy', 'max_uniform')),
           cont.params.to.include = group_vars[grepl('_decile', group_vars)],
           simulation.params = list(
             'N' = c(25, 500),
@@ -101,8 +101,8 @@ sim.plot.segment.eval <- function(
       print.colour.key = print.colour.key,
       clustering.method = 'none',
       colour.scheme = jaccard.colour.scheme,
-      xaxis.lab = c('gamma', 'norm', 'unif'),
-      xaxis.rot = 45,
+      xaxis.lab = distribution_names[c('gamma', 'norm', 'unif')],
+      xaxis.rot = 90,
       at = heatmap.at,
       xaxis.tck = 0,
       yaxis.tck = 0,
@@ -111,9 +111,6 @@ sim.plot.segment.eval <- function(
 
   create.multipanelplot(
       list(jaccard.cov.heatmap, jaccard.heatmap),
-      plot.objects.widths = c(0.1, 1),
-      x.spacing = c(-0.25, 0),
-      width = 12,
       legend = legend,
       main.cex = 2,
       main = if (cluster) 'DIANA Clustered' else 'No Clustering',
