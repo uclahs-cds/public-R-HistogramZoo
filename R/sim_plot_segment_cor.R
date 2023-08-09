@@ -1,12 +1,21 @@
+#' Creates a Spearman correlation heatmap for metric and variables of interest including N, epslion, noise and parameter
+#' Automatically separates by both distribution and `remove_low_entropy`
+#' 
+#' @param x a data frame of simulation results with columns named for `cor.var` and simulation parameters including `N`, `eps`, `noise` and `param`
+#' @param cluster whether or not to cluster the heatmap (using diana)
+#' @param cor.var target variable for correlation, out of `jaccard` and `prob_segment`
+#' @param ... additional arguments to `BoutrosLab.plotting.general::create.multipanelplot`
+#'
 #' @export
 sim.plot.segment.cor <- function(
     x,
     cluster = FALSE,
     cor.var = c('jaccard', 'prob_segment'),
     ...
-    ) {
+){
   cor.var <- match.arg(cor.var)
 
+  # Calculating spearman's correlation
   seg.cor.data <- as.data.frame(x[
     ,
     .(
@@ -22,27 +31,31 @@ sim.plot.segment.cor <- function(
 
   cor.cols <- colnames(seg.cor.data)[grepl('_cor', colnames(seg.cor.data))]
 
+  # Clustering and extracting variable order
   if (cluster) {
     seg.cor.order <- diana(seg.cor.data[, cor.cols])$order
   } else {
     seg.cor.order <- seq_len(nrow(seg.cor.data))
   }
 
-
+  # Creating covariate heatmap
   cor.cov.heatmap <- sim.plot.heatmap.cov(
       seg.cor.data[seg.cor.order, c(
         'actual_dist', 'remove_low_entropy'
         )]
       );
 
+  # Reordering dataframe
   cor.data <- seg.cor.data[seg.cor.order, cor.cols]
 
+  # Adding text to the heatmap
   row.col.text <- cbind.data.frame(
     which(abs(cor.data) > 0.1, arr.ind = TRUE),
     value = round(cor.data[abs(cor.data) > 0.1], digits = 2)
     )
   row.col.text$row <- nrow(cor.data) - row.col.text$row + 1
 
+  # X axis labels
   xaxis.lab <- c(
     expression('\u03c1'['N']),
     expression('\u03c1'['\u03B5']),
@@ -50,6 +63,7 @@ sim.plot.segment.cor <- function(
     expression('\u03c1'['param'])
     )
 
+  # Correlation heatmap
   cov.hm <- create.heatmap(
     x = cor.data,
     same.as.matrix = TRUE,
@@ -67,6 +81,7 @@ sim.plot.segment.cor <- function(
     fill.colour = 'lightgrey'
     )
 
+  # Multipanelplot
   create.multipanelplot(
     list(cor.cov.heatmap, cov.hm),
     plot.objects.widths = c(0.1, 1),
