@@ -33,9 +33,9 @@ confusion_matrix_dist <- function(
 }
 
 #' Creates an accuracy heatmap relative to metrics
-#' 
+#'
 #' @param x a data frame of simulation results
-#' @param acc accuracy variable; one of `dist` (distribution), `peaks` (number of peaks), `both`, `count`, and options from `caret::confusionMatrix` 
+#' @param acc accuracy variable; one of `dist` (distribution), `peaks` (number of peaks), `both`, `count`, and options from `caret::confusionMatrix`
 #' @param cluster whether or not to cluster (using diana)
 #' @param print.colour.key whether or not to print the colour key for the heatmap
 #' @param group_vars variables to group in the covariate
@@ -58,7 +58,7 @@ sim.plot.quantile.accuracy <- function(
     print.colour.key = TRUE,
     group_vars = c(
       'actual_dist', 'max_uniform', 'remove_low_entropy',
-      'jaccard_decile', 'N_decile', 'noise_decile'
+      'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile'
       ),
     legend = list(
       right = list(
@@ -80,13 +80,17 @@ sim.plot.quantile.accuracy <- function(
     ...
 ){
   acc <- match.arg(acc);
+  group_vars <- match.arg(group_vars, several.ok = TRUE); # Restricting the set of group vars for now
+  # TODO: Error checking:
+  # 1. Make sure all required columns are in data frame
+  # 2. "actual_dist" *has to* be a covariate for caret functions
 
   # Confusion matrix accuracy calculation
   is.cm.acc <- acc %in% c('Sensitivity', 'Specificity', 'Pos Pred Value', 'Neg Pred Value',
       'Precision', 'Recall', 'F1', 'Prevalence', 'Detection Rate',
       'Detection Prevalence', 'Balanced Accuracy')
   if (is.cm.acc) {
-    group_vars <- setdiff(group_vars, c('actual_dist', 'dist'))
+    confusion_matrix_vars <- setdiff(group_vars, c('actual_dist', 'dist'))
     decile.accuracy <- x[
       ,
       confusion_matrix_dist(
@@ -94,18 +98,13 @@ sim.plot.quantile.accuracy <- function(
           actual_dist,
           eval_metrics = ..acc
           ),
-      by = c('metric', group_vars)
+      by = c('metric', confusion_matrix_vars)
       ]
-
-    # Correct ordering of covariates
-    group_vars <- c(
-      group_vars[group_vars %in% c('max_uniform', 'remove_low_entropy')],
-      'dist',
-      group_vars[! group_vars %in% c('max_uniform', 'remove_low_entropy')]
-      )
+    
+    group_vars[group_vars == "actual_dist"] <- "dist" # Accounting for confusion_matrix_dist output format
     value.var <- 'value'
   } else {
-    
+
     # Accuracy of distribution and number of peaks
     decile.accuracy <- x[
     , .(
@@ -124,12 +123,12 @@ sim.plot.quantile.accuracy <- function(
 
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'metric', sep = ' ~ ')
   decile.wide.accuracy.dist <- dcast(
-    decile.accuracy,
-    long.wide.formula,
+    data = decile.accuracy,
+    formula = long.wide.formula,
     value.var = value.var
     )
   decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
-  
+
   # Clustering data
   if (cluster) {
     cluster.mat <- decile.wide.accuracy.dist[, metrics]
@@ -156,7 +155,7 @@ sim.plot.quantile.accuracy <- function(
     print.colour.key = print.colour.key,
     colour.scheme = if (acc != 'count') acc.colour.scheme else c('white', 'forestgreen'),
     xaxis.lab = metrics,
-    xaxis.rot = 45,
+    xaxis.rot = 90,
     at = if (acc == 'count') NULL else seq(0, 1, length.out = 20),
     xaxis.tck = 0,
     yaxis.tck = 0,
@@ -165,9 +164,8 @@ sim.plot.quantile.accuracy <- function(
 
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
-    plot.objects.widths = c(0.1, 1),
+    plot.objects.widths = c(0.3, 1),
     x.spacing = c(-0.25, 0),
-    width = 12,
     legend = legend,
     main.cex = 2,
     layout.width = 2,

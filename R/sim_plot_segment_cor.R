@@ -1,6 +1,6 @@
 #' Creates a Spearman correlation heatmap for metric and variables of interest including N, epslion, noise and parameter
 #' Automatically separates by both distribution and `remove_low_entropy`
-#' 
+#'
 #' @param x a data frame of simulation results with columns named for `cor.var` and simulation parameters including `N`, `eps`, `noise` and `param`
 #' @param cluster whether or not to cluster the heatmap (using diana)
 #' @param cor.var target variable for correlation, out of `jaccard` and `prob_segment`
@@ -86,7 +86,6 @@ sim.plot.segment.cor <- function(
     list(cor.cov.heatmap, cov.hm),
     plot.objects.widths = c(0.1, 1),
     x.spacing = c(-0.25, 0),
-    width = 12,
     main.cex = 2,
     layout.width = 2,
     layout.height = 1,

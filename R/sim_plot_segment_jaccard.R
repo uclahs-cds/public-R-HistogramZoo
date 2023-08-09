@@ -2,7 +2,7 @@ jaccard.colour.scheme <- c('white', 'dodgerblue2');
 
 
 #' Creates a heatmap of a metric vs. distributions for simulation data split by different parameters
-#' 
+#'
 #' @param x simulation dataset in the form of a data frame with corresponding column names for `actual_dist` (distributions), `group_vars`and `target`
 #' @param cluster whether or not to cluster using the method `diana`
 #' @param print.colour.key whether or not to print the colour key
@@ -38,7 +38,7 @@ sim.plot.segment.eval <- function(
       ),
     ...
 ){
-  
+
   target <- match.arg(target);
   if (target == 'median_jaccard') {
       res <- x[
@@ -98,7 +98,6 @@ sim.plot.segment.eval <- function(
   jaccard.heatmap <- create.heatmap(
       res.wide[diana.jaccard.clust, c('gamma', 'norm', 'unif')],
       same.as.matrix = TRUE,
-      print.colour.key = print.colour.key,
       clustering.method = 'none',
       colour.scheme = jaccard.colour.scheme,
       xaxis.lab = distribution_names[c('gamma', 'norm', 'unif')],
@@ -106,7 +105,12 @@ sim.plot.segment.eval <- function(
       at = heatmap.at,
       xaxis.tck = 0,
       yaxis.tck = 0,
-      fill.colour = 'lightgrey'
+      fill.colour = 'lightgrey',
+      # Colourkey
+      print.colour.key = print.colour.key,
+      # colourkey.labels.at = NULL,
+      # colourkey.labels = NULL,
+      colourkey.cex = 1.5
       );
 
   create.multipanelplot(
