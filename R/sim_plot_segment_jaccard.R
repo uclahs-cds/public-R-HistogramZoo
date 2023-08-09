@@ -1,5 +1,16 @@
 jaccard.colour.scheme <- c('white', 'dodgerblue2');
 
+
+#' Creates a heatmap of a metric vs. distributions for simulation data split by different parameters
+#' 
+#' @param x simulation dataset in the form of a data frame with corresponding column names for `actual_dist` (distributions), `group_vars`and `target`
+#' @param cluster whether or not to cluster using the method `diana`
+#' @param print.colour.key whether or not to print the colour key
+#' @param group_vars columns used to group variable of interest
+#' @param target column name of variable of interest to aggregate and visualize
+#' @param legend a `legend.grob` from `BoutrosLab.plotting.general`
+#' @param ... additional parameters to be passed to `create.multipanelplot`
+#'
 #' @export
 sim.plot.segment.eval <- function(
     x,
@@ -16,12 +27,18 @@ sim.plot.segment.eval <- function(
         fun = common.sim.legend(
           include.legends = c('params', 'distributions', 'quantiles'),
           params.to.include = intersect(group_vars, c('remove_low_entropy')),
-          cont.params.to.include = group_vars[grepl('_decile', group_vars)]
+          cont.params.to.include = group_vars[grepl('_decile', group_vars)],
+          simulation.params = list(
+            'N' = c(25, 500),
+            'eps' = c(0.5, 2),
+            'noise' = c(.05, .5)
+            )
           )
         )
       ),
     ...
-    ) {
+){
+  
   target <- match.arg(target);
   if (target == 'median_jaccard') {
       res <- x[
@@ -71,7 +88,7 @@ sim.plot.segment.eval <- function(
       diana.jaccard.clust <- seq_len(nrow(res.wide))
     }
 
-
+  # Generating covariate heatmap
   jaccard.cov.heatmap <- sim.plot.heatmap.cov(
       data.frame(res.wide[diana.jaccard.clust, ..group_vars])
       );
