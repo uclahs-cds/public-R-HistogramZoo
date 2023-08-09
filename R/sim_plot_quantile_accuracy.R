@@ -1,3 +1,10 @@
+#' Generates a confusion matrix for predicted and true distribution
+#'
+#' @param pred a vector of predicted distributions
+#' @param actual a vector of true distributions
+#' @param eval_metrics evaluation metrics for confusion matrix generation
+#'
+#' @return a data table with columns `Eval Metric`, `dist` and `value` describing the evaluation metric for each distribution
 confusion_matrix_dist <- function(
     pred,
     actual,
@@ -6,7 +13,7 @@ confusion_matrix_dist <- function(
       'Precision', 'Recall', 'F1', 'Prevalence', 'Detection Rate',
       'Detection Prevalence', 'Balanced Accuracy'
       )
-    ) {
+){
   eval_metrics <- match.arg(eval_metrics, several.ok = TRUE)
 #  if (length(actual) == 1) actual <- rep(actual, length(pred))
   res <- as.data.table(
@@ -25,6 +32,17 @@ confusion_matrix_dist <- function(
     )
 }
 
+#' Creates an accuracy heatmap relative to metrics
+#' 
+#' @param x a data frame of simulation results
+#' @param acc accuracy variable; one of `dist` (distribution), `peaks` (number of peaks), `both`, `count`, and options from `caret::confusionMatrix` 
+#' @param cluster whether or not to cluster (using diana)
+#' @param print.colour.key whether or not to print the colour key for the heatmap
+#' @param group_vars variables to group in the covariate
+#' @param legend a `legend.grob` object from `BoutrosLab.plotting.general`
+#' @param xlab.label x axis label
+#' @param ... additional parameters to be passed to `BoutrosLab.plotting.general::create.multipanelplot`
+#'
 #' @import data.table
 #' @export
 sim.plot.quantile.accuracy <- function(
@@ -36,7 +54,6 @@ sim.plot.quantile.accuracy <- function(
       'Precision', 'Recall', 'F1', 'Prevalence', 'Detection Rate',
       'Detection Prevalence', 'Balanced Accuracy'
       ),
-    sort.cols = NULL,
     cluster = FALSE,
     print.colour.key = TRUE,
     group_vars = c(
@@ -60,9 +77,11 @@ sim.plot.quantile.accuracy <- function(
         acc
         }
       ),
-    ...) {
+    ...
+){
   acc <- match.arg(acc);
 
+  # Confusion matrix accuracy calculation
   is.cm.acc <- acc %in% c('Sensitivity', 'Specificity', 'Pos Pred Value', 'Neg Pred Value',
       'Precision', 'Recall', 'F1', 'Prevalence', 'Detection Rate',
       'Detection Prevalence', 'Balanced Accuracy')
@@ -86,6 +105,8 @@ sim.plot.quantile.accuracy <- function(
       )
     value.var <- 'value'
   } else {
+    
+    # Accuracy of distribution and number of peaks
     decile.accuracy <- x[
     , .(
       accuracy_dist = mean(actual_dist == dist, na.rm = TRUE),
@@ -98,6 +119,7 @@ sim.plot.quantile.accuracy <- function(
     value.var <- if (acc == 'count') acc else paste0('accuracy_', acc)
   }
 
+  # Generating a long-wide format of the data
   metrics <- unique(decile.accuracy$metric)
 
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'metric', sep = ' ~ ')
@@ -107,18 +129,13 @@ sim.plot.quantile.accuracy <- function(
     value.var = value.var
     )
   decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
-
-  cont.cols <- colnames(decile.wide.accuracy.dist)[grepl('_decile', colnames(decile.wide.accuracy.dist))];
+  
+  # Clustering data
   if (cluster) {
     cluster.mat <- decile.wide.accuracy.dist[, metrics]
     na.cells <- is.na(decile.wide.accuracy.dist[, metrics])
     cluster.mat[na.cells] <- -1
 
-    # diana.acc.clust <- hclust(
-    #   dist(
-    #     cluster.mat
-    #   )
-    # )$order
     diana.acc.clust <- diana(
       cluster.mat
       )$order
@@ -126,10 +143,12 @@ sim.plot.quantile.accuracy <- function(
       diana.acc.clust <- seq_len(nrow(decile.wide.accuracy.dist))
     }
 
+  # covariate heatmap
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
     decile.wide.accuracy.dist[diana.acc.clust, group_vars]
     )
 
+  # accuracy heatmap
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
     decile.wide.accuracy.dist[diana.acc.clust, metrics],
     same.as.matrix = TRUE,
