@@ -35,7 +35,9 @@ sim.plot.parameter.accuracy <- function(
     xlab.label = switch(
       acc,
       "mse" = "Mean Squared Error",
-      "mae" = "Mean Average Error"
+      "mae" = "Mean Average Error",
+      "mdae" = "Median Absolute Error",
+      "rmse" = "Root Mean Squared Error"
     ),
     ...
 ){
