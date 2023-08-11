@@ -1,7 +1,7 @@
 #' Simulate a multimodal histogram composed as the sum of data from sampling several distributions
 #' WARNING: Comprehensive error checking required before export
 #' TODO: potentially allow for user specification of sampled distributions (i.e. actual dist)
-#' 
+#'
 #' @param N number of points to sample from the distribution
 #' @param unif_length range of uniform distribution length (vector of length 2)
 #' @param norm_sd range of normal standard deviations (vector of length 2)
@@ -15,7 +15,7 @@
 #' @param peak_shift range of number of standard deviations of the first peak to sample from (vector of length 2) - this is used to shift subsequent peaks
 #' @param metrics metrics for segment and fit
 #' @param seed numeric seed
-#' @param run_segment_and_fit logical; whether to run segment and fit or not 
+#' @param run_segment_and_fit logical; whether to run segment and fit or not
 #' @param include_simulated_data logical; whether to return simulated data
 #' @param include_fit_data logical; whether to return the HistogramFit object
 #'
@@ -157,9 +157,9 @@ random_multi_peak_sim <- function(
 
   peak_min <- unlist(lapply(peak_histograms, function(x) head(x$interval_start, n = 1)))
   peak_max <- unlist(lapply(peak_histograms, function(x) tail(x$interval_end, n = 1)))
-  
+
   optima <- find_local_optima(merged_peak_histograms_noise)
-  
+
     res <- list(
         N = N_sim,
         local_optima = sum(sapply(optima, length)),
@@ -184,10 +184,10 @@ random_multi_peak_sim <- function(
 
     # long format, one peak per line
     actual_peaks <- as.data.frame(res)
-    
+
     print('PARAMS: ')
     print(actual_peaks)
-    
+
   if (run_segment_and_fit) {
     timing <- system.time({
       seg_results_mod <- try({
@@ -216,19 +216,6 @@ random_multi_peak_sim <- function(
     seg_results$seed <- seed
 
     # Compute overlap data for peaks
-    overlap_data <- apply(actual_peaks[, c('peak_min', 'peak_max')], 1, function(x) {
-      which.max(
-        sapply(seq_along(peak_start), function(i) {
-          overlap_size(
-            a1 = x['peak_min'],
-            a2 = x['peak_max'],
-            b1 = peak_start[i],
-            b2 = peak_end[i]
-            )
-          }, simplify = FALSE)
-        )
-      }, simplify = FALSE)
-
     overlap_data <- merge(
       actual_peaks[, c('peak_num', 'peak_min', 'peak_max')],
       data.frame(
@@ -261,11 +248,11 @@ random_multi_peak_sim <- function(
       seed = seed
       )
   }
-    
+
   rtn <- list(
     "actual_peaks" = actual_peaks
   )
-    
+
   if(run_segment_and_fit){
     rtn <- c(
       rtn,
@@ -275,7 +262,7 @@ random_multi_peak_sim <- function(
       )
     )
   }
-    
+
   if(include_simulated_data){
     rtn <- c(
       rtn,
@@ -285,7 +272,7 @@ random_multi_peak_sim <- function(
       )
     )
   }
-    
+
   if(include_fit_data && run_segment_and_fit){
     rtn <- c(
       rtn,
