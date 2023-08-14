@@ -16,7 +16,7 @@ labels_helper <- function(
   labels <- ifelse(
     histogram_obj$interval_start == histogram_obj$interval_end,
     as.character(histogram_obj$interval_start),
-    paste0(interval_start, "-", interval_end)
+    paste0(interval_start, ",", interval_end)
   )
 
   return(labels[xat])

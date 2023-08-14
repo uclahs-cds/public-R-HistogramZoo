@@ -100,7 +100,7 @@ sim.plot.quantile.accuracy <- function(
           ),
       by = c('metric', confusion_matrix_vars)
       ]
-    
+
     group_vars[group_vars == "actual_dist"] <- "dist" # Accounting for confusion_matrix_dist output format
     value.var <- 'value'
   } else {
