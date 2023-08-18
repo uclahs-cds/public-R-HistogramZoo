@@ -187,7 +187,7 @@ sim.plot.heatmap.cov <- function(cov.data) {
     cov.data$eps_decile <- assign.cov.factor.col(cov.data$eps_decile, c('white', covariate.col$eps.decile));
   }
   if ('interference_decile' %in% colnames(cov.data)) {
-    cov.data$interference_decile <- assign.cov.factor.col(cov.data$interference_decile, c('white', covariate.col$interference_decile));
+    cov.data$interference_decile <- assign.cov.factor.col(cov.data$interference_decile, c('white', covariate.col$interference.decile));
   }
   if ('proportion_decile' %in% colnames(cov.data)) {
     cov.data$proportion_decile <- assign.cov.factor.col(cov.data$proportion_decile, c('white', covariate.col$proportion.decile));
