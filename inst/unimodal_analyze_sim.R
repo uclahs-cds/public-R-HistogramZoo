@@ -312,7 +312,7 @@ decile.vars <- c('eps_decile', 'N_decile', 'noise_decile', 'jaccard_decile')
 
 decile.uni.plots <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
-  res <- sim.plot.quantile.accuracy(
+  res <- sim.plot.distribution.accuracy(
     unimodal.sim,
     resolution = resolution,
     cluster = FALSE,
@@ -329,7 +329,7 @@ decile.uni.plots <- lapply(decile.vars, function(v) {
 
 decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
-  res <- sim.plot.quantile.accuracy(
+  res <- sim.plot.distribution.accuracy(
     unimodal.sim,
     resolution = resolution,
     cluster = TRUE,
@@ -346,7 +346,7 @@ decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
 
 decile.uni.plots.clustered <- lapply(decile.vars, function(v) {
   main <- sub('_decile', '', v)
-  res <- sim.plot.quantile.accuracy(
+  res <- sim.plot.distribution.accuracy(
     unimodal.sim,
     resolution = resolution,
     cluster = TRUE,
@@ -438,7 +438,7 @@ create.multipanelplot(
   )
 
 # Across all variables
-sim.plot.quantile.accuracy(
+sim.plot.distribution.accuracy(
     unimodal.sim,
     resolution = resolution,
     cluster = TRUE,
@@ -458,7 +458,7 @@ sim.plot.quantile.accuracy(
     )
   )
 
-sim.plot.quantile.accuracy(
+sim.plot.distribution.accuracy(
     unimodal.sim,
     resolution = resolution,
     cluster = FALSE,
@@ -480,7 +480,7 @@ sim.plot.quantile.accuracy(
 
 ### Prints the alternative metrics on the Noise and N quantiles
 for (eval.metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity', 'Balanced Accuracy')) {
-  no.clust.cm <- sim.plot.quantile.accuracy(
+  no.clust.cm <- sim.plot.distribution.accuracy(
     unimodal.sim,
     cluster = FALSE,
     acc = eval.metric,
@@ -495,7 +495,7 @@ for (eval.metric in c('F1', 'Precision', 'Recall', 'Sensitivity', 'Specificity',
   )
   class(no.clust.cm) <- c('multipanel', 'frame', 'gTree', 'grob', 'gDesc')
 
-  clust.cm <- sim.plot.quantile.accuracy(
+  clust.cm <- sim.plot.distribution.accuracy(
     unimodal.sim,
     cluster = TRUE,
     acc = eval.metric,

@@ -5,7 +5,7 @@ covariate.col <- list(
   noise.decile = 'darkorange1',
   eps.decile = 'seagreen3',
   param.decile = 'yellowgreen',
-  jaccard.decile = 'violetred3'
+  jaccard.decile = 'royalblue4'
   )
 
 acc.colour.scheme <- c('white', 'red');
@@ -19,9 +19,9 @@ acc.colour.scheme <- c('white', 'red');
 #'
 #' @export
 segment_prob <- function(
-    distribution = c('norm', 'gamma', 'unif'), 
-    params, 
-    a, 
+    distribution = c('norm', 'gamma', 'unif'),
+    params,
+    a,
     b
 ){
   stopifnot(b >= a)
@@ -37,7 +37,7 @@ segment_prob <- function(
 }
 
 #' Creates a common legend for simulation plots
-#' TODO: add back `param_decile` with distribution specificity 
+#' TODO: add back `param_decile` with distribution specificity
 #'
 #' @param include.legends vector of legends to include from the set of `params`, `distributions` and `quantiles`
 #' @param params.to.include if `params` is in the vector of legends, specify the set of params out of `max_uniform` and `remove_low_entropy`
@@ -49,7 +49,7 @@ common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
     params.to.include = c('max_uniform', 'remove_low_entropy'),
     cont.params.to.include = c(
-      'N_decile', 
+      'N_decile',
       'noise_decile',
       'eps_decile',
       'jaccard_decile'

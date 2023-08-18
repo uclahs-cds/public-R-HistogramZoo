@@ -1,4 +1,4 @@
-jaccard.colour.scheme <- c('white', 'dodgerblue2');
+jaccard.colour.scheme <- c('white', 'royalblue4');
 
 
 #' Creates a heatmap of a metric vs. distributions for simulation data split by different parameters

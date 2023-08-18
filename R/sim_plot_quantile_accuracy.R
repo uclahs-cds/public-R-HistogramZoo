@@ -45,7 +45,7 @@ confusion_matrix_dist <- function(
 #'
 #' @import data.table
 #' @export
-sim.plot.quantile.accuracy <- function(
+sim.plot.distribution.accuracy <- function(
     x,
     acc = c(
       'dist', 'peaks', 'both', 'count',
