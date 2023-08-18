@@ -326,7 +326,7 @@ create_coverageplot.HistogramFit <- function(
     "labels_x" = seq(1, length(histogram_data), 1),
     "dist" = "coverage"
   )
-  segment_dists <- unlist(lapply(histogram_obj$models, function(x) x$consensus$dist))
+  segment_dists <- unlist(lapply(histogram_obj$models, function(x) x[[model_name]]$dist))
   dist_colors <- col_distributions[segment_dists]
   # Distribution fit data
   mods <- lapply(histogram_obj$models, `[[`,  model_name)
