@@ -58,7 +58,8 @@ sim.plot.distribution.accuracy <- function(
     print.colour.key = TRUE,
     group_vars = c(
       'actual_dist', 'max_uniform', 'remove_low_entropy',
-      'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile'
+      'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile',
+      'interference_decile', 'proportion_decile'
       ),
     legend = list(
       right = list(
@@ -84,6 +85,7 @@ sim.plot.distribution.accuracy <- function(
   # TODO: Error checking:
   # 1. Make sure all required columns are in data frame
   # 2. "actual_dist" *has to* be a covariate for caret functions
+  # 3. NA's in the column of interest will lead to nonsensical results
 
   # Confusion matrix accuracy calculation
   is.cm.acc <- acc %in% c('Sensitivity', 'Specificity', 'Pos Pred Value', 'Neg Pred Value',

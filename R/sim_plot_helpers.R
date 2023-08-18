@@ -5,7 +5,9 @@ covariate.col <- list(
   noise.decile = 'darkorange1',
   eps.decile = 'seagreen3',
   param.decile = 'yellowgreen',
-  jaccard.decile = 'royalblue4'
+  jaccard.decile = 'royalblue4',
+  interference.decile = 'tan3', # interference (i.e. overlap) of adjacent peaks for a given peak in multimodal histograms
+  proportion.decile = 'violet' # proportion of counts of a given peak in multimodal histograms
   )
 
 acc.colour.scheme <- c('white', 'red');
@@ -42,7 +44,7 @@ segment_prob <- function(
 #' @param include.legends vector of legends to include from the set of `params`, `distributions` and `quantiles`
 #' @param params.to.include if `params` is in the vector of legends, specify the set of params out of `max_uniform` and `remove_low_entropy`
 #' @param cont.params.to.include continuous parameters to include, particularly factored deciles, from a set of `N_decile`, `noise_decile`, `eps_decile` and `jaccard_decile`
-#' @param simulation.params a list of ranges for continuous parameters that correspond to `cont.params.to.include`
+#' @param parameter.ranges a list of ranges for continuous parameters that correspond to `cont.params.to.include`
 #'
 #' @export
 common.sim.legend <- function(
@@ -52,9 +54,11 @@ common.sim.legend <- function(
       'N_decile',
       'noise_decile',
       'eps_decile',
-      'jaccard_decile'
+      'jaccard_decile',
+      'interference_decile',
+      'proportion_decile'
     ),
-    simulation.params = list(
+    parameter.ranges = list(
       'N' = c(25, 500),
       'eps' = c(0.5, 2),
       'noise' = c(.05, .5)
@@ -110,7 +114,7 @@ common.sim.legend <- function(
 
       list(
         colours = c('white', covariate.col[[p]]),
-        labels = if (cont.param.name == 'jaccard') c('0', '1') else as.character(simulation.params[[cont.param.name]]),
+        labels = if (cont.param.name == 'jaccard') c('0', '1') else as.character(parameter.ranges[[cont.param.name]]),
         at = c(0, 100),
         title = cont.param.name,
         angle = -90,
@@ -181,6 +185,12 @@ sim.plot.heatmap.cov <- function(cov.data) {
   }
   if ('eps_decile' %in% colnames(cov.data)) {
     cov.data$eps_decile <- assign.cov.factor.col(cov.data$eps_decile, c('white', covariate.col$eps.decile));
+  }
+  if ('interference_decile' %in% colnames(cov.data)) {
+    cov.data$interference_decile <- assign.cov.factor.col(cov.data$interference_decile, c('white', covariate.col$interference_decile));
+  }
+  if ('proportion_decile' %in% colnames(cov.data)) {
+    cov.data$proportion_decile <- assign.cov.factor.col(cov.data$proportion_decile, c('white', covariate.col$proportion.decile));
   }
   if ('param_decile' %in% colnames(cov.data)) {
     cov.data$param_decile <- assign.cov.factor.col(cov.data$param_decile, c('white', covariate.col$param.decile));

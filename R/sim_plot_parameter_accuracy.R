@@ -21,7 +21,8 @@ sim.plot.parameter.accuracy <- function(
     print.colour.key = TRUE,
     group_vars = c(
       'actual_dist', 'max_uniform', 'remove_low_entropy',
-      'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile'
+      'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile',
+      'interference_decile', 'proportion_decile'
     ),
     legend = list(
       right = list(
@@ -46,10 +47,10 @@ sim.plot.parameter.accuracy <- function(
   # TODO: Error checking:
   # 1. Make sure all required columns are in data frame
   # 2. "actual_dist" *has to* be a covariate for caret functions
-  
+
   # Accuracy of parameter estimate
   decile.accuracy <- x[
-    , 
+    ,
     .(
       "value" = do.call(acc, list(param, param_fit))
      ), by = c('metric', group_vars)
@@ -57,7 +58,7 @@ sim.plot.parameter.accuracy <- function(
 
   # Generating a long-wide format of the data
   metrics <- unique(decile.accuracy$metric)
-  
+
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'metric', sep = ' ~ ')
   decile.wide.accuracy.dist <- dcast(
     data = decile.accuracy,
@@ -65,28 +66,28 @@ sim.plot.parameter.accuracy <- function(
     value.var = "value"
   )
   decile.wide.accuracy.dist <- as.data.frame(decile.wide.accuracy.dist)
-  
+
   # Clustering data
   if (cluster) {
     cluster.mat <- decile.wide.accuracy.dist[, metrics]
     na.cells <- is.na(decile.wide.accuracy.dist[, metrics])
     cluster.mat[na.cells] <- -1
-    
+
     diana.acc.clust <- diana(
       cluster.mat
     )$order
   } else {
     diana.acc.clust <- seq_len(nrow(decile.wide.accuracy.dist))
   }
-  
+
   # covariate heatmap
   decile.accuracy.cov.heatmap <- sim.plot.heatmap.cov(
     decile.wide.accuracy.dist[diana.acc.clust, group_vars]
   )
-  
+
   colour_bar <- range(decile.accuracy$value)
   colour_bar <- c(floor(colour_bar[1]), ceiling(colour_bar[2]))
-  
+
   # accuracy heatmap
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
     decile.wide.accuracy.dist[diana.acc.clust, metrics],
@@ -101,7 +102,7 @@ sim.plot.parameter.accuracy <- function(
     yaxis.tck = 0,
     fill.colour = 'lightgrey'
   );
-  
+
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
     plot.objects.widths = c(0.3, 1),
