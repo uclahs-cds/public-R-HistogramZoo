@@ -44,6 +44,7 @@ sim.plot.parameter.accuracy <- function(
     at = NULL,
     colourkey.labels.at = NULL,
     colourkey.labels = NULL,
+    colourkey.cex = 1,
     ...
 ){
   acc <- match.arg(acc);
@@ -100,6 +101,7 @@ sim.plot.parameter.accuracy <- function(
     at = at,
     colourkey.labels.at = colourkey.labels.at,
     colourkey.labels = colourkey.labels,
+    colourkey.cex = colourkey.cex,
     # Formatting
     xaxis.lab = metrics,
     xaxis.rot = 90,
