@@ -5,10 +5,10 @@
 #' @param x a data frame of simulation results
 #' @param acc regression accuracy metric from the package `Metrics`; one of `mse` (mean squared error), `mdae` (median absolute error), `rmse` (root mean squared error) and `mae` (mean absolute error)
 #' @param cluster whether or not to cluster (using diana)
-#' @param print.colour.key whether or not to print the colour key for the heatmap
 #' @param group_vars variables to group in the covariate
 #' @param legend a `legend.grob` object from `BoutrosLab.plotting.general`
 #' @param xlab.label x axis label
+#' @inheritParams BoutrosLab.plotting.general::create.heatmap
 #' @param ... additional parameters to be passed to `BoutrosLab.plotting.general::create.multipanelplot`
 #'
 #' @import data.table
@@ -18,7 +18,6 @@ sim.plot.parameter.accuracy <- function(
     x,
     acc = c('mse', 'mdae', 'rmse', 'mae'),
     cluster = FALSE,
-    print.colour.key = TRUE,
     group_vars = c(
       'actual_dist', 'max_uniform', 'remove_low_entropy',
       'jaccard_decile', 'N_decile', 'noise_decile', 'eps_decile',
@@ -40,6 +39,11 @@ sim.plot.parameter.accuracy <- function(
       "mdae" = "Median Absolute Error",
       "rmse" = "Root Mean Squared Error"
     ),
+    print.colour.key = TRUE,
+    colour.scheme = c('white', 'darkmagenta'),
+    at = NULL,
+    colourkey.labels.at = NULL,
+    colourkey.labels = NULL,
     ...
 ){
   acc <- match.arg(acc);
@@ -85,19 +89,20 @@ sim.plot.parameter.accuracy <- function(
     decile.wide.accuracy.dist[diana.acc.clust, group_vars]
   )
 
-  colour_bar <- range(decile.accuracy$value)
-  colour_bar <- c(floor(colour_bar[1]), ceiling(colour_bar[2]))
-
   # accuracy heatmap
   decile.wide.accuracy.dist.heatmap <- create.heatmap(
     decile.wide.accuracy.dist[diana.acc.clust, metrics],
     same.as.matrix = TRUE,
     clustering.method = 'none',
+    # Colour key parameters
     print.colour.key = print.colour.key,
-    colour.scheme = c('white', 'darkmagenta'),
+    colour.scheme = colour.scheme,
+    at = at,
+    colourkey.labels.at = colourkey.labels.at,
+    colourkey.labels = colourkey.labels,
+    # Formatting
     xaxis.lab = metrics,
     xaxis.rot = 90,
-    at = seq(colour_bar[1], colour_bar[2], length.out = 20),
     xaxis.tck = 0,
     yaxis.tck = 0,
     fill.colour = 'lightgrey'
