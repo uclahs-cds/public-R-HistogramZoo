@@ -2,7 +2,7 @@ covariate.col <- list(
   max.uniform = 'firebrick3',
   remove.low.entropy = 'dodgerblue2',
   N.decile = 'slateblue4',
-  noise.decile = 'darkorange1',
+  noise.decile = 'brown',
   eps.decile = 'seagreen3',
   param.decile = 'yellowgreen',
   jaccard.decile = 'royalblue4',
