@@ -154,20 +154,22 @@ sim.plot.distribution.accuracy <- function(
     decile.wide.accuracy.dist[diana.acc.clust, metrics],
     same.as.matrix = TRUE,
     clustering.method = 'none',
-    print.colour.key = print.colour.key,
     colour.scheme = if (acc != 'count') acc.colour.scheme else c('white', 'forestgreen'),
     xaxis.lab = metrics,
     xaxis.rot = 90,
     at = if (acc == 'count') NULL else seq(0, 1, length.out = 20),
     xaxis.tck = 0,
     yaxis.tck = 0,
-    fill.colour = 'lightgrey'
+    fill.colour = 'lightgrey',
+    # Colourkey
+    print.colour.key = print.colour.key,
+    # colourkey.labels.at = NULL,
+    # colourkey.labels = NULL,
+    colourkey.cex = 1.5
     );
 
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
-    plot.objects.widths = c(0.3, 1),
-    x.spacing = c(-0.25, 0),
     legend = legend,
     main.cex = 2,
     layout.width = 2,
