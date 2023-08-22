@@ -12,6 +12,8 @@ covariate.col <- list(
 
 acc.colour.scheme <- c('white', 'red');
 
+metric_ref <- c("jaccard", "intersection", "ks", "mse", "chisq", "mle")
+
 #' Calculates the probability of a distribution in a given interval
 #'
 #' @param distribution one of `norm`, `gamma` and `unif`
@@ -114,7 +116,7 @@ common.sim.legend <- function(
 
       list(
         colours = c('white', covariate.col[[p]]),
-        labels = if (cont.param.name == 'jaccard') c('0', '1') else as.character(parameter.ranges[[cont.param.name]]),
+        labels = if (cont.param.name %in% c('jaccard', 'interference', 'proportion')) c('0', '1') else as.character(parameter.ranges[[cont.param.name]]),
         at = c(0, 100),
         title = cont.param.name,
         angle = -90,
