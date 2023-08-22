@@ -112,8 +112,6 @@ sim.plot.parameter.accuracy <- function(
 
   create.multipanelplot(
     list(decile.accuracy.cov.heatmap, decile.wide.accuracy.dist.heatmap),
-    plot.objects.widths = c(0.3, 1),
-    x.spacing = c(-0.25, 0),
     legend = legend,
     main.cex = 2,
     layout.width = 2,
