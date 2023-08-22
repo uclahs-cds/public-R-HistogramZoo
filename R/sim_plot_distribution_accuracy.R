@@ -122,6 +122,7 @@ sim.plot.distribution.accuracy <- function(
 
   # Generating a long-wide format of the data
   metrics <- unique(decile.accuracy$metric)
+  metrics <- metrics[match(metrics, metric_ref[metric_ref %in% metrics])]
 
   long.wide.formula <- paste(paste0(group_vars, collapse = ' + '), 'metric', sep = ' ~ ')
   decile.wide.accuracy.dist <- dcast(
