@@ -20,9 +20,9 @@ if (length(opts) >= 2) {
 
 params <- list(
     N = c(25, 500),
-    unif_length = c(6, 25),
+    unif_length = c(6, 24),
     norm_sd = c(1, 4),
-    gamma_shape = c(1, 10),
+    gamma_shape = c(1, 13),
     eps = c(0.5, 2),
     noise = c(.05, 0.5),
     max_uniform = NULL,
@@ -30,7 +30,7 @@ params <- list(
     truncated_models = FALSE,
     peaks = 2:4,
     peak_shift = c(2, 8), # Peak shift in standard deviations from previous peak
-    metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq')
+    metrics = metrics
     )
 cat('Params: \n')
 print(params)

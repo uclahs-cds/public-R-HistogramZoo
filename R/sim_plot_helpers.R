@@ -2,16 +2,32 @@ covariate.col <- list(
   max.uniform = 'firebrick3',
   remove.low.entropy = 'dodgerblue2',
   N.decile = 'slateblue4',
-  noise.decile = 'darkorange1',
+  noise.decile = 'brown',
   eps.decile = 'seagreen3',
   param.decile = 'yellowgreen',
-  jaccard.decile = 'violetred3'
+  jaccard.decile = 'royalblue4',
+  interference.decile = 'tan3', # interference (i.e. overlap) of adjacent peaks for a given peak in multimodal histograms
+  proportion.decile = 'violet' # proportion of counts of a given peak in multimodal histograms
   )
 
 acc.colour.scheme <- c('white', 'red');
 
+metric_ref <- c("jaccard", "intersection", "ks", "mse", "chisq", "mle")
+
+#' Calculates the probability of a distribution in a given interval
+#'
+#' @param distribution one of `norm`, `gamma` and `unif`
+#' @param params list of parameters for distribution
+#' @param a interval start
+#' @param b interval end
+#'
 #' @export
-segment_prob <- function(distribution = c('norm', 'gamma', 'unif'), params, a, b) {
+segment_prob <- function(
+    distribution = c('norm', 'gamma', 'unif'),
+    params,
+    a,
+    b
+){
   stopifnot(b >= a)
   distribution <- match.arg(distribution)
   # if (distribution == 'gamma' && a < 0 )
@@ -24,20 +40,32 @@ segment_prob <- function(distribution = c('norm', 'gamma', 'unif'), params, a, b
   cdf.params.func(b) - cdf.params.func(a)
 }
 
-#' Creates a common legend for unimodal simulations
+#' Creates a common legend for simulation plots
+#' TODO: add back `param_decile` with distribution specificity
+#'
+#' @param include.legends vector of legends to include from the set of `params`, `distributions` and `quantiles`
+#' @param params.to.include if `params` is in the vector of legends, specify the set of params out of `max_uniform` and `remove_low_entropy`
+#' @param cont.params.to.include continuous parameters to include, particularly factored deciles, from a set of `N_decile`, `noise_decile`, `eps_decile` and `jaccard_decile`
+#' @param parameter.ranges a list of ranges for continuous parameters that correspond to `cont.params.to.include`
 #'
 #' @export
 common.sim.legend <- function(
     include.legends = c('params', 'distributions', 'quantiles'),
-    params.to.include = c(
-      'max_uniform', 'remove_low_entropy'
-      ),
+    params.to.include = c('max_uniform', 'remove_low_entropy'),
     cont.params.to.include = c(
-      'N_decile', 'noise_decile',
-      'eps_decile', 'param_decile',
-      'jaccard_decile'
+      'N_decile',
+      'noise_decile',
+      'eps_decile',
+      'jaccard_decile',
+      'interference_decile',
+      'proportion_decile'
+    ),
+    parameter.ranges = list(
+      'N' = c(25, 500),
+      'eps' = c(0.5, 2),
+      'noise' = c(.05, .5)
     )
-  ) {
+){
   include.legends <- match.arg(include.legends, several.ok = TRUE);
   params.to.include <- match.arg(params.to.include, several.ok = TRUE);
   if (! is.null(cont.params.to.include)) {
@@ -88,7 +116,7 @@ common.sim.legend <- function(
 
       list(
         colours = c('white', covariate.col[[p]]),
-        labels = if (cont.param.name == 'jaccard') c('0', '1') else as.character(unimodal.params[[cont.param.name]]),
+        labels = if (cont.param.name %in% c('jaccard', 'interference', 'proportion')) c('0', '1') else as.character(parameter.ranges[[cont.param.name]]),
         at = c(0, 100),
         title = cont.param.name,
         angle = -90,
@@ -110,10 +138,14 @@ common.sim.legend <- function(
     title.just = 'left',
     layout = c(1,length(legend.list))
     )
-  }
+}
 
-
-
+#' Generates covariates as colour vectors
+#'
+#' @param x a factor vector
+#' @param ramp.colors a colour scheme vector of length two
+#'
+#' @return a vector of colors
 assign.cov.factor.col <- function(x, ramp.colors) {
   x.levels <- levels(x);
   k <- length(x.levels);
@@ -126,6 +158,10 @@ assign.cov.factor.col <- function(x, ramp.colors) {
   colormap[x];
 }
 
+#' Creates a covariate heatmap
+#'
+#' @param cov.data a matrix of covariate data - colnames indicate category
+#' @return a heatmap colored by covariate
 sim.plot.heatmap.cov <- function(cov.data) {
   if ('max_uniform' %in% colnames(cov.data)) {
     cov.data$max_uniform <- ifelse(cov.data$max_uniform, covariate.col$max.uniform, 'white');
@@ -151,6 +187,12 @@ sim.plot.heatmap.cov <- function(cov.data) {
   }
   if ('eps_decile' %in% colnames(cov.data)) {
     cov.data$eps_decile <- assign.cov.factor.col(cov.data$eps_decile, c('white', covariate.col$eps.decile));
+  }
+  if ('interference_decile' %in% colnames(cov.data)) {
+    cov.data$interference_decile <- assign.cov.factor.col(cov.data$interference_decile, c('white', covariate.col$interference.decile));
+  }
+  if ('proportion_decile' %in% colnames(cov.data)) {
+    cov.data$proportion_decile <- assign.cov.factor.col(cov.data$proportion_decile, c('white', covariate.col$proportion.decile));
   }
   if ('param_decile' %in% colnames(cov.data)) {
     cov.data$param_decile <- assign.cov.factor.col(cov.data$param_decile, c('white', covariate.col$param.decile));

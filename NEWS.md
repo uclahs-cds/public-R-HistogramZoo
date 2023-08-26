@@ -4,9 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# HistogramZoo v1.4.0
+# HistogramZoo v1.5.2
+
+## [1.5.2] - 2023-08-24
+
+### Added
+- more inherited parameters for plotting code
+- number of local optima to returned results
+- documentation for simulation function
+
+### Fixed
+- bugs in simulation code - seed placement for reproducibility
+- Closes #149 - fixed bug with coverageplot legend colors
 
 ## [1.5.1] - 2023-08-02
+
+### Added
 - Analysis for multi-peak simulations
 
 ## [1.5.0] - 2023-07-26

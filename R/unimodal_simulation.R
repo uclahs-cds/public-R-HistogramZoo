@@ -1,9 +1,33 @@
-unimodal.params <- list(
-  N = c(25, 500),
-  eps = c(0.5, 2),
-  noise = c(.05, 0.5)
-)
-
+#' Simulate a unimodal (one distribution) histogram
+#' WARNING: Comprehensive error checking required before export
+#'
+#' @param N number of points to sample from the distribution
+#' @param unif_length range of uniform distribution length (vector of length 2)
+#' @param norm_sd range of normal standard deviations (vector of length 2)
+#' @param gamma_shape range of gamma shape (vector of length 2)
+#' @param eps range of hyperparameter epsilon (vector of length 2)
+#' @param noise range of noise as a proportion of total counts (vector of length 2)
+#' @param max_uniform NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param remove_low_entropy NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param truncated_models NULL forces an equal probability of sampling TRUE or FALSE, otherwise deterministic
+#' @param actual_dist a vector of distributions from which to sample
+#' @param metrics metrics for segment and fit
+#' @param seed numeric seed
+#' @param run_segment_and_fit logical; whether to run segment and fit or not 
+#' @param include_simulated_data logical; whether to return simulated data
+#' @param include_fit_data logical; whether to return the HistogramFit object
+#'
+#' @return A list of results
+#' \describe{
+#'     \item{res}{A data frame of parameters used for simulation. If `run_segment_and_fit`, additional columns will be added for fit results}
+#'     \item{peak_data}{if `include_simulated_data`, simulated peak counts will be returned}
+#'     \item{noise_data}{if `include_simulated_data`, simulated noise counts will be returned}
+#'     \item{hz_model}{if `include_fit_data`, the HistogramFit object will be returned}
+#'}
+#'
+#' @examples \dontrun{
+#' simulated_histogram <- random_unimodal_sim()
+#'}
 random_unimodal_sim <- function(
     N = c(25, 500),
     unif_length = c(6, 24),
@@ -14,12 +38,14 @@ random_unimodal_sim <- function(
     max_uniform = NULL,
     remove_low_entropy = NULL,
     truncated_models = FALSE,
-    include_data = FALSE,
-    include_segment_and_fit = TRUE,
     actual_dist = c('norm', 'unif', 'gamma'),
     metrics = c('mle', 'jaccard', 'intersection', 'ks', 'mse', 'chisq'),
-    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time())))
+    seed = as.integer(sub('^16', sample(1:9, size = 1), as.integer(Sys.time()))),
+    run_segment_and_fit = TRUE,
+    include_simulated_data = FALSE,
+    include_fit_data = FALSE
   ) {
+
   set.seed(seed);
   sim_dist <- if (length(actual_dist) == 1) actual_dist else sample(actual_dist, size = 1)
   if (is.null(max_uniform)) max_uniform <- sample(c(TRUE, FALSE), size = 1)
@@ -31,7 +57,6 @@ random_unimodal_sim <- function(
   }
 
   set.seed(seed);
-
   N_sim <- if (length(N) == 1) N else .sample_unif(N)
   eps_sample <- if (length(eps) == 1) eps else .sample_unif(eps)
   noise_sim <- if (length(noise) == 1) noise else .sample_unif(noise)
@@ -67,18 +92,16 @@ random_unimodal_sim <- function(
     noise_data
     )
 
-  peak_histogram_data <- observations_to_histogram(
-    x = peak,
-    histogram_bin_width = 1
-    )
-
   histogram_data <- observations_to_histogram(
     x = peak_noise,
     histogram_bin_width = 1
     )
 
+  optima <- find_local_optima(histogram_data)
+  
   res <- list(
     N = N_sim,
+    local_optima = sum(sapply(optima, length)),
     param = param,
     noise_min = noise_min,
     noise_max = noise_max,
@@ -93,12 +116,13 @@ random_unimodal_sim <- function(
     truncated_models = truncated_models
     )
 
-    print.res <- as.data.frame(res)
-    rownames(print.res) <- 'PARAMS: '
-    print(print.res)
+    res <- as.data.frame(res)
+    
+    print('PARAMS: ')
+    print(res)
 
-    all_seg_results <- NULL
-    if (include_segment_and_fit) {
+    seg_results <- NULL
+    if (run_segment_and_fit) {
       timing <- system.time({
       seg_results_mod <- try({
         segment_and_fit(
@@ -120,24 +144,31 @@ random_unimodal_sim <- function(
         t(unclass(timing))[, c('user.self', 'sys.self', 'elapsed'), drop = FALSE]
         )
 
-      all_seg_results <- cbind.data.frame(res, seg_results)
-      if (!include_data) return(all_seg_results)
-      else {
-        return(
-          list(
-            seg_results = all_seg_results,
-            hz_model = seg_results_mod,
-            peak_data = peak,
-            noise_data = noise_data
-          )
-        )
-      }
+      res <- cbind.data.frame(res, seg_results)
     }
-
-    if (include_data) {
-      # Return the actual data
-        res$peak_data <- peak
-        res$noise_data <- noise_data
-        return(res)
-      }
+    
+    rtn <- list(
+      "res" = res
+    )
+    
+    if(include_simulated_data){
+      rtn <- c(
+        rtn,
+        list(
+          "peak_data" = peak,
+          "noise_data" = noise_data
+        )
+      )
+    }
+    
+    if(include_fit_data && run_segment_and_fit){
+      rtn <- c(
+        rtn,
+        list(
+          "hz_model" = seg_results_mod
+        )
+      )
+    }
+    
+    return(rtn)
 }
