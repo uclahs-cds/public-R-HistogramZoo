@@ -22,11 +22,11 @@ Finally, HistogramZoo provides several convenient functions to summarize fits an
 Using devtools in R:
 ```R
 library(devtools);
-install_github('https://github.com/uclahs-cds/public-R-HistogramZoo'); 
+install_github('https://github.com/uclahs-cds/public-R-HistogramZoo');
 ```
 
 From source:
-```shell script
+```shell
 git clone https://github.com/uclahs-cds/public-R-HistogramZoo.git
 R CMD INSTALL public-R-HistogramZoo
 ```
