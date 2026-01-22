@@ -1,6 +1,7 @@
 Package: HistogramZoo
 Title: A Method for Peak Merging And Distribution Fitting Across Biological Replicates
-Version: 1.5.2
+Version: 1.5.3
+Date: 2026-01-22
 Authors@R:
     c(
     person(given = "Helen",
@@ -14,8 +15,8 @@ Authors@R:
            comment = c(ORCID = "0000-0002-5245-6507")),
     person(given = "Paul C.",
            family = "Boutros",
-           role = c("aut"),
-           email = "PBoutros@mednet.ucla.edu",
+           role = c("aut", "cre"),
+           email = "pboutros@sbpdiscovery.org",
            comment = c(ORCID = "0000-0003-0553-7520"))
     )
 Description: A method for merging peaks called across biological replicates, in bed file format, and modelling the density functions of the resulting distributions.
